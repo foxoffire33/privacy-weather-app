@@ -19,7 +19,7 @@ export const ACCENTS: Record<Exclude<Accent, 'custom'>, { label: string; tuple: 
 
 // Mantine dark scheme: [0] text, [2] dimmed, [4] borders, [6] inputs/surfaces, [7] body.
 const dark: MantineColorsTuple = [
-  '#ffffff', '#e4e1e1', '#cbc7c7', '#a3a0a0', '#6e6b6b',
+  '#ffffff', '#ece9e9', '#d8d4d4', '#b4b0b0', '#7d7979',
   '#3a3737', '#1c1b1b', '#000000', '#000000', '#000000',
 ];
 
@@ -31,7 +31,7 @@ const chartStyles = {
   legend: { paddingTop: 6 },
   legendItem: { paddingInline: '0 12px', gap: 6 },
   legendItemColor: { borderRadius: 0, width: 12, height: 3, minWidth: 12, minHeight: 3, boxShadow: 'none' },
-  legendItemName: { fontSize: 11, color: 'var(--mantine-color-dark-2)' },
+  legendItemName: { fontSize: 12, color: 'var(--mantine-color-dark-2)' },
   tooltip: { borderRadius: 0, border: '2px solid var(--rule)', background: '#000', boxShadow: '0 6px 18px rgba(0,0,0,.6)', padding: '3px 6px', fontSize: 10 },
   tooltipLabel: { fontSize: 10, marginBottom: 1, fontWeight: 800 },
   tooltipBody: { padding: 0 },
@@ -63,6 +63,7 @@ export function customTuple(hex: string): MantineColorsTuple {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
   let base = m ? [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)) : [23, 138, 74];
   while (luminance(base) > 0.5) base = mix(base as [number, number, number], [0, 0, 0], 0.1);
+  while (luminance(base) < 0.12) base = mix(base as [number, number, number], [255, 255, 255], 0.1); // stay visible on black
   const b = base as [number, number, number];
   const white: [number, number, number] = [255, 255, 255];
   const black: [number, number, number] = [0, 0, 0];

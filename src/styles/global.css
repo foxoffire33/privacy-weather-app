@@ -45,11 +45,11 @@ body { font-variant-numeric: tabular-nums; }
 [data-accent=off] .overlay { background: #000; border-bottom: 2px solid var(--rule); }
 .dot { width: 8px; height: 8px; background: rgba(255, 255, 255, .45); transition: width .2s; border: 0; padding: 0; cursor: pointer; }
 .dot[data-active] { width: 22px; background: #fff; }
-.hours { display: grid; grid-template-columns: repeat(8, 1fr); border-bottom: 2px solid rgba(248, 244, 244, .2); }
+.hours { display: grid; grid-template-columns: repeat(8, 1fr); border-bottom: 1px solid rgba(248, 244, 244, .2); }
 .metric-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--rule); }
-.hourly-strip { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 2px solid rgba(248, 244, 244, .2); touch-action: pan-x pan-y; cursor: grab; user-select: none; overscroll-behavior-x: contain; }
+.hourly-strip { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(248, 244, 244, .2); touch-action: pan-x pan-y; cursor: grab; user-select: none; overscroll-behavior-x: contain; }
 .hourly-strip > * { flex: none; width: 52px; padding: 10px 0 10px 10px; }
-.hourly-strip > .day-divider { width: 18px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800; line-height: 1; color: var(--mantine-color-signal-3); }
+.hourly-strip > .day-divider { width: 18px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800; line-height: 1; color: var(--mantine-color-signal-3); }
 .day-divider i { flex: 1; width: 2px; background: var(--rule); }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
 .bar { height: 4px; background: rgba(255, 255, 255, .12); position: relative; }
@@ -58,8 +58,8 @@ body { font-variant-numeric: tabular-nums; }
 .archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
 /* Chart text: small, grey, tabular. Active dot as a plain square-edged marker. */
-.recharts-cartesian-axis-tick-value { font-size: 10px; font-variant-numeric: tabular-nums; }
-.recharts-reference-line-label { font-size: 10px; fill: var(--mantine-color-dark-2); }
+.recharts-cartesian-axis-tick-value { font-size: 11px; font-variant-numeric: tabular-nums; }
+.recharts-reference-line-label { font-size: 11px; fill: var(--mantine-color-dark-2); }
 .recharts-active-dot circle { stroke: #000; stroke-width: 2; }
 
 /* Chart metric picker: equal-size buttons, four per row, all visible. */
@@ -70,7 +70,7 @@ body { font-variant-numeric: tabular-nums; }
 
 /* Click-to-toggle chart legend */
 .toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }
-.toggle-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 8px 0 4px; font: inherit; font-size: 10px; color: var(--mantine-color-dark-2); background: transparent; border: 0; cursor: pointer; }
+.toggle-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 8px 0 4px; font: inherit; font-size: 12px; color: var(--mantine-color-dark-2); background: transparent; border: 0; cursor: pointer; }
 .toggle-legend button i { width: 10px; height: 3px; }
 .toggle-legend button[aria-pressed=false] { opacity: .4; text-decoration: line-through; }
 
@@ -84,11 +84,14 @@ body { font-variant-numeric: tabular-nums; }
 .recharts-wrapper, .recharts-responsive-container { overflow: visible !important; }
 
 /* Pull-right indicator at the start of the hourly strip */
-.hourly-strip > .pull-past { padding: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--mantine-color-dark-2); overflow: hidden; writing-mode: horizontal-tb; white-space: nowrap; }
+.hourly-strip > .pull-past { padding: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--mantine-color-dark-2); overflow: hidden; writing-mode: horizontal-tb; white-space: nowrap; }
 
 /* Cities: the list scrolls, the Follow button stays pinned to the bottom. */
 .cities-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
-.city-row { border-bottom: 2px solid rgba(248, 244, 244, .18); background: var(--mantine-color-body); position: relative; }
+.city-row { border-bottom: 1px solid rgba(248, 244, 244, .18); background: var(--mantine-color-body); position: relative; }
 .city-row[data-dragging] { z-index: 2; background: #1c1b1b; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
 .drag-handle { flex: none; width: 52px; display: flex; align-items: center; justify-content: center; color: var(--mantine-color-dark-3); cursor: grab; touch-action: none; user-select: none; }
 .city-row[data-dragging] .drag-handle { cursor: grabbing; color: #fff; }
+
+/* One-time gesture hint */
+.gesture-hint { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 4; padding: 10px 12px; font: inherit; font-size: 12px; line-height: 1.35; text-align: left; color: #fff; background: #1c1b1b; border: 1px solid var(--rule); cursor: pointer; }

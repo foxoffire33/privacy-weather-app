@@ -67,7 +67,7 @@ export function Settings() {
                 swatchesPerRow={7} swatches={['#e11d48', '#f97316', '#d97706', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea', '#db2777', '#78716c', '#0f766e', '#b91c1c', '#1d4ed8', '#7e22ce']} />
               <TextInput mt={8} label="Hex colour" value={s.settings.accentColor} maxLength={7}
                 onChange={(e) => set({ accent: 'custom', accentColor: e.currentTarget.value })} />
-              <Text fz={11} c="dimmed" mt={4}>Colours too light for white text are darkened automatically.</Text>
+              <Text fz={12} c="dimmed" mt={4}>Colours too light for white text are darkened automatically.</Text>
             </Box>
           )}
         </Box>
@@ -114,7 +114,7 @@ export function Settings() {
 
         <div className="kicker">About</div>
         <Stack gap={4} py={12}>
-          <Text fz={13} c="dimmed">Open source · GPL-3.0 · v0.1.0</Text>
+          <Text fz={13} c="dimmed">Open source · GPL-3.0 · v0.1.2</Text>
           <Text fz={13} c="dimmed">Weather data by Open-Meteo.com (CC BY 4.0)</Text>
         </Stack>
       </Stack>

@@ -152,7 +152,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
             </Section>
           )}
 
-          <Text px={12} py={20} fz={11} c="dimmed">
+          <Text px={12} py={20} fz={12} c="dimmed">
             {day.source === 'forecast' ? 'Open-Meteo forecast models (past data)' : 'Open-Meteo historical weather (ERA5 reanalysis)'} · Weather data by Open-Meteo.com
           </Text>
         </>

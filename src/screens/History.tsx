@@ -75,9 +75,9 @@ export function History({ cityId }: { cityId: string }) {
               disabled={!y || y.error} onClick={() => y && open(`${y.year}${today.slice(4)}`)}>
               {y ? (
                 <>
-                  <Text fz={11} c="dimmed">{y.year}</Text>
+                  <Text fz={12} c="dimmed">{y.year}</Text>
                   <Text fz={22} fw={800}>{y.error ? '–' : `${T(y.hi)}°`}</Text>
-                  <Text fz={11} c="dimmed">{y.error ? 'No data' : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
+                  <Text fz={12} c="dimmed">{y.error ? 'No data' : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
                 </>
               ) : (
                 <>
@@ -112,8 +112,8 @@ export function History({ cityId }: { cityId: string }) {
                       <Text fz={40} fw={800} lh={1}>{T(s.lookup.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(s.lookup.lo)}°</Text></Text>
                     </Group>
                     <div className="stat-grid" style={{ marginTop: 12 }}>
-                      <Box><Text fz={10} tt="uppercase" c="dimmed">Rain</Text><Text fz={16} fw={800}>{(s.lookup.mm ?? 0).toFixed(1)} mm</Text></Box>
-                      <Box><Text fz={10} tt="uppercase" c="dimmed">Max wind</Text><Text fz={16} fw={800}>{fmtWind(s.lookup.wind, s.windUnit)}</Text></Box>
+                      <Box><Text fz={12} tt="uppercase" c="dimmed">Rain</Text><Text fz={16} fw={800}>{(s.lookup.mm ?? 0).toFixed(1)} mm</Text></Box>
+                      <Box><Text fz={12} tt="uppercase" c="dimmed">Max wind</Text><Text fz={16} fw={800}>{fmtWind(s.lookup.wind, s.windUnit)}</Text></Box>
                     </div>
                   </Box>
                 </>

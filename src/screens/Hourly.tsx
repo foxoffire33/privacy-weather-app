@@ -10,7 +10,7 @@ import { Sk } from '../components/Skeletons';
 function Cell({ k, v }: { k: string; v: string }) {
   return (
     <Box py={8} pr={8}>
-      <Text fz={10} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
+      <Text fz={12} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
       <Text fz={16} fw={800}>{v}</Text>
     </Box>
   );
@@ -70,7 +70,7 @@ export function Hourly({ cityId }: { cityId: string }) {
               const isNow = i === h0;
               return (
                 <Box key={i} mt={10} p={14}
-                  style={{ border: `2px solid ${isNow ? '#fff' : 'var(--rule-soft)'}`, background: v.is_day[i] ? '#000' : '#0b0b0b' }}>
+                  style={{ border: `${isNow ? 2 : 1}px solid ${isNow ? "#fff" : "var(--rule-soft)"}`, background: v.is_day[i] ? '#000' : '#0b0b0b' }}>
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <Box style={{ minWidth: 0 }}>
                       <Text fz={20} fw={800}>{isNow ? 'Now' : hhmm(data.hourly.time[i])}</Text>
@@ -94,7 +94,7 @@ export function Hourly({ cityId }: { cityId: string }) {
             })}
           </Box>
         ))}
-        <Text fz={11} c="dimmed" pt={16} px={8}>Weather data by Open-Meteo.com</Text>
+        <Text fz={12} c="dimmed" pt={16} px={8}>Weather data by Open-Meteo.com</Text>
       </Box>
     </div>
   );

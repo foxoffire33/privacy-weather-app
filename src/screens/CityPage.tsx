@@ -245,9 +245,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
                 ))}
               </div>
               <Group justify="space-between" mt={4}>
-                <Text fz={10} c="dimmed">{hhmm(mq.time[0])}</Text>
-                <Text fz={10} c="dimmed">next 2 hours · mm per 15 min</Text>
-                <Text fz={10} c="dimmed">{hhmm(mq.time[mq.time.length - 1])}</Text>
+                <Text fz={12} c="dimmed">{hhmm(mq.time[0])}</Text>
+                <Text fz={12} c="dimmed">next 2 hours · mm per 15 min</Text>
+                <Text fz={12} c="dimmed">{hhmm(mq.time[mq.time.length - 1])}</Text>
               </Group>
             </>
           )}
@@ -269,16 +269,16 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
               </div>
             )}
             <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .55 } : undefined}>
-              <Text fz={11} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
+              <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
-              <Text fz={10} fw={600} c="signal.3">{h.p == null ? '–' : `${h.p}%`}</Text>
-              <Text fz={10} c="dimmed">{h.wind == null ? '–' : Math.round(h.wind)}</Text>
+              <Text fz={12} fw={600} c="signal.3">{h.p == null ? '–' : `${h.p}%`}</Text>
+              <Text fz={12} c="dimmed">{h.wind == null ? '–' : Math.round(h.wind)}</Text>
             </Box>
             </Fragment>
           ))}
         </div>
         <UnstyledButton w="100%" px={12} py={10} onClick={() => s.navigate({ name: 'hourly', cityId: city.id })}
-          style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid rgba(248,244,244,.2)' }}>
+          style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(248,244,244,.2)' }}>
           <Text fz={13} fw={800}>Hourly forecast · 7 days</Text>
           <Icon name="arrow" size={16} />
         </UnstyledButton>
@@ -353,9 +353,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
             <div style={{ width: `${(sunPos ?? (c.is_day ? 1 : 0)) * 100}%`, background: 'var(--mantine-color-signal-4)' }} />
           </div>
           <Group justify="space-between" mt={4}>
-            <Text fz={11} c="dimmed">Sunrise</Text>
-            <Text fz={11} c="dimmed">{sunPos == null ? 'Sun is down' : `${Math.round(sunPos * 100)}% of daylight passed`}</Text>
-            <Text fz={11} c="dimmed">Sunset</Text>
+            <Text fz={12} c="dimmed">Sunrise</Text>
+            <Text fz={12} c="dimmed">{sunPos == null ? 'Sun is down' : `${Math.round(sunPos * 100)}% of daylight passed`}</Text>
+            <Text fz={12} c="dimmed">Sunset</Text>
           </Group>
         </Box>
         <div className="stat-grid">
@@ -405,9 +405,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
               const lvl = pollutantLevel(p.key, v);
               return (
                 <Box key={p.key} py={8} className="row" style={{ display: 'grid', gridTemplateColumns: '1fr 64px 84px', gap: 8, alignItems: 'center' }}>
-                  <Box><Text fz={13} fw={600}>{p.name}</Text><Text fz={10} c="dimmed">{p.unit}</Text></Box>
+                  <Box><Text fz={13} fw={600}>{p.name}</Text><Text fz={12} c="dimmed">{p.unit}</Text></Box>
                   <Text fz={15} fw={800}>{n0(v)}</Text>
-                  <Box><Text fz={11} c="dimmed">{lvl != null ? LEVELS[lvl] : '—'}</Text>{lvl != null && <Bar pct={((lvl + 1) / 6) * 100} level={lvl} />}</Box>
+                  <Box><Text fz={12} c="dimmed">{lvl != null ? LEVELS[lvl] : '—'}</Text>{lvl != null && <Bar pct={((lvl + 1) / 6) * 100} level={lvl} />}</Box>
                 </Box>
               );
             })}
@@ -427,7 +427,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
             <Box key={p.name} py={8} className="row" style={{ display: 'grid', gridTemplateColumns: '1fr 56px 96px', gap: 8, alignItems: 'center' }}>
               <Text fz={13} fw={600}>{p.name}</Text>
               <Text fz={15} fw={800}>{n0(p.v)}</Text>
-              <Box><Text fz={11} c="dimmed">{p.lvl?.label}</Text><Bar pct={(((p.lvl?.level ?? 0) + 1) / 5) * 100} color={levelColor(p.lvl ? p.lvl.level : null)} /></Box>
+              <Box><Text fz={12} c="dimmed">{p.lvl?.label}</Text><Bar pct={(((p.lvl?.level ?? 0) + 1) / 5) * 100} color={levelColor(p.lvl ? p.lvl.level : null)} /></Box>
             </Box>
           ))}
         </Section>
@@ -470,8 +470,8 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
 
       <Group justify="space-between" px={12} pt={12} pb={24} wrap="nowrap" align="flex-start">
         <Box>
-          <Text fz={11} c="dimmed">{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}° · {Math.round(data.elevation)} m · {data.timezone}</Text>
-          <Text fz={11} c="dimmed">Weather data by Open-Meteo.com · updated {ago(fetchedAt)}</Text>
+          <Text fz={12} c="dimmed">{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}° · {Math.round(data.elevation)} m · {data.timezone}</Text>
+          <Text fz={12} c="dimmed">Weather data by Open-Meteo.com · updated {ago(fetchedAt)}</Text>
         </Box>
         <ActionIcon size={36} aria-label={s.status?.loading ? 'Updating' : 'Refresh'} aria-busy={s.status?.loading || undefined}
           onClick={() => s.refreshCity(city.id, { maxAgeMs: 0 })}>

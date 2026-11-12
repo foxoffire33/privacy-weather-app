@@ -1,9 +1,29 @@
-import { memo, useEffect, useRef, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Group } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
+
+const HINT_KEY = 'weather-log-hint-seen';
+const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
+
+// One-time hint for the gestures that have no visible control. Gone after the first touch or tap.
+function GestureHint({ multiple }: { multiple: boolean }) {
+  const [open, setOpen] = useState(() => !hintSeen());
+  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch { /* private mode */ } };
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(close, 12000);
+    return () => window.clearTimeout(t);
+  }, [open]);
+  if (!open) return null;
+  return (
+    <button type="button" className="gesture-hint" onClick={close}>
+      {multiple ? 'Swipe sideways for the next city · ' : ''}pull the hourly strip right for earlier days · tap to dismiss
+    </button>
+  );
+}
 
 // Opens on the default city (index 0). Swipe / drag sideways or use ← → to move through followed cities.
 export function Home() {
@@ -86,6 +106,7 @@ export function Home() {
           ? <CityPage key={c.id} city={c} isDefault={i === 0} />
           : <div key={c.id} className="page" />))}
       </div>
+      <GestureHint multiple={n > 1} />
       <div className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label="Cities" onClick={() => navigate({ name: 'cities' })}>
           <Icon name="list" />

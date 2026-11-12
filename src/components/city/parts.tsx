@@ -30,7 +30,7 @@ export function Section({ title, summary, children }: { title: string; summary?:
 export function Stat({ k, v, s, children }: { k: string; v: ReactNode; s?: ReactNode; children?: ReactNode }) {
   return (
     <Box py={10} className="row">
-      <Text fz={10} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
+      <Text fz={12} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
       <Text fz={20} fw={800}>{v}</Text>
       {s && <Text fz={12} c="dimmed">{s}</Text>}
       {children && <Box mt={6}>{children}</Box>}

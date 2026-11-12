@@ -10,12 +10,12 @@ export function CompactTooltip({ active, label, payload }: { active?: boolean; l
   return (
     <div style={{
       border: `1px solid ${rows.length ? 'var(--rule)' : 'rgba(255,255,255,.12)'}`, background: rows.length ? '#000' : 'transparent',
-      padding: '3px 8px', minHeight: 22, fontSize: 11, lineHeight: '16px', display: 'flex', alignItems: 'baseline', gap: 12,
+      padding: '3px 8px', minHeight: 24, fontSize: 12, lineHeight: '16px', display: 'flex', alignItems: 'baseline', gap: 12,
       width: '100%', boxSizing: 'border-box', overflow: 'hidden', whiteSpace: 'nowrap',
     }}>
       {rows.length ? (
         <>
-          <b style={{ marginRight: 'auto', fontSize: 12 }}>{title}</b>
+          <b style={{ marginRight: 'auto', fontSize: 13 }}>{title}</b>
           {rows.map((e, i) => (
             <b key={e.dataKey ?? e.name ?? i} style={{ color: e.color ?? e.stroke ?? e.fill }}>
               <span style={{ fontWeight: 400, opacity: .8 }}>{e.name} </span>{round(e.value)}{e.unit ?? ''}

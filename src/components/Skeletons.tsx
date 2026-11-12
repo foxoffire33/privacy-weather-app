@@ -63,7 +63,7 @@ export function CityBodySk() {
             <Box key={i}><Sk w={26} h={11} /><Sk w={30} h={18} mt={6} /><Sk w={22} h={10} mt={6} /><Sk w={16} h={10} mt={4} /></Box>
           ))}
         </div>
-        <Box px={12} py={10} style={{ borderBottom: '2px solid rgba(248,244,244,.2)' }}><Sk w={160} h={16} /></Box>
+        <Box px={12} py={10} style={{ borderBottom: '1px solid rgba(248,244,244,.2)' }}><Sk w={160} h={16} /></Box>
         <Box px={12}><RowsSk n={7} h={39} /></Box>
       </Paper>
       <Section title="Next 48 hours"><ChartSk /></Section>
