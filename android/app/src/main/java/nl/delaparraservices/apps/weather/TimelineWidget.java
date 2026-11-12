@@ -24,13 +24,13 @@ public class TimelineWidget extends BaseWidget {
 
         // Header: what is logged and what is forecast.
         float half = (p.w - pad * 2) / 2;
-        p.kicker(c, "Past 7 days", pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, half - 4);
-        p.kicker(c, "Forecast", p.w - pad, pad + 9, WidgetPainter.DIM, Paint.Align.RIGHT, half - 4);
+        p.kicker(c, WidgetPainter.label(data, "past7", "Past 7 days"), pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, half - 4);
+        p.kicker(c, WidgetPainter.label(data, "forecast", "Forecast"), p.w - pad, pad + 9, WidgetPainter.DIM, Paint.Align.RIGHT, half - 4);
         if (p.w >= 260) {
             // Legend for the average line.
             float lx = p.w / 2 - 22;
             p.rect(c, lx, pad + 5, lx + 17, pad + 6.5f, WidgetPainter.FAINT);
-            p.text(c, "average", lx + 22, pad + 9, 10, p.regular, WidgetPainter.FAINT, Paint.Align.LEFT, 60);
+            p.text(c, WidgetPainter.label(data, "average", "average"), lx + 22, pad + 9, 10, p.regular, WidgetPainter.FAINT, Paint.Align.LEFT, 60);
         }
 
         float top = pad + 26;

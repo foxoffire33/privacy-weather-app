@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export interface ToggleSeries { name: string; color: string; strokeDasharray?: string }
+export interface ToggleSeries { name: string; label?: string; color: string }
 
 // Click-to-toggle legend. Mantine's own legend is not interactive, so charts pass withLegend={false}
 // and draw only the series that are not switched off.
@@ -14,7 +14,7 @@ export function useSeriesToggle(scope: string) {
         {series.map((s) => (
           <button key={s.name} type="button" aria-pressed={!off.has(key(s.name))}
             onClick={() => setOff((prev) => { const next = new Set(prev); const k = key(s.name); if (!next.delete(k)) next.add(k); return next; })}>
-            <i style={{ background: `var(--mantine-color-${s.color.replace('.', '-')})` }} />{s.name}
+            <i style={{ background: `var(--mantine-color-${s.color.replace('.', '-')})` }} />{s.label ?? s.name}
           </button>
         ))}
       </div>

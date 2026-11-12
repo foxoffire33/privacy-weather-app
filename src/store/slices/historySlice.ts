@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { fetchAirDay, fetchArchive, fetchDay } from '../../api/openMeteo';
 import { LOG_ARCHIVE_VARS } from '../../api/variables';
 import { daysBetween, todayISO } from '../../lib/format';
@@ -132,7 +133,7 @@ export const createHistorySlice: SliceCreator<HistorySlice> = (set, get) => ({
     set((s) => ({ lookups: { ...s.lookups, [key]: { loading: true } } }));
     try {
       const d = await fetchArchive(city, date, date, get().settings);
-      if (d.temperature_2m_max[0] == null) throw new Error('No archive data for this date yet');
+      if (d.temperature_2m_max[0] == null) throw new Error(t('history.noArchive'));
       set((s) => ({ lookups: { ...s.lookups, [key]: {
         hi: d.temperature_2m_max[0] ?? undefined, lo: d.temperature_2m_min[0] ?? undefined, mm: d.precipitation_sum[0] ?? undefined,
         wind: d.wind_speed_10m_max[0] ?? undefined, code: d.weather_code[0] ?? undefined,
@@ -171,7 +172,7 @@ export const createHistorySlice: SliceCreator<HistorySlice> = (set, get) => ({
 
   importRange: async (id, start, end) => {
     const city = get().cities.find((c) => c.id === id);
-    if (!city) throw new Error('This city is no longer followed');
+    if (!city) throw new Error(t('common.noLongerFollowed'));
     const r = await fetchArchive(city, start, end, get().settings, LOG_ARCHIVE_VARS);
     const counts = { added: 0, updated: 0, kept: 0 };
     set((s) => {

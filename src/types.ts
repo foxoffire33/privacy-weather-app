@@ -1,3 +1,4 @@
+import type { LanguagePref } from './i18n';
 import type { AirVar, CurrentVar, DailyVar, HourlyVar, MarineVar } from './api/variables';
 
 export interface GeoResult {
@@ -92,6 +93,7 @@ export interface Settings {
   backfill: boolean;
   accent: Accent;
   accentColor: string; // hex, used when accent is 'custom'
+  language: LanguagePref; // 'system' follows the device
 }
 
 export type Route =

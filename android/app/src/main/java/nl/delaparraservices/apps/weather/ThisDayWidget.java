@@ -20,7 +20,7 @@ public class ThisDayWidget extends BaseWidget {
         c.drawColor(WidgetPainter.BLACK);
         p.frame(c);
 
-        p.kicker(c, "On this day · " + thisDay.optString("date"), pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, p.w - pad * 2);
+        p.kicker(c, WidgetPainter.label(data, "onThisDay", "On this day") + " · " + thisDay.optString("date"), pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, p.w - pad * 2);
         float top = pad + 22;
         float rowH = 21;
         int fit = Math.max(1, (int) ((p.h - top - pad + 6) / rowH));
@@ -70,7 +70,7 @@ public class ThisDayWidget extends BaseWidget {
         }
 
         if (rows.length() <= 2 && p.h >= top + rowH * 3) {
-            p.text(c, "Earlier years load the next time the app is online", pad, top + 2 * rowH + 12, 11, p.regular,
+            p.text(c, WidgetPainter.label(data, "earlierYears", "Earlier years load the next time the app is online"), pad, top + 2 * rowH + 12, 11, p.regular,
                 WidgetPainter.FAINT, Paint.Align.LEFT, p.w - pad * 2);
         }
     }

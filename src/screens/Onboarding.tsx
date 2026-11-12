@@ -1,19 +1,20 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useWeatherStore } from '../store';
 import { Icon } from '../components/Icon';
+import { t } from '../i18n';
 
-const STEPS = [
-  { t: 'No account, no tracking', d: 'Forecasts come from Open-Meteo. Free for personal use, no key needed.' },
-  { t: 'No location access', d: 'You add cities by name. The app never asks for GPS.' },
-  { t: 'A full history, on this device', d: 'Every city you follow is logged locally. Nothing is uploaded.' },
-];
 
 export function Onboarding() {
   const navigate = useWeatherStore((s) => s.navigate);
+  const STEPS = [
+    { t: t('onboarding.step1Title'), d: t('onboarding.step1Text') },
+    { t: t('onboarding.step2Title'), d: t('onboarding.step2Text') },
+    { t: t('onboarding.step3Title'), d: t('onboarding.step3Text') },
+  ];
 
   return (
     <div className="screen accent-field">
-      <Title className="display" style={{ fontSize: 72, paddingTop: 56 }}>Weather,<br />kept.</Title>
+      <Title className="display" style={{ fontSize: 72, paddingTop: 56, whiteSpace: 'pre-line' }}>{t('onboarding.title')}</Title>
       <Stack gap={0} mx={20} style={{ borderTop: '2px solid #fff', flex: 1 }}>
         {STEPS.map((s, i) => (
           <Group key={s.t} wrap="nowrap" align="flex-start" py={14}
@@ -28,7 +29,7 @@ export function Onboarding() {
       </Stack>
       <Button variant="white" color="dark" size="xl" fullWidth rightSection={<Icon name="arrow" />}
         onClick={() => navigate({ name: 'search' })}>
-        Choose your first city
+        {t('onboarding.start')}
       </Button>
     </div>
   );

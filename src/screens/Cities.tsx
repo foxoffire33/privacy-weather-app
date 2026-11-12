@@ -7,8 +7,8 @@ import { fmtTemp } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
+import { t, tl } from '../i18n';
 
-const WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
 const EDGE = 70; // px from the list edge where dragging auto-scrolls
 
 interface Drag { from: number; to: number; dy: number }
@@ -81,8 +81,8 @@ export function Cities() {
     <div className="screen" style={{ overflow: 'hidden' }}>
       <div className="cities-scroll" ref={scroller} style={{ overflowY: drag ? 'hidden' : undefined }}>
         <ScreenHeader />
-        <Title className="display">{WORDS[n] ?? n}<br />{n === 1 ? 'city.' : 'cities.'}</Title>
-        <Text px={20} pb={16} fz={13} c="dimmed">Drag the handle to reorder. The top city opens first.</Text>
+        <Title className="display" style={{ whiteSpace: 'pre-line' }}>{t('cities.title', { count: n, word: tl('cities.count')[n] ?? n })}</Title>
+        <Text px={20} pb={16} fz={13} c="dimmed">{t('cities.hint')}</Text>
 
         <Box className="rule-top">
           {cities.map((c, i) => {
@@ -96,7 +96,7 @@ export function Cities() {
                   transition: dragging ? 'none' : 'transform .18s ease',
                 }}>
                 <Group gap={0} wrap="nowrap" align="stretch">
-                  <div className="drag-handle" role="button" aria-label={`Reorder ${c.name}`} tabIndex={0}
+                  <div className="drag-handle" role="button" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
                     onPointerDown={(e) => onDown(e, i)} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                     <Icon name="grip" size={20} />
                   </div>
@@ -104,11 +104,11 @@ export function Cities() {
                     <UnstyledButton onClick={() => goHome(i)} style={{ flex: 1, minWidth: 0 }}>
                       <Group gap={8} wrap="nowrap">
                         <Text fz={22} fw={800} truncate>{c.name}</Text>
-                        {i === 0 && <Badge size="sm">Default</Badge>}
+                        {i === 0 && <Badge size="sm">{t('common.default')}</Badge>}
                       </Group>
                       {f ? (
                         <Text fz={13} c="dimmed" truncate>
-                          {conditionLabel(f.data.current.v.weather_code)} · {days} {days === 1 ? 'day' : 'days'} logged
+                          {conditionLabel(f.data.current.v.weather_code)} · {t('common.daysLogged', { count: days })}
                         </Text>
                       ) : <Sk w={150} h={13} mt={4} />}
                     </UnstyledButton>
@@ -117,8 +117,8 @@ export function Cities() {
                         {fmtTemp(f.data.current.v.temperature_2m, tempUnit)}°
                       </Text>
                     ) : <Sk w={56} h={40} />}
-                    <ActionIcon size={40} aria-label={`Unfollow ${c.name}`}
-                      onClick={() => { if (window.confirm(`Stop following ${c.name}? Its logged history is kept.`)) unfollowCity(c.id); }}>
+                    <ActionIcon size={40} aria-label={t('cities.unfollow', { name: c.name })}
+                      onClick={() => { if (window.confirm(t('cities.confirmUnfollow', { name: c.name }))) unfollowCity(c.id); }}>
                       <Icon name="x" size={18} />
                     </ActionIcon>
                   </Group>
@@ -130,7 +130,7 @@ export function Cities() {
       </div>
 
       <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => navigate({ name: 'search' })}>
-        Follow a city
+        {t('cities.followCity')}
       </Button>
     </div>
   );

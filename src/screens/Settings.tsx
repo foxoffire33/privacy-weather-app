@@ -7,6 +7,10 @@ import { ACCENTS } from '../theme';
 import { downloadFile } from '../lib/format';
 import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { LANGUAGES, systemLanguage, t, type LanguagePref } from '../i18n';
+import { version } from '../../package.json';
+
+const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
 
 export function Settings() {
   const s = useWeatherStore(useShallow((st) => ({
@@ -41,7 +45,7 @@ export function Settings() {
   const doImport = () => {
     if (!pending) return;
     const r = s.importBackup(pending, parts);
-    setImportMsg({ ok: true, text: `Imported ${r.cities} new ${r.cities === 1 ? 'city' : 'cities'} and ${r.days} ${r.days === 1 ? 'day' : 'days'}.` });
+    setImportMsg({ ok: true, text: t('settings.imported', { cities: r.cities, days: r.days }) });
     setPending(null);
   };
 
@@ -54,121 +58,131 @@ export function Settings() {
   return (
     <div className="screen">
       <ScreenHeader />
-      <Title className="display display-sm">Settings.</Title>
+      <Title className="display display-sm">{t('settings.title')}</Title>
       <Stack gap={0} px={20} pb={24}>
-        <div className="kicker">Data source</div>
+        <div className="kicker">{t('settings.language')}</div>
         <Box py={12} className="row">
-          <PasswordInput label="API key" placeholder="Optional" value={s.settings.apiKey}
-            description="Leave empty for the free API. Add a key only for a commercial Open-Meteo plan."
+          <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
+            value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v as LanguagePref })}
+            data={[
+              { value: 'system', label: t('settings.languageSystem', { name: LANGUAGES.find((l) => l.code === systemLanguage())?.name }) },
+              ...LANGUAGES.map((l) => ({ value: l.code, label: l.name })),
+            ]} />
+        </Box>
+
+        <div className="kicker">{t('settings.dataSource')}</div>
+        <Box py={12} className="row">
+          <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
+            description={t('settings.apiKeyNote')}
             onChange={(e) => set({ apiKey: e.currentTarget.value.trim() })} />
         </Box>
         <Box py={12} className="row">
-          <TextInput label="Forecast server" placeholder="https://api.open-meteo.com" value={s.settings.server}
-            description="Point to your own self-hosted Open-Meteo instance."
+          <TextInput label={t('settings.server')} placeholder="https://api.open-meteo.com" value={s.settings.server}
+            description={t('settings.serverNote')}
             onChange={(e) => set({ server: e.currentTarget.value.trim() })} />
         </Box>
-        <Button variant="subtle" color="gray" mt={8} onClick={() => s.refreshAll({ maxAgeMs: 0 })}>Apply and refresh now</Button>
+        <Button variant="subtle" color="gray" mt={8} onClick={() => s.refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
-        <div className="kicker">Appearance</div>
+        <div className="kicker">{t('settings.appearance')}</div>
         <Box py={12} className="row">
-          <Text fz={14} fw={600}>Accent colour</Text>
-          <Text fz={12} c="dimmed" mb={10}>Used for the main temperature panel and buttons. Off keeps everything black and white.</Text>
+          <Text fz={14} fw={600}>{t('settings.accent')}</Text>
+          <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
           <Group gap={8}>
             {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
               <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                   border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>
                 <span style={{ width: 16, height: 16, background: a === 'off' ? '#000' : ACCENTS[a].tuple[5], border: '1px solid var(--rule)' }} />
-                <Text fz={13} fw={800}>{ACCENTS[a].label}</Text>
+                <Text fz={13} fw={800}>{t(ACCENT_KEYS[a])}</Text>
               </UnstyledButton>
             ))}
             <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                 border: `2px solid ${s.settings.accent === 'custom' ? '#fff' : 'var(--rule-soft)'}` }}>
               <span style={{ width: 16, height: 16, background: s.settings.accentColor, border: '1px solid var(--rule)' }} />
-              <Text fz={13} fw={800}>Custom</Text>
+              <Text fz={13} fw={800}>{t('settings.custom')}</Text>
             </UnstyledButton>
           </Group>
           {s.settings.accent === 'custom' && (
             <Box mt={12}>
               <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => set({ accent: 'custom', accentColor })}
                 swatchesPerRow={7} swatches={['#e11d48', '#f97316', '#d97706', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea', '#db2777', '#78716c', '#0f766e', '#b91c1c', '#1d4ed8', '#7e22ce']} />
-              <TextInput mt={8} label="Hex colour" value={s.settings.accentColor} maxLength={7}
+              <TextInput mt={8} label={t('settings.hex')} value={s.settings.accentColor} maxLength={7}
                 onChange={(e) => set({ accent: 'custom', accentColor: e.currentTarget.value })} />
-              <Text fz={12} c="dimmed" mt={4}>Colours too light for white text are darkened automatically.</Text>
+              <Text fz={12} c="dimmed" mt={4}>{t('settings.hexNote')}</Text>
             </Box>
           )}
         </Box>
 
-        <div className="kicker">Units</div>
+        <div className="kicker">{t('settings.units')}</div>
         <Group py={12} className="row" justify="space-between">
-          <Text fz={14} fw={600}>Temperature</Text>
+          <Text fz={14} fw={600}>{t('settings.temperature')}</Text>
           <SegmentedControl value={s.settings.tempUnit} onChange={(v) => set({ tempUnit: v as TempUnit })}
             data={[{ label: '°C', value: 'C' }, { label: '°F', value: 'F' }]} />
         </Group>
         <Group py={12} className="row" justify="space-between">
-          <Text fz={14} fw={600}>Wind</Text>
+          <Text fz={14} fw={600}>{t('settings.wind')}</Text>
           <SegmentedControl value={s.settings.windUnit} onChange={(v) => set({ windUnit: v as WindUnit })}
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
 
-        <div className="kicker">History</div>
+        <div className="kicker">{t('settings.history')}</div>
         <Box py={12} className="row">
-          <Select label="Snapshot interval" value={String(s.settings.snapshotMinutes)} allowDeselect={false}
-            description="While the app is open. The Android build will use a background job."
+          <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
+            description={t('settings.intervalNote')}
             onChange={(v) => v && set({ snapshotMinutes: Number(v) })}
             data={[
-              { value: '15', label: 'Every 15 minutes' },
-              { value: '30', label: 'Every 30 minutes' },
-              { value: '60', label: 'Hourly' },
-              { value: '180', label: 'Every 3 hours' },
+              { value: '15', label: t('settings.every15') },
+              { value: '30', label: t('settings.every30') },
+              { value: '60', label: t('settings.hourly') },
+              { value: '180', label: t('settings.every180') },
             ]} />
         </Box>
         <Box py={12} className="row">
-          <Switch label="Fill gaps from archive" description="Days the app was closed are filled from Open-Meteo (up to 92 days)."
+          <Switch label={t('settings.fillGaps')} description={t('settings.fillGapsNote')}
             checked={s.settings.backfill} onChange={(e) => set({ backfill: e.currentTarget.checked })} />
         </Box>
         <Group py={12} className="row" justify="space-between" wrap="nowrap">
           <Box>
-            <Text fz={14} fw={600}>Stored on this device</Text>
-            <Text fz={12} c="dimmed">{s.cityCount} cities · {s.dayCount} days · IndexedDB</Text>
+            <Text fz={14} fw={600}>{t('settings.stored')}</Text>
+            <Text fz={12} c="dimmed">{t('settings.storedCount', { cities: s.cityCount, days: s.dayCount })}</Text>
           </Box>
           <Group gap={8} wrap="nowrap">
-            <Button variant="outline" color="gray" onClick={exportAll}>Export</Button>
-            <Button variant="outline" color="gray" onClick={() => fileInput.current?.click()}>Import</Button>
+            <Button variant="outline" color="gray" onClick={exportAll}>{t('settings.export')}</Button>
+            <Button variant="outline" color="gray" onClick={() => fileInput.current?.click()}>{t('settings.import')}</Button>
           </Group>
           <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={(e) => void onFile(e.currentTarget.files?.[0])} />
         </Group>
         {pending && (
           <Box py={12} className="row">
-            <Text fz={14} fw={600}>Import from backup</Text>
+            <Text fz={14} fw={600}>{t('settings.importTitle')}</Text>
             <Text fz={12} c="dimmed" mb={8}>
-              {pending.exportedAt ? `Exported ${pending.exportedAt.slice(0, 10)}. ` : ''}Merges into what is on this device; days you logged here are kept.
+              {pending.exportedAt ? t('settings.exported', { date: pending.exportedAt.slice(0, 10) }) : ''}{t('settings.importNote')}
             </Text>
             <Stack gap={10}>
-              <Switch label={`Cities (${pending.cities.length})`} description="Cities you do not follow yet are added at the end."
+              <Switch label={t('settings.importCities', { n: pending.cities.length })} description={t('settings.importCitiesNote')}
                 disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setParts({ ...parts, cities: e.currentTarget.checked })} />
-              <Switch label={`History (${countDays(pending)} days)`} description="Only for cities you follow."
+              <Switch label={t('settings.importHistory', { n: countDays(pending) })} description={t('settings.importHistoryNote')}
                 disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setParts({ ...parts, history: e.currentTarget.checked })} />
-              <Switch label="Settings" description="Units and accent colour. The server and your API key are never imported."
+              <Switch label={t('settings.importSettings')} description={t('settings.importSettingsNote')}
                 disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setParts({ ...parts, settings: e.currentTarget.checked })} />
             </Stack>
             <Group mt={12} gap={8}>
-              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={doImport}>Import selected</Button>
-              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>Cancel</Button>
+              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={doImport}>{t('settings.importSelected')}</Button>
+              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>{t('common.cancel')}</Button>
             </Group>
           </Box>
         )}
         {importMsg && <Text fz={13} py={8} c={importMsg.ok ? undefined : 'signal.3'} role="status">{importMsg.text}</Text>}
         <Button variant="subtle" color="signal" mt={8}
-          onClick={() => { if (window.confirm('Delete all logged history? This cannot be undone.')) s.clearHistory(); }}>
-          Delete all history
+          onClick={() => { if (window.confirm(t('settings.confirmDeleteAll'))) s.clearHistory(); }}>
+          {t('settings.deleteAll')}
         </Button>
 
-        <div className="kicker">About</div>
+        <div className="kicker">{t('settings.about')}</div>
         <Stack gap={4} py={12}>
-          <Text fz={13} c="dimmed">Open source · GPL-3.0 · v0.1.3</Text>
-          <Text fz={13} c="dimmed">Weather data by Open-Meteo.com (CC BY 4.0)</Text>
+          <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
+          <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
         </Stack>
       </Stack>
     </div>
