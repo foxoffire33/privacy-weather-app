@@ -112,13 +112,16 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const yearA = to.slice(0, 4);
   const yearB = back ? String(+to.slice(0, 4) - back) : '';
 
+  const nameA = (a: Attr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
+  const nameB = (a: Attr) => `${t(a.label)} ${yearB}`;
+
   const data: Record<string, string | number | null>[] = [];
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const row: Record<string, string | number | null> = { label: shortDate(d) };
     const dayB = back ? shift(d, back) : '';
     for (const a of attrs) {
-      row[a.key] = a.value(log?.[d], normals?.[d.slice(5)] ?? null, units);
-      if (back) row[`${a.key}B`] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units);
+      row[nameA(a)] = a.value(log?.[d], normals?.[d.slice(5)] ?? null, units);
+      if (back) row[nameB(a)] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units);
     }
     data.push(row);
   }
@@ -170,10 +173,17 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         const mine = attrs.filter((a) => a.group === g.key);
         if (!mine.length) return null;
         const series = mine.flatMap((a, i) => [
-          { name: a.key, label: back ? `${t(a.label)} ${yearA}` : t(a.label), color: COLORS[i % COLORS.length] },
-          ...(back ? [{ name: `${a.key}B`, label: `${t(a.label)} ${yearB}`, color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
+          { name: nameA(a), color: COLORS[i % COLORS.length] },
+          ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
         ]);
-        const common = { ...base, h: 180, unit: unitOf(g.key), data, series, withLegend: true };
+        // The legend wraps at roughly three entries a line; reserve a line's height for each
+        // so it never runs into whatever follows the chart.
+        const lines = Math.ceil(series.length / 3);
+        const common = {
+          ...base, unit: unitOf(g.key), data, series, withLegend: true,
+          h: 180 + (lines - 1) * 24,
+          legendProps: { verticalAlign: 'bottom' as const, height: lines * 24 + 4 },
+        };
         return (
           <Box key={g.key} pt={12}>
             <Text fz={12} c="dimmed" pb={4}>{t(g.title)}</Text>

@@ -19,29 +19,45 @@ function fit(value: number | string | undefined): string {
   return tries.find((s) => s.length <= WIDTH) ?? tries[tries.length - 1];
 }
 
-// Chart readout: a slim bar across the full chart width, above it. Always visible: a muted outline
-// while idle, then the day/time and the series values (in their colours) while the chart is touched.
+// Chart readout: a bar across the full chart width, above it. Always visible: a muted outline
+// while idle, then the day/time and the series values (in their colours) while the chart is
+// touched. Up to three values sit beside the title; beyond that they wrap into rows of three.
+const PER_ROW = 3;
+
 export function CompactTooltip({ active, label, payload }: { active?: boolean; label?: string | number; payload?: readonly object[] }) {
   const rows = (active && payload ? payload : []) as Entry[];
   const title = (rows[0] as { payload?: { when?: string } } | undefined)?.payload?.when ?? label;
+  const grid = rows.length > PER_ROW;
+
+  // The name gives way before the number does: it truncates, the value keeps its slot.
+  const cell = (e: Entry, i: number) => (
+    <b key={e.dataKey ?? e.name ?? i}
+      style={{ color: e.color ?? e.stroke ?? e.fill, display: 'flex', alignItems: 'baseline', gap: 4, flex: '1 1 auto', minWidth: 0 }}>
+      <span style={{ fontWeight: 400, opacity: .8, overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{e.name}</span>
+      <span style={{ marginLeft: 'auto', flex: 'none', minWidth: `${WIDTH}ch`, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+        {fit(e.value)}{e.unit ?? ''}
+      </span>
+    </b>
+  );
+
   return (
     <div style={{
       border: `1px solid ${rows.length ? 'var(--rule)' : 'rgba(255,255,255,.12)'}`, background: rows.length ? '#000' : 'transparent',
-      padding: '3px 8px', minHeight: 24, fontSize: 12, lineHeight: '16px', display: 'flex', alignItems: 'baseline', gap: 12,
+      padding: '3px 8px', minHeight: 24, fontSize: 12, lineHeight: '16px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
       width: '100%', boxSizing: 'border-box', overflow: 'hidden', whiteSpace: 'nowrap',
     }}>
       {rows.length ? (
         <>
-          <b style={{ marginRight: 'auto', fontSize: 13 }}>{title}</b>
-          {rows.map((e, i) => (
-            <b key={e.dataKey ?? e.name ?? i} style={{ color: e.color ?? e.stroke ?? e.fill }}>
-              <span style={{ fontWeight: 400, opacity: .8 }}>{e.name} </span>
-              <span style={{ display: 'inline-block', minWidth: `${WIDTH}ch`, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                {fit(e.value)}
-              </span>
-              {e.unit ?? ''}
-            </b>
-          ))}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+            <b style={{ marginRight: 'auto', fontSize: 13 }}>{title}</b>
+            {!grid && rows.map(cell)}
+          </div>
+          {grid && (
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${PER_ROW}, minmax(0, 1fr))`, gap: '2px 12px' }}>
+              {rows.map(cell)}
+            </div>
+          )}
         </>
       ) : <span style={{ color: 'rgba(255,255,255,.3)' }}>{t('common.touchChart')}</span>}
     </div>
