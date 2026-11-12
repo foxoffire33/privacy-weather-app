@@ -109,14 +109,21 @@ export async function fetchMarine(city: City, settings: Settings): Promise<Marin
   return current.wave_height == null && current.sea_surface_temperature == null ? null : { current };
 }
 
-export async function fetchArchive(city: City, start: string, end: string, settings: Settings, daily: readonly string[] = ARCHIVE_VARS) {
-  const [r] = await fetchWeatherApi(endpoint('archive', '/v1/archive', settings), withKey({
+// Daily values for a date range. 'archive' is ERA5 (back to 1940, about 5 days behind);
+// 'forecast' covers roughly the last 92 days and carries variables ERA5 lacks, such as UV.
+export async function fetchDailyRange(city: City, start: string, end: string, settings: Settings,
+  daily: readonly string[], source: 'archive' | 'forecast' = 'archive') {
+  const url = source === 'archive' ? endpoint('archive', '/v1/archive', settings) : endpoint('forecast', '/v1/forecast', settings);
+  const [r] = await fetchWeatherApi(url, withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: start, end_date: end, daily: [...daily],
   }, settings));
   const d = r.daily()!;
   return { time: times(d, r.utcOffsetSeconds()).map((t) => t.slice(0, 10)), ...series<string>(d, daily) } as
     { time: string[] } & Record<string, (number | null)[]>;
 }
+
+export const fetchArchive = (city: City, start: string, end: string, settings: Settings, daily: readonly string[] = ARCHIVE_VARS) =>
+  fetchDailyRange(city, start, end, settings, daily, 'archive');
 
 // Full detail for one past day. Recent days use the forecast API (all variables);
 // older days use the ERA5 archive (no UV, rain chance, visibility, CAPE).

@@ -44,6 +44,9 @@ export const LOG_ARCHIVE_VARS = [
   'precipitation_sum', 'snowfall_sum', 'wind_speed_10m_max', 'wind_gusts_10m_max', 'sunshine_duration',
 ] as const;
 
+// The same for days recent enough for the forecast API, which also knows the UV index.
+export const LOG_FORECAST_VARS = [...LOG_ARCHIVE_VARS, 'uv_index_max'] as const;
+
 // Variables available in the historical (ERA5) archive for a full past day.
 export const ARCHIVE_HOURLY_VARS = [
   'temperature_2m', 'apparent_temperature', 'relative_humidity_2m', 'dew_point_2m',

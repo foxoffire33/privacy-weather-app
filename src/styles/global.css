@@ -76,12 +76,31 @@ body { font-variant-numeric: tabular-nums; }
 .recharts-active-dot circle { stroke: #000; stroke-width: 2; }
 
 /* Chart metric picker: equal-size buttons, four per row, all visible. */
-.metric-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 26px; }
-.metric-tabs button, .tab-button { height: 40px; padding: 0 4px; font: inherit; font-size: 13px; font-weight: 800; text-transform: none; letter-spacing: 0; color: var(--mantine-color-dark-2); background: transparent; border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer; }
-.metric-tabs button[data-active], .tab-button[data-active] { color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5); }
-[data-accent=off] .metric-tabs button[data-active], [data-accent=off] .tab-button[data-active] { color: #000; background: #fff; border-color: #fff; }
-/* Same button outside a tab row, e.g. "Add dates" above the log. */
-.tab-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; }
+/* Button rows: a row always fills the width, and a button's text stays on one line
+   (it truncates rather than wrapping). Used by the chart tabs and the Trends controls. */
+.metric-tabs, .tab-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.metric-tabs { margin-bottom: 26px; }
+.tab-row { margin-bottom: 8px; }
+.metric-tabs button, .tab-row button, .tab-button {
+  flex: 1 1 76px; min-width: 76px; height: 40px; padding: 0 10px;
+  font: inherit; font-size: 13px; font-weight: 800; text-transform: none; letter-spacing: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--mantine-color-dark-2); background: transparent;
+  border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer;
+}
+.metric-tabs button[data-active], .tab-row button[data-active], .tab-button[data-active] {
+  color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5);
+}
+[data-accent=off] .metric-tabs button[data-active], [data-accent=off] .tab-row button[data-active],
+[data-accent=off] .tab-button[data-active] { color: #000; background: #fff; border-color: #fff; }
+/* The same button on its own, e.g. "Add dates" above the log. */
+.tab-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* Full-screen sheet (attribute picker) and the centred dialog used for date ranges. */
+.sheet { position: fixed; inset: 0; z-index: 30; background: var(--mantine-color-body); display: flex; flex-direction: column; }
+.sheet-head { border-bottom: 2px solid var(--rule); }
+.sheet-body { flex: 1; overflow-y: auto; padding-bottom: 24px; }
+.sheet-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
 
 /* Click-to-toggle chart legend */
 .toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }

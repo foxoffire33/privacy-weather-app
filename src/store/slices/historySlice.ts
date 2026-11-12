@@ -1,7 +1,7 @@
 import { t } from '../../i18n';
-import { fetchAirDay, fetchArchive, fetchDay } from '../../api/openMeteo';
-import { LOG_ARCHIVE_VARS } from '../../api/variables';
-import { daysBetween, todayISO } from '../../lib/format';
+import { fetchAirDay, fetchArchive, fetchDailyRange, fetchDay } from '../../api/openMeteo';
+import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from '../../api/variables';
+import { addDays, daysBetween, todayISO } from '../../lib/format';
 import type { ArchiveYear, DayRecord } from '../../types';
 import type { HistorySlice, SliceCreator } from '../types';
 
@@ -170,28 +170,40 @@ export const createHistorySlice: SliceCreator<HistorySlice> = (set, get) => ({
     return { history: { ...s.history, [id]: log } };
   }),
 
+  // Downloads every attribute a log entry holds. Days within the forecast API's window come
+  // from there (it also has UV); older days come from the ERA5 archive, which has no UV.
   importRange: async (id, start, end) => {
     const city = get().cities.find((c) => c.id === id);
     if (!city) throw new Error(t('common.noLongerFollowed'));
-    const r = await fetchArchive(city, start, end, get().settings, LOG_ARCHIVE_VARS);
+    const recentFrom = addDays(todayISO(), -92);
+    const parts: { from: string; to: string; recent: boolean }[] = [];
+    if (start < recentFrom) parts.push({ from: start, to: end < recentFrom ? end : addDays(recentFrom, -1), recent: false });
+    if (end >= recentFrom) parts.push({ from: start > recentFrom ? start : recentFrom, to: end, recent: true });
+
     const counts = { added: 0, updated: 0, kept: 0 };
+    const fetched = await Promise.all(parts.map((p) => fetchDailyRange(
+      city, p.from, p.to, get().settings, p.recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, p.recent ? 'forecast' : 'archive',
+    )));
     set((s) => {
       const log = { ...(s.history[id] ?? {}) };
-      r.time.forEach((date, i) => {
-        if (r.temperature_2m_max[i] == null) return; // not in the archive yet
-        const prev = log[date];
-        if (prev?.source === 'log') { counts.kept++; return; }
-        if (prev) counts.updated++; else counts.added++;
-        log[date] = {
-          date,
-          hi: r.temperature_2m_max[i], lo: r.temperature_2m_min[i],
-          feelsHi: r.apparent_temperature_max[i], feelsLo: r.apparent_temperature_min[i],
-          mm: r.precipitation_sum[i], snow: r.snowfall_sum[i],
-          wind: r.wind_speed_10m_max[i], gust: r.wind_gusts_10m_max[i],
-          sunshine: r.sunshine_duration[i], uv: prev?.uv ?? null, code: r.weather_code[i],
-          source: 'filled', snapshots: prev?.snapshots ?? 0,
-        };
-      });
+      for (const r of fetched) {
+        r.time.forEach((date, i) => {
+          if (r.temperature_2m_max[i] == null) return; // not available yet
+          const prev = log[date];
+          if (prev?.source === 'log') { counts.kept++; return; }
+          if (prev) counts.updated++; else counts.added++;
+          log[date] = {
+            date,
+            hi: r.temperature_2m_max[i], lo: r.temperature_2m_min[i],
+            feelsHi: r.apparent_temperature_max[i], feelsLo: r.apparent_temperature_min[i],
+            mm: r.precipitation_sum[i], snow: r.snowfall_sum[i],
+            wind: r.wind_speed_10m_max[i], gust: r.wind_gusts_10m_max[i],
+            sunshine: r.sunshine_duration[i], uv: r.uv_index_max?.[i] ?? prev?.uv ?? null,
+            code: r.weather_code[i],
+            source: 'filled', snapshots: prev?.snapshots ?? 0,
+          };
+        });
+      }
       return { history: { ...s.history, [id]: log } };
     });
     return counts;
