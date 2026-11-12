@@ -88,3 +88,7 @@ body { font-variant-numeric: tabular-nums; }
 
 /* Cities: the list scrolls, the Follow button stays pinned to the bottom. */
 .cities-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.city-row { border-bottom: 2px solid rgba(248, 244, 244, .18); background: var(--mantine-color-body); position: relative; }
+.city-row[data-dragging] { z-index: 2; background: #1c1b1b; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
+.drag-handle { flex: none; width: 52px; display: flex; align-items: center; justify-content: center; color: var(--mantine-color-dark-3); cursor: grab; touch-action: none; user-select: none; }
+.city-row[data-dragging] .drag-handle { cursor: grabbing; color: #fff; }

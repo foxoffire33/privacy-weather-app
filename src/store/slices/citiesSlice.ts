@@ -30,12 +30,10 @@ export const createCitiesSlice: SliceCreator<CitiesSlice> = (set, get) => ({
     return { cities: s.cities.filter((c) => c.id !== id), forecasts, pageIndex: 0 };
   }),
 
-  moveCity: (id, dir) => set((s) => {
+  reorderCities: (from, to) => set((s) => {
+    if (from === to || from < 0 || to < 0 || from >= s.cities.length || to >= s.cities.length) return {};
     const list = [...s.cities];
-    const i = list.findIndex((c) => c.id === id);
-    const j = i + dir;
-    if (i < 0 || j < 0 || j >= list.length) return {};
-    [list[i], list[j]] = [list[j], list[i]];
+    list.splice(to, 0, list.splice(from, 1)[0]);
     return { cities: list, pageIndex: 0 };
   }),
 

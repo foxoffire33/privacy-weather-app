@@ -13,7 +13,7 @@ export interface CitiesSlice {
   onboarded: boolean;
   followCity: (geo: GeoResult) => number;
   unfollowCity: (id: string) => void;
-  moveCity: (id: string, dir: -1 | 1) => void;
+  reorderCities: (from: number, to: number) => void;
   makeDefault: (id: string) => void;
 }
 
