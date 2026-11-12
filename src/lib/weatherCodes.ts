@@ -1,11 +1,7 @@
-const WMO: Record<number, string> = {
-  0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Overcast',
-  45: 'Fog', 48: 'Rime fog',
-  51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle', 56: 'Freezing drizzle', 57: 'Freezing drizzle',
-  61: 'Light rain', 63: 'Rain', 65: 'Heavy rain', 66: 'Freezing rain', 67: 'Freezing rain',
-  71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
-  80: 'Light showers', 81: 'Showers', 82: 'Violent showers', 85: 'Snow showers', 86: 'Heavy snow showers',
-  95: 'Thunderstorm', 96: 'Thunderstorm, hail', 99: 'Thunderstorm, hail',
-};
+import { t, type MessageKey } from '../i18n';
 
-export const conditionLabel = (code?: number | null) => (code == null ? '—' : WMO[code] ?? '—');
+// WMO weather interpretation codes (Open-Meteo); the names live in the translation files.
+const KNOWN = new Set([0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99]);
+
+export const conditionLabel = (code?: number | null) =>
+  (code == null || !KNOWN.has(code) ? '—' : t(`weather.${code}` as MessageKey));

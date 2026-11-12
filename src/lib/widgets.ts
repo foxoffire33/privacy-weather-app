@@ -5,6 +5,7 @@ import type { StoreState } from '../store/types';
 import { addDays, convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
+import { t as tx, useI18n } from '../i18n';
 
 // Home-screen widgets (Android) for the default city. The app builds one snapshot of
 // past, present and future from the store and hands it to the native side
@@ -24,7 +25,8 @@ export interface WidgetSnapshot {
   v: 1;
   city: string;
   updated: string;
-  now: { temp: string; cond: string; hi: string; lo: string; rain: string; delta: string | null };
+  now: { temp: string; cond: string; hi: string; lo: string; rain: string; rainLabel: string; delta: string | null };
+  labels: { past7: string; forecast: string; average: string; onThisDay: string; earlierYears: string };
   timeline: { days: Day[]; todayHi: string };
   thisDay: { date: string; rows: Row[] };
   rain: { text: string; bars: RainBar[]; from: string; to: string; caption: string };
@@ -68,8 +70,8 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
   }
 
   // On this day: today against the 1991–2020 average and earlier years.
-  const rows: Row[] = [{ label: 'Today', v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
-  if (avgToday != null) rows.push({ label: 'Average', v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });
+  const rows: Row[] = [{ label: tx('common.today'), v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
+  if (avgToday != null) rows.push({ label: tx('widgets.average_row'), v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });
   for (const y of st.thisDay[`${city.id}:${today.slice(5)}`] ?? []) {
     if (!y.error && y.hi != null) rows.push({ label: String(y.year), v: N(y.hi), text: `${T(y.hi)}°`, kind: 'year' });
   }
@@ -82,7 +84,7 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
     rain = {
       text: rainOutlook(data, h0),
       bars: mq.precipitation.map((v) => ({ f: (v ?? 0) / max, wet: (v ?? 0) >= 0.1 })),
-      from: hhmm(mq.time[0]), to: hhmm(mq.time[mq.time.length - 1]), caption: 'mm per 15 min',
+      from: hhmm(mq.time[0]), to: hhmm(mq.time[mq.time.length - 1]), caption: tx('widgets.mmPer15'),
     };
   } else {
     const end = Math.min(h0 + 12, data.hourly.time.length);
@@ -90,14 +92,14 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
     rain = {
       text: rainOutlook(data, h0),
       bars: p.map((v) => ({ f: v / 100, wet: v >= 50 })),
-      from: hhmm(data.hourly.time[h0]), to: hhmm(data.hourly.time[end - 1]), caption: '% chance per hour',
+      from: hhmm(data.hourly.time[h0]), to: hhmm(data.hourly.time[end - 1]), caption: tx('widgets.chancePerHour'),
     };
   }
 
   const hours = data.hourly.time.slice(h0, h0 + 12).map((time, k) => {
     const i = h0 + k;
     return {
-      label: k === 0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
+      label: k === 0 ? tx('common.now') : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
       temp: `${T(k === 0 ? c.temperature_2m : hv.temperature_2m[i])}°`,
       p: hv.precipitation_probability[i] ?? 0,
     };
@@ -114,12 +116,17 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
       hi: `${T(hiToday)}°`,
       lo: `${T(dv.temperature_2m_min[t])}°`,
       rain: `${dv.precipitation_probability_max[t] ?? 0}%`,
-      delta: delta ? `${delta} vs average` : null,
+      rainLabel: tx('widgets.rainShort', { p: `${dv.precipitation_probability_max[t] ?? 0}%` }),
+      delta: delta ? tx('city.vsAverage', { delta }) : null,
     },
     timeline: { days, todayHi: `${T(hiToday)}°` },
     thisDay: { date: shortDate(today), rows },
     rain,
     hours,
+    labels: {
+      past7: tx('widgets.past7'), forecast: tx('widgets.forecast'), average: tx('widgets.average'),
+      onThisDay: tx('widgets.onThisDay'), earlierYears: tx('widgets.earlierYears'),
+    },
   };
 }
 
@@ -144,9 +151,11 @@ export function startWidgetSync(): () => void {
     });
   };
   push();
-  const unsub = useWeatherStore.subscribe(() => {
+  const later = () => {
     window.clearTimeout(timer);
     timer = window.setTimeout(push, 800);
-  });
-  return () => { unsub(); window.clearTimeout(timer); };
+  };
+  const unsub = useWeatherStore.subscribe(later);
+  const unsubLang = useI18n.subscribe(later); // widget text follows the app language
+  return () => { unsub(); unsubLang(); window.clearTimeout(timer); };
 }

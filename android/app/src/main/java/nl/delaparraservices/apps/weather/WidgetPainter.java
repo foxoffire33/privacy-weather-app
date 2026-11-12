@@ -113,6 +113,13 @@ final class WidgetPainter {
         text(c, line2, w / 2, h / 2 + 15, 12, regular, DIM, Paint.Align.CENTER, w - 24);
     }
 
+    /** A translated label sent by the app (labels.*), or the English fallback. */
+    static String label(JSONObject data, String key, String fallback) {
+        JSONObject labels = data == null ? null : data.optJSONObject("labels");
+        String value = labels == null ? null : labels.optString(key, null);
+        return value == null || value.isEmpty() ? fallback : value;
+    }
+
     static Float num(JSONObject o, String key) {
         if (o == null || o.isNull(key)) return null;
         double v = o.optDouble(key, Double.NaN);

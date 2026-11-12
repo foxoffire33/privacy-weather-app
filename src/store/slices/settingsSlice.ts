@@ -10,6 +10,7 @@ export const defaultSettings: Settings = {
   backfill: true,
   accent: 'green',
   accentColor: '#178a4a',
+  language: 'system',
 };
 
 export const createSettingsSlice: SliceCreator<SettingsSlice> = (set) => ({

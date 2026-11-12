@@ -6,6 +6,7 @@ import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
 import { nowIndex } from '../lib/insights';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
+import { t } from '../i18n';
 
 function Cell({ k, v }: { k: string; v: string }) {
   return (
@@ -33,13 +34,13 @@ export function Hourly({ cityId }: { cityId: string }) {
     tempUnit: st.settings.tempUnit,
     windUnit: st.settings.windUnit,
   })));
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>This city is no longer followed.</Text></div>;
+  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
 
   const header = (
     <>
       <ScreenHeader />
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
-      <Title className="display display-sm">Hour<br />by hour.</Title>
+      <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('hourly.title')}</Title>
     </>
   );
   if (!s.entry) {
@@ -73,28 +74,28 @@ export function Hourly({ cityId }: { cityId: string }) {
                   style={{ border: `${isNow ? 2 : 1}px solid ${isNow ? "#fff" : "var(--rule-soft)"}`, background: v.is_day[i] ? '#000' : '#0b0b0b' }}>
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <Box style={{ minWidth: 0 }}>
-                      <Text fz={20} fw={800}>{isNow ? 'Now' : hhmm(data.hourly.time[i])}</Text>
-                      <Text fz={14} fw={600} truncate>{conditionLabel(v.weather_code[i])}{v.is_day[i] ? '' : ' · night'}</Text>
+                      <Text fz={20} fw={800}>{isNow ? t('common.now') : hhmm(data.hourly.time[i])}</Text>
+                      <Text fz={14} fw={600} truncate>{conditionLabel(v.weather_code[i])}{v.is_day[i] ? '' : ` · ${t('common.night')}`}</Text>
                     </Box>
                     <Text fz={48} fw={800} lh={0.9} style={{ letterSpacing: '-.04em' }}>{T(v.temperature_2m[i])}°</Text>
                   </Group>
                   <Box mt={10} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderTop: '1px solid var(--rule-soft)' }}>
-                    <Cell k="Feels like" v={`${T(v.apparent_temperature[i])}°`} />
-                    <Cell k="Rain chance" v={`${v.precipitation_probability[i] ?? 0}%`} />
-                    <Cell k="Rain" v={`${mm.toFixed(1)} mm`} />
-                    <Cell k={`Wind ${compass(v.wind_direction_10m[i] ?? 0)}`} v={W(v.wind_speed_10m[i])} />
-                    <Cell k="Gusts" v={W(v.wind_gusts_10m[i])} />
-                    <Cell k="UV" v={v.uv_index[i] == null ? '–' : String(Math.round(v.uv_index[i]!))} />
-                    <Cell k="Clouds" v={`${v.cloud_cover[i] ?? '–'}%`} />
-                    <Cell k="Humidity" v={`${v.relative_humidity_2m[i] ?? '–'}%`} />
-                    <Cell k="Visibility" v={v.visibility[i] == null ? '–' : `${Math.round(v.visibility[i]! / 1000)} km`} />
+                    <Cell k={t('hourly.feelsLike')} v={`${T(v.apparent_temperature[i])}°`} />
+                    <Cell k={t('hourly.rainChance')} v={`${v.precipitation_probability[i] ?? 0}%`} />
+                    <Cell k={t('hourly.rain')} v={`${mm.toFixed(1)} mm`} />
+                    <Cell k={t('hourly.wind', { dir: compass(v.wind_direction_10m[i] ?? 0) })} v={W(v.wind_speed_10m[i])} />
+                    <Cell k={t('hourly.gusts')} v={W(v.wind_gusts_10m[i])} />
+                    <Cell k={t('hourly.uv')} v={v.uv_index[i] == null ? '–' : String(Math.round(v.uv_index[i]!))} />
+                    <Cell k={t('hourly.clouds')} v={`${v.cloud_cover[i] ?? '–'}%`} />
+                    <Cell k={t('hourly.humidity')} v={`${v.relative_humidity_2m[i] ?? '–'}%`} />
+                    <Cell k={t('hourly.visibility')} v={v.visibility[i] == null ? '–' : `${Math.round(v.visibility[i]! / 1000)} km`} />
                   </Box>
                 </Box>
               );
             })}
           </Box>
         ))}
-        <Text fz={12} c="dimmed" pt={16} px={8}>Weather data by Open-Meteo.com</Text>
+        <Text fz={12} c="dimmed" pt={16} px={8}>{t('common.dataBy')}</Text>
       </Box>
     </div>
   );

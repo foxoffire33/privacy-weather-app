@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
+import { t } from '../i18n';
 
 const HINT_KEY = 'weather-log-hint-seen';
 const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
@@ -20,7 +21,7 @@ function GestureHint({ multiple }: { multiple: boolean }) {
   if (!open) return null;
   return (
     <button type="button" className="gesture-hint" onClick={close}>
-      {multiple ? 'Swipe sideways for the next city · ' : ''}pull the hourly strip right for earlier days · tap to dismiss
+      {multiple ? t('home.hintSwipe') : ''}{t('home.hint')}
     </button>
   );
 }
@@ -108,21 +109,21 @@ export function Home() {
       </div>
       <GestureHint multiple={n > 1} />
       <div className="overlay">
-        <ActionIcon variant="transparent" c="white" aria-label="Cities" onClick={() => navigate({ name: 'cities' })}>
+        <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => navigate({ name: 'cities' })}>
           <Icon name="list" />
         </ActionIcon>
         <div style={{ display: 'flex', gap: 6 }}>
           {cities.map((c, i) => (
             <button key={c.id} className="dot" data-active={i === idx || undefined}
-              aria-label={`Show ${c.name}`} onClick={() => setPage(i)} />
+              aria-label={t('home.show', { name: c.name })} onClick={() => setPage(i)} />
           ))}
         </div>
         <Group gap={0} wrap="nowrap">
-          <ActionIcon variant="transparent" c="white" aria-label={updating ? 'Updating' : 'Refresh all'} aria-busy={updating || undefined}
+          <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
             onClick={() => refreshAll({ maxAgeMs: 0 })}>
             <span className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></span>
           </ActionIcon>
-          <ActionIcon variant="transparent" c="white" aria-label="Settings" onClick={() => navigate({ name: 'settings' })}>
+          <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => navigate({ name: 'settings' })}>
             <Icon name="sliders" />
           </ActionIcon>
         </Group>

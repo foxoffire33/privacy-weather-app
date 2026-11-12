@@ -31,7 +31,7 @@ public class NowWidget extends BaseWidget {
             y -= 17;
         }
         String range = "H " + now.optString("hi") + "  L " + now.optString("lo");
-        if (p.w >= 150) range += "  ·  Rain " + now.optString("rain");
+        if (p.w >= 150) range += "  ·  " + now.optString("rainLabel", "Rain " + now.optString("rain"));
         p.text(c, range, pad, y, 12, p.bold, WidgetPainter.WHITE, Paint.Align.LEFT, inner);
         y -= 18;
         p.text(c, now.optString("cond"), pad, y, 15, p.bold, WidgetPainter.WHITE, Paint.Align.LEFT, inner);

@@ -7,6 +7,7 @@ import type { GeoResult } from '../types';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
+import { t } from '../i18n';
 
 export function Search() {
   const s = useWeatherStore(useShallow((st) => ({
@@ -34,21 +35,21 @@ export function Search() {
   return (
     <div className="screen">
       <ScreenHeader />
-      <Title className="display display-sm">Follow<br />a city.</Title>
+      <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('search.title')}</Title>
       <Box px={20}>
-        <TextInput size="lg" placeholder="City name" autoFocus value={s.query}
+        <TextInput size="lg" placeholder={t('search.placeholder')} autoFocus value={s.query}
           leftSection={<Icon name="search" size={20} />}
           rightSection={s.searching ? <Loader size="xs" /> : null}
           onChange={(e) => s.setQuery(e.currentTarget.value)}
-          aria-label="Search cities" />
+          aria-label={t('search.label')} />
       </Box>
 
       <Box px={20} style={{ flex: 1 }}>
-        <div className="kicker">Results</div>
+        <div className="kicker">{t('search.results')}</div>
         {s.searchError && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
-        {!s.searchError && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">Type at least two letters.</Text>}
+        {!s.searchError && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
         {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && !s.searchError && (
-          <Text py={12} fz={13} c="dimmed">No places match “{s.query}”.</Text>
+          <Text py={12} fz={13} c="dimmed">{t('search.noMatch', { query: s.query })}</Text>
         )}
         {s.searching && s.results.length === 0 && Array.from({ length: 4 }, (_, i) => (
           <Group key={i} className="row" py={12} wrap="nowrap" justify="space-between">
@@ -67,7 +68,7 @@ export function Search() {
                 </Text>
               </Box>
               <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => follow(r)}>
-                {isFollowed ? 'Following' : 'Follow'}
+                {isFollowed ? t('search.following') : t('search.follow')}
               </Button>
             </Group>
           );
@@ -76,7 +77,7 @@ export function Search() {
 
       <Group px={20} py={14} gap={8} wrap="nowrap" className="rule-top">
         <Icon name="lock" size={16} />
-        <Text fz={12} c="dimmed">No location access. Search by Open-Meteo Geocoding API.</Text>
+        <Text fz={12} c="dimmed">{t('search.privacy')}</Text>
       </Group>
     </div>
   );

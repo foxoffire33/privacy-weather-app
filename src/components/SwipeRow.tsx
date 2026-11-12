@@ -1,4 +1,5 @@
 import { useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { t } from '../i18n';
 
 const ACTION_W = 88;
 
@@ -62,14 +63,14 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
         swallowClick.current = false;
       }}>
       <button type="button" data-swipe-action onClick={onDelete} tabIndex={open ? 0 : -1} aria-hidden={!open}
-        aria-label={`Delete ${label}`}
+        aria-label={t('history.deleteLabel', { date: label })}
         style={{
           position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
           border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
           transition: dragX == null ? 'width .25s ease' : 'none',
         }}>
-        Delete
+        {t('history.delete')}
       </button>
       <div style={{
         position: 'relative', background: 'var(--mantine-color-body)',

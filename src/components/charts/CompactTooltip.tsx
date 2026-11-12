@@ -1,3 +1,5 @@
+import { t } from '../../i18n';
+
 interface Entry { name?: string; value?: number | string; color?: string; stroke?: string; fill?: string; unit?: string; dataKey?: string }
 
 const round = (v: number | string | undefined) => (typeof v === 'number' ? String(Math.round(v * 10) / 10) : (v ?? '–'));
@@ -22,7 +24,7 @@ export function CompactTooltip({ active, label, payload }: { active?: boolean; l
             </b>
           ))}
         </>
-      ) : <span style={{ color: 'rgba(255,255,255,.3)' }}>Touch the chart for details</span>}
+      ) : <span style={{ color: 'rgba(255,255,255,.3)' }}>{t('common.touchChart')}</span>}
     </div>
   );
 }

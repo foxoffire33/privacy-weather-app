@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Box, Group, Paper } from '@mantine/core';
 import { Section } from './city/parts';
+import { t } from '../i18n';
 
 // Placeholder block. Width/height match the content it stands in for.
 export function Sk({ w = '100%', h = 14, mt = 0, style }: { w?: number | string; h?: number; mt?: number; style?: CSSProperties }) {
@@ -66,10 +67,10 @@ export function CityBodySk() {
         <Box px={12} py={10} style={{ borderBottom: '1px solid rgba(248,244,244,.2)' }}><Sk w={160} h={16} /></Box>
         <Box px={12}><RowsSk n={7} h={39} /></Box>
       </Paper>
-      <Section title="Next 48 hours"><ChartSk /></Section>
-      <Section title="Next 7 days"><ChartSk h={200} /></Section>
-      <SectionSk title="Feels like" />
-      <SectionSk title="Sun" />
+      <Section title={t('city.next48')}><ChartSk /></Section>
+      <Section title={t('city.next7')}><ChartSk h={200} /></Section>
+      <SectionSk title={t('city.feels.title')} />
+      <SectionSk title={t('city.sun.title')} />
     </>
   );
 }
