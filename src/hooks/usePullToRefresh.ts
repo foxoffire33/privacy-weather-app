@@ -1,15 +1,12 @@
 import { useRef, useState, type MouseEvent, type TouchEvent } from 'react';
 
-const TRIGGER = 64; // px of (damped) pull needed to refresh
+const TRIGGER = 64;
 const MAX = 96;
 
-// Pull down at the top of a scroll container to refresh.
-// Pull distance is transient gesture state; the data refresh itself goes through the store.
 export function usePullToRefresh(onRefresh: () => void) {
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef<number | null>(null);
   const [pull, setPull] = useState(0);
-
   const begin = (y: number, target?: EventTarget | null) => {
     if ((target as HTMLElement | null)?.closest?.('[data-noswipe]')) { start.current = null; return; }
     start.current = (ref.current?.scrollTop ?? 1) <= 0 ? y : null;
@@ -26,7 +23,6 @@ export function usePullToRefresh(onRefresh: () => void) {
     if (pull >= TRIGGER) onRefresh();
     setPull(0);
   };
-
   return {
     pull,
     armed: pull >= TRIGGER,

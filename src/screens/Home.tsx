@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Group } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
+import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../storesV2';
+import { useUiStore } from '../store/uiStore';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';
@@ -9,10 +10,9 @@ import { t } from '../i18n';
 const HINT_KEY = 'weather-log-hint-seen';
 const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
 
-// One-time hint for the gestures that have no visible control. Gone after the first touch or tap.
 function GestureHint({ multiple }: { multiple: boolean }) {
   const [open, setOpen] = useState(() => !hintSeen());
-  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch { /* private mode */ } };
+  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch {} };
   useEffect(() => {
     if (!open) return;
     const t = window.setTimeout(close, 12000);
@@ -26,15 +26,11 @@ function GestureHint({ multiple }: { multiple: boolean }) {
   );
 }
 
-// Opens on the default city (index 0). Swipe / drag sideways or use ← → to move through followed cities.
 export function Home() {
-  const { cities, pageIndex, setPage, navigate, updating, refreshAll } = useWeatherStore(useShallow((s) => ({
-    cities: s.cities,
-    pageIndex: s.pageIndex,
-    setPage: s.setPage,
-    navigate: s.navigate,
-    updating: Object.values(s.status).some((x) => x.loading),
-    refreshAll: s.refreshAll,
+  const cities = useCities();
+  const updating = useAnyForecastLoading();
+  const { pageIndex, setPage, navigate } = useUiStore(useShallow((s) => ({
+    pageIndex: s.pageIndex, setPage: s.setPage, navigate: s.navigate,
   })));
   const n = cities.length;
   const idx = Math.min(pageIndex, n - 1);
@@ -42,7 +38,6 @@ export function Home() {
   const dx = useRef(0);
   const drag = useRef<{ x: number; y: number; id: number; active: boolean } | null>(null);
   const justDragged = useRef(false);
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' && idx < n - 1) setPage(idx + 1);
@@ -51,17 +46,13 @@ export function Home() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [idx, n, setPage]);
-
-  // The visible city refreshes after the slide has settled, never during it.
   const activeId = cities[idx]?.id;
   useEffect(() => {
     if (!activeId) return;
-    const t = window.setTimeout(() => void useWeatherStore.getState().refreshCity(activeId), 450);
+    const t = window.setTimeout(() => void refreshCity(activeId), 450);
     return () => window.clearTimeout(t);
   }, [activeId]);
-
   const onDown = (e: PointerEvent) => {
-    // Horizontal scrollers (hourly strip) keep their own drag.
     if ((e.target as HTMLElement).closest('[data-noswipe]')) return;
     drag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, active: false };
   };
@@ -81,7 +72,6 @@ export function Home() {
       } else return;
     }
     const atEdge = (idx === 0 && mx > 0) || (idx === n - 1 && mx < 0);
-    // Follow the finger by writing the transform directly: no React render per pointer move.
     dx.current = atEdge ? mx / 3 : mx;
     e.currentTarget.style.transform = `translateX(calc(${-idx * 100}% + ${dx.current}px))`;
   };
@@ -97,7 +87,6 @@ export function Home() {
     if (el) { el.style.transition = ''; el.style.transform = `translateX(${-next * 100}%)`; }
     if (next !== idx) setPage(next);
   };
-
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
       <div className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}

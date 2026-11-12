@@ -2,8 +2,11 @@ import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type Reac
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
-import type { City } from '../types';
+import {
+  openDay, refreshCity, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
+} from '../storesV2';
+import { useUiStore } from '../store/uiStore';
+import type { City } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
 import { ago, compass, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, weekday } from '../lib/format';
 import {
@@ -14,7 +17,8 @@ import { Icon } from '../components/Icon';
 import { Bar, Section, Stat, levelColor } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { CompositeChart } from '@mantine/charts';
-import { addDays, convTemp } from '../lib/format';
+import { convTemp } from '../lib/format';
+import { addDays } from '../storesV2';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
@@ -38,7 +42,7 @@ const POLLUTANTS = [
 const POLLEN = ['alder_pollen', 'birch_pollen', 'grass_pollen', 'mugwort_pollen', 'olive_pollen', 'ragweed_pollen'] as const;
 
 export const CityPage = memo(function CityPage({ city, isDefault }: { city: City; isDefault: boolean }) {
-  const { busy, refreshCity } = useWeatherStore(useShallow((st) => ({ busy: !!st.status[city.id]?.loading, refreshCity: st.refreshCity })));
+  const busy = useForecastQuery(city.id).status === 'loading';
   const { pull, armed, bind } = usePullToRefresh(() => void refreshCity(city.id, { maxAgeMs: 0 }));
   return (
     <div className="page" {...bind} style={{ position: 'relative' }}>
@@ -56,7 +60,6 @@ export const CityPage = memo(function CityPage({ city, isDefault }: { city: City
   );
 });
 
-// Charts are the heavy part of a page: mount them just after the page itself so a slide never waits on them.
 function Deferred({ h, children }: { h: number; children: ReactNode }) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -68,26 +71,23 @@ function Deferred({ h, children }: { h: number; children: ReactNode }) {
 
 function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }) {
   const weekTg = useSeriesToggle('week');
-  const s = useWeatherStore(useShallow((st) => ({
-    entry: st.forecasts[city.id],
-    status: st.status[city.id],
-    normals: st.normals[city.id],
-    logged: Object.keys(st.history[city.id] ?? {}).length,
-    expanded: st.expandedDay[city.id] ?? null,
-    tempUnit: st.settings.tempUnit,
-    windUnit: st.settings.windUnit,
-    refreshCity: st.refreshCity,
-    navigate: st.navigate,
-    toggleDay: st.toggleDay,
-    days: st.days,
-    logYesterday: st.logYesterday,
-    logDay: st.logDay,
-    loadDay: st.loadDay,
-  })));
+  const entry = useForecast(city.id);
+  const query = useForecastQuery(city.id);
+  const units = useUnits();
+  const s = {
+    entry,
+    error: query.error,
+    loading: query.status === 'loading',
+    normals: useNormals(city.id),
+    logged: useLogCount(city.id),
+    expanded: useUiStore((st) => st.expandedDay[city.id] ?? null),
+    tempUnit: units.temp,
+    windUnit: units.wind,
+    days: useDayStore((st) => st.days),
+    ...useUiStore(useShallow((st) => ({ navigate: st.navigate, toggleDay: st.toggleDay }))),
+  };
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const strip = useDragScroll<HTMLDivElement>();
-  // Pulling right at the start of the strip reveals one earlier day per pull and adds it to the log.
-  // Yesterday is already in the forecast response; older days are fetched (archive) first.
   const [back, setBack] = useState(0);
   const [loadingPast, setLoadingPast] = useState(false);
   const widthBefore = useRef(0);
@@ -96,13 +96,12 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     const today = s.entry?.data.daily.time[s.entry.pastDays];
     if (!el || !today) return;
     const n = back + 1;
-    if (n === 1) s.logYesterday(city.id);
-    else {
+    if (n > 1) {
+      const date = addDays(today, -n);
       setLoadingPast(true);
-      await s.loadDay(city.id, addDays(today, -n));
+      await openDay(city.id, date);
       setLoadingPast(false);
-      if (!useWeatherStore.getState().days[`${city.id}:${addDays(today, -n)}`]) return;
-      s.logDay(city.id, addDays(today, -n));
+      if (!useDayStore.getState().days[`${city.id}:${date}`]) return;
     }
     widthBefore.current = el.scrollWidth;
     setBack(n);
@@ -112,36 +111,33 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     const el = strip.ref.current;
     if (!el || !back) return;
     const added = el.scrollWidth - widthBefore.current;
-    el.scrollLeft = added; // keep what was on screen, then glide back to show the new hours
+    el.scrollLeft = added;
     el.scrollTo({ left: Math.max(0, added - 3 * 52), behavior: 'smooth' });
-  }, [back]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Selecting a day scrolls the hourly strip to its first hour.
+  }, [back]);
   useEffect(() => {
     const el = strip.ref.current;
     const first = s.expanded ? el?.querySelector<HTMLElement>(`[data-date="${s.expanded}"]`) : null;
     if (el && first) el.scrollTo({ left: (first.previousElementSibling as HTMLElement | null)?.classList.contains('day-divider') ? (first.previousElementSibling as HTMLElement).offsetLeft : first.offsetLeft, behavior: 'smooth' });
-  }, [s.expanded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [s.expanded]);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
   const n0 = (v: number | null | undefined, digits = 0) => (v == null ? '–' : v.toFixed(digits));
-
   const title = (
     <Group gap={8}>
       <Text fz={15} fw={800}>{city.name}</Text>
       {isDefault && <Badge variant="white" color="dark" size="sm">{tx('common.default')}</Badge>}
     </Group>
   );
-
   if (!s.entry) {
     return (
       <>
         <div className="hero">
           {title}
-          {s.status?.error ? (
+          {s.error ? (
             <>
               <div className="hero-temp">–°</div>
               <Text fz={18} fw={800} mt={12}>{tx('city.couldNotLoad')}</Text>
-              <Text fz={13} fw={600}>{s.status.error}</Text>
-              <Button mt={16} onClick={() => s.refreshCity(city.id, { maxAgeMs: 0 })}>{tx('common.tryAgain')}</Button>
+              <Text fz={13} fw={600}>{s.error}</Text>
+              <Button mt={16} onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>{tx('common.tryAgain')}</Button>
             </>
           ) : (
             <>
@@ -151,7 +147,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
             </>
           )}
         </div>
-        {!s.status?.error && <CityBodySk />}
+        {!s.error && <CityBodySk />}
       </>
     );
   }
@@ -165,11 +161,8 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const normal = s.normals?.[today.slice(5)];
   const delta = normal != null && dv.temperature_2m_max[t] != null ? dv.temperature_2m_max[t]! - normal : null;
   const precipProb = dv.precipitation_probability_max[t] ?? 0;
-
-  // Hourly strip: every remaining hour of the 7-day forecast
   type Cell = { time: string; date: string; isNow: boolean; past: boolean; temp: number | null | undefined; p: number | null; wind: number | null | undefined };
   const cells: Cell[] = [];
-  // Days before yesterday (fetched on pull), oldest first.
   for (let n = back; n >= 2; n--) {
     const day = s.days[`${city.id}:${addDays(today, -n)}`];
     if (!day) continue;
@@ -178,7 +171,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
       temp: day.hourly.v.temperature_2m?.[k], p: day.hourly.v.precipitation_probability?.[k] ?? null, wind: day.hourly.v.wind_speed_10m?.[k],
     }));
   }
-  const from = back >= 1 ? 0 : h0; // yesterday and today's passed hours are part of the forecast response
+  const from = back >= 1 ? 0 : h0;
   data.hourly.time.slice(from).forEach((time, k) => {
     const i = from + k;
     cells.push({
@@ -195,19 +188,12 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
       dayName: dayStart ? weekday(h.date).toLocaleUpperCase() : '',
     };
   });
-
-  // 2-hour nowcast (15-minute steps)
   const mq = data.minutely15;
   const mMax = Math.max(0.5, ...(mq?.precipitation.map((v) => v ?? 0) ?? [0]));
-
   const days = data.daily.time.slice(t, t + 7).map((date, k) => ({ date, i: t + k, label: k === 0 ? tx('common.today') : weekday(date) }));
-
-  // Sun
   const daylightChange = dv.daylight_duration[t] != null && dv.daylight_duration[t - 1] != null
     ? dv.daylight_duration[t]! - dv.daylight_duration[t - 1]! : null;
   const sunPos = sunProgress(data.current.time, data.daily.sunrise[t], data.daily.sunset[t]);
-
-  // Air
   const aqi = air?.current.european_aqi ?? null;
   const aqiLvl = euAqiLevel(aqi);
   const aqiAhead = air ? air.hourly.time.reduce<{ v: number; time: string } | null>((worst, time, i) => {
@@ -216,10 +202,8 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     return !worst || v > worst.v ? { v, time } : worst;
   }, null) : null;
   const pollen = air ? POLLEN.map((k) => ({ name: tx(`city.pollen.${k}`), v: air.current[k], lvl: pollenLevel(air.current[k]) })).filter((p) => p.v != null) : [];
-
   const trend = pressureTrend(data, h0);
   const windChill = c.apparent_temperature != null && c.temperature_2m != null ? c.apparent_temperature - c.temperature_2m : 0;
-
   return (
     <>
       <div className="hero">
@@ -469,9 +453,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
           <Text fz={12} c="dimmed">{city.lat.toFixed(2)}°, {city.lon.toFixed(2)}° · {Math.round(data.elevation)} m · {data.timezone}</Text>
           <Text fz={12} c="dimmed">{tx('city.footer', { ago: ago(fetchedAt) })}</Text>
         </Box>
-        <ActionIcon size={36} aria-label={s.status?.loading ? tx('common.updating') : tx('common.refresh')} aria-busy={s.status?.loading || undefined}
-          onClick={() => s.refreshCity(city.id, { maxAgeMs: 0 })}>
-          <span className={s.status?.loading ? 'spin' : undefined}><Icon name="refresh" size={16} /></span>
+        <ActionIcon size={36} aria-label={s.loading ? tx('common.updating') : tx('common.refresh')} aria-busy={s.loading || undefined}
+          onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>
+          <span className={s.loading ? 'spin' : undefined}><Icon name="refresh" size={16} /></span>
         </ActionIcon>
       </Group>
     </>

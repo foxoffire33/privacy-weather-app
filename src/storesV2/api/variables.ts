@@ -1,5 +1,3 @@
-// Every variable the app requests. The order matters: the SDK returns variables by index.
-
 export const CURRENT_VARS = [
   'temperature_2m', 'apparent_temperature', 'relative_humidity_2m', 'dew_point_2m', 'is_day',
   'precipitation', 'rain', 'showers', 'snowfall', 'weather_code', 'cloud_cover',
@@ -15,7 +13,6 @@ export const HOURLY_VARS = [
   'cape', 'freezing_level_height',
 ] as const;
 
-// sunrise / sunset are int64 timestamps and are read separately.
 export const DAILY_VARS = [
   'weather_code', 'temperature_2m_max', 'temperature_2m_min', 'apparent_temperature_max', 'apparent_temperature_min',
   'sunrise', 'sunset', 'daylight_duration', 'sunshine_duration', 'uv_index_max', 'uv_index_clear_sky_max',
@@ -38,16 +35,13 @@ export const ARCHIVE_VARS = [
   'weather_code', 'temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'wind_speed_10m_max',
 ] as const;
 
-// Everything a log entry (DayRecord) holds that the ERA5 archive has (no UV).
 export const LOG_ARCHIVE_VARS = [
   'weather_code', 'temperature_2m_max', 'temperature_2m_min', 'apparent_temperature_max', 'apparent_temperature_min',
   'precipitation_sum', 'snowfall_sum', 'wind_speed_10m_max', 'wind_gusts_10m_max', 'sunshine_duration',
 ] as const;
 
-// The same for days recent enough for the forecast API, which also knows the UV index.
 export const LOG_FORECAST_VARS = [...LOG_ARCHIVE_VARS, 'uv_index_max'] as const;
 
-// Variables available in the historical (ERA5) archive for a full past day.
 export const ARCHIVE_HOURLY_VARS = [
   'temperature_2m', 'apparent_temperature', 'relative_humidity_2m', 'dew_point_2m',
   'precipitation', 'rain', 'snowfall', 'snow_depth', 'weather_code', 'pressure_msl',

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 
-// Lucide icon paths (https://lucide.dev)
 const ICONS: Record<string, ReactNode> = {
   list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   sliders: <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />,

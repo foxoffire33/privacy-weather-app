@@ -1,17 +1,15 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
-import { useWeatherStore } from '../store';
+import { useUiStore } from '../store/uiStore';
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
 
-
 export function Onboarding() {
-  const navigate = useWeatherStore((s) => s.navigate);
+  const navigate = useUiStore((s) => s.navigate);
   const STEPS = [
     { t: t('onboarding.step1Title'), d: t('onboarding.step1Text') },
     { t: t('onboarding.step2Title'), d: t('onboarding.step2Text') },
     { t: t('onboarding.step3Title'), d: t('onboarding.step3Text') },
   ];
-
   return (
     <div className="screen accent-field">
       <Title className="display" style={{ fontSize: 72, paddingTop: 56, whiteSpace: 'pre-line' }}>{t('onboarding.title')}</Title>

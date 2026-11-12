@@ -1,19 +1,35 @@
-import type { SliceCreator, UiSlice } from '../types';
+import { create } from 'zustand';
+import type { Route } from '../types';
 
-// Navigation lives in the store: a route, a back stack and the home pager index.
-// The pager always starts at 0 — the default city.
-export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
-  hydrated: false,
+export interface UiState {
+  route: Route;
+  stack: Route[];
+  pageIndex: number;
+  expandedDay: Record<string, string | null>;
+  chartMetric: string;
+  historyRange: number;
+  lookupDraft: string;
+  setChartMetric: (m: string) => void;
+  setHistoryRange: (d: number) => void;
+  setLookupDraft: (date: string) => void;
+  toggleDay: (cityId: string, date: string) => void;
+  navigate: (route: Route) => void;
+  back: () => void;
+  goHome: (pageIndex?: number) => void;
+  setPage: (i: number) => void;
+}
+
+export const useUiStore = create<UiState>()((set) => ({
   route: { name: 'home' },
   stack: [],
   pageIndex: 0,
   expandedDay: {},
   chartMetric: 'temp',
   historyRange: 90,
-
-  setHydrated: () => set({ hydrated: true }),
+  lookupDraft: '',
   setChartMetric: (chartMetric) => set({ chartMetric }),
   setHistoryRange: (historyRange) => set({ historyRange }),
+  setLookupDraft: (lookupDraft) => set({ lookupDraft }),
   toggleDay: (cityId, date) => set((s) => ({
     expandedDay: { ...s.expandedDay, [cityId]: s.expandedDay[cityId] === date ? null : date },
   })),
@@ -23,4 +39,4 @@ export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
     : { route: { name: 'home' } })),
   goHome: (pageIndex) => set((s) => ({ route: { name: 'home' }, stack: [], pageIndex: pageIndex ?? s.pageIndex })),
   setPage: (pageIndex) => set({ pageIndex }),
-});
+}));

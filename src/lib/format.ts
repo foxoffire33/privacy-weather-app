@@ -1,10 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import type { TempUnit, WindUnit } from '../types';
+import type { TempUnit, WindUnit } from '../storesV2';
 import { currentLocale, t } from '../i18n';
 
-// Stored data is always metric (°C, km/h, mm); units apply only when formatting.
 export function fmtTemp(c: number | null | undefined, unit: TempUnit): string {
   if (c == null || Number.isNaN(c)) return '–';
   return String(Math.round(unit === 'F' ? c * 9 / 5 + 32 : c));
@@ -36,17 +35,6 @@ export function ago(ts?: number): string {
   const h = Math.round(m / 60);
   return h < 24 ? t('ago.hours', { n: h }) : t('ago.days', { n: Math.round(h / 24) });
 }
-export function todayISO(): string {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-}
-export function addDays(iso: string, n: number): string {
-  const d = new Date(iso + 'T12:00Z');
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-}
-export const daysBetween = (a: string, b: string) =>
-  Math.round((new Date(b + 'T12:00Z').getTime() - new Date(a + 'T12:00Z').getTime()) / 86400000);
 
 export function uvLabel(u?: number | null): string {
   if (u == null) return '–';
@@ -56,12 +44,11 @@ export function aqiLabel(a?: number | null): string {
   if (a == null) return 'Unavailable';
   return a <= 20 ? 'Good' : a <= 40 ? 'Fair' : a <= 60 ? 'Moderate' : a <= 80 ? 'Poor' : a <= 100 ? 'Very poor' : 'Extremely poor';
 }
-// Browsers download via a link. The Android WebView ignores that for blobs, so the app writes the file to
-// its cache and hands it to the system share sheet (save to Files, Drive, mail, ...).
+
 export async function downloadFile(name: string, text: string, type: string) {
   if (Capacitor.isNativePlatform()) {
     const { uri } = await Filesystem.writeFile({ path: name, data: text, directory: Directory.Cache, encoding: Encoding.UTF8 });
-    await Share.share({ title: name, url: uri, dialogTitle: 'Save or share' }).catch(() => undefined); // closing the sheet is not an error
+    await Share.share({ title: name, url: uri, dialogTitle: 'Save or share' }).catch(() => undefined);
     return;
   }
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -72,7 +59,6 @@ export async function downloadFile(name: string, text: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Numeric conversions for charts.
 export const convTemp = (c: number | null | undefined, unit: TempUnit) =>
   (c == null || Number.isNaN(c) ? null : Math.round((unit === 'F' ? c * 9 / 5 + 32 : c) * 10) / 10);
 export const convWind = (kmh: number | null | undefined, unit: WindUnit) =>

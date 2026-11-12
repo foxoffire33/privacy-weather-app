@@ -1,10 +1,7 @@
-import type { ForecastData } from '../types';
+import type { ForecastData } from '../storesV2';
 import { hhmm } from './format';
 import { t, tl } from '../i18n';
 
-// Plain-language readings derived from raw API values.
-
-/** Names of the European AQI levels, in the current language. */
 export const levelName = (i: number) => tl('levels.aqi')[i];
 
 const band = (v: number, edges: number[]) => { const i = edges.findIndex((e) => v <= e); return i === -1 ? edges.length : i; };
@@ -16,7 +13,6 @@ export function usAqiLabel(a: number | null) {
   return t(a <= 50 ? 'levels.usAqi.good' : a <= 100 ? 'levels.usAqi.moderate' : a <= 150 ? 'levels.usAqi.sensitive' : a <= 200 ? 'levels.usAqi.unhealthy' : a <= 300 ? 'levels.usAqi.veryUnhealthy' : 'levels.usAqi.hazardous');
 }
 
-// European AQI sub-index bands, µg/m³.
 const POLLUTANT_BANDS: Record<string, number[]> = {
   pm2_5: [10, 20, 25, 50, 75],
   pm10: [20, 40, 50, 100, 150],
@@ -77,7 +73,6 @@ export function signedMinutes(sec: number) {
   return `${m >= 0 ? '+' : '−'}${t('units.minutes', { m: Math.abs(m) })}`;
 }
 
-// Index of the current hour in the hourly arrays.
 export function nowIndex(data: ForecastData) {
   const floor = data.current.time.slice(0, 13) + ':00';
   return Math.max(0, data.hourly.time.findIndex((x) => x >= floor));
@@ -111,7 +106,6 @@ export function pressureTrend(data: ForecastData, h0: number) {
   return { delta: d, label: t(d > 1 ? 'levels.pressure.rising' : d < -1 ? 'levels.pressure.falling' : 'levels.pressure.steady') };
 }
 
-// 0–1 position of "now" between sunrise and sunset, or null at night.
 export function sunProgress(nowIso: string, sunrise?: string, sunset?: string) {
   if (!sunrise || !sunset) return null;
   const t = (s: string) => new Date(s + 'Z').getTime();

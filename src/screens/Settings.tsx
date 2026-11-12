@@ -1,30 +1,21 @@
 import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useRef, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
-import type { Accent, TempUnit, WindUnit } from '../types';
+import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
+import type { Accent, TempUnit, WindUnit } from '../storesV2';
 import { ACCENTS } from '../theme';
 import { downloadFile } from '../lib/format';
 import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { LANGUAGES, systemLanguage, t, type LanguagePref } from '../i18n';
+import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { version } from '../../package.json';
 
 const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
 
 export function Settings() {
-  const s = useWeatherStore(useShallow((st) => ({
-    settings: st.settings,
-    cityCount: st.cities.length,
-    dayCount: Object.values(st.history).reduce((n, log) => n + Object.keys(log).length, 0),
-    updateSettings: st.updateSettings,
-    refreshAll: st.refreshAll,
-    clearHistory: st.clearHistory,
-    importBackup: st.importBackup,
-  })));
-  const set = s.updateSettings;
-
-  // Import: read the file, show what it holds, let the user pick the parts, then merge.
+  const settings = useSettings();
+  const set = useUpdateSettings();
+  const counts = storedCounts();
+  const s = { settings };
   const fileInput = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<Backup | null>(null);
   const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
@@ -44,17 +35,15 @@ export function Settings() {
   };
   const doImport = () => {
     if (!pending) return;
-    const r = s.importBackup(pending, parts);
+    const r = importBackup(pending, parts);
     setImportMsg({ ok: true, text: t('settings.imported', { cities: r.cities, days: r.days }) });
     setPending(null);
   };
-
   const exportAll = () => {
-    const { cities, history, settings } = useWeatherStore.getState();
-    const { apiKey: _omit, ...safeSettings } = settings;
+    const { cities, history, settings: stored } = exportSnapshot();
+    const { apiKey: _omit, ...safeSettings } = stored;
     downloadFile('weather-log.json', JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
   };
-
   return (
     <div className="screen">
       <ScreenHeader />
@@ -63,7 +52,7 @@ export function Settings() {
         <div className="kicker">{t('settings.language')}</div>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
-            value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v as LanguagePref })}
+            value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v })}
             data={[
               { value: 'system', label: t('settings.languageSystem', { name: LANGUAGES.find((l) => l.code === systemLanguage())?.name }) },
               ...LANGUAGES.map((l) => ({ value: l.code, label: l.name })),
@@ -81,7 +70,7 @@ export function Settings() {
             description={t('settings.serverNote')}
             onChange={(e) => set({ server: e.currentTarget.value.trim() })} />
         </Box>
-        <Button variant="subtle" color="gray" mt={8} onClick={() => s.refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
+        <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
         <div className="kicker">{t('settings.appearance')}</div>
         <Box py={12} className="row">
@@ -145,7 +134,7 @@ export function Settings() {
         <Group py={12} className="row" justify="space-between" wrap="nowrap">
           <Box>
             <Text fz={14} fw={600}>{t('settings.stored')}</Text>
-            <Text fz={12} c="dimmed">{t('settings.storedCount', { cities: s.cityCount, days: s.dayCount })}</Text>
+            <Text fz={12} c="dimmed">{t('settings.storedCount', { cities: counts.cities, days: counts.days })}</Text>
           </Box>
           <Group gap={8} wrap="nowrap">
             <Button variant="outline" color="gray" onClick={exportAll}>{t('settings.export')}</Button>
@@ -175,7 +164,7 @@ export function Settings() {
         )}
         {importMsg && <Text fz={13} py={8} c={importMsg.ok ? undefined : 'signal.3'} role="status">{importMsg.text}</Text>}
         <Button variant="subtle" color="signal" mt={8}
-          onClick={() => { if (window.confirm(t('settings.confirmDeleteAll'))) s.clearHistory(); }}>
+          onClick={() => { if (window.confirm(t('settings.confirmDeleteAll'))) clearHistory(); }}>
           {t('settings.deleteAll')}
         </Button>
 

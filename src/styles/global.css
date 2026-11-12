@@ -1,7 +1,6 @@
 :root {
   --rule: rgba(248, 244, 244, .6);
   --rule-soft: rgba(248, 244, 244, .22);
-  /* Selection tint, shared by a selected day row and the touched column in a chart. */
   --selected-bg: color-mix(in srgb, var(--mantine-color-signal-5) 18%, transparent);
 }
 [data-accent=off] { --selected-bg: rgba(255, 255, 255, .1); }
@@ -9,11 +8,9 @@ html, body, #root { height: 100%; margin: 0; }
 body { font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Phone-sized stage on desktop, full screen on mobile / Capacitor. */
 .stage { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: #000; }
 .device { width: 390px; height: 844px; max-height: calc(100dvh - 48px); position: relative; overflow: hidden; background: var(--mantine-color-body); border: 2px solid #2d2b2b; display: flex; flex-direction: column; }
-/* Phone safe area: padding keeps content clear of the notch and gesture bar; the strips fill it
-   with the colour of the screen edge (accent on home/onboarding, body elsewhere). */
+
 .device::before, .device::after { content: ''; position: absolute; left: 0; right: 0; z-index: 3; pointer-events: none; background: var(--mantine-color-body); }
 .device::before { top: 0; height: var(--sat, 0px); }
 .device::after { bottom: 0; height: var(--sab, 0px); }
@@ -30,25 +27,22 @@ body { font-variant-numeric: tabular-nums; }
 .kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #fff; font-weight: 800; padding: 20px 0 6px; border-bottom: 2px solid var(--rule); }
 .rule-top { border-top: 2px solid var(--rule); }
 .row { border-bottom: 1px solid var(--rule-soft); }
-/* Log rows: fixed columns so the Filled badge, the high and the difference line up down the
-   list whatever the description says. Only the description gives way. */
+
 .log-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) 54px 40px 40px; align-items: baseline; gap: 6px; }
 .log-row > span { justify-self: start; }
-/* Calm, high contrast: solid panels, no blur, clear 2px edges. */
+
 .glass { background: #000; border: 2px solid var(--rule); }
 
-/* Home pager */
 .pager { position: absolute; inset: 0; display: flex; touch-action: pan-y; user-select: none; transition: transform .35s cubic-bezier(.2,.8,.2,1); will-change: transform; }
 .page { touch-action: pan-y; width: 100%; height: 100%; flex: none; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
-/* Accent field: hero, top bar and onboarding. Black when the accent is off. */
+
 .hero, .accent-field { background: var(--mantine-color-signal-5); color: #fff; }
 .hero { padding: 72px 20px 56px; }
 [data-accent=off] .hero, [data-accent=off] .accent-field { background: #000; }
 .hero-temp { font-size: 168px; font-weight: 800; line-height: .85; letter-spacing: -.06em; margin-top: 8px; }
-/* Loading placeholders: same box as the content they stand in for, so nothing shifts. */
-/* Mantine's Skeleton, toned down to the app's palette (its dark default is far too bright). */
+
 .mantine-Skeleton-root::after { background-color: rgba(255, 255, 255, .08); }
-/* Background refresh indicator */
+
 .spin { display: inline-flex; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .overlay { position: absolute; left: 0; right: 0; top: 0; padding: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 2; background: var(--mantine-color-signal-5); }
@@ -67,17 +61,12 @@ body { font-variant-numeric: tabular-nums; }
 .nowcast { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; align-items: end; height: 36px; }
 .archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
-/* A chart owns horizontal gestures; the page keeps vertical scrolling. */
 .chart-surface { touch-action: pan-y; }
 
-/* Chart text: small, grey, tabular. Active dot as a plain square-edged marker. */
 .recharts-cartesian-axis-tick-value { font-size: 11px; font-variant-numeric: tabular-nums; }
 .recharts-reference-line-label { font-size: 11px; fill: var(--mantine-color-dark-2); }
 .recharts-active-dot circle { stroke: #000; stroke-width: 2; }
 
-/* Chart metric picker: equal-size buttons, four per row, all visible. */
-/* Button rows: a row always fills the width, and a button's text stays on one line
-   (it truncates rather than wrapping). Used by the chart tabs and the Trends controls. */
 .metric-tabs, .tab-row { display: flex; flex-wrap: wrap; gap: 4px; }
 .metric-tabs { margin-bottom: 26px; }
 .tab-row { margin-bottom: 8px; }
@@ -93,11 +82,9 @@ body { font-variant-numeric: tabular-nums; }
 }
 [data-accent=off] .metric-tabs button[data-active], [data-accent=off] .tab-row button[data-active],
 [data-accent=off] .tab-button[data-active] { color: #000; background: #fff; border-color: #fff; }
-/* The same button on its own, e.g. "Add dates" above the log. */
+
 .tab-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 
-/* Full-screen sheet (attribute picker) and the dialog used for date ranges. Both are fixed to
-   the viewport, so they keep clear of the notch and the gesture bar themselves. */
 .sheet { position: fixed; inset: 0; z-index: 30; background: var(--mantine-color-body); display: flex; flex-direction: column;
   padding-top: env(safe-area-inset-top, 0px); box-sizing: border-box; }
 .sheet-head { border-bottom: 2px solid var(--rule); }
@@ -105,31 +92,25 @@ body { font-variant-numeric: tabular-nums; }
 .sheet-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end;
   justify-content: center; padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }
 
-/* Click-to-toggle chart legend */
 .toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }
 .toggle-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 8px 0 4px; font: inherit; font-size: 12px; color: var(--mantine-color-dark-2); background: transparent; border: 0; cursor: pointer; }
 .toggle-legend button i { width: 10px; height: 3px; }
 .toggle-legend button[aria-pressed=false] { opacity: .4; text-decoration: line-through; }
 
-/* Selected day: its hours in the strip and its row in the list share an accent tint. */
 .hourly-strip > [data-on] { background: color-mix(in srgb, var(--mantine-color-signal-5) 28%, transparent); }
 .hourly-strip > .day-divider[data-on] { color: #fff; }
 .row[data-on] { background: var(--selected-bg); box-shadow: inset 3px 0 0 var(--mantine-color-signal-5); }
 [data-accent=off] .hourly-strip > [data-on] { background: rgba(255, 255, 255, .1); }
 
-/* Tooltips float above the chart, outside its box. */
 .recharts-wrapper, .recharts-responsive-container { overflow: visible !important; }
 
-/* Pull-right indicator at the start of the hourly strip */
 .hourly-strip > .pull-past { width: 0; padding: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--mantine-color-dark-2); overflow: hidden; writing-mode: horizontal-tb; white-space: nowrap; will-change: width; transition: width .2s ease; }
 .hourly-strip > .pull-past[data-armed] { color: var(--mantine-color-signal-4); }
 
-/* Cities: the list scrolls, the Follow button stays pinned to the bottom. */
 .cities-scroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .city-row { border-bottom: 1px solid rgba(248, 244, 244, .18); background: var(--mantine-color-body); position: relative; }
 .city-row[data-dragging] { z-index: 2; background: #1c1b1b; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
 .drag-handle { flex: none; width: 52px; display: flex; align-items: center; justify-content: center; color: var(--mantine-color-dark-3); cursor: grab; touch-action: none; user-select: none; }
 .city-row[data-dragging] .drag-handle { cursor: grabbing; color: #fff; }
 
-/* One-time gesture hint */
 .gesture-hint { position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 4; padding: 10px 12px; font: inherit; font-size: 12px; line-height: 1.35; text-align: left; color: #fff; background: #1c1b1b; border: 1px solid var(--rule); cursor: pointer; }

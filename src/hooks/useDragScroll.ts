@@ -1,11 +1,8 @@
 import { useRef } from 'react';
 
-// Horizontal scroller that also works with a mouse: drag to scroll, vertical wheel scrolls sideways.
-// Touch uses native scrolling. Mark the element data-noswipe so the city pager ignores it.
 export function useDragScroll<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
-
   return {
     ref,
     'data-noswipe': true,

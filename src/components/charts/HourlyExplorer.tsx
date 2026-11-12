@@ -1,19 +1,18 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 import { Box } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../../store';
+import { useUnits } from '../../storesV2';
+import { useUiStore } from '../../store/uiStore';
 import { useSeriesToggle } from './SeriesToggle';
-import type { HourlyVar } from '../../api/variables';
+import type { HourlyVar } from '../../storesV2/api/variables';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
 import { t, t as tt, type MessageKey } from '../../i18n';
 
 type Series = Partial<Record<HourlyVar, (number | null)[]>>;
 
-// Visual defaults (grid, ticks, legend, tooltip) come from theme.ts.
 const BASE = { h: 180, dataKey: 'label' };
 const LINE = BASE;
 
-// Series names are the data keys; labels are translated when drawn.
 const TEMP = [{ name: 'Air', label: 'chart.airTemp', color: 'signal.4' }, { name: 'Feels like', label: 'chart.feelsLike', color: 'dark.2' }, { name: 'Dew point', label: 'chart.dewPoint', color: 'dark.4' }] as const;
 const RAIN = [{ name: 'mm', label: 'chart.mm', type: 'bar' as const, color: 'signal.7' }, { name: 'Chance %', label: 'chart.chance', type: 'line' as const, color: 'signal.4', yAxisId: 'right' }] as const;
 const WIND = [{ name: 'Wind', label: 'chart.wind', color: 'signal.4' }, { name: 'Gusts', label: 'chart.gusts', color: 'signal.7' }] as const;
@@ -31,13 +30,11 @@ const METRICS: { value: string; label: MessageKey; needs: HourlyVar | 'aqi' }[] 
   { value: 'air', label: 'chart.air', needs: 'aqi' },
 ];
 
-// One chart, switchable metric. Used on the city page (next 48 h) and the day view (24 h).
 export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   time: string[]; v: Series; aqi?: Record<string, number | null>; from?: number; to?: number;
 }) {
-  const s = useWeatherStore(useShallow((st) => ({
-    metric: st.chartMetric, setMetric: st.setChartMetric, tempUnit: st.settings.tempUnit, windUnit: st.settings.windUnit,
-  })));
+  const units = useUnits();
+  const s = useUiStore(useShallow((st) => ({ metric: st.chartMetric, setMetric: st.setChartMetric })));
   const end = Math.min(to ?? time.length, time.length);
   const has = (k: HourlyVar | 'aqi') => (k === 'aqi'
     ? Object.values(aqi ?? {}).some((x) => x != null)
@@ -45,20 +42,19 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   const available = METRICS.filter((m) => has(m.needs));
   const active = available.find((m) => m.value === s.metric)?.value ?? available[0]?.value;
   const at = (k: HourlyVar, i: number) => v[k]?.[i] ?? null;
-
   const data = [];
   for (let i = from; i < end; i++) {
     const t = time[i];
     data.push({
       when: tt('chart.hourLabel', { day: weekday(t.slice(0, 10)), hour: hourOf(t) }),
       label: hourOf(t) === '00' && i !== from ? weekday(t.slice(0, 10)) : hourOf(t),
-      Air: convTemp(at('temperature_2m', i), s.tempUnit),
-      'Feels like': convTemp(at('apparent_temperature', i), s.tempUnit),
-      'Dew point': convTemp(at('dew_point_2m', i), s.tempUnit),
+      Air: convTemp(at('temperature_2m', i), units.temp),
+      'Feels like': convTemp(at('apparent_temperature', i), units.temp),
+      'Dew point': convTemp(at('dew_point_2m', i), units.temp),
       mm: at('precipitation', i),
       'Chance %': at('precipitation_probability', i),
-      Wind: convWind(at('wind_speed_10m', i), s.windUnit),
-      Gusts: convWind(at('wind_gusts_10m', i), s.windUnit),
+      Wind: convWind(at('wind_speed_10m', i), units.wind),
+      Gusts: convWind(at('wind_gusts_10m', i), units.wind),
       UV: at('uv_index', i),
       Total: at('cloud_cover', i),
       Low: at('cloud_cover_low', i),
@@ -71,7 +67,6 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   const tg = useSeriesToggle(String(active));
   const xAxisProps = { interval: Math.max(0, Math.ceil(data.length / 8) - 1) };
   const hasChance = has('precipitation_probability');
-
   return (
     <Box>
       <div className="metric-tabs" role="tablist">
@@ -93,7 +88,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
         <BarChart {...BASE} xAxisProps={xAxisProps} series={[{ name: 'mm', label: t('chart.mm'), color: 'signal.5' }]} data={data} />
       ))}
       {active === 'wind' && (
-        <LineChart {...LINE} xAxisProps={xAxisProps} unit={` ${windUnitLabel(s.windUnit)}`} yAxisProps={{ width: 44 }}
+        <LineChart {...LINE} xAxisProps={xAxisProps} unit={` ${windUnitLabel(units.wind)}`} yAxisProps={{ width: 44 }}
           withLegend={false} series={tg.visible(tr(WIND))} data={data} />
       )}
       {active === 'wind' && tg.legend(tr(WIND))}

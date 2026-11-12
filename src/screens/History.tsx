@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
+import {
+  addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
+  useLookup, useNormals, useThisDay, useUnits,
+} from '../storesV2';
+import { useUiStore } from '../store/uiStore';
+import { useAlmanacStore } from '../storesV2';
+import { useLogStore } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
-import { addDays, daysBetween, downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate, todayISO } from '../lib/format';
+import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
+import { addDays, daysBetween, todayISO } from '../storesV2';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
@@ -12,59 +19,50 @@ import { Trends } from '../components/history/Trends';
 import { t } from '../i18n';
 
 export function History({ cityId }: { cityId: string }) {
-  const s = useWeatherStore(useShallow((st) => {
-    const entry = st.forecasts[cityId];
-    const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
-    return {
-      city: st.cities.find((c) => c.id === cityId),
-      log: st.history[cityId],
-      normals: st.normals[cityId],
-      today,
-      years: st.thisDay[`${cityId}:${today.slice(5)}`],
-      draft: st.lookupDraft,
-      lookup: st.lookups[`${cityId}:${st.lookupDraft}`],
-      tempUnit: st.settings.tempUnit,
-      windUnit: st.settings.windUnit,
-      loadThisDay: st.loadThisDay,
-      setLookupDraft: st.setLookupDraft,
-      lookupDate: st.lookupDate,
-      deleteLogDay: st.deleteLogDay,
-      importRange: st.importRange,
-      navigate: st.navigate,
-      goHome: st.goHome,
-      range: st.historyRange,
-      setRange: st.setHistoryRange,
-      cityIndex: st.cities.findIndex((c) => c.id === cityId),
-      back: st.back,
-    };
-  }));
-  const { loadThisDay, today, lookupDate, draft } = s;
-  useEffect(() => { void loadThisDay(cityId, today); }, [cityId, today, loadThisDay]);
-  // A complete, in-range date is looked up as soon as it is entered (debounced while the year is still being typed).
-  const maxLookupDate = addDays(today, -5); // archive lags ~5 days
+  const city = useCity(cityId);
+  const entry = useForecast(cityId);
+  const units = useUnits();
+  const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
+  const draft = useUiStore((st) => st.lookupDraft);
+  const lookup = useLookup(cityId, draft);
+  const s = {
+    city,
+    log: useCityLog(cityId),
+    normals: useNormals(cityId),
+    today,
+    years: useThisDay(cityId, today),
+    draft,
+    lookup,
+    tempUnit: units.temp,
+    windUnit: units.wind,
+    deleteLogDay: useLogStore((st) => st.removeDay),
+    cityIndex: useCityIndex(cityId),
+    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
+  };
+  const ensureThisDay = useAlmanacStore((st) => st.ensureThisDay);
+  useEffect(() => { if (city) void ensureThisDay(city, today); }, [city, today, ensureThisDay]);
+  const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
-  const lookedUp = !!s.lookup;
+  const lookedUp = s.lookup.query.status !== 'idle';
   const [swiped, setSwiped] = useState<string | null>(null);
   useEffect(() => {
     if (!validDraft || lookedUp) return;
     const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
     return () => window.clearTimeout(t);
   }, [validDraft, lookedUp, cityId, draft, lookupDate]);
-
   if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
-
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
+  const loadingLookup = s.lookup.query.status === 'loading';
+  const lookupError = s.lookup.query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : s.lookup.query.error;
+  const lookupRecord = s.lookup.query.status === 'success' ? s.lookup.record : undefined;
   const rows = Object.values(s.log ?? {}).sort((a, b) => b.date.localeCompare(a.date));
-  const maxLookup = addDays(today, -5); // archive lags ~5 days
-
+  const maxLookup = addDays(today, -5);
   const open = (date: string) => (date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }));
-
   const exportCsv = () => {
     const head = 'date,max_c,min_c,feels_max_c,feels_min_c,precip_mm,snow_cm,wind_max_kmh,gust_max_kmh,sunshine_s,uv_max,weather_code,source';
     const body = rows.map((r) => [r.date, r.hi, r.lo, r.feelsHi, r.feelsLo, r.mm, r.snow, r.wind, r.gust, r.sunshine, r.uv, r.code, r.source].map((x) => x ?? '').join(',')).join('\n');
     downloadFile(`${s.city!.name.toLowerCase().replace(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
-
   return (
     <div className="screen">
       <ScreenHeader right={
@@ -99,16 +97,15 @@ export function History({ cityId }: { cityId: string }) {
             min="1940-01-01" max={maxLookup} value={s.draft}
             onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
           {validDraft && (
-            <UnstyledButton mt={12} w="100%" disabled={!s.lookup || !!s.lookup.loading || !!s.lookup.error} onClick={() => {
-                // A looked-up date is saved to the log before it opens.
-                void s.importRange(cityId, s.draft, s.draft).catch(() => undefined);
+            <UnstyledButton mt={12} w="100%" disabled={loadingLookup || lookupError !== null || lookupRecord === undefined} onClick={() => {
+                void addDateRange(cityId, s.draft, s.draft).catch(() => undefined);
                 open(s.draft);
               }}
               style={{ border: '2px solid var(--rule)', display: 'block' }}>
-              {!s.lookup || s.lookup.loading ? (
+              {loadingLookup || lookupRecord === undefined ? (
                 <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
-              ) : s.lookup.error ? (
-                <Box p={14}><Text fz={13} c="signal.3">{s.lookup.error}</Text></Box>
+              ) : lookupError !== null ? (
+                <Box p={14}><Text fz={13} c="signal.3">{lookupError}</Text></Box>
               ) : (
                 <>
                   <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
@@ -117,12 +114,12 @@ export function History({ cityId }: { cityId: string }) {
                   </Group>
                   <Box p={14}>
                     <Group justify="space-between" align="flex-end" wrap="nowrap">
-                      <Text fz={16} fw={800}>{conditionLabel(s.lookup.code)}</Text>
-                      <Text fz={40} fw={800} lh={1}>{T(s.lookup.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(s.lookup.lo)}°</Text></Text>
+                      <Text fz={16} fw={800}>{conditionLabel(lookupRecord.code)}</Text>
+                      <Text fz={40} fw={800} lh={1}>{T(lookupRecord.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(lookupRecord.lo)}°</Text></Text>
                     </Group>
                     <div className="stat-grid" style={{ marginTop: 12 }}>
-                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(s.lookup.mm ?? 0).toFixed(1)} mm</Text></Box>
-                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(s.lookup.wind, s.windUnit)}</Text></Box>
+                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(lookupRecord.mm ?? 0).toFixed(1)} mm</Text></Box>
+                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(lookupRecord.wind, s.windUnit)}</Text></Box>
                     </div>
                   </Box>
                 </>
@@ -134,13 +131,13 @@ export function History({ cityId }: { cityId: string }) {
 
       {rows.length > 1 && (
         <Trends cityId={cityId} log={s.log} normals={s.normals} today={today} followedAt={s.city.followedAt}
-          tempUnit={s.tempUnit} windUnit={s.windUnit} importRange={s.importRange} />
+          tempUnit={s.tempUnit} windUnit={s.windUnit} />
       )}
 
       <Box px={20} pb={24}>
         <Group justify="space-between" className="kicker" wrap="nowrap">
           <span>{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</span>
-          <ImportRange cityId={cityId} maxDate={maxLookup} importRange={s.importRange} />
+          <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
         {rows.map((r) => {
@@ -165,12 +162,7 @@ export function History({ cityId }: { cityId: string }) {
   );
 }
 
-// Download a range of past days from the archive into the log.
-function ImportRange({ cityId, maxDate, importRange }: {
-  cityId: string;
-  maxDate: string;
-  importRange: (id: string, start: string, end: string) => Promise<{ added: number; updated: number; kept: number }>;
-}) {
+function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
   const [show, setShow] = useState(false);
   const [from, setFrom] = useState(() => addDays(maxDate, -29));
   const [to, setTo] = useState(maxDate);
@@ -180,12 +172,11 @@ function ImportRange({ cityId, maxDate, importRange }: {
   const tooLong = days > 3660;
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(from) && /^\d{4}-\d{2}-\d{2}$/.test(to)
     && from >= '1940-01-01' && to <= maxDate && days > 0 && !tooLong;
-
   const run = async () => {
     setBusy(true);
     setMsg(null);
     try {
-      const c = await importRange(cityId, from, to);
+      const c = await addDateRange(cityId, from, to);
       setMsg(t(c.kept ? 'history.addedKept' : 'history.added', { count: c.added, updated: c.updated, kept: c.kept }));
     } catch (e) {
       setMsg(t('history.downloadFailed', { error: (e as Error).message }));
@@ -193,7 +184,6 @@ function ImportRange({ cityId, maxDate, importRange }: {
       setBusy(false);
     }
   };
-
   if (!show) {
     return (
       <button type="button" className="tab-button" onClick={() => setShow(true)}>

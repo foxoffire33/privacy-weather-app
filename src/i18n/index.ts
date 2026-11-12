@@ -2,11 +2,6 @@ import { create } from 'zustand';
 
 import en from './locales/en.json';
 
-// Translations: one static JSON file per language in ./locales, English (en.json) is the
-// source and the fallback for anything a translation lacks. The active language lives in
-// a small store; the app re-renders from the root when it changes, so t() is a plain
-// function usable anywhere (components, formatters, insights).
-
 export type Messages = typeof en;
 type Plural = { one: string; other: string };
 type Leaves<T, P extends string = ''> = {
@@ -14,7 +9,6 @@ type Leaves<T, P extends string = ''> = {
 }[keyof T & string];
 export type MessageKey = Leaves<Messages>;
 
-// English plus every official language of the European Union, each named in itself.
 export const LANGUAGES = [
   { code: 'bg', name: 'Български', locale: 'bg-BG' },
   { code: 'cs', name: 'Čeština', locale: 'cs-CZ' },
@@ -43,11 +37,9 @@ export const LANGUAGES = [
 ] as const;
 
 export type Language = (typeof LANGUAGES)[number]['code'];
-export type LanguagePref = Language | 'system';
 
 const loaders = import.meta.glob<{ default: Messages }>(['./locales/*.json', '!./locales/en.json']);
 
-/** The first of the device's preferred languages that the app supports, else English. */
 export function systemLanguage(): Language {
   const prefs = typeof navigator === 'undefined' ? [] : (navigator.languages?.length ? navigator.languages : [navigator.language]);
   for (const tag of prefs) {
@@ -62,7 +54,7 @@ interface I18nState {
   locale: string;
   messages: Messages;
   ready: boolean;
-  setLanguage: (pref: LanguagePref | undefined) => Promise<void>;
+  setLanguage: (pref: string | undefined) => Promise<void>;
 }
 
 export const useI18n = create<I18nState>((set, get) => ({
@@ -71,14 +63,15 @@ export const useI18n = create<I18nState>((set, get) => ({
   messages: en,
   ready: false,
   setLanguage: async (pref) => {
-    const lang = !pref || pref === 'system' ? systemLanguage() : pref;
+    const known = LANGUAGES.some((l) => l.code === pref);
+    const lang: Language = known ? pref as Language : systemLanguage();
     if (get().ready && get().lang === lang) return;
     let messages: Messages = en;
     if (lang !== 'en') {
       try {
         messages = (await loaders[`./locales/${lang}.json`]()).default;
       } catch {
-        messages = en; // missing file: stay readable in English
+        messages = en;
       }
     }
     const locale = LANGUAGES.find((l) => l.code === lang)?.locale ?? 'en-GB';
@@ -108,7 +101,6 @@ function pluralCategory(locale: string, n: number) {
 
 type Vars = Record<string, string | number | null | undefined>;
 
-/** Translates a key. {name} placeholders are filled from vars; a `count` var picks the plural form. */
 export function t(key: MessageKey, vars?: Vars): string {
   const { messages, locale } = useI18n.getState();
   let value = lookup(messages, key);
@@ -123,12 +115,10 @@ export function t(key: MessageKey, vars?: Vars): string {
   return vars ? value.replace(/\{(\w+)\}/g, (m, k: string) => (vars[k] == null ? m : String(vars[k]))) : value;
 }
 
-/** A translated list (e.g. level names), falling back to English per item. */
 export function tl(key: MessageKey): string[] {
   const value = lookup(useI18n.getState().messages, key);
   const fallback = lookup(en, key) as string[];
   return Array.isArray(value) ? fallback.map((f, i) => (value[i] as string) || f) : fallback;
 }
 
-/** The active locale for dates and numbers, e.g. 'nl-NL'. */
 export const currentLocale = () => useI18n.getState().locale;
