@@ -63,9 +63,17 @@ npm run cap:sync   # build the web app and copy it into android/
 npm run cap:open   # open in Android Studio, then Run
 ```
 
-To get an installable APK without Android Studio, push this project to GitHub. The **Android APK** workflow (`.github/workflows/android-apk.yml`) builds `app-debug.apk` on every push to `main`; download it from the run's Artifacts section and install it on the phone (allow installing from unknown sources).
+To get an installable APK without Android Studio, push this project to GitHub. The **Android APK** workflow (`.github/workflows/android-apk.yml`) builds `app-debug.apk` for every published release and attaches it to the release and install it on the phone (allow installing from unknown sources).
 
 Privacy: the app never requests location; don't add the geolocation plugin. For snapshots while the app is closed, use a background runner. IndexedDB persists inside the Android WebView.
+
+## F-Droid
+
+Releases are picked up by F-Droid from `vX.Y.Z` tags. Release with `npm version patch|minor|major` and `git push --follow-tags`; see [`fdroid/README.md`](fdroid/README.md).
+
+## License
+
+GPL-3.0-or-later, see [LICENSE](LICENSE). If you distribute a modified version, you must publish its source under the same license.
 
 Weather data by Open-Meteo.com (CC BY 4.0).
 # privacy-weather-app
