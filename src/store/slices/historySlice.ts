@@ -67,6 +67,19 @@ export const createHistorySlice: SliceCreator<HistorySlice> = (set, get) => ({
     return { history: { ...s.history, [id]: { ...(s.history[id] ?? {}), [date]: rec } } };
   }),
 
+  // A fetched past day (days[]) joins the log if it is not there yet.
+  logDay: (id, date) => set((s) => {
+    const d = s.days[`${id}:${date}`];
+    if (!d || s.history[id]?.[date]) return {};
+    const v = d.daily.v;
+    const rec: DayRecord = {
+      date, hi: v.temperature_2m_max ?? null, lo: v.temperature_2m_min ?? null, feelsHi: v.apparent_temperature_max ?? null, feelsLo: v.apparent_temperature_min ?? null,
+      mm: v.precipitation_sum ?? null, snow: v.snowfall_sum ?? null, wind: v.wind_speed_10m_max ?? null, gust: v.wind_gusts_10m_max ?? null,
+      sunshine: v.sunshine_duration ?? null, uv: v.uv_index_max ?? null, code: v.weather_code ?? null, source: 'filled', snapshots: 0,
+    };
+    return { history: { ...s.history, [id]: { ...(s.history[id] ?? {}), [date]: rec } } };
+  }),
+
   loadNormals: async (id) => {
     const city = get().cities.find((c) => c.id === id);
     const key = `normals:${id}`;

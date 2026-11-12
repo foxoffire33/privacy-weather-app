@@ -1,4 +1,4 @@
-import { Fragment, memo, useEffect, useState, type ReactNode } from 'react';
+import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
@@ -14,7 +14,7 @@ import { Icon } from '../components/Icon';
 import { Bar, Section, Stat, levelColor } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { CompositeChart } from '@mantine/charts';
-import { convTemp } from '../lib/format';
+import { addDays, convTemp } from '../lib/format';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
@@ -81,20 +81,42 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     refreshCity: st.refreshCity,
     navigate: st.navigate,
     toggleDay: st.toggleDay,
+    days: st.days,
     logYesterday: st.logYesterday,
+    logDay: st.logDay,
+    loadDay: st.loadDay,
   })));
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const strip = useDragScroll<HTMLDivElement>();
-  // Pulling right at the start of the strip reveals the hours already passed (yesterday included) and logs yesterday.
-  const [showPast, setShowPast] = useState(false);
-  const pastPull = usePullPast(strip.ref, () => { setShowPast(true); s.logYesterday(city.id); }, !showPast);
-  useEffect(() => {
+  // Pulling right at the start of the strip reveals one earlier day per pull and adds it to the log.
+  // Yesterday is already in the forecast response; older days are fetched (archive) first.
+  const [back, setBack] = useState(0);
+  const [loadingPast, setLoadingPast] = useState(false);
+  const widthBefore = useRef(0);
+  const loadPast = async () => {
     const el = strip.ref.current;
-    const now = showPast ? el?.querySelector<HTMLElement>('[data-now]') : null;
-    if (!el || !now) return;
-    el.scrollLeft = now.offsetLeft; // keep what was on screen, then glide back to show the new hours
-    el.scrollTo({ left: Math.max(0, now.offsetLeft - 3 * 52), behavior: 'smooth' });
-  }, [showPast]); // eslint-disable-line react-hooks/exhaustive-deps
+    const today = s.entry?.data.daily.time[s.entry.pastDays];
+    if (!el || !today) return;
+    const n = back + 1;
+    if (n === 1) s.logYesterday(city.id);
+    else {
+      setLoadingPast(true);
+      await s.loadDay(city.id, addDays(today, -n));
+      setLoadingPast(false);
+      if (!useWeatherStore.getState().days[`${city.id}:${addDays(today, -n)}`]) return;
+      s.logDay(city.id, addDays(today, -n));
+    }
+    widthBefore.current = el.scrollWidth;
+    setBack(n);
+  };
+  const pastPull = usePullPast(strip.ref, () => void loadPast(), !loadingPast);
+  useLayoutEffect(() => {
+    const el = strip.ref.current;
+    if (!el || !back) return;
+    const added = el.scrollWidth - widthBefore.current;
+    el.scrollLeft = added; // keep what was on screen, then glide back to show the new hours
+    el.scrollTo({ left: Math.max(0, added - 3 * 52), behavior: 'smooth' });
+  }, [back]); // eslint-disable-line react-hooks/exhaustive-deps
   // Selecting a day scrolls the hourly strip to its first hour.
   useEffect(() => {
     const el = strip.ref.current;
@@ -147,21 +169,32 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const precipProb = dv.precipitation_probability_max[t] ?? 0;
 
   // Hourly strip: every remaining hour of the 7-day forecast
-  const from = showPast ? 0 : h0;
-  const hours = data.hourly.time.slice(from).map((time, k) => {
+  type Cell = { time: string; date: string; isNow: boolean; past: boolean; temp: number | null | undefined; p: number | null; wind: number | null | undefined };
+  const cells: Cell[] = [];
+  // Days before yesterday (fetched on pull), oldest first.
+  for (let n = back; n >= 2; n--) {
+    const day = s.days[`${city.id}:${addDays(today, -n)}`];
+    if (!day) continue;
+    day.hourly.time.forEach((time, k) => cells.push({
+      time, date: time.slice(0, 10), isNow: false, past: true,
+      temp: day.hourly.v.temperature_2m?.[k], p: day.hourly.v.precipitation_probability?.[k] ?? null, wind: day.hourly.v.wind_speed_10m?.[k],
+    }));
+  }
+  const from = back >= 1 ? 0 : h0; // yesterday and today's passed hours are part of the forecast response
+  data.hourly.time.slice(from).forEach((time, k) => {
     const i = from + k;
-    const dayStart = hourOf(time) === '00' && (k > 0 || showPast);
+    cells.push({
+      time, date: time.slice(0, 10), isNow: i === h0, past: i < h0,
+      temp: i === h0 ? c.temperature_2m : hv.temperature_2m[i], p: hv.precipitation_probability[i] ?? 0, wind: hv.wind_speed_10m[i],
+    });
+  });
+  const hours = cells.map((h, k) => {
+    const dayStart = hourOf(h.time) === '00' && k > 0;
     return {
-      time,
-      date: time.slice(0, 10),
-      isNow: i === h0,
-      past: i < h0,
-      label: i === h0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
+      ...h,
+      label: h.isNow ? 'Now' : hourOf(h.time) === '00' ? weekday(h.date) : hourOf(h.time),
       dayBreak: dayStart,
-      dayName: dayStart ? weekday(time.slice(0, 10)).toUpperCase() : '',
-      temp: i === h0 ? c.temperature_2m : hv.temperature_2m[i],
-      p: hv.precipitation_probability[i] ?? 0,
-      wind: hv.wind_speed_10m[i],
+      dayName: dayStart ? weekday(h.date).toUpperCase() : '',
     };
   });
 
@@ -223,7 +256,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
         <div className="hourly-strip" {...strip} {...pastPull.touch}>
           {pastPull.pull > 0 && (
             <div className="pull-past" style={{ width: pastPull.pull, color: pastPull.armed ? 'var(--mantine-color-signal-4)' : undefined }}>
-              {pastPull.armed ? 'Release' : 'Yesterday'}
+              {loadingPast ? '…' : pastPull.armed ? 'Release' : back ? 'Earlier' : 'Yesterday'}
             </div>
           )}
           {hours.map((h) => (
@@ -238,7 +271,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
             <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .55 } : undefined}>
               <Text fz={11} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
-              <Text fz={10} fw={600} c="signal.3">{h.p}%</Text>
+              <Text fz={10} fw={600} c="signal.3">{h.p == null ? '–' : `${h.p}%`}</Text>
               <Text fz={10} c="dimmed">{h.wind == null ? '–' : Math.round(h.wind)}</Text>
             </Box>
             </Fragment>
