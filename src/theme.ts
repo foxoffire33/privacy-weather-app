@@ -25,7 +25,7 @@ const dark: MantineColorsTuple = [
 
 const font = 'Archivo, system-ui, sans-serif';
 
-// Charts: plain lines and solid bars only, no area fills or gradients. Quiet by default. Dotted horizontal grid only, small grey ticks, flat legend swatches,
+// Charts: plain solid lines and solid bars only: no dashes, area fills or gradients. Quiet by default. Solid horizontal grid only, small grey ticks, flat legend swatches,
 // tooltips as square black panels. Series colours are set per chart from white/grey, red only for emphasis.
 const chartStyles = {
   legend: { paddingTop: 6 },
@@ -42,7 +42,7 @@ const chartStyles = {
 };
 const chartBase = {
   gridAxis: 'y' as const,
-  strokeDasharray: '2 5',
+  strokeDasharray: '0', // solid grid lines
   gridColor: 'dark.5',
   textColor: 'dark.2',
   tickLine: 'none' as const,

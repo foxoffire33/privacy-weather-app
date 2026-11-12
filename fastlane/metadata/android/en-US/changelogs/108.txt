@@ -1,0 +1,1 @@
+Chart lines are always solid: no dashed or dotted lines.

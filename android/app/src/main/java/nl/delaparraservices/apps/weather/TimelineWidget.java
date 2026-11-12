@@ -1,7 +1,6 @@
 package nl.delaparraservices.apps.weather;
 
 import android.graphics.Canvas;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 
@@ -10,7 +9,7 @@ import org.json.JSONObject;
 
 /**
  * Past, present and future on one axis: the last 7 logged days, today and the next
- * 6 forecast days as low–high ranges, with the 1991–2020 average as a dotted line.
+ * 6 forecast days as low–high ranges, with the 1991–2020 average as a thin line.
  * Today is marked with the logo's line and circle.
  */
 public class TimelineWidget extends BaseWidget {
@@ -28,9 +27,9 @@ public class TimelineWidget extends BaseWidget {
         p.kicker(c, "Past 7 days", pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, half - 4);
         p.kicker(c, "Forecast", p.w - pad, pad + 9, WidgetPainter.DIM, Paint.Align.RIGHT, half - 4);
         if (p.w >= 260) {
-            // Legend for the dotted line.
+            // Legend for the average line.
             float lx = p.w / 2 - 22;
-            for (int k = 0; k < 4; k++) p.rect(c, lx + k * 5, pad + 5, lx + k * 5 + 2, pad + 6.5f, WidgetPainter.FAINT);
+            p.rect(c, lx, pad + 5, lx + 17, pad + 6.5f, WidgetPainter.FAINT);
             p.text(c, "average", lx + 22, pad + 9, 10, p.regular, WidgetPainter.FAINT, Paint.Align.LEFT, 60);
         }
 
@@ -67,7 +66,7 @@ public class TimelineWidget extends BaseWidget {
             p.rect(c, x - 0.5f, top - 6, x + 0.5f, bottom, WidgetPainter.withAlpha(WidgetPainter.WHITE, 0.35f));
         }
 
-        // Average: dotted line through each day's normal.
+        // Average: thin solid line through each day's normal.
         Path avg = new Path();
         boolean open = false;
         for (int i = 0; i < n; i++) {
@@ -82,7 +81,6 @@ public class TimelineWidget extends BaseWidget {
         dots.setStyle(Paint.Style.STROKE);
         dots.setStrokeWidth(1.5f);
         dots.setColor(WidgetPainter.FAINT);
-        dots.setPathEffect(new DashPathEffect(new float[] { 2, 3 }, 0));
         c.drawPath(avg, dots);
 
         // Ranges: logged days in grey, today solid accent, forecast lighter accent. Gaps stay visible.

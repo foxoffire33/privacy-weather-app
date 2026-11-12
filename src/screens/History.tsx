@@ -154,7 +154,7 @@ export function History({ cityId }: { cityId: string }) {
             </Group>
             <Text fz={12} c="dimmed" pt={12} pb={4}>Daily high and low against the 1991–2020 normal</Text>
             <LineChart {...base} h={180} withDots={chart.length < 15} unit="°"
-              data={chart} series={[{ name: 'High', color: 'signal.4' }, { name: 'Low', color: 'signal.2' }, { name: 'Normal', color: 'dark.2', strokeDasharray: '4 3' }]} />
+              data={chart} series={[{ name: 'High', color: 'signal.4' }, { name: 'Low', color: 'signal.2' }, { name: 'Normal', color: 'dark.2' }]} />
             <Text fz={12} c="dimmed" pt={16} pb={4}>Warmer or colder than normal</Text>
             <BarChart {...base} h={120} unit="°" withLegend={false} data={chart} series={[{ name: 'vs avg', color: 'signal.5' }]}
               getBarColor={(v) => (v >= 0 ? 'signal.4' : 'dark.3')} referenceLines={[{ y: 0, color: 'dark.2' }]} />

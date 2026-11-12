@@ -12,9 +12,9 @@ type Series = Partial<Record<HourlyVar, (number | null)[]>>;
 const BASE = { h: 180, dataKey: 'label' };
 const LINE = BASE;
 
-const TEMP = [{ name: 'Air', color: 'signal.4' }, { name: 'Feels like', color: 'dark.2', strokeDasharray: '4 3' }, { name: 'Dew point', color: 'dark.4' }];
+const TEMP = [{ name: 'Air', color: 'signal.4' }, { name: 'Feels like', color: 'dark.2' }, { name: 'Dew point', color: 'dark.4' }];
 const RAIN = [{ name: 'mm', type: 'bar' as const, color: 'signal.7' }, { name: 'Chance %', type: 'line' as const, color: 'signal.4', yAxisId: 'right' }];
-const WIND = [{ name: 'Wind', color: 'signal.4' }, { name: 'Gusts', color: 'signal.7', strokeDasharray: '4 3' }];
+const WIND = [{ name: 'Wind', color: 'signal.4' }, { name: 'Gusts', color: 'signal.7' }];
 const CLOUDS = [{ name: 'Total', color: 'signal.4' }, { name: 'Low', color: 'signal.7' }, { name: 'High', color: 'dark.4' }];
 
 const METRICS: { value: string; label: string; needs: HourlyVar | 'aqi' }[] = [
