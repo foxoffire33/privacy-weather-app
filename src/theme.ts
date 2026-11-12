@@ -4,6 +4,7 @@ import {
 } from '@mantine/core';
 import { AreaChart, BarChart, CompositeChart, LineChart } from '@mantine/charts';
 
+import { CompactTooltip } from './components/charts/CompactTooltip';
 import type { Accent } from './types';
 
 // Global theme — calm, high contrast: Archivo, white on black, zero radius.
@@ -48,7 +49,7 @@ const chartBase = {
   withLegend: true,
   legendProps: { verticalAlign: 'bottom' as const, height: 28 },
   tooltipAnimationDuration: 100,
-  valueFormatter: (v: number) => String(Math.round(v * 10) / 10),
+  tooltipProps: { content: CompactTooltip },
   yAxisProps: { width: 34 },
 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
