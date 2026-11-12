@@ -8,7 +8,8 @@ export const defaultSettings: Settings = {
   windUnit: 'kmh',
   snapshotMinutes: 60,
   backfill: true,
-  accent: 'red',
+  accent: 'green',
+  accentColor: '#178a4a',
 };
 
 export const createSettingsSlice: SliceCreator<SettingsSlice> = (set) => ({

@@ -79,7 +79,7 @@ export interface ArchiveYear { year: number; hi?: number; lo?: number; mm?: numb
 
 export interface Lookup { loading?: boolean; error?: string; hi?: number; lo?: number; mm?: number; wind?: number; code?: number }
 
-export type Accent = 'red' | 'blue' | 'green' | 'off';
+export type Accent = 'green' | 'red' | 'blue' | 'off' | 'custom';
 export type TempUnit = 'C' | 'F';
 export type WindUnit = 'kmh' | 'ms' | 'mph';
 
@@ -91,6 +91,7 @@ export interface Settings {
   snapshotMinutes: number;
   backfill: boolean;
   accent: Accent;
+  accentColor: string; // hex, used when accent is 'custom'
 }
 
 export type Route =

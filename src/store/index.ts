@@ -25,11 +25,14 @@ export const useWeatherStore = create<StoreState>()(
     }),
     {
       name: 'open-weather-log',
-      version: 2,
+      version: 3,
       // v2 changed the forecast shape; cached forecasts are dropped and refetched, history is kept.
       migrate: (persisted, version) => {
         const p = (persisted ?? {}) as Partial<Persisted>;
-        return (version < 2 ? { ...p, forecasts: {} } : p) as Persisted;
+        let out = (version < 2 ? { ...p, forecasts: {} } : p) as Persisted;
+        // v3: green became the default accent; the old default (red) moves with it.
+        if (version < 3 && out.settings?.accent === 'red') out = { ...out, settings: { ...out.settings, accent: 'green' } };
+        return out;
       },
       storage: idbStorage<Persisted>(),
       partialize: (s): Persisted => ({

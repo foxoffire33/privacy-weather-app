@@ -1,4 +1,4 @@
-import { Box, Button, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
 import type { Accent, TempUnit, WindUnit } from '../types';
@@ -46,7 +46,7 @@ export function Settings() {
           <Text fz={14} fw={600}>Accent colour</Text>
           <Text fz={12} c="dimmed" mb={10}>Used for the main temperature panel and buttons. Off keeps everything black and white.</Text>
           <Group gap={8}>
-            {(Object.keys(ACCENTS) as Accent[]).map((a) => (
+            {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
               <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                   border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>
@@ -54,7 +54,22 @@ export function Settings() {
                 <Text fz={13} fw={800}>{ACCENTS[a].label}</Text>
               </UnstyledButton>
             ))}
+            <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
+                border: `2px solid ${s.settings.accent === 'custom' ? '#fff' : 'var(--rule-soft)'}` }}>
+              <span style={{ width: 16, height: 16, background: s.settings.accentColor, border: '1px solid var(--rule)' }} />
+              <Text fz={13} fw={800}>Custom</Text>
+            </UnstyledButton>
           </Group>
+          {s.settings.accent === 'custom' && (
+            <Box mt={12}>
+              <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => set({ accent: 'custom', accentColor })}
+                swatchesPerRow={7} swatches={['#e11d48', '#f97316', '#d97706', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea', '#db2777', '#78716c', '#0f766e', '#b91c1c', '#1d4ed8', '#7e22ce']} />
+              <TextInput mt={8} label="Hex colour" value={s.settings.accentColor} maxLength={7}
+                onChange={(e) => set({ accent: 'custom', accentColor: e.currentTarget.value })} />
+              <Text fz={11} c="dimmed" mt={4}>Colours too light for white text are darkened automatically.</Text>
+            </Box>
+          )}
         </Box>
 
         <div className="kicker">Units</div>

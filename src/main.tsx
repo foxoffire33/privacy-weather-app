@@ -11,7 +11,8 @@ import App from './App';
 // The theme follows the accent setting in the store.
 function ThemeRoot({ children }: { children: ReactNode }) {
   const accent = useWeatherStore((s) => s.settings.accent);
-  const theme = useMemo(() => buildTheme(accent), [accent]);
+  const accentColor = useWeatherStore((s) => s.settings.accentColor);
+  const theme = useMemo(() => buildTheme(accent, accentColor), [accent, accentColor]);
   return <MantineProvider theme={theme} forceColorScheme="dark">{children}</MantineProvider>;
 }
 
