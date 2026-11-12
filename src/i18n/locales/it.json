@@ -1,0 +1,215 @@
+{
+  "common": {
+    "back": "Indietro", "close": "Chiudi", "cancel": "Annulla", "tryAgain": "Riprova", "default": "Predefinita",
+    "now": "Ora", "today": "Oggi", "tomorrow": "Domani", "night": "notte", "refresh": "Aggiorna", "updating": "Aggiornamento",
+    "noLongerFollowed": "Questa città non è più seguita.",
+    "dataBy": "Dati meteo di Open-Meteo.com",
+    "days": { "one": "{count} giorno", "many": "{count} giorni", "other": "{count} giorni" },
+    "daysLogged": { "one": "{count} giorno registrato", "many": "{count} giorni registrati", "other": "{count} giorni registrati" },
+    "touchChart": "Tocca il grafico per i dettagli"
+  },
+  "ago": { "never": "mai", "justNow": "proprio ora", "minutes": "{n} min fa", "hours": "{n} h fa", "days": "{n} g fa" },
+  "units": { "hoursMinutes": "{h} h {m} min", "minutes": "{m} min" },
+  "compass": { "N": "N", "NE": "NE", "E": "E", "SE": "SE", "S": "S", "SW": "SO", "W": "O", "NW": "NO" },
+  "weather": {
+    "0": "Sereno", "1": "Per lo più sereno", "2": "Parzialmente nuvoloso", "3": "Coperto",
+    "45": "Nebbia", "48": "Nebbia con brina",
+    "51": "Pioggerella leggera", "53": "Pioggerella", "55": "Pioggerella intensa", "56": "Pioggerella gelata", "57": "Pioggerella gelata",
+    "61": "Pioggia leggera", "63": "Pioggia", "65": "Pioggia forte", "66": "Pioggia gelata", "67": "Pioggia gelata",
+    "71": "Neve leggera", "73": "Neve", "75": "Neve forte", "77": "Neve granulosa",
+    "80": "Rovesci leggeri", "81": "Rovesci", "82": "Rovesci violenti", "85": "Rovesci di neve", "86": "Forti rovesci di neve",
+    "95": "Temporale", "96": "Temporale con grandine", "99": "Temporale con grandine"
+  },
+  "levels": {
+    "aqi": ["Buona", "Discreta", "Moderata", "Scadente", "Molto scadente", "Estremamente scadente"],
+    "usAqi": { "unavailable": "Non disponibile", "good": "Buona", "moderate": "Moderata", "sensitive": "Malsana per i gruppi sensibili", "unhealthy": "Malsana", "veryUnhealthy": "Molto malsana", "hazardous": "Pericolosa" },
+    "pollen": ["Assente", "Basso", "Moderato", "Alto", "Molto alto"],
+    "beaufort": ["Calma", "Bava di vento", "Brezza leggera", "Brezza tesa", "Vento moderato", "Vento teso", "Vento fresco", "Vento forte", "Burrasca", "Burrasca forte", "Tempesta", "Tempesta violenta", "Uragano"],
+    "feels": { "dangerouslyCold": "Pericolosamente freddo", "freezing": "Gelido", "cold": "Freddo", "cool": "Fresco", "comfortable": "Piacevole", "warm": "Mite", "hot": "Caldo", "veryHot": "Molto caldo" },
+    "dew": { "dry": "Aria secca", "comfortable": "Piacevole", "humid": "Umido", "oppressive": "Afoso" },
+    "uv": { "none": "Nessuna protezione necessaria", "midday": "Crema solare verso mezzogiorno", "shade": "Cerca l’ombra 11:00–16:00", "avoid": "Evita il sole di mezzogiorno" },
+    "cape": { "low": "Basso", "moderate": "Moderato", "high": "Alto", "extreme": "Estremo" },
+    "visibility": { "fog": "Nebbia", "mist": "Foschia", "moderate": "Moderata", "clear": "Buona" },
+    "pressure": { "rising": "In aumento", "falling": "In calo", "steady": "Stabile" }
+  },
+  "rain": {
+    "rain": "Pioggia", "snow": "Neve",
+    "continuing": "{word} per almeno le prossime 2 ore",
+    "stopping": "{word} ora, smetterà verso le {time}",
+    "starting": "{word} a partire dalle {time} circa",
+    "likely": "{word} probabile dalle {time} ({p}%)",
+    "none": "Nessuna pioggia prevista nelle prossime 12 ore"
+  },
+  "onboarding": {
+    "title": "Il meteo,\nconservato.",
+    "step1Title": "Nessun account, nessun tracciamento",
+    "step1Text": "Le previsioni arrivano da Open-Meteo. Gratis per uso personale, senza chiave.",
+    "step2Title": "Nessun accesso alla posizione",
+    "step2Text": "Aggiungi le città per nome. L’app non chiede mai il GPS.",
+    "step3Title": "Uno storico completo, su questo dispositivo",
+    "step3Text": "Ogni città che segui viene registrata in locale. Non viene caricato nulla.",
+    "start": "Scegli la tua prima città"
+  },
+  "search": {
+    "title": "Segui\nuna città.", "placeholder": "Nome della città", "label": "Cerca città", "results": "Risultati",
+    "typeMore": "Scrivi almeno due lettere.", "noMatch": "Nessun luogo corrisponde a “{query}”.",
+    "following": "Seguita", "follow": "Segui", "privacy": "Nessun accesso alla posizione. Ricerca tramite l’API di geocodifica di Open-Meteo."
+  },
+  "cities": {
+    "count": ["Nessuna", "Una", "Due", "Tre", "Quattro", "Cinque", "Sei", "Sette", "Otto", "Nove", "Dieci"],
+    "title": { "one": "{word}\ncittà.", "many": "{word}\ncittà.", "other": "{word}\ncittà." },
+    "hint": "Trascina la maniglia per riordinare. La prima città si apre per prima.",
+    "reorder": "Sposta {name}", "unfollow": "Non seguire più {name}",
+    "confirmUnfollow": "Non seguire più {name}? Lo storico registrato viene conservato.",
+    "followCity": "Segui una città"
+  },
+  "home": {
+    "hintSwipe": "Scorri di lato per la città successiva · ",
+    "hint": "trascina la striscia oraria a destra per i giorni precedenti · tocca per chiudere",
+    "cities": "Città", "show": "Mostra {name}", "refreshAll": "Aggiorna tutto", "settings": "Impostazioni"
+  },
+  "city": {
+    "couldNotLoad": "Impossibile caricare le previsioni",
+    "precipChance": "{cond}, {p}%",
+    "heroLine": "Percepita {feels}° · Max {hi}° Min {lo}°",
+    "vsAverage": "{delta} rispetto alla media",
+    "nowcastCaption": "prossime 2 ore · mm ogni 15 min",
+    "yesterday": "Ieri", "earlier": "Prima", "release": "Rilascia",
+    "hourlyLink": "Previsioni orarie · 7 giorni",
+    "next48": "Prossime 48 ore", "next7": "Prossimi 7 giorni", "high": "Max", "low": "Min",
+    "historyButton": "Storico · {logged}",
+    "footer": "Dati meteo di Open-Meteo.com · aggiornato {ago}",
+    "updatingCity": "Aggiornamento di {name}",
+    "feels": {
+      "title": "Temperatura percepita",
+      "colder": "{label}. Si percepiscono {n}° in meno dell’aria a causa di vento e umidità.",
+      "warmer": "{label}. Si percepiscono {n}° in più dell’aria.",
+      "close": "{label}. Vicina alla temperatura dell’aria.",
+      "air": "Aria {t}°", "humidity": "Umidità", "dewPoint": "Punto di rugiada", "todayFeels": "Percepita oggi", "maxMin": "Max / min"
+    },
+    "sun": {
+      "title": "Sole",
+      "summary": "{daylight} di luce, {change} rispetto a ieri.",
+      "sunrise": "Alba", "sunset": "Tramonto", "sunDown": "Il sole è tramontato",
+      "passed": "{p}% della luce del giorno trascorso", "uvNow": "UV ora", "uvMaxToday": "UV max oggi",
+      "clearSkyMax": "Max a cielo sereno {v}", "sunshineToday": "Sole oggi", "sunsetAt": "Tramonto {time}"
+    },
+    "precip": {
+      "title": "Pioggia e neve",
+      "nowDetail": "Pioggia {rain} · rovesci {showers} · neve {snow} cm",
+      "todayDetail": "{h} h di pioggia · {p}% di probabilità",
+      "snowfallToday": "Neve oggi", "snowOnGround": "Neve al suolo {cm} cm",
+      "noSnow": "Nessuna neve al suolo", "chance": "{p}% di probabilità"
+    },
+    "wind": { "title": "Vento", "summary": "{force} da {dir}.", "from": "da {dir} · {deg}°", "gusts": "Raffiche", "maxToday": "Max oggi", "gustsUpTo": "Raffiche fino a {v}" },
+    "air": {
+      "title": "Qualità dell’aria", "now": "Qualità dell’aria ora: {level}.", "unknown": "Sconosciuta",
+      "worst": " Peggiore nelle prossime 24 h: {v} alle {time}.",
+      "unavailable": "Dati sulla qualità dell’aria non disponibili per questo luogo.",
+      "euAqi": "AQI europeo", "usAqi": "AQI USA",
+      "pm2_5": "Particolato fine", "pm10": "Particolato grossolano", "nitrogen_dioxide": "Biossido di azoto", "ozone": "Ozono",
+      "sulphur_dioxide": "Biossido di zolfo", "carbon_monoxide": "Monossido di carbonio",
+      "dust": "Polvere", "dustNote": "Polvere sahariana / desertica", "haze": "Foschia", "hazeNote": "Spessore ottico degli aerosol"
+    },
+    "pollen": {
+      "title": "Pollini", "summary": "Granuli per m³. La previsione copre l’Europa durante la stagione.",
+      "none": "Al momento nessun polline nell’aria.",
+      "alder_pollen": "Ontano", "birch_pollen": "Betulla", "grass_pollen": "Graminacee", "mugwort_pollen": "Artemisia", "olive_pollen": "Olivo", "ragweed_pollen": "Ambrosia"
+    },
+    "sky": { "title": "Cielo", "cloudCover": "Nuvolosità", "visibility": "Visibilità", "lowClouds": "Nubi basse", "below3": "Sotto i 3 km", "midHigh": "Medie / alte", "midHighNote": "3–8 km / sopra gli 8 km" },
+    "atmosphere": {
+      "title": "Atmosfera", "pressure": "Pressione", "trend": "{label} · {delta} in 3 h", "seaLevel": "Livello del mare",
+      "thunder": "Rischio temporali", "freezing": "Zero termico", "freezingNote": "Quota di 0 °C",
+      "evaporation": "Evaporazione", "evaporationNote": "Acqua persa oggi dalle piante (ET₀)"
+    },
+    "sea": { "title": "Mare", "waves": "Onde", "wavesNote": "Da {dir} · ogni {s} s", "swell": "Mare lungo", "temperature": "Temperatura del mare" },
+    "day": {
+      "feelsLike": "Percepita", "precipitation": "Precipitazioni", "precipDetail": "{h} h · pioggia {rain} · rovesci {showers}",
+      "snowfall": "Neve", "wind": "Vento", "windDetail": "Raffiche {gusts} · da {dir}", "uvMax": "UV max",
+      "sunshine": "Sole", "ofDaylight": "su {d} di luce", "sunrise": "Alba", "solarEnergy": "Energia solare"
+    }
+  },
+  "chart": {
+    "temp": "Temp.", "rain": "Pioggia", "wind": "Vento", "uv": "UV", "clouds": "Nubi", "pressure": "Pressione", "humidity": "Umidità", "air": "Aria",
+    "airTemp": "Aria", "feelsLike": "Percepita", "dewPoint": "Punto di rugiada", "mm": "mm", "chance": "Prob. %", "gusts": "Raffiche",
+    "total": "Totale", "low": "Basse", "high": "Alte", "good": "Buona", "fair": "Discreta", "moderate": "Moderata",
+    "hourLabel": "{day} {hour}:00"
+  },
+  "hourly": {
+    "title": "Ora\nper ora.", "feelsLike": "Percepita", "rainChance": "Prob. pioggia", "rain": "Pioggia", "wind": "Vento {dir}",
+    "gusts": "Raffiche", "uv": "UV", "clouds": "Nubi", "humidity": "Umidità", "visibility": "Visibilità"
+  },
+  "dayView": {
+    "logged": "Registrato", "filled": "Integrato",
+    "lowLine": "Min {lo}° · percepita {fhi}° / {flo}°",
+    "couldNotLoad": "Impossibile caricare questo giorno", "hourByHour": "Ora per ora", "temperature": "Temperatura",
+    "highLow": "Max / min", "normalHigh": "Max normale {t}°", "dailyAverage": "Media giornaliera",
+    "wet": "{h} h di pioggia", "snowDepth": "Neve al suolo fino a {cm} cm", "forecastChance": "Probabilità prevista",
+    "windSummary": "Fino a {force}, per lo più da {dir}.",
+    "maxWind": "Vento max", "maxGusts": "Raffiche max", "daylight": "Luce del giorno", "sunshine": "Sole {d}",
+    "skyAtmosphere": "Cielo e atmosfera", "pressureNote": "hPa, min–max", "maxCape": "CAPE max", "capeNote": "J/kg, energia temporalesca",
+    "airSummary": "Ora peggiore: {v} ({level}).",
+    "pm25": "PM2.5 media", "pm10": "PM10 media", "no2": "NO₂ media", "ozoneMax": "Ozono max",
+    "sourceForecast": "Modelli di previsione Open-Meteo (dati passati)",
+    "sourceArchive": "Meteo storico Open-Meteo (rianalisi ERA5)"
+  },
+  "history": {
+    "title": "Questo giorno,\naltri anni.", "export": "Esporta CSV", "noData": "Nessun dato",
+    "lookup": "Cerca una data dal 1940", "noArchive": "Ancora nessun dato d’archivio per questa data",
+    "rain": "Pioggia", "maxWind": "Vento max", "trends": "Tendenze", "all": "Tutto",
+    "trendTemp": "Massime e minime giornaliere rispetto alla norma 1991–2020",
+    "trendDelta": "Più caldo o più freddo della norma", "trendPrecip": "Precipitazioni, mm",
+    "normal": "Norma", "vsAvg": "vs media",
+    "yourLog": "Il tuo registro · {days}",
+    "empty": "La prima istantanea viene salvata quando la previsione è caricata.",
+    "rowDetail": "{cond}, {mm} mm", "rowFeels": " · percepita {t}°", "filled": "Integrato",
+    "delete": "Elimina", "deleteLabel": "Elimina {date}",
+    "addDates": "Aggiungi date", "addTitle": "Aggiungi date al registro", "from": "Dal", "to": "Al",
+    "addNote": "Meteo giornaliero dall’archivio storico (dal 1940 a 5 giorni fa). I giorni registrati dall’app vengono conservati.",
+    "tooLong": "Scegli al massimo 10 anni alla volta.", "download": "Scarica",
+    "downloadDays": { "one": "Scarica {count} giorno", "many": "Scarica {count} giorni", "other": "Scarica {count} giorni" },
+    "added": { "one": "{count} giorno aggiunto, {updated} aggiornati.", "many": "{count} giorni aggiunti, {updated} aggiornati.", "other": "{count} giorni aggiunti, {updated} aggiornati." },
+    "addedKept": { "one": "{count} giorno aggiunto, {updated} aggiornati, {kept} registrati dall’app conservati.", "many": "{count} giorni aggiunti, {updated} aggiornati, {kept} registrati dall’app conservati.", "other": "{count} giorni aggiunti, {updated} aggiornati, {kept} registrati dall’app conservati." },
+    "downloadFailed": "Download non riuscito: {error}"
+  },
+  "settings": {
+    "title": "Impostazioni.", "language": "Lingua", "languageSystem": "Sistema ({name})",
+    "languageNote": "Segue la lingua del telefono, a meno che tu non ne scelga una.",
+    "dataSource": "Fonte dei dati", "apiKey": "Chiave API", "optional": "Facoltativa",
+    "apiKeyNote": "Lascia vuoto per l’API gratuita. Aggiungi una chiave solo per un piano commerciale Open-Meteo.",
+    "server": "Server delle previsioni", "serverNote": "Punta alla tua istanza Open-Meteo self-hosted.",
+    "apply": "Applica e aggiorna ora", "appearance": "Aspetto", "accent": "Colore di accento",
+    "accentNote": "Usato per il pannello della temperatura e i pulsanti. Spento lascia tutto in bianco e nero.",
+    "accentGreen": "Verde", "accentRed": "Rosso", "accentBlue": "Blu", "accentOff": "Spento", "custom": "Personalizzato",
+    "hex": "Colore hex", "hexNote": "I colori troppo chiari per il testo bianco vengono scuriti automaticamente.",
+    "units": "Unità", "temperature": "Temperatura", "wind": "Vento", "history": "Storico",
+    "interval": "Intervallo delle istantanee", "intervalNote": "Mentre l’app è aperta. La versione Android userà un’attività in background.",
+    "every15": "Ogni 15 minuti", "every30": "Ogni 30 minuti", "hourly": "Ogni ora", "every180": "Ogni 3 ore",
+    "fillGaps": "Riempi i vuoti dall’archivio", "fillGapsNote": "I giorni in cui l’app era chiusa vengono integrati da Open-Meteo (fino a 92 giorni).",
+    "stored": "Salvato su questo dispositivo", "storedCount": "{cities} città · {days} giorni · IndexedDB",
+    "export": "Esporta", "import": "Importa", "importTitle": "Importa da backup",
+    "exported": "Esportato il {date}. ", "importNote": "Viene unito ai dati di questo dispositivo; i giorni registrati qui vengono conservati.",
+    "importCities": "Città ({n})", "importCitiesNote": "Le città che non segui ancora vengono aggiunte in fondo.",
+    "importHistory": "Storico ({n} giorni)", "importHistoryNote": "Solo per le città che segui.",
+    "importSettings": "Impostazioni", "importSettingsNote": "Unità e colore di accento. Il server e la chiave API non vengono mai importati.",
+    "importSelected": "Importa selezione", "imported": "Importate {cities} nuove città e {days} giorni.",
+    "deleteAll": "Elimina tutto lo storico", "confirmDeleteAll": "Eliminare tutto lo storico registrato? L’operazione è irreversibile.",
+    "about": "Informazioni", "license": "Open source · GPL-3.0 · v{version}", "attribution": "Dati meteo di Open-Meteo.com (CC BY 4.0)"
+  },
+  "backup": {
+    "notJson": "Questo file non è un JSON valido.", "notBackup": "Questo non è un backup di Weather Log.",
+    "empty": "Nessuna città, storico o impostazione trovati in questo file."
+  },
+  "widgets": {
+    "past7": "Ultimi 7 giorni", "forecast": "Previsioni", "average": "media", "onThisDay": "In questo giorno",
+    "earlierYears": "Gli anni precedenti si caricano quando l’app è online", "average_row": "Media",
+    "mmPer15": "mm ogni 15 min", "chancePerHour": "% di probabilità all’ora", "rainShort": "Pioggia {p}",
+    "android": {
+      "now": "Ora", "nowDescription": "Temperatura attuale sul tuo colore di accento, con oggi rispetto alla media",
+      "timeline": "Cronologia", "timelineDescription": "Gli ultimi 7 giorni registrati, oggi e i prossimi 6 giorni, con la media",
+      "thisday": "In questo giorno", "thisdayDescription": "La massima di oggi rispetto alla media e alla stessa data negli anni precedenti",
+      "rain": "Prossime 2 ore", "rainDescription": "Previsione di pioggia con barre di 15 minuti",
+      "hourly": "Ora per ora", "hourlyDescription": "Temperatura e probabilità di pioggia per le prossime ore"
+    }
+  }
+}

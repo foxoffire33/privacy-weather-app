@@ -1,0 +1,215 @@
+{
+  "common": {
+    "back": "Zpět", "close": "Zavřít", "cancel": "Zrušit", "tryAgain": "Zkusit znovu", "default": "Výchozí",
+    "now": "Teď", "today": "Dnes", "tomorrow": "Zítra", "night": "noc", "refresh": "Obnovit", "updating": "Aktualizace",
+    "noLongerFollowed": "Toto město už nesledujete.",
+    "dataBy": "Data o počasí: Open-Meteo.com",
+    "days": { "one": "{count} den", "few": "{count} dny", "many": "{count} dne", "other": "{count} dní" },
+    "daysLogged": { "one": "{count} zaznamenaný den", "few": "{count} zaznamenané dny", "many": "{count} zaznamenaného dne", "other": "{count} zaznamenaných dní" },
+    "touchChart": "Klepněte na graf pro podrobnosti"
+  },
+  "ago": { "never": "nikdy", "justNow": "právě teď", "minutes": "před {n} min", "hours": "před {n} h", "days": "před {n} d" },
+  "units": { "hoursMinutes": "{h} h {m} min", "minutes": "{m} min" },
+  "compass": { "N": "S", "NE": "SV", "E": "V", "SE": "JV", "S": "J", "SW": "JZ", "W": "Z", "NW": "SZ" },
+  "weather": {
+    "0": "Jasno", "1": "Skoro jasno", "2": "Polojasno", "3": "Zataženo",
+    "45": "Mlha", "48": "Mrznoucí mlha",
+    "51": "Slabé mrholení", "53": "Mrholení", "55": "Silné mrholení", "56": "Mrznoucí mrholení", "57": "Mrznoucí mrholení",
+    "61": "Slabý déšť", "63": "Déšť", "65": "Silný déšť", "66": "Mrznoucí déšť", "67": "Mrznoucí déšť",
+    "71": "Slabé sněžení", "73": "Sněžení", "75": "Silné sněžení", "77": "Sněhová zrna",
+    "80": "Slabé přeháňky", "81": "Přeháňky", "82": "Prudké přeháňky", "85": "Sněhové přeháňky", "86": "Silné sněhové přeháňky",
+    "95": "Bouřka", "96": "Bouřka s kroupami", "99": "Bouřka s kroupami"
+  },
+  "levels": {
+    "aqi": ["Dobrá", "Přijatelná", "Mírná", "Špatná", "Velmi špatná", "Extrémně špatná"],
+    "usAqi": { "unavailable": "Nedostupné", "good": "Dobrá", "moderate": "Mírná", "sensitive": "Nezdravá pro citlivé skupiny", "unhealthy": "Nezdravá", "veryUnhealthy": "Velmi nezdravá", "hazardous": "Nebezpečná" },
+    "pollen": ["Žádný", "Nízký", "Střední", "Vysoký", "Velmi vysoký"],
+    "beaufort": ["Bezvětří", "Vánek", "Větřík", "Slabý vítr", "Mírný vítr", "Čerstvý vítr", "Silný vítr", "Prudký vítr", "Bouřlivý vítr", "Vichřice", "Silná vichřice", "Mohutná vichřice", "Orkán"],
+    "feels": { "dangerouslyCold": "Nebezpečně chladno", "freezing": "Mrazivo", "cold": "Chladno", "cool": "Svěže", "comfortable": "Příjemně", "warm": "Teplo", "hot": "Horko", "veryHot": "Velké horko" },
+    "dew": { "dry": "Suchý vzduch", "comfortable": "Příjemně", "humid": "Vlhko", "oppressive": "Dusno" },
+    "uv": { "none": "Ochrana není nutná", "midday": "V poledne opalovací krém", "shade": "Vyhledejte stín 11:00–16:00", "avoid": "Vyhněte se polednímu slunci" },
+    "cape": { "low": "Nízké", "moderate": "Střední", "high": "Vysoké", "extreme": "Extrémní" },
+    "visibility": { "fog": "Mlha", "mist": "Kouřmo nebo opar", "moderate": "Střední", "clear": "Dobrá" },
+    "pressure": { "rising": "Stoupá", "falling": "Klesá", "steady": "Stálý" }
+  },
+  "rain": {
+    "rain": "Déšť", "snow": "Sníh",
+    "continuing": "{word} nejméně další 2 hodiny",
+    "stopping": "{word} teď, skončí kolem {time}",
+    "starting": "{word} začne kolem {time}",
+    "likely": "{word} pravděpodobně od {time} ({p} %)",
+    "none": "V příštích 12 hodinách se déšť neočekává"
+  },
+  "onboarding": {
+    "title": "Počasí,\nuchované.",
+    "step1Title": "Bez účtu, bez sledování",
+    "step1Text": "Předpovědi pocházejí z Open-Meteo. Zdarma pro osobní použití, bez klíče.",
+    "step2Title": "Bez přístupu k poloze",
+    "step2Text": "Města přidáváte podle názvu. Aplikace nikdy nežádá o GPS.",
+    "step3Title": "Celá historie v tomto zařízení",
+    "step3Text": "Každé sledované město se zaznamenává místně. Nic se nenahrává.",
+    "start": "Vyberte první město"
+  },
+  "search": {
+    "title": "Sledujte\nměsto.", "placeholder": "Název města", "label": "Hledat města", "results": "Výsledky",
+    "typeMore": "Zadejte aspoň dvě písmena.", "noMatch": "Výrazu „{query}“ neodpovídá žádné místo.",
+    "following": "Sledováno", "follow": "Sledovat", "privacy": "Bez přístupu k poloze. Vyhledávání přes geokódovací API Open-Meteo."
+  },
+  "cities": {
+    "count": ["Žádné", "Jedno", "Dvě", "Tři", "Čtyři", "Pět", "Šest", "Sedm", "Osm", "Devět", "Deset"],
+    "title": { "one": "{word}\nměsto.", "few": "{word}\nměsta.", "many": "{word}\nměsta.", "other": "{word}\nměst." },
+    "hint": "Pořadí změníte přetažením úchytu. Horní město se otevře jako první.",
+    "reorder": "Přesunout {name}", "unfollow": "Přestat sledovat {name}",
+    "confirmUnfollow": "Přestat sledovat {name}? Zaznamenaná historie zůstane zachována.",
+    "followCity": "Sledovat město"
+  },
+  "home": {
+    "hintSwipe": "Přejeďte do strany pro další město · ",
+    "hint": "táhněte hodinový pruh doprava pro dřívější dny · klepnutím zavřete",
+    "cities": "Města", "show": "Zobrazit {name}", "refreshAll": "Obnovit vše", "settings": "Nastavení"
+  },
+  "city": {
+    "couldNotLoad": "Předpověď se nepodařilo načíst",
+    "precipChance": "{cond}, {p} %",
+    "heroLine": "Pocitově {feels}° · Max {hi}° Min {lo}°",
+    "vsAverage": "{delta} oproti průměru",
+    "nowcastCaption": "další 2 hodiny · mm za 15 min",
+    "yesterday": "Včera", "earlier": "Dříve", "release": "Pusťte",
+    "hourlyLink": "Hodinová předpověď · 7 dní",
+    "next48": "Příštích 48 hodin", "next7": "Příštích 7 dní", "high": "Max", "low": "Min",
+    "historyButton": "Historie · {logged}",
+    "footer": "Data o počasí: Open-Meteo.com · aktualizováno {ago}",
+    "updatingCity": "Aktualizace: {name}",
+    "feels": {
+      "title": "Pocitová teplota",
+      "colder": "{label}. Kvůli větru a vlhkosti působí o {n}° chladněji než vzduch.",
+      "warmer": "{label}. Působí o {n}° tepleji než vzduch.",
+      "close": "{label}. Blízko teplotě vzduchu.",
+      "air": "Vzduch {t}°", "humidity": "Vlhkost", "dewPoint": "Rosný bod", "todayFeels": "Dnes pocitově", "maxMin": "Max / min"
+    },
+    "sun": {
+      "title": "Slunce",
+      "summary": "{daylight} denního světla, {change} oproti včerejšku.",
+      "sunrise": "Východ", "sunset": "Západ", "sunDown": "Slunce zapadlo",
+      "passed": "Uplynulo {p} % dne", "uvNow": "UV teď", "uvMaxToday": "UV max dnes",
+      "clearSkyMax": "Max při jasné obloze {v}", "sunshineToday": "Slunečný svit dnes", "sunsetAt": "Západ {time}"
+    },
+    "precip": {
+      "title": "Déšť a sníh",
+      "nowDetail": "Déšť {rain} · přeháňky {showers} · sníh {snow} cm",
+      "todayDetail": "{h} h srážek · pravděpodobnost {p} %",
+      "snowfallToday": "Sněžení dnes", "snowOnGround": "Sníh na zemi {cm} cm",
+      "noSnow": "Na zemi není sníh", "chance": "pravděpodobnost {p} %"
+    },
+    "wind": { "title": "Vítr", "summary": "{force} od {dir}.", "from": "od {dir} · {deg}°", "gusts": "Nárazy", "maxToday": "Max dnes", "gustsUpTo": "Nárazy až {v}" },
+    "air": {
+      "title": "Kvalita ovzduší", "now": "Kvalita ovzduší teď: {level}.", "unknown": "Neznámá",
+      "worst": " Nejhorší během 24 h: {v} v {time}.",
+      "unavailable": "Pro toto místo nejsou data o kvalitě ovzduší k dispozici.",
+      "euAqi": "Evropský AQI", "usAqi": "Americký AQI",
+      "pm2_5": "Jemné částice", "pm10": "Hrubé částice", "nitrogen_dioxide": "Oxid dusičitý", "ozone": "Ozon",
+      "sulphur_dioxide": "Oxid siřičitý", "carbon_monoxide": "Oxid uhelnatý",
+      "dust": "Prach", "dustNote": "Saharský / pouštní prach", "haze": "Zákal", "hazeNote": "Optická tloušťka aerosolu"
+    },
+    "pollen": {
+      "title": "Pyl", "summary": "Zrn na m³. Předpověď pokrývá Evropu během sezóny.",
+      "none": "V ovzduší teď není žádný pyl.",
+      "alder_pollen": "Olše", "birch_pollen": "Bříza", "grass_pollen": "Trávy", "mugwort_pollen": "Pelyněk", "olive_pollen": "Olivovník", "ragweed_pollen": "Ambrózie"
+    },
+    "sky": { "title": "Obloha", "cloudCover": "Oblačnost", "visibility": "Dohlednost", "lowClouds": "Nízká oblačnost", "below3": "Pod 3 km", "midHigh": "Střední / vysoká", "midHighNote": "3–8 km / nad 8 km" },
+    "atmosphere": {
+      "title": "Atmosféra", "pressure": "Tlak", "trend": "{label} · {delta} za 3 h", "seaLevel": "Hladina moře",
+      "thunder": "Riziko bouřek", "freezing": "Nulová izoterma", "freezingNote": "Výška 0 °C",
+      "evaporation": "Výpar", "evaporationNote": "Kolik rostliny dnes ztratí (ET₀)"
+    },
+    "sea": { "title": "Moře", "waves": "Vlny", "wavesNote": "Od {dir} · každých {s} s", "swell": "Vlnobití", "temperature": "Teplota moře" },
+    "day": {
+      "feelsLike": "Pocitově", "precipitation": "Srážky", "precipDetail": "{h} h · déšť {rain} · přeháňky {showers}",
+      "snowfall": "Sněžení", "wind": "Vítr", "windDetail": "Nárazy {gusts} · od {dir}", "uvMax": "UV max",
+      "sunshine": "Slunečný svit", "ofDaylight": "z {d} světla", "sunrise": "Východ slunce", "solarEnergy": "Sluneční energie"
+    }
+  },
+  "chart": {
+    "temp": "Tepl.", "rain": "Déšť", "wind": "Vítr", "uv": "UV", "clouds": "Oblaka", "pressure": "Tlak", "humidity": "Vlhkost", "air": "Ovzduší",
+    "airTemp": "Vzduch", "feelsLike": "Pocitová", "dewPoint": "Rosný bod", "mm": "mm", "chance": "Pravd. %", "gusts": "Nárazy",
+    "total": "Celkem", "low": "Nízká", "high": "Vysoká", "good": "Dobrá", "fair": "Přijatelná", "moderate": "Mírná",
+    "hourLabel": "{day} {hour}:00"
+  },
+  "hourly": {
+    "title": "Hodinu\npo hodině.", "feelsLike": "Pocitově", "rainChance": "Pravd. deště", "rain": "Déšť", "wind": "Vítr {dir}",
+    "gusts": "Nárazy", "uv": "UV", "clouds": "Oblaka", "humidity": "Vlhkost", "visibility": "Dohlednost"
+  },
+  "dayView": {
+    "logged": "Zaznamenáno", "filled": "Doplněno",
+    "lowLine": "Min {lo}° · pocitově {fhi}° / {flo}°",
+    "couldNotLoad": "Tento den se nepodařilo načíst", "hourByHour": "Hodinu po hodině", "temperature": "Teplota",
+    "highLow": "Max / min", "normalHigh": "Normální max {t}°", "dailyAverage": "Denní průměr",
+    "wet": "{h} h srážek", "snowDepth": "Sněhová pokrývka až {cm} cm", "forecastChance": "Předpovídaná pravděpodobnost",
+    "windSummary": "Až {force}, většinou od {dir}.",
+    "maxWind": "Max vítr", "maxGusts": "Max nárazy", "daylight": "Délka dne", "sunshine": "Slunečný svit {d}",
+    "skyAtmosphere": "Obloha a atmosféra", "pressureNote": "hPa, min–max", "maxCape": "Max CAPE", "capeNote": "J/kg, energie bouřek",
+    "airSummary": "Nejhorší hodina: {v} ({level}).",
+    "pm25": "PM2.5 prům.", "pm10": "PM10 prům.", "no2": "NO₂ prům.", "ozoneMax": "Ozon max",
+    "sourceForecast": "Předpovědní modely Open-Meteo (minulá data)",
+    "sourceArchive": "Historické počasí Open-Meteo (reanalýza ERA5)"
+  },
+  "history": {
+    "title": "Tento den,\njiné roky.", "export": "Exportovat CSV", "noData": "Žádná data",
+    "lookup": "Vyhledat datum od roku 1940", "noArchive": "Pro toto datum zatím nejsou archivní data",
+    "rain": "Déšť", "maxWind": "Max vítr", "trends": "Trendy", "all": "Vše",
+    "trendTemp": "Denní maximum a minimum oproti normálu 1991–2020",
+    "trendDelta": "Tepleji nebo chladněji než obvykle", "trendPrecip": "Srážky, mm",
+    "normal": "Normál", "vsAvg": "vs. prům.",
+    "yourLog": "Váš deník · {days}",
+    "empty": "První záznam se uloží po načtení předpovědi.",
+    "rowDetail": "{cond}, {mm} mm", "rowFeels": " · pocitově {t}°", "filled": "Doplněno",
+    "delete": "Smazat", "deleteLabel": "Smazat {date}",
+    "addDates": "Přidat data", "addTitle": "Přidat data do deníku", "from": "Od", "to": "Do",
+    "addNote": "Denní počasí z historického archivu (od roku 1940 do před 5 dny). Dny zaznamenané aplikací zůstanou zachovány.",
+    "tooLong": "Vyberte nejvýše 10 let najednou.", "download": "Stáhnout",
+    "downloadDays": { "one": "Stáhnout {count} den", "few": "Stáhnout {count} dny", "many": "Stáhnout {count} dne", "other": "Stáhnout {count} dní" },
+    "added": { "one": "Přidán {count} den, aktualizováno {updated}.", "few": "Přidány {count} dny, aktualizováno {updated}.", "many": "Přidáno {count} dne, aktualizováno {updated}.", "other": "Přidáno {count} dní, aktualizováno {updated}." },
+    "addedKept": { "one": "Přidán {count} den, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací.", "few": "Přidány {count} dny, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací.", "many": "Přidáno {count} dne, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací.", "other": "Přidáno {count} dní, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací." },
+    "downloadFailed": "Stažení se nezdařilo: {error}"
+  },
+  "settings": {
+    "title": "Nastavení.", "language": "Jazyk", "languageSystem": "Systémový ({name})",
+    "languageNote": "Řídí se jazykem telefonu, pokud nevyberete jiný.",
+    "dataSource": "Zdroj dat", "apiKey": "Klíč API", "optional": "Volitelné",
+    "apiKeyNote": "Pro bezplatné API nechte prázdné. Klíč přidejte jen pro komerční tarif Open-Meteo.",
+    "server": "Server předpovědí", "serverNote": "Odkaz na vlastní hostovanou instanci Open-Meteo.",
+    "apply": "Použít a obnovit", "appearance": "Vzhled", "accent": "Barva zvýraznění",
+    "accentNote": "Používá se pro panel teploty a tlačítka. Vypnuto ponechá vše černobílé.",
+    "accentGreen": "Zelená", "accentRed": "Červená", "accentBlue": "Modrá", "accentOff": "Vypnuto", "custom": "Vlastní",
+    "hex": "Barva hex", "hexNote": "Barvy příliš světlé pro bílý text se automaticky ztmaví.",
+    "units": "Jednotky", "temperature": "Teplota", "wind": "Vítr", "history": "Historie",
+    "interval": "Interval záznamů", "intervalNote": "Když je aplikace otevřená. Verze pro Android bude používat úlohu na pozadí.",
+    "every15": "Každých 15 minut", "every30": "Každých 30 minut", "hourly": "Každou hodinu", "every180": "Každé 3 hodiny",
+    "fillGaps": "Doplňovat mezery z archivu", "fillGapsNote": "Dny, kdy byla aplikace zavřená, se doplní z Open-Meteo (až 92 dní).",
+    "stored": "Uloženo v tomto zařízení", "storedCount": "Města: {cities} · dny: {days} · IndexedDB",
+    "export": "Exportovat", "import": "Importovat", "importTitle": "Import ze zálohy",
+    "exported": "Exportováno {date}. ", "importNote": "Sloučí se s obsahem tohoto zařízení; dny zaznamenané zde zůstanou zachovány.",
+    "importCities": "Města ({n})", "importCitiesNote": "Města, která zatím nesledujete, se přidají na konec.",
+    "importHistory": "Historie (dny: {n})", "importHistoryNote": "Jen pro sledovaná města.",
+    "importSettings": "Nastavení", "importSettingsNote": "Jednotky a barva zvýraznění. Server a klíč API se nikdy neimportují.",
+    "importSelected": "Importovat vybrané", "imported": "Importováno nových měst: {cities}, dní: {days}.",
+    "deleteAll": "Smazat celou historii", "confirmDeleteAll": "Smazat celou zaznamenanou historii? Tuto akci nelze vrátit.",
+    "about": "O aplikaci", "license": "Open source · GPL-3.0 · v{version}", "attribution": "Data o počasí: Open-Meteo.com (CC BY 4.0)"
+  },
+  "backup": {
+    "notJson": "Tento soubor není platný JSON.", "notBackup": "Toto není záloha Weather Log.",
+    "empty": "V souboru nebyla nalezena žádná města, historie ani nastavení."
+  },
+  "widgets": {
+    "past7": "Posledních 7 dní", "forecast": "Předpověď", "average": "průměr", "onThisDay": "V tento den",
+    "earlierYears": "Dřívější roky se načtou, až bude aplikace online", "average_row": "Průměr",
+    "mmPer15": "mm za 15 min", "chancePerHour": "% pravděpodobnost za hodinu", "rainShort": "Déšť {p}",
+    "android": {
+      "now": "Teď", "nowDescription": "Aktuální teplota v barvě zvýraznění, s dneškem oproti průměru",
+      "timeline": "Časová osa", "timelineDescription": "Posledních 7 zaznamenaných dní, dnešek a příštích 6 dní s průměrem",
+      "thisday": "V tento den", "thisdayDescription": "Dnešní maximum oproti průměru a stejnému datu v minulých letech",
+      "rain": "Příští 2 hodiny", "rainDescription": "Výhled srážek ve 15minutových sloupcích",
+      "hourly": "Po hodinách", "hourlyDescription": "Teplota a pravděpodobnost deště na příští hodiny"
+    }
+  }
+}
