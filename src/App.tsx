@@ -42,5 +42,7 @@ export default function App() {
   else if (route.name === 'day') screen = <DayView cityId={route.cityId} date={route.date} />;
   else screen = <Home />;
 
-  return <div className="stage"><div className="device" data-accent={accent}>{screen}</div></div>;
+  const topAccent = hydrated && (route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings'));
+
+  return <div className="stage"><div className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}>{screen}</div></div>;
 }

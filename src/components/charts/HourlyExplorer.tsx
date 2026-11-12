@@ -64,45 +64,45 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   return (
     <Box>
       <ScrollArea type="never" mb={10}>
-        <SegmentedControl size="xs" value={active} onChange={s.setMetric}
+        <SegmentedControl size="md" color="signal" value={active} onChange={s.setMetric}
           data={available.map(({ value, label }) => ({ value, label }))} />
       </ScrollArea>
       {active === 'temp' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
-          series={[{ name: 'Air', color: 'dark.0' }, { name: 'Feels like', color: 'dark.2', strokeDasharray: '4 3' }, { name: 'Dew point', color: 'dark.4' }]} data={data} />
+          series={[{ name: 'Air', color: 'signal.4' }, { name: 'Feels like', color: 'dark.2', strokeDasharray: '4 3' }, { name: 'Dew point', color: 'dark.4' }]} data={data} />
       )}
       {active === 'rain' && (hasChance ? (
         <CompositeChart {...LINE} xAxisProps={xAxisProps} withRightYAxis rightYAxisProps={{ domain: [0, 100], width: 36 }}
-          series={[{ name: 'mm', type: 'bar', color: 'dark.3' }, { name: 'Chance %', type: 'line', color: 'dark.0', yAxisId: 'right' }]} data={data} />
+          series={[{ name: 'mm', type: 'bar', color: 'signal.7' }, { name: 'Chance %', type: 'line', color: 'signal.4', yAxisId: 'right' }]} data={data} />
       ) : (
-        <BarChart {...BASE} xAxisProps={xAxisProps} series={[{ name: 'mm', color: 'dark.2' }]} data={data} />
+        <BarChart {...BASE} xAxisProps={xAxisProps} series={[{ name: 'mm', color: 'signal.5' }]} data={data} />
       ))}
       {active === 'wind' && (
         <LineChart {...LINE} xAxisProps={xAxisProps} unit={` ${windUnitLabel(s.windUnit)}`} yAxisProps={{ width: 44 }}
-          series={[{ name: 'Wind', color: 'dark.0' }, { name: 'Gusts', color: 'dark.3', strokeDasharray: '4 3' }]} data={data} />
+          series={[{ name: 'Wind', color: 'signal.4' }, { name: 'Gusts', color: 'signal.7', strokeDasharray: '4 3' }]} data={data} />
       )}
       {active === 'uv' && (
         <BarChart {...BASE} xAxisProps={xAxisProps}
-          getBarColor={(val) => (val >= 8 ? 'signal.5' : val >= 6 ? 'dark.0' : val >= 3 ? 'dark.2' : 'dark.4')}
+          getBarColor={(val) => (val >= 8 ? 'signal.5' : val >= 6 ? 'signal.4' : val >= 3 ? 'signal.7' : 'dark.4')}
           series={[{ name: 'UV', color: 'signal.4' }]} data={data} />
       )}
       {active === 'clouds' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }}
-          series={[{ name: 'Total', color: 'dark.0' }, { name: 'Low', color: 'dark.2' }, { name: 'High', color: 'dark.4' }]} data={data} />
+          series={[{ name: 'Total', color: 'signal.4' }, { name: 'Low', color: 'signal.7' }, { name: 'High', color: 'dark.4' }]} data={data} />
       )}
       {active === 'pressure' && (
         <LineChart {...LINE} xAxisProps={xAxisProps} withLegend={false} yAxisProps={{ width: 44, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
-          series={[{ name: 'hPa', color: 'dark.0' }]} data={data} />
+          series={[{ name: 'hPa', color: 'signal.4' }]} data={data} />
       )}
       {active === 'humidity' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }} withLegend={false}
-          series={[{ name: 'Humidity', color: 'dark.0' }]} data={data} />
+          series={[{ name: 'Humidity', color: 'signal.4' }]} data={data} />
       )}
       {active === 'air' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} withLegend={false}
           referenceLines={[{ y: 20, label: 'Good', color: 'dark.4' }, { y: 40, label: 'Fair', color: 'dark.4' }, { y: 60, label: 'Moderate', color: 'signal.5' }]}
-          series={[{ name: 'AQI', color: 'dark.0' }]} data={data} />
+          series={[{ name: 'AQI', color: 'signal.4' }]} data={data} />
       )}
     </Box>
   );

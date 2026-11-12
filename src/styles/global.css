@@ -6,7 +6,17 @@ body { font-variant-numeric: tabular-nums; }
 /* Phone-sized stage on desktop, full screen on mobile / Capacitor. */
 .stage { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: #000; }
 .device { width: 390px; height: 844px; max-height: calc(100dvh - 48px); position: relative; overflow: hidden; background: var(--mantine-color-body); border: 2px solid #2d2b2b; display: flex; flex-direction: column; }
-@media (max-width: 500px) { .stage { padding: 0; } .device { width: 100%; height: 100dvh; max-height: none; border: 0; } }
+/* Phone safe area: padding keeps content clear of the notch and gesture bar; the strips fill it
+   with the colour of the screen edge (accent on home/onboarding, body elsewhere). */
+.device::before, .device::after { content: ''; position: absolute; left: 0; right: 0; z-index: 3; pointer-events: none; background: var(--mantine-color-body); }
+.device::before { top: 0; height: var(--sat, 0px); }
+.device::after { bottom: 0; height: var(--sab, 0px); }
+.device[data-top=accent]::before { background: var(--mantine-color-signal-5); }
+.device[data-top=accent][data-accent=off]::before { background: #000; }
+@media (max-width: 500px) {
+  .stage { padding: 0; }
+  .device { --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); width: 100%; height: 100dvh; max-height: none; border: 0; padding: var(--sat) 0 var(--sab); box-sizing: border-box; }
+}
 
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
 .display { font-size: 56px; line-height: .95; letter-spacing: -.03em; padding: 8px 20px 12px; margin: 0; }
@@ -18,7 +28,7 @@ body { font-variant-numeric: tabular-nums; }
 .glass { background: #000; border: 2px solid var(--rule); }
 
 /* Home pager */
-.pager { position: absolute; inset: 0; display: flex; touch-action: pan-y; user-select: none; }
+.pager { position: absolute; inset: var(--sat, 0px) 0 var(--sab, 0px); display: flex; touch-action: pan-y; user-select: none; }
 .page { width: 100%; height: 100%; flex: none; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
 /* Accent field: hero, top bar and onboarding. Black when the accent is off. */
 .hero, .accent-field { background: var(--mantine-color-signal-5); color: #fff; }
@@ -31,7 +41,7 @@ body { font-variant-numeric: tabular-nums; }
 /* Background refresh indicator */
 .spin { display: inline-flex; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.overlay { position: absolute; left: 0; right: 0; top: 0; padding: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 2; background: var(--mantine-color-signal-5); }
+.overlay { position: absolute; left: 0; right: 0; top: var(--sat, 0px); padding: 8px; display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 2; background: var(--mantine-color-signal-5); }
 [data-accent=off] .overlay { background: #000; border-bottom: 2px solid var(--rule); }
 .dot { width: 8px; height: 8px; background: rgba(255, 255, 255, .45); transition: width .2s; border: 0; padding: 0; cursor: pointer; }
 .dot[data-active] { width: 22px; background: #fff; }
