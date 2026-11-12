@@ -1,0 +1,83 @@
+import { useEffect } from 'react';
+import { Box, Button, Group, Loader, Text, TextInput, Title } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
+import { useShallow } from 'zustand/react/shallow';
+import { useWeatherStore } from '../store';
+import type { GeoResult } from '../types';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { Icon } from '../components/Icon';
+import { Sk } from '../components/Skeletons';
+
+export function Search() {
+  const s = useWeatherStore(useShallow((st) => ({
+    query: st.query,
+    results: st.results,
+    searching: st.searching,
+    searchError: st.searchError,
+    setQuery: st.setQuery,
+    runSearch: st.runSearch,
+    followedIds: st.cities.map((c) => c.id).join('|'),
+    followCity: st.followCity,
+    goHome: st.goHome,
+  })));
+  const [debounced] = useDebouncedValue(s.query, 300);
+  const { runSearch } = s;
+  useEffect(() => { void runSearch(debounced); }, [debounced, runSearch]);
+  const followed = new Set(s.followedIds.split('|'));
+
+  const follow = (r: GeoResult) => {
+    const i = s.followCity(r);
+    s.setQuery('');
+    s.goHome(i);
+  };
+
+  return (
+    <div className="screen">
+      <ScreenHeader />
+      <Title className="display display-sm">Follow<br />a city.</Title>
+      <Box px={20}>
+        <TextInput size="lg" placeholder="City name" autoFocus value={s.query}
+          leftSection={<Icon name="search" size={20} />}
+          rightSection={s.searching ? <Loader size="xs" /> : null}
+          onChange={(e) => s.setQuery(e.currentTarget.value)}
+          aria-label="Search cities" />
+      </Box>
+
+      <Box px={20} style={{ flex: 1 }}>
+        <div className="kicker">Results</div>
+        {s.searchError && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
+        {!s.searchError && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">Type at least two letters.</Text>}
+        {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && !s.searchError && (
+          <Text py={12} fz={13} c="dimmed">No places match “{s.query}”.</Text>
+        )}
+        {s.searching && s.results.length === 0 && Array.from({ length: 4 }, (_, i) => (
+          <Group key={i} className="row" py={12} wrap="nowrap" justify="space-between">
+            <Box><Sk w={120} h={20} /><Sk w={190} h={12} mt={6} /></Box>
+            <Sk w={104} h={36} />
+          </Group>
+        ))}
+        {s.results.map((r) => {
+          const isFollowed = followed.has(String(r.id));
+          return (
+            <Group key={r.id} className="row" py={12} wrap="nowrap" justify="space-between">
+              <Box style={{ minWidth: 0 }}>
+                <Text fz={18} fw={800} truncate>{r.name}</Text>
+                <Text fz={12} c="dimmed" truncate>
+                  {[r.admin1, r.country].filter(Boolean).join(', ')} · {r.latitude.toFixed(2)}°, {r.longitude.toFixed(2)}°
+                </Text>
+              </Box>
+              <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => follow(r)}>
+                {isFollowed ? 'Following' : 'Follow'}
+              </Button>
+            </Group>
+          );
+        })}
+      </Box>
+
+      <Group px={20} py={14} gap={8} wrap="nowrap" className="rule-top">
+        <Icon name="lock" size={16} />
+        <Text fz={12} c="dimmed">No location access. Search by Open-Meteo Geocoding API.</Text>
+      </Group>
+    </div>
+  );
+}

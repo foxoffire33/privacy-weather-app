@@ -1,0 +1,157 @@
+import { useEffect } from 'react';
+import { ActionIcon, Badge, Box, Button, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { BarChart, LineChart } from '@mantine/charts';
+import { useShallow } from 'zustand/react/shallow';
+import { useWeatherStore } from '../store';
+import { conditionLabel } from '../lib/weatherCodes';
+import { addDays, convTemp, daysBetween, downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate, todayISO } from '../lib/format';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { Icon } from '../components/Icon';
+import { Sk } from '../components/Skeletons';
+
+export function History({ cityId }: { cityId: string }) {
+  const s = useWeatherStore(useShallow((st) => {
+    const entry = st.forecasts[cityId];
+    const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
+    return {
+      city: st.cities.find((c) => c.id === cityId),
+      log: st.history[cityId],
+      normals: st.normals[cityId],
+      today,
+      years: st.thisDay[`${cityId}:${today.slice(5)}`],
+      draft: st.lookupDraft,
+      lookup: st.lookups[`${cityId}:${st.lookupDraft}`],
+      tempUnit: st.settings.tempUnit,
+      windUnit: st.settings.windUnit,
+      loadThisDay: st.loadThisDay,
+      setLookupDraft: st.setLookupDraft,
+      lookupDate: st.lookupDate,
+      navigate: st.navigate,
+      goHome: st.goHome,
+      range: st.historyRange,
+      setRange: st.setHistoryRange,
+      cityIndex: st.cities.findIndex((c) => c.id === cityId),
+      back: st.back,
+    };
+  }));
+  const { loadThisDay, today } = s;
+  useEffect(() => { void loadThisDay(cityId, today); }, [cityId, today, loadThisDay]);
+
+  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>This city is no longer followed.</Text></div>;
+
+  const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
+  const rows = Object.values(s.log ?? {}).sort((a, b) => b.date.localeCompare(a.date));
+  const maxLookup = addDays(today, -5); // archive lags ~5 days
+
+  const open = (date: string) => (date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }));
+
+  const exportCsv = () => {
+    const head = 'date,max_c,min_c,feels_max_c,feels_min_c,precip_mm,snow_cm,wind_max_kmh,gust_max_kmh,sunshine_s,uv_max,weather_code,source';
+    const body = rows.map((r) => [r.date, r.hi, r.lo, r.feelsHi, r.feelsLo, r.mm, r.snow, r.wind, r.gust, r.sunshine, r.uv, r.code, r.source].map((x) => x ?? '').join(',')).join('\n');
+    downloadFile(`${s.city!.name.toLowerCase().replace(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
+  };
+
+  return (
+    <div className="screen">
+      <ScreenHeader right={
+        <ActionIcon aria-label="Export CSV" disabled={!rows.length} onClick={exportCsv}><Icon name="download" size={20} /></ActionIcon>
+      } />
+      <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
+      <Title className="display display-sm">This day,<br />other years.</Title>
+
+      <Paper className="glass" mx={12}>
+        <div className="archive-grid">
+          {(s.years ?? [0, 1, 2, 3].map(() => null)).map((y, i) => (
+            <UnstyledButton key={y?.year ?? i} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
+              disabled={!y || y.error} onClick={() => y && open(`${y.year}${today.slice(4)}`)}>
+              {y ? (
+                <>
+                  <Text fz={11} c="dimmed">{y.year}</Text>
+                  <Text fz={22} fw={800}>{y.error ? '–' : `${T(y.hi)}°`}</Text>
+                  <Text fz={11} c="dimmed">{y.error ? 'No data' : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
+                </>
+              ) : (
+                <>
+                  <Sk w={30} h={11} mt={3} />
+                  <Sk w={44} h={26} mt={5} />
+                  <Sk w={56} h={11} mt={5} />
+                </>
+              )}
+            </UnstyledButton>
+          ))}
+        </div>
+        <Box p={12} style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
+          <Group gap={8} wrap="nowrap" align="flex-end">
+            <TextInput type="date" label="Look up any date since 1940" style={{ flex: 1 }}
+              min="1940-01-01" max={maxLookup} value={s.draft}
+              onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
+            <Button disabled={!s.draft} loading={s.lookup?.loading} onClick={() => s.lookupDate(cityId, s.draft)}>Look up</Button>
+          </Group>
+          {s.lookup && !s.lookup.loading && (
+            <UnstyledButton mt={8} disabled={!!s.lookup.error} onClick={() => open(s.draft)}>
+            <Text fz={13} c={s.lookup.error ? 'signal.3' : undefined}>
+              {s.lookup.error ?? `${longDate(s.draft)}: ${conditionLabel(s.lookup.code)}, ${T(s.lookup.hi)}° / ${T(s.lookup.lo)}°, ${(s.lookup.mm ?? 0).toFixed(1)} mm, wind ${fmtWind(s.lookup.wind, s.windUnit)} →`}
+            </Text>
+            </UnstyledButton>
+          )}
+        </Box>
+      </Paper>
+
+      {rows.length > 1 && (() => {
+        const inRange = rows.filter((r) => !s.range || daysBetween(r.date, today) < s.range).slice().reverse();
+        const chart = inRange.map((r) => {
+          const n = s.normals?.[r.date.slice(5)];
+          return {
+            label: shortDate(r.date),
+            High: convTemp(r.hi, s.tempUnit),
+            Low: convTemp(r.lo, s.tempUnit),
+            Normal: convTemp(n, s.tempUnit),
+            mm: r.mm,
+            'vs avg': n != null && r.hi != null ? Math.round((s.tempUnit === 'F' ? (r.hi - n) * 9 / 5 : r.hi - n) * 10) / 10 : null,
+          };
+        });
+        const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(chart.length / 6) - 1) } };
+        return (
+          <Box px={20}>
+            <Group justify="space-between" className="kicker" style={{ paddingBottom: 8 }}>
+              <span>Trends</span>
+              <SegmentedControl size="xs" value={String(s.range)} onChange={(v) => s.setRange(Number(v))}
+                data={[{ value: '30', label: '30d' }, { value: '90', label: '90d' }, { value: '365', label: '1y' }, { value: '0', label: 'All' }]} />
+            </Group>
+            <Text fz={12} c="dimmed" pt={12} pb={4}>Daily high and low against the 1991–2020 normal</Text>
+            <LineChart {...base} h={180} withDots={chart.length < 15} unit="°"
+              data={chart} series={[{ name: 'High', color: 'dark.0' }, { name: 'Low', color: 'dark.3' }, { name: 'Normal', color: 'dark.2', strokeDasharray: '4 3' }]} />
+            <Text fz={12} c="dimmed" pt={16} pb={4}>Warmer or colder than normal</Text>
+            <BarChart {...base} h={120} unit="°" withLegend={false} data={chart} series={[{ name: 'vs avg', color: 'signal.5' }]}
+              getBarColor={(v) => (v >= 0 ? 'signal.5' : 'dark.2')} referenceLines={[{ y: 0, color: 'dark.2' }]} />
+            <Text fz={12} c="dimmed" pt={16} pb={4}>Precipitation, mm</Text>
+            <BarChart {...base} h={120} withLegend={false} data={chart} series={[{ name: 'mm', color: 'dark.1' }]} />
+          </Box>
+        );
+      })()}
+
+      <Box px={20} pb={24}>
+        <div className="kicker">Your log · {rows.length} {rows.length === 1 ? 'day' : 'days'} since {shortDate(s.city.followedAt)}</div>
+        {rows.length === 0 && <Text py={12} fz={13} c="dimmed">The first snapshot is saved after the forecast loads.</Text>}
+        {rows.map((r) => {
+          const normal = s.normals?.[r.date.slice(5)];
+          const delta = normal != null && r.hi != null ? fmtDelta(r.hi - normal, s.tempUnit) : null;
+          return (
+            <UnstyledButton key={r.date} className="row" py={10} w="100%" onClick={() => open(r.date)}
+              style={{ display: 'grid', gridTemplateColumns: '72px 1fr auto', alignItems: 'baseline', gap: 8 }}>
+              <Text fz={14} fw={800}>{r.date === today ? 'Today' : shortDate(r.date)}</Text>
+              <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+                <Text fz={13} c="dimmed" truncate>{conditionLabel(r.code)}, {(r.mm || 0).toFixed(1)} mm{r.feelsHi != null ? ` · feels ${T(r.feelsHi)}°` : ''}</Text>
+                {r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">Filled</Badge>}
+              </Group>
+              <Text fz={20} fw={800}>
+                {T(r.hi)}°
+                {delta && <Text span fz={12} ml={6} c={delta.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta}</Text>}
+              </Text>
+            </UnstyledButton>
+          );
+        })}
+      </Box>
+    </div>
+  );
+}
