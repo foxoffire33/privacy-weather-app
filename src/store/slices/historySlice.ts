@@ -52,6 +52,21 @@ export const createHistorySlice: SliceCreator<HistorySlice> = (set, get) => ({
     return { history: { ...s.history, [id]: log } };
   }),
 
+  // Yesterday is already part of the forecast response (past_days >= 1): add it to the log if it is not there yet.
+  logYesterday: (id) => set((s) => {
+    const entry = s.forecasts[id];
+    const i = entry ? entry.pastDays - 1 : -1;
+    if (!entry || i < 0 || s.history[id]?.[entry.data.daily.time[i]]) return {};
+    const { time, v } = entry.data.daily;
+    const date = time[i];
+    const rec: DayRecord = {
+      date, hi: v.temperature_2m_max[i], lo: v.temperature_2m_min[i], feelsHi: v.apparent_temperature_max[i], feelsLo: v.apparent_temperature_min[i],
+      mm: v.precipitation_sum[i], snow: v.snowfall_sum[i], wind: v.wind_speed_10m_max[i], gust: v.wind_gusts_10m_max[i],
+      sunshine: v.sunshine_duration[i], uv: v.uv_index_max[i], code: v.weather_code[i], source: 'filled', snapshots: 0,
+    };
+    return { history: { ...s.history, [id]: { ...(s.history[id] ?? {}), [date]: rec } } };
+  }),
+
   loadNormals: async (id) => {
     const city = get().cities.find((c) => c.id === id);
     const key = `normals:${id}`;

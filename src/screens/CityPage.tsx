@@ -18,6 +18,7 @@ import { convTemp } from '../lib/format';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
+import { usePullPast } from '../hooks/usePullPast';
 
 const WEEK_SERIES = [
   { name: 'mm', type: 'bar' as const, color: 'signal.7', yAxisId: 'right' },
@@ -80,9 +81,20 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     refreshCity: st.refreshCity,
     navigate: st.navigate,
     toggleDay: st.toggleDay,
+    logYesterday: st.logYesterday,
   })));
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const strip = useDragScroll<HTMLDivElement>();
+  // Pulling right at the start of the strip reveals the hours already passed (yesterday included) and logs yesterday.
+  const [showPast, setShowPast] = useState(false);
+  const pastPull = usePullPast(strip.ref, () => { setShowPast(true); s.logYesterday(city.id); }, !showPast);
+  useEffect(() => {
+    const el = strip.ref.current;
+    const now = showPast ? el?.querySelector<HTMLElement>('[data-now]') : null;
+    if (!el || !now) return;
+    el.scrollLeft = now.offsetLeft; // keep what was on screen, then glide back to show the new hours
+    el.scrollTo({ left: Math.max(0, now.offsetLeft - 3 * 52), behavior: 'smooth' });
+  }, [showPast]); // eslint-disable-line react-hooks/exhaustive-deps
   // Selecting a day scrolls the hourly strip to its first hour.
   useEffect(() => {
     const el = strip.ref.current;
@@ -135,15 +147,19 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const precipProb = dv.precipitation_probability_max[t] ?? 0;
 
   // Hourly strip: every remaining hour of the 7-day forecast
-  const hours = data.hourly.time.slice(h0).map((time, k) => {
-    const i = h0 + k;
+  const from = showPast ? 0 : h0;
+  const hours = data.hourly.time.slice(from).map((time, k) => {
+    const i = from + k;
+    const dayStart = hourOf(time) === '00' && (k > 0 || showPast);
     return {
       time,
       date: time.slice(0, 10),
-      label: k === 0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
-      dayBreak: k > 0 && hourOf(time) === '00',
-      dayName: k > 0 && hourOf(time) === '00' ? weekday(time.slice(0, 10)).toUpperCase() : '',
-      temp: k === 0 ? c.temperature_2m : hv.temperature_2m[i],
+      isNow: i === h0,
+      past: i < h0,
+      label: i === h0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
+      dayBreak: dayStart,
+      dayName: dayStart ? weekday(time.slice(0, 10)).toUpperCase() : '',
+      temp: i === h0 ? c.temperature_2m : hv.temperature_2m[i],
       p: hv.precipitation_probability[i] ?? 0,
       wind: hv.wind_speed_10m[i],
     };
@@ -204,7 +220,12 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
           )}
         </Box>
 
-        <div className="hourly-strip" {...strip}>
+        <div className="hourly-strip" {...strip} {...pastPull.touch}>
+          {pastPull.pull > 0 && (
+            <div className="pull-past" style={{ width: pastPull.pull, color: pastPull.armed ? 'var(--mantine-color-signal-4)' : undefined }}>
+              {pastPull.armed ? 'Release' : 'Yesterday'}
+            </div>
+          )}
           {hours.map((h) => (
             <Fragment key={h.time}>
             {h.dayName && (
@@ -214,7 +235,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
                 <i />
               </div>
             )}
-            <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-on={h.date === s.expanded || undefined}>
+            <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .55 } : undefined}>
               <Text fz={11} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
               <Text fz={10} fw={600} c="signal.3">{h.p}%</Text>

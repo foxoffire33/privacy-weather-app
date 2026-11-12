@@ -34,6 +34,7 @@ export interface HistorySlice {
   dayStatus: Record<string, { loading: boolean; error: string | null }>;
   gapDays: (id: string) => number;
   recordForecast: (id: string, data: ForecastData, pastDays: number, gap: number) => void;
+  logYesterday: (id: string) => void;
   loadNormals: (id: string) => Promise<void>;
   loadThisDay: (id: string, date: string) => Promise<void>;
   setLookupDraft: (date: string) => void;
