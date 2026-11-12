@@ -251,9 +251,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
               mm: dv.precipitation_sum[i],
             }))}
             series={[
-              { name: 'mm', type: 'bar', color: 'dark.5', yAxisId: 'right' },
-              { name: 'High', type: 'line', color: 'dark.0' },
-              { name: 'Low', type: 'line', color: 'dark.3' },
+              { name: 'mm', type: 'bar', color: 'signal.7', yAxisId: 'right' },
+              { name: 'High', type: 'line', color: 'signal.4' },
+              { name: 'Low', type: 'line', color: 'signal.2' },
             ]} />
         </Box>
       </Section>
