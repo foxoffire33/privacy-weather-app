@@ -65,6 +65,8 @@ npm run cap:open   # open in Android Studio, then Run
 
 To get an installable APK without Android Studio, push this project to GitHub. The **Android APK** workflow (`.github/workflows/android-apk.yml`) builds `app-debug.apk` for every published release and attaches it to the release and install it on the phone (allow installing from unknown sources).
 
+The launcher icon follows the accent colour: the manifest has one launcher alias per accent and `AppIconPlugin` enables the matching one when the app goes to the background (a custom colour gets the nearest of green, red and blue). The accent is also saved in SharedPreferences (`app_icon` / `accent_color`) for native widgets.
+
 Privacy: the app never requests location; don't add the geolocation plugin. For snapshots while the app is closed, use a background runner. IndexedDB persists inside the Android WebView.
 
 ## F-Droid

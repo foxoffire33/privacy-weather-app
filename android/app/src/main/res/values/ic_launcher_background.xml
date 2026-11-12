@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#EC3013</color>
+    <!-- Launcher icon backgrounds, one per accent (shade 5 of each accent in src/theme.ts). -->
+    <color name="ic_launcher_green">#178A4A</color>
+    <color name="ic_launcher_red">#EC3013</color>
+    <color name="ic_launcher_blue">#2F62F5</color>
+    <color name="ic_launcher_off">#000000</color>
+    <color name="ic_launcher_background">@color/ic_launcher_green</color>
 </resources>
