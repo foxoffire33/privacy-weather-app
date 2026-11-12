@@ -44,6 +44,10 @@ export interface HistorySlice {
   setLookupDraft: (date: string) => void;
   lookupDate: (id: string, date: string) => Promise<void>;
   loadDay: (id: string, date: string) => Promise<void>;
+  /** Removes one day from a city's log. */
+  deleteLogDay: (id: string, date: string) => void;
+  /** Downloads a date range from the archive into the log. Days the app logged itself are kept. */
+  importRange: (id: string, start: string, end: string) => Promise<{ added: number; updated: number; kept: number }>;
   clearHistory: () => void;
 }
 

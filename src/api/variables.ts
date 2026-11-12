@@ -38,6 +38,12 @@ export const ARCHIVE_VARS = [
   'weather_code', 'temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'wind_speed_10m_max',
 ] as const;
 
+// Everything a log entry (DayRecord) holds that the ERA5 archive has (no UV).
+export const LOG_ARCHIVE_VARS = [
+  'weather_code', 'temperature_2m_max', 'temperature_2m_min', 'apparent_temperature_max', 'apparent_temperature_min',
+  'precipitation_sum', 'snowfall_sum', 'wind_speed_10m_max', 'wind_gusts_10m_max', 'sunshine_duration',
+] as const;
+
 // Variables available in the historical (ERA5) archive for a full past day.
 export const ARCHIVE_HOURLY_VARS = [
   'temperature_2m', 'apparent_temperature', 'relative_humidity_2m', 'dew_point_2m',

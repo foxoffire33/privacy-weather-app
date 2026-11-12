@@ -15,12 +15,13 @@ import com.getcapacitor.annotation.CapacitorPlugin;
  * Makes the launcher icon follow the accent colour chosen in Settings.
  *
  * Android can't recolour an installed icon, so the manifest declares one launcher
- * alias per accent (LauncherGreen, LauncherRed, LauncherBlue, LauncherOff). The web app
+ * alias per accent (LauncherGreen, LauncherRed, LauncherBlue, LauncherOff) plus 25 extra
+ * colours for custom accents (LauncherH000l and so on). The web app
  * calls setAccent() whenever the accent changes; the switch itself happens in apply(),
  * called when the app goes to the background, so it never interrupts the user.
  *
  * The accent is also stored in SharedPreferences ("accent_color", a #rrggbb hex) so
- * native parts such as home-screen widgets can use the same colour.
+ * the home-screen widgets (WidgetPainter) use the same colour.
  */
 @CapacitorPlugin(name = "AppIcon")
 public class AppIconPlugin extends Plugin {
@@ -30,9 +31,11 @@ public class AppIconPlugin extends Plugin {
     public static final String KEY_ACCENT_COLOR = "accent_color";
 
     private static final String DEFAULT_ALIAS = "green";
-    private static final String[] ALIASES = { "green", "red", "blue", "off" };
-    // Hues of the green, red and blue accents, used to pick the nearest icon for a custom colour.
-    private static final float[] PRESET_HUES = { 146f, 8f, 225f };
+    private static final String[] ALIASES = { "green", "red", "blue", "off",
+        "h000l", "h000d", "h030l", "h030d", "h060l", "h060d", "h090l", "h090d", "h120l", "h120d", "h150l", "h150d", "h180l", "h180d", "h210l", "h210d", "h240l", "h240d", "h270l", "h270d", "h300l", "h300d", "h330l", "h330d", "grey" };
+    // Icon background of every alias except "off" (same order), used to match a custom accent.
+    private static final int[] COLORS = { 0x178A4A, 0xEC3013, 0x2F62F5, 0x000000,
+        0xD51A1A, 0x8C1717, 0xD5781A, 0x8C5217, 0xD5D51A, 0x8C8C17, 0x78D51A, 0x528C17, 0x1AD51A, 0x178C17, 0x1AD578, 0x178C52, 0x1AD5D5, 0x178C8C, 0x1A78D5, 0x17528C, 0x1A1AD5, 0x17178C, 0x781AD5, 0x52178C, 0xD51AD5, 0x8C178C, 0xD51A78, 0x8C1752, 0x6E6B6B };
 
     @PluginMethod
     public void setAccent(PluginCall call) {
@@ -43,6 +46,8 @@ public class AppIconPlugin extends Plugin {
             .putString(KEY_ALIAS, alias)
             .putString(KEY_ACCENT_COLOR, color)
             .apply();
+        // Widgets use the accent too: redraw them right away.
+        Widgets.updateAll(getContext());
         call.resolve();
     }
 
@@ -78,7 +83,7 @@ public class AppIconPlugin extends Plugin {
         return false;
     }
 
-    /** A custom accent gets the icon whose accent hue is closest. */
+    /** A custom accent gets the icon whose colour is closest (weighted RGB distance). */
     static String nearestAlias(String hex) {
         int rgb;
         try {
@@ -86,19 +91,20 @@ public class AppIconPlugin extends Plugin {
         } catch (IllegalArgumentException e) {
             return DEFAULT_ALIAS;
         }
-        float[] hsv = new float[3];
-        Color.colorToHSV(rgb, hsv);
-        int best = 0;
-        float bestDistance = Float.MAX_VALUE;
-        for (int i = 0; i < PRESET_HUES.length; i++) {
-            float d = Math.abs(hsv[0] - PRESET_HUES[i]);
-            d = Math.min(d, 360f - d);
+        int r = Color.red(rgb), g = Color.green(rgb), b = Color.blue(rgb);
+        String best = DEFAULT_ALIAS;
+        long bestDistance = Long.MAX_VALUE;
+        for (int i = 0; i < ALIASES.length; i++) {
+            if ("off".equals(ALIASES[i])) continue;
+            int c = COLORS[i];
+            long dr = r - ((c >> 16) & 0xFF), dg = g - ((c >> 8) & 0xFF), db = b - (c & 0xFF);
+            long d = 2 * dr * dr + 4 * dg * dg + 3 * db * db;
             if (d < bestDistance) {
                 bestDistance = d;
-                best = i;
+                best = ALIASES[i];
             }
         }
-        return ALIASES[best];
+        return best;
     }
 
     private static SharedPreferences prefs(Context context) {
