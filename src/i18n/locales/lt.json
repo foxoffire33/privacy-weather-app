@@ -1,0 +1,215 @@
+{
+  "common": {
+    "back": "Atgal", "close": "Uždaryti", "cancel": "Atšaukti", "tryAgain": "Bandyti dar kartą", "default": "Numatytasis",
+    "now": "Dabar", "today": "Šiandien", "tomorrow": "Rytoj", "night": "naktis", "refresh": "Atnaujinti", "updating": "Atnaujinama",
+    "noLongerFollowed": "Šio miesto nebestebite.",
+    "dataBy": "Orų duomenys: Open-Meteo.com",
+    "days": { "one": "{count} diena", "few": "{count} dienos", "many": "{count} dienos", "other": "{count} dienų" },
+    "daysLogged": { "one": "{count} užfiksuota diena", "few": "{count} užfiksuotos dienos", "many": "{count} užfiksuotos dienos", "other": "{count} užfiksuotų dienų" },
+    "touchChart": "Palieskite grafiką, kad pamatytumėte išsamiau"
+  },
+  "ago": { "never": "niekada", "justNow": "ką tik", "minutes": "prieš {n} min.", "hours": "prieš {n} val.", "days": "prieš {n} d." },
+  "units": { "hoursMinutes": "{h} val. {m} min.", "minutes": "{m} min." },
+  "compass": { "N": "Š", "NE": "ŠR", "E": "R", "SE": "PR", "S": "P", "SW": "PV", "W": "V", "NW": "ŠV" },
+  "weather": {
+    "0": "Giedra", "1": "Daugiausia giedra", "2": "Nepastoviai debesuota", "3": "Debesuota",
+    "45": "Rūkas", "48": "Šerkšnas rūkas",
+    "51": "Silpna dulksna", "53": "Dulksna", "55": "Stipri dulksna", "56": "Lijundra (dulksna)", "57": "Lijundra (dulksna)",
+    "61": "Silpnas lietus", "63": "Lietus", "65": "Stiprus lietus", "66": "Lijundra", "67": "Lijundra",
+    "71": "Silpnas sniegas", "73": "Sniegas", "75": "Stiprus sniegas", "77": "Sniego kruopos",
+    "80": "Silpnos liūtys", "81": "Liūtys", "82": "Smarkios liūtys", "85": "Sniego šuorai", "86": "Stiprūs sniego šuorai",
+    "95": "Perkūnija", "96": "Perkūnija su kruša", "99": "Perkūnija su kruša"
+  },
+  "levels": {
+    "aqi": ["Gera", "Pakankama", "Vidutinė", "Bloga", "Labai bloga", "Itin bloga"],
+    "usAqi": { "unavailable": "Nepasiekiama", "good": "Gera", "moderate": "Vidutinė", "sensitive": "Nesveika jautrioms grupėms", "unhealthy": "Nesveika", "veryUnhealthy": "Labai nesveika", "hazardous": "Pavojinga" },
+    "pollen": ["Nėra", "Mažai", "Vidutiniškai", "Daug", "Labai daug"],
+    "beaufort": ["Štilis", "Labai silpnas vėjas", "Silpnas vėjas", "Silpnas vėjas", "Vidutinis vėjas", "Gana stiprus vėjas", "Stiprus vėjas", "Labai stiprus vėjas", "Audringas vėjas", "Audra", "Stipri audra", "Labai stipri audra", "Uraganas"],
+    "feels": { "dangerouslyCold": "Pavojingai šalta", "freezing": "Speigas", "cold": "Šalta", "cool": "Vėsu", "comfortable": "Malonu", "warm": "Šilta", "hot": "Karšta", "veryHot": "Labai karšta" },
+    "dew": { "dry": "Sausas oras", "comfortable": "Malonu", "humid": "Drėgna", "oppressive": "Tvanku" },
+    "uv": { "none": "Apsaugos nereikia", "midday": "Vidurdienį naudokite kremą", "shade": "Ieškokite šešėlio 11:00–16:00", "avoid": "Venkite vidurdienio saulės" },
+    "cape": { "low": "Maža", "moderate": "Vidutinė", "high": "Didelė", "extreme": "Ekstremali" },
+    "visibility": { "fog": "Rūkas", "mist": "Rūkana", "moderate": "Vidutinis", "clear": "Geras" },
+    "pressure": { "rising": "Kyla", "falling": "Krinta", "steady": "Stabilus" }
+  },
+  "rain": {
+    "rain": "Lietus", "snow": "Sniegas",
+    "continuing": "{word} dar bent 2 valandas",
+    "stopping": "{word} dabar, liausis apie {time}",
+    "starting": "{word} prasidės apie {time}",
+    "likely": "{word} tikėtinas nuo {time} ({p} %)",
+    "none": "Per artimiausias 12 valandų lietaus nesitikima"
+  },
+  "onboarding": {
+    "title": "Orai,\nišsaugoti.",
+    "step1Title": "Be paskyros, be sekimo",
+    "step1Text": "Prognozės gaunamos iš Open-Meteo. Asmeniniam naudojimui nemokamai, rakto nereikia.",
+    "step2Title": "Be prieigos prie vietos",
+    "step2Text": "Miestus pridedate pagal pavadinimą. Programėlė niekada neprašo GPS.",
+    "step3Title": "Visa istorija šiame įrenginyje",
+    "step3Text": "Kiekvienas stebimas miestas fiksuojamas vietoje. Niekas neįkeliama.",
+    "start": "Pasirinkite pirmąjį miestą"
+  },
+  "search": {
+    "title": "Stebėkite\nmiestą.", "placeholder": "Miesto pavadinimas", "label": "Ieškoti miestų", "results": "Rezultatai",
+    "typeMore": "Įveskite bent dvi raides.", "noMatch": "Pagal „{query}“ vietų nerasta.",
+    "following": "Stebite", "follow": "Stebėti", "privacy": "Be prieigos prie vietos. Paieška per Open-Meteo geokodavimo API."
+  },
+  "cities": {
+    "count": ["Nė vieno", "Vienas", "Du", "Trys", "Keturi", "Penki", "Šeši", "Septyni", "Aštuoni", "Devyni", "Dešimt"],
+    "title": { "one": "{word}\nmiestas.", "few": "{word}\nmiestai.", "many": "{word}\nmiesto.", "other": "{word}\nmiestų." },
+    "hint": "Tempkite rankenėlę, kad pakeistumėte tvarką. Viršutinis miestas atsidaro pirmas.",
+    "reorder": "Perkelti: {name}", "unfollow": "Nebestebėti: {name}",
+    "confirmUnfollow": "Nebestebėti {name}? Užfiksuota istorija išsaugoma.",
+    "followCity": "Stebėti miestą"
+  },
+  "home": {
+    "hintSwipe": "Perbraukite į šoną kitam miestui · ",
+    "hint": "patraukite valandų juostą į dešinę ankstesnėms dienoms · palieskite, kad uždarytumėte",
+    "cities": "Miestai", "show": "Rodyti: {name}", "refreshAll": "Atnaujinti viską", "settings": "Nustatymai"
+  },
+  "city": {
+    "couldNotLoad": "Nepavyko įkelti prognozės",
+    "precipChance": "{cond}, {p} %",
+    "heroLine": "Juntama {feels}° · Maks. {hi}° Min. {lo}°",
+    "vsAverage": "{delta} palyginti su vidurkiu",
+    "nowcastCaption": "artimiausios 2 val. · mm per 15 min.",
+    "yesterday": "Vakar", "earlier": "Anksčiau", "release": "Atleiskite",
+    "hourlyLink": "Valandinė prognozė · 7 dienos",
+    "next48": "Artimiausios 48 valandos", "next7": "Artimiausios 7 dienos", "high": "Maks.", "low": "Min.",
+    "historyButton": "Istorija · {logged}",
+    "footer": "Orų duomenys: Open-Meteo.com · atnaujinta {ago}",
+    "updatingCity": "Atnaujinama: {name}",
+    "feels": {
+      "title": "Juntama temperatūra",
+      "colder": "{label}. Dėl vėjo ir drėgmės juntama {n}° šalčiau nei oras.",
+      "warmer": "{label}. Juntama {n}° šilčiau nei oras.",
+      "close": "{label}. Artima oro temperatūrai.",
+      "air": "Oras {t}°", "humidity": "Drėgmė", "dewPoint": "Rasos taškas", "todayFeels": "Šiandien juntama", "maxMin": "Maks. / min."
+    },
+    "sun": {
+      "title": "Saulė",
+      "summary": "{daylight} šviesaus paros laiko, {change} palyginti su vakar.",
+      "sunrise": "Saulėtekis", "sunset": "Saulėlydis", "sunDown": "Saulė nusileido",
+      "passed": "Praėjo {p} % dienos", "uvNow": "UV dabar", "uvMaxToday": "UV maks. šiandien",
+      "clearSkyMax": "Maks. esant giedrai {v}", "sunshineToday": "Saulėta šiandien", "sunsetAt": "Saulėlydis {time}"
+    },
+    "precip": {
+      "title": "Lietus ir sniegas",
+      "nowDetail": "Lietus {rain} · liūtys {showers} · sniegas {snow} cm",
+      "todayDetail": "{h} val. kritulių · tikimybė {p} %",
+      "snowfallToday": "Sniegas šiandien", "snowOnGround": "Sniego ant žemės {cm} cm",
+      "noSnow": "Sniego ant žemės nėra", "chance": "tikimybė {p} %"
+    },
+    "wind": { "title": "Vėjas", "summary": "{force}, kryptis {dir}.", "from": "kryptis {dir} · {deg}°", "gusts": "Gūsiai", "maxToday": "Maks. šiandien", "gustsUpTo": "Gūsiai iki {v}" },
+    "air": {
+      "title": "Oro kokybė", "now": "Oro kokybė dabar: {level}.", "unknown": "Nežinoma",
+      "worst": " Blogiausia per 24 val.: {v} {time}.",
+      "unavailable": "Šiai vietai oro kokybės duomenų nėra.",
+      "euAqi": "Europos AQI", "usAqi": "JAV AQI",
+      "pm2_5": "Smulkiosios kietosios dalelės", "pm10": "Stambiosios kietosios dalelės", "nitrogen_dioxide": "Azoto dioksidas", "ozone": "Ozonas",
+      "sulphur_dioxide": "Sieros dioksidas", "carbon_monoxide": "Anglies monoksidas",
+      "dust": "Dulkės", "dustNote": "Sacharos / dykumų dulkės", "haze": "Migla", "hazeNote": "Aerozolių optinis storis"
+    },
+    "pollen": {
+      "title": "Žiedadulkės", "summary": "Grūdeliai m³. Prognozė sezono metu apima Europą.",
+      "none": "Šiuo metu ore žiedadulkių nėra.",
+      "alder_pollen": "Alksnis", "birch_pollen": "Beržas", "grass_pollen": "Žolės", "mugwort_pollen": "Kietis", "olive_pollen": "Alyvmedis", "ragweed_pollen": "Ambrozija"
+    },
+    "sky": { "title": "Dangus", "cloudCover": "Debesuotumas", "visibility": "Matomumas", "lowClouds": "Žemi debesys", "below3": "Žemiau 3 km", "midHigh": "Vidutiniai / aukšti", "midHighNote": "3–8 km / virš 8 km" },
+    "atmosphere": {
+      "title": "Atmosfera", "pressure": "Slėgis", "trend": "{label} · {delta} per 3 val.", "seaLevel": "Jūros lygis",
+      "thunder": "Perkūnijos rizika", "freezing": "Užšalimo lygis", "freezingNote": "0 °C aukštis",
+      "evaporation": "Garavimas", "evaporationNote": "Kiek augalai šiandien praranda (ET₀)"
+    },
+    "sea": { "title": "Jūra", "waves": "Bangos", "wavesNote": "Kryptis {dir} · kas {s} s", "swell": "Bangavimas", "temperature": "Jūros temperatūra" },
+    "day": {
+      "feelsLike": "Juntama", "precipitation": "Krituliai", "precipDetail": "{h} val. · lietus {rain} · liūtys {showers}",
+      "snowfall": "Sniegas", "wind": "Vėjas", "windDetail": "Gūsiai {gusts} · kryptis {dir}", "uvMax": "UV maks.",
+      "sunshine": "Saulėta", "ofDaylight": "iš {d} šviesaus laiko", "sunrise": "Saulėtekis", "solarEnergy": "Saulės energija"
+    }
+  },
+  "chart": {
+    "temp": "Temp.", "rain": "Lietus", "wind": "Vėjas", "uv": "UV", "clouds": "Debesys", "pressure": "Slėgis", "humidity": "Drėgmė", "air": "Oras",
+    "airTemp": "Oras", "feelsLike": "Juntama", "dewPoint": "Rasos taškas", "mm": "mm", "chance": "Tikim. %", "gusts": "Gūsiai",
+    "total": "Iš viso", "low": "Žemi", "high": "Aukšti", "good": "Gera", "fair": "Pakankama", "moderate": "Vidutinė",
+    "hourLabel": "{day} {hour}:00"
+  },
+  "hourly": {
+    "title": "Valanda\npo valandos.", "feelsLike": "Juntama", "rainChance": "Lietaus tikim.", "rain": "Lietus", "wind": "Vėjas {dir}",
+    "gusts": "Gūsiai", "uv": "UV", "clouds": "Debesys", "humidity": "Drėgmė", "visibility": "Matomumas"
+  },
+  "dayView": {
+    "logged": "Užfiksuota", "filled": "Papildyta",
+    "lowLine": "Min. {lo}° · juntama {fhi}° / {flo}°",
+    "couldNotLoad": "Nepavyko įkelti šios dienos", "hourByHour": "Valanda po valandos", "temperature": "Temperatūra",
+    "highLow": "Maks. / min.", "normalHigh": "Įprasta maks. {t}°", "dailyAverage": "Paros vidurkis",
+    "wet": "{h} val. kritulių", "snowDepth": "Sniego danga iki {cm} cm", "forecastChance": "Prognozuota tikimybė",
+    "windSummary": "Iki: {force}, dažniausiai kryptis {dir}.",
+    "maxWind": "Maks. vėjas", "maxGusts": "Maks. gūsiai", "daylight": "Šviesus paros laikas", "sunshine": "Saulėta {d}",
+    "skyAtmosphere": "Dangus ir atmosfera", "pressureNote": "hPa, min.–maks.", "maxCape": "Maks. CAPE", "capeNote": "J/kg, perkūnijos energija",
+    "airSummary": "Blogiausia valanda: {v} ({level}).",
+    "pm25": "PM2.5 vid.", "pm10": "PM10 vid.", "no2": "NO₂ vid.", "ozoneMax": "Ozonas maks.",
+    "sourceForecast": "Open-Meteo prognozių modeliai (praeities duomenys)",
+    "sourceArchive": "Open-Meteo istoriniai orai (ERA5 reanalizė)"
+  },
+  "history": {
+    "title": "Ši diena,\nkiti metai.", "export": "Eksportuoti CSV", "noData": "Duomenų nėra",
+    "lookup": "Rasti bet kurią datą nuo 1940 m.", "noArchive": "Šiai datai archyvo duomenų dar nėra",
+    "rain": "Lietus", "maxWind": "Maks. vėjas", "trends": "Tendencijos", "all": "Visi",
+    "trendTemp": "Paros maksimumas ir minimumas palyginti su 1991–2020 m. norma",
+    "trendDelta": "Šilčiau ar šalčiau nei įprasta", "trendPrecip": "Krituliai, mm",
+    "normal": "Norma", "vsAvg": "pagal vid.",
+    "yourLog": "Jūsų žurnalas · {days}",
+    "empty": "Pirmasis įrašas išsaugomas įkėlus prognozę.",
+    "rowDetail": "{cond}, {mm} mm", "rowFeels": " · juntama {t}°", "filled": "Papildyta",
+    "delete": "Ištrinti", "deleteLabel": "Ištrinti {date}",
+    "addDates": "Pridėti datų", "addTitle": "Pridėti datų į žurnalą", "from": "Nuo", "to": "Iki",
+    "addNote": "Paros orai iš istorinio archyvo (nuo 1940 m. iki prieš 5 dienas). Programėlės užfiksuotos dienos išsaugomos.",
+    "tooLong": "Vienu metu pasirinkite ne daugiau kaip 10 metų.", "download": "Atsisiųsti",
+    "downloadDays": { "one": "Atsisiųsti {count} dieną", "few": "Atsisiųsti {count} dienas", "many": "Atsisiųsti {count} dienos", "other": "Atsisiųsti {count} dienų" },
+    "added": { "one": "Pridėta {count} diena, atnaujinta {updated}.", "few": "Pridėtos {count} dienos, atnaujinta {updated}.", "many": "Pridėta {count} dienos, atnaujinta {updated}.", "other": "Pridėta {count} dienų, atnaujinta {updated}." },
+    "addedKept": { "one": "Pridėta {count} diena, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų.", "few": "Pridėtos {count} dienos, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų.", "many": "Pridėta {count} dienos, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų.", "other": "Pridėta {count} dienų, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų." },
+    "downloadFailed": "Atsisiųsti nepavyko: {error}"
+  },
+  "settings": {
+    "title": "Nustatymai.", "language": "Kalba", "languageSystem": "Sistemos ({name})",
+    "languageNote": "Naudojama telefono kalba, nebent pasirinksite kitą.",
+    "dataSource": "Duomenų šaltinis", "apiKey": "API raktas", "optional": "Neprivaloma",
+    "apiKeyNote": "Nemokamai API palikite tuščią. Raktą pridėkite tik komerciniam Open-Meteo planui.",
+    "server": "Prognozių serveris", "serverNote": "Nurodykite savo talpinamą Open-Meteo egzempliorių.",
+    "apply": "Taikyti ir atnaujinti", "appearance": "Išvaizda", "accent": "Akcento spalva",
+    "accentNote": "Naudojama temperatūros skydeliui ir mygtukams. Išjungta palieka viską juodai baltą.",
+    "accentGreen": "Žalia", "accentRed": "Raudona", "accentBlue": "Mėlyna", "accentOff": "Išjungta", "custom": "Pasirinktinė",
+    "hex": "Hex spalva", "hexNote": "Per šviesios baltam tekstui spalvos automatiškai patamsinamos.",
+    "units": "Vienetai", "temperature": "Temperatūra", "wind": "Vėjas", "history": "Istorija",
+    "interval": "Įrašų dažnis", "intervalNote": "Kol programėlė atidaryta. „Android“ versija naudos foninę užduotį.",
+    "every15": "Kas 15 minučių", "every30": "Kas 30 minučių", "hourly": "Kas valandą", "every180": "Kas 3 valandas",
+    "fillGaps": "Užpildyti spragas iš archyvo", "fillGapsNote": "Dienos, kai programėlė buvo uždaryta, papildomos iš Open-Meteo (iki 92 dienų).",
+    "stored": "Saugoma šiame įrenginyje", "storedCount": "Miestai: {cities} · dienos: {days} · IndexedDB",
+    "export": "Eksportuoti", "import": "Importuoti", "importTitle": "Importuoti iš atsarginės kopijos",
+    "exported": "Eksportuota {date}. ", "importNote": "Sujungiama su šio įrenginio duomenimis; čia užfiksuotos dienos išsaugomos.",
+    "importCities": "Miestai ({n})", "importCitiesNote": "Dar nestebimi miestai pridedami pabaigoje.",
+    "importHistory": "Istorija (dienos: {n})", "importHistoryNote": "Tik stebimiems miestams.",
+    "importSettings": "Nustatymai", "importSettingsNote": "Vienetai ir akcento spalva. Serveris ir API raktas niekada neimportuojami.",
+    "importSelected": "Importuoti pasirinktus", "imported": "Importuota naujų miestų: {cities}, dienų: {days}.",
+    "deleteAll": "Ištrinti visą istoriją", "confirmDeleteAll": "Ištrinti visą užfiksuotą istoriją? Šio veiksmo atšaukti negalima.",
+    "about": "Apie", "license": "Atvirasis kodas · GPL-3.0 · v{version}", "attribution": "Orų duomenys: Open-Meteo.com (CC BY 4.0)"
+  },
+  "backup": {
+    "notJson": "Šis failas nėra tinkamas JSON.", "notBackup": "Tai nėra „Weather Log“ atsarginė kopija.",
+    "empty": "Šiame faile nerasta miestų, istorijos ar nustatymų."
+  },
+  "widgets": {
+    "past7": "Paskutinės 7 dienos", "forecast": "Prognozė", "average": "vidurkis", "onThisDay": "Šią dieną",
+    "earlierYears": "Ankstesni metai įkeliami, kai programėlė prisijungia", "average_row": "Vidurkis",
+    "mmPer15": "mm per 15 min.", "chancePerHour": "% tikimybė per valandą", "rainShort": "Lietus {p}",
+    "android": {
+      "now": "Dabar", "nowDescription": "Dabartinė temperatūra akcento spalva, šiandiena palyginti su vidurkiu",
+      "timeline": "Laiko juosta", "timelineDescription": "Paskutinės 7 užfiksuotos dienos, šiandiena ir kitos 6 dienos su vidurkiu",
+      "thisday": "Šią dieną", "thisdayDescription": "Šiandienos maksimumas palyginti su vidurkiu ir ta pačia data ankstesniais metais",
+      "rain": "Artimiausios 2 valandos", "rainDescription": "Lietaus prognozė 15 minučių stulpeliais",
+      "hourly": "Kas valandą", "hourlyDescription": "Temperatūra ir lietaus tikimybė artimiausioms valandoms"
+    }
+  }
+}
