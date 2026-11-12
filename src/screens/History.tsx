@@ -151,17 +151,12 @@ export function History({ cityId }: { cityId: string }) {
             <SwipeRow key={r.date} label={longDate(r.date)} disabled={r.date === today}
               open={swiped === r.date} onOpenChange={(o) => setSwiped(o ? r.date : null)}
               onDelete={() => { s.deleteLogDay(cityId, r.date); setSwiped(null); }}>
-            <UnstyledButton className="row" py={10} w="100%" onClick={() => open(r.date)}
-              style={{ display: 'grid', gridTemplateColumns: '72px 1fr auto', alignItems: 'baseline', gap: 8 }}>
+            <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => open(r.date)}>
               <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
-              <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-                <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi != null ? t('history.rowFeels', { t: T(r.feelsHi) }) : ''}</Text>
-                {r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}
-              </Group>
-              <Text fz={20} fw={800}>
-                {T(r.hi)}°
-                {delta && <Text span fz={12} ml={6} c={delta.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta}</Text>}
-              </Text>
+              <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi != null ? t('history.rowFeels', { t: T(r.feelsHi) }) : ''}</Text>
+              <span>{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</span>
+              <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
+              <Text fz={12} ta="right" c={delta?.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
             </UnstyledButton>
             </SwipeRow>
           );
@@ -202,9 +197,9 @@ function ImportRange({ cityId, maxDate, importRange }: {
 
   if (!show) {
     return (
-      <UnstyledButton onClick={() => setShow(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 800 }}>
-        <Icon name="plus" size={14} /> {t('history.addDates')}
-      </UnstyledButton>
+      <button type="button" className="tab-button" onClick={() => setShow(true)}>
+        <Icon name="plus" size={14} />{t('history.addDates')}
+      </button>
     );
   }
   return (

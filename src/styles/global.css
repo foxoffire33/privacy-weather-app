@@ -30,6 +30,10 @@ body { font-variant-numeric: tabular-nums; }
 .kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #fff; font-weight: 800; padding: 20px 0 6px; border-bottom: 2px solid var(--rule); }
 .rule-top { border-top: 2px solid var(--rule); }
 .row { border-bottom: 1px solid var(--rule-soft); }
+/* Log rows: fixed columns so the Filled badge, the high and the difference line up down the
+   list whatever the description says. Only the description gives way. */
+.log-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) 54px 40px 40px; align-items: baseline; gap: 6px; }
+.log-row > span { justify-self: start; }
 /* Calm, high contrast: solid panels, no blur, clear 2px edges. */
 .glass { background: #000; border: 2px solid var(--rule); }
 
@@ -73,9 +77,11 @@ body { font-variant-numeric: tabular-nums; }
 
 /* Chart metric picker: equal-size buttons, four per row, all visible. */
 .metric-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 26px; }
-.metric-tabs button { height: 40px; padding: 0 4px; font: inherit; font-size: 13px; font-weight: 800; color: var(--mantine-color-dark-2); background: transparent; border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer; }
-.metric-tabs button[data-active] { color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5); }
-[data-accent=off] .metric-tabs button[data-active] { color: #000; background: #fff; border-color: #fff; }
+.metric-tabs button, .tab-button { height: 40px; padding: 0 4px; font: inherit; font-size: 13px; font-weight: 800; text-transform: none; letter-spacing: 0; color: var(--mantine-color-dark-2); background: transparent; border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer; }
+.metric-tabs button[data-active], .tab-button[data-active] { color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5); }
+[data-accent=off] .metric-tabs button[data-active], [data-accent=off] .tab-button[data-active] { color: #000; background: #fff; border-color: #fff; }
+/* Same button outside a tab row, e.g. "Add dates" above the log. */
+.tab-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; }
 
 /* Click-to-toggle chart legend */
 .toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }
