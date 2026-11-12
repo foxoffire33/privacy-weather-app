@@ -202,13 +202,12 @@ function ImportRange({ cityId, maxDate, importRange }: {
     );
   }
   return (
-    <Box style={{ position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-      onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
+    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
       <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
         role="dialog" aria-label={t('history.addTitle')}>
         <Group justify="space-between" mb={8}>
           <Text fz={16} fw={800}>{t('history.addTitle')}</Text>
-          <ActionIcon aria-label={t('common.close')} onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={18} /></ActionIcon>
+          <ActionIcon size={44} aria-label={t('common.close')} onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={20} /></ActionIcon>
         </Group>
         <div className="stat-grid">
           <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />

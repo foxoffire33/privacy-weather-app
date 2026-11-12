@@ -201,9 +201,9 @@ function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: 
   const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
   return (
     <div className="sheet" role="dialog" aria-label={t('history.attrTitle')}>
-      <Group justify="space-between" px={20} py={12} wrap="nowrap" className="sheet-head">
-        <Text fz={16} fw={800}>{t('history.attrTitle')}</Text>
-        <ActionIcon aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={20} /></ActionIcon>
+      <Group justify="space-between" px={14} py={8} wrap="nowrap" className="sheet-head">
+        <Text fz={16} fw={800} pl={6}>{t('history.attrTitle')}</Text>
+        <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={22} /></ActionIcon>
       </Group>
       <div className="sheet-body">
         {GROUPS.map((g) => {
@@ -240,7 +240,7 @@ function RangeSheet({ from, to, max, onApply, onClose }: {
         role="dialog" aria-label={t('history.custom')}>
         <Group justify="space-between" mb={8}>
           <Text fz={16} fw={800}>{t('history.custom')}</Text>
-          <ActionIcon aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={18} /></ActionIcon>
+          <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={20} /></ActionIcon>
         </Group>
         <div className="stat-grid">
           <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />

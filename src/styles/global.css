@@ -96,11 +96,14 @@ body { font-variant-numeric: tabular-nums; }
 /* The same button on its own, e.g. "Add dates" above the log. */
 .tab-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 
-/* Full-screen sheet (attribute picker) and the centred dialog used for date ranges. */
-.sheet { position: fixed; inset: 0; z-index: 30; background: var(--mantine-color-body); display: flex; flex-direction: column; }
+/* Full-screen sheet (attribute picker) and the dialog used for date ranges. Both are fixed to
+   the viewport, so they keep clear of the notch and the gesture bar themselves. */
+.sheet { position: fixed; inset: 0; z-index: 30; background: var(--mantine-color-body); display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); box-sizing: border-box; }
 .sheet-head { border-bottom: 2px solid var(--rule); }
-.sheet-body { flex: 1; overflow-y: auto; padding-bottom: 24px; }
-.sheet-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end; justify-content: center; }
+.sheet-body { flex: 1; overflow-y: auto; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+.sheet-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); display: flex; align-items: flex-end;
+  justify-content: center; padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }
 
 /* Click-to-toggle chart legend */
 .toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }
