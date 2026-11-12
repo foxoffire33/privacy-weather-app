@@ -1,10 +1,12 @@
-import { useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { t } from '../i18n';
 
 const ACTION_W = 88;
+const REMOVE_MS = 220;
 
 // iOS-style swipe to delete: drag the row left to reveal a red Delete button, or swipe
-// it most of the way across to delete at once. Vertical scrolling is left to the page.
+// it most of the way across to delete at once. Either way the row slides the rest of the
+// way out before it is removed. Vertical scrolling is left to the page.
 export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -14,12 +16,30 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
   children: ReactNode;
 }) {
   const [dragX, setDragX] = useState<number | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number; base: number; dir: 'h' | 'v' | null; width: number } | null>(null);
+  // A horizontal drag must not be read as a tap. The flag is cleared when the next gesture
+  // starts, because a drag often ends without any click event to clear it.
   const swallowClick = useRef(false);
-  const offset = dragX ?? (open ? -ACTION_W : 0);
+  const width = root.current?.offsetWidth ?? 420;
+  const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);
+
+  // Slide the row out, then let the parent remove it.
+  const remove = () => {
+    if (removing) return;
+    setDragX(null);
+    setRemoving(true);
+  };
+  useEffect(() => {
+    if (!removing) return;
+    const timer = window.setTimeout(onDelete, REMOVE_MS);
+    return () => window.clearTimeout(timer);
+  }, [removing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (disabled || e.button > 0) return;
+    swallowClick.current = false;
+    if (disabled || removing || e.button > 0) return;
     drag.current = { x: e.clientX, y: e.clientY, base: open ? -ACTION_W : 0, dir: null, width: e.currentTarget.offsetWidth };
   };
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -46,35 +66,36 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     if (!d || d.dir !== 'h' || dragX == null) { setDragX(null); return; }
     const x = dragX;
     setDragX(null);
-    if (x < -d.width * 0.6) onDelete();
+    if (x < -d.width * 0.6) remove();
     else onOpenChange(x < -ACTION_W / 2);
   };
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
+    <div ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
-        // A drag is not a tap, and tapping an open row closes it.
+        // A drag is not a tap, and tapping an open row anywhere but Delete closes it.
         if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
           e.preventDefault();
           e.stopPropagation();
           if (!swallowClick.current) onOpenChange(false);
+          swallowClick.current = false;
         }
-        swallowClick.current = false;
       }}>
-      <button type="button" data-swipe-action onClick={onDelete} tabIndex={open ? 0 : -1} aria-hidden={!open}
+      <button type="button" data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
         aria-label={t('history.deleteLabel', { date: label })}
         style={{
           position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
           border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
-          transition: dragX == null ? 'width .25s ease' : 'none',
+          transition: dragX == null ? `width ${REMOVE_MS}ms ease` : 'none',
         }}>
         {t('history.delete')}
       </button>
       <div style={{
         position: 'relative', background: 'var(--mantine-color-body)',
-        transform: `translateX(${offset}px)`, transition: dragX == null ? 'transform .25s ease' : 'none',
+        transform: `translateX(${offset}px)`,
+        transition: dragX == null ? `transform ${REMOVE_MS}ms ease` : 'none',
       }}>
         {children}
       </div>

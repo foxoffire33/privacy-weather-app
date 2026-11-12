@@ -25,8 +25,10 @@ const dark: MantineColorsTuple = [
 
 const font = 'Archivo, system-ui, sans-serif';
 
-// Charts: plain solid lines and solid bars only: no dashes, area fills or gradients. Quiet by default. Solid horizontal grid only, small grey ticks, flat legend swatches,
-// tooltips as square black panels. Series colours are set per chart from white/grey, red only for emphasis.
+// Charts: plain solid lines and solid bars only: no dashes, area fills or gradients. No grid lines
+// behind the chart. The touched position is marked with the same accent band as a selected day in
+// the 7-day list. Small grey ticks, flat legend swatches, tooltips as square black panels.
+// Series colours are set per chart from white/grey, red only for emphasis.
 const chartStyles = {
   legend: { paddingTop: 6 },
   legendItem: { paddingInline: '0 12px', gap: 6 },
@@ -40,16 +42,17 @@ const chartStyles = {
   tooltipItemName: { fontSize: 10, marginRight: 8 },
   tooltipItemData: { fontSize: 10, fontWeight: 800 },
 };
+// A wide, soft vertical stroke reads as a selected column, like .row[data-on].
+const cursorBand = { stroke: 'var(--selected-bg)', strokeWidth: 26, strokeDasharray: '0' };
 const chartBase = {
-  gridAxis: 'y' as const,
-  strokeDasharray: '0', // solid grid lines
-  gridColor: 'dark.5',
+  gridAxis: 'none' as const,
+  strokeDasharray: '0',
   textColor: 'dark.2',
   tickLine: 'none' as const,
   withLegend: true,
   legendProps: { verticalAlign: 'bottom' as const, height: 28 },
   tooltipAnimationDuration: 100,
-  tooltipProps: { content: CompactTooltip, position: { x: 0, y: -26 }, wrapperStyle: { width: '100%', pointerEvents: 'none' as const, visibility: 'visible' as const }, allowEscapeViewBox: { x: false, y: true }, isAnimationActive: false },
+  tooltipProps: { content: CompactTooltip, cursor: cursorBand, position: { x: 0, y: -26 }, wrapperStyle: { width: '100%', pointerEvents: 'none' as const, visibility: 'visible' as const }, allowEscapeViewBox: { x: false, y: true }, isAnimationActive: false },
   yAxisProps: { width: 34 },
 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
@@ -100,7 +103,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     SegmentedControl: SegmentedControl.extend({ defaultProps: { radius: 0 } }),
     Switch: Switch.extend({ defaultProps: { radius: 0, color: 'signal' } }),
     LineChart: LineChart.extend({ defaultProps: lineBase, styles: chartStyles }),
-    BarChart: BarChart.extend({ defaultProps: { ...chartBase, maxBarWidth: 14 }, styles: chartStyles }),
+    BarChart: BarChart.extend({ defaultProps: { ...chartBase, cursorFill: 'var(--selected-bg)', maxBarWidth: 14 }, styles: chartStyles }),
     CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),
   },
 });

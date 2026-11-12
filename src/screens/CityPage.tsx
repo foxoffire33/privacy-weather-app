@@ -252,11 +252,9 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
         </Box>
 
         <div className="hourly-strip" {...strip} {...pastPull.touch}>
-          {pastPull.pull > 0 && (
-            <div className="pull-past" style={{ width: pastPull.pull, color: pastPull.armed ? 'var(--mantine-color-signal-4)' : undefined }}>
-              {loadingPast ? '…' : pastPull.armed ? tx('city.release') : back ? tx('city.earlier') : tx('city.yesterday')}
-            </div>
-          )}
+          <div ref={pastPull.indicatorRef} className="pull-past" data-armed={pastPull.armed || undefined}>
+            {loadingPast ? '…' : pastPull.armed ? tx('city.release') : back ? tx('city.earlier') : tx('city.yesterday')}
+          </div>
           {hours.map((h) => (
             <Fragment key={h.time}>
             {h.dayName && (
@@ -266,7 +264,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
                 <i />
               </div>
             )}
-            <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .55 } : undefined}>
+            <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .82 } : undefined}>
               <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
               <Text fz={12} fw={600} c="signal.3">{h.p == null ? '–' : `${h.p}%`}</Text>

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { ActionIcon, Badge, Box, Button, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
+import { ActionIcon, Badge, Box, Button, Group, Loader, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
+import type { DayRecord, TempUnit } from '../types';
 import { conditionLabel } from '../lib/weatherCodes';
 import { addDays, convTemp, daysBetween, downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate, todayISO } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -132,38 +133,10 @@ export function History({ cityId }: { cityId: string }) {
         </Box>
       </Paper>
 
-      {rows.length > 1 && (() => {
-        const inRange = rows.filter((r) => !s.range || daysBetween(r.date, today) < s.range).slice().reverse();
-        const chart = inRange.map((r) => {
-          const n = s.normals?.[r.date.slice(5)];
-          return {
-            label: shortDate(r.date),
-            High: convTemp(r.hi, s.tempUnit),
-            Low: convTemp(r.lo, s.tempUnit),
-            Normal: convTemp(n, s.tempUnit),
-            mm: r.mm,
-            'vs avg': n != null && r.hi != null ? Math.round((s.tempUnit === 'F' ? (r.hi - n) * 9 / 5 : r.hi - n) * 10) / 10 : null,
-          };
-        });
-        const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(chart.length / 6) - 1) } };
-        return (
-          <Box px={20}>
-            <Group justify="space-between" className="kicker" style={{ paddingBottom: 8 }}>
-              <span>{t('history.trends')}</span>
-              <SegmentedControl size="xs" value={String(s.range)} onChange={(v) => s.setRange(Number(v))}
-                data={[{ value: '30', label: '30d' }, { value: '90', label: '90d' }, { value: '365', label: '1y' }, { value: '0', label: t('history.all') }]} />
-            </Group>
-            <Text fz={12} c="dimmed" pt={12} pb={4}>{t('history.trendTemp')}</Text>
-            <LineChart {...base} h={180} withDots={chart.length < 15} unit="°"
-              data={chart} series={[{ name: 'High', label: t('city.high'), color: 'signal.4' }, { name: 'Low', label: t('city.low'), color: 'signal.2' }, { name: 'Normal', label: t('history.normal'), color: 'dark.2' }]} />
-            <Text fz={12} c="dimmed" pt={16} pb={4}>{t('history.trendDelta')}</Text>
-            <BarChart {...base} h={120} unit="°" withLegend={false} data={chart} series={[{ name: 'vs avg', label: t('history.vsAvg'), color: 'signal.5' }]}
-              getBarColor={(v) => (v >= 0 ? 'signal.4' : 'dark.3')} referenceLines={[{ y: 0, color: 'dark.2' }]} />
-            <Text fz={12} c="dimmed" pt={16} pb={4}>{t('history.trendPrecip')}</Text>
-            <BarChart {...base} h={120} withLegend={false} data={chart} series={[{ name: 'mm', label: t('chart.mm'), color: 'signal.6' }]} />
-          </Box>
-        );
-      })()}
+      {rows.length > 1 && (
+        <Trends cityId={cityId} log={s.log} normals={s.normals} today={today} followedAt={s.city.followedAt}
+          tempUnit={s.tempUnit} importRange={s.importRange} />
+      )}
 
       <Box px={20} pb={24}>
         <Group justify="space-between" className="kicker" wrap="nowrap">
@@ -256,6 +229,155 @@ function ImportRange({ cityId, maxDate, importRange }: {
         </Button>
         {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}
       </Paper>
+    </Box>
+  );
+}
+
+const METRICS = [
+  { value: 'temp', label: 'history.metricTemp' },
+  { value: 'delta', label: 'history.metricDelta' },
+  { value: 'rain', label: 'city.day.precipitation' },
+] as const;
+const LENGTHS = [30, 90, 365, 0];
+const BACK_YEARS = [0, 1, 10, 30];
+
+// Trends: one metric at a time over a chosen period, optionally against the same period in an
+// earlier year. Days missing from the log for either period are downloaded from the archive and
+// added to the log, so comparing also fills the history.
+function Trends({ cityId, log, normals, today, followedAt, tempUnit, importRange }: {
+  cityId: string;
+  log?: Record<string, DayRecord>;
+  normals?: Record<string, number>;
+  today: string;
+  followedAt: string;
+  tempUnit: TempUnit;
+  importRange: (id: string, start: string, end: string) => Promise<{ added: number; updated: number; kept: number }>;
+}) {
+  const [metric, setMetric] = useState<(typeof METRICS)[number]['value']>('temp');
+  const [len, setLen] = useState(90);
+  const [back, setBack] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fetched = useRef<Set<string>>(new Set());
+
+  const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
+  const first = addDays(today, -(days - 1));
+  const shift = (date: string, years: number) => (years ? `${+date.slice(0, 4) - years}${date.slice(4)}` : date);
+  const maxArchive = addDays(today, -5); // the archive lags about 5 days
+
+  // Fill whatever the selected periods are missing, once per period.
+  useEffect(() => {
+    const windows = [{ from: first, to: today }];
+    if (back) windows.push({ from: shift(first, back), to: shift(today, back) });
+    const wanted = windows
+      .map(({ from, to }) => ({ from, to: to > maxArchive ? maxArchive : to }))
+      .filter(({ from, to }) => {
+        if (from > to) return false;
+        for (let d = from; d <= to; d = addDays(d, 1)) if (!log?.[d]) return true;
+        return false;
+      })
+      .filter(({ from, to }) => !fetched.current.has(`${cityId}:${from}:${to}`));
+    if (!wanted.length) return;
+    let active = true;
+    setBusy(true);
+    setError(null);
+    void (async () => {
+      for (const { from, to } of wanted) {
+        fetched.current.add(`${cityId}:${from}:${to}`);
+        try {
+          await importRange(cityId, from, to);
+        } catch (e) {
+          if (active) setError((e as Error).message);
+        }
+      }
+      if (active) setBusy(false);
+    })();
+    return () => { active = false; };
+  }, [cityId, len, back, days]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const T = (c?: number | null) => convTemp(c, tempUnit);
+  const delta = (r?: DayRecord) => {
+    const n = r && normals?.[r.date.slice(5)];
+    return n != null && r?.hi != null ? Math.round((tempUnit === 'F' ? (r.hi - n) * 9 / 5 : r.hi - n) * 10) / 10 : null;
+  };
+  const yearB = back ? String(+today.slice(0, 4) - back) : '';
+  const thisYear = today.slice(0, 4);
+
+  const chart = [];
+  for (let d = first; d <= today; d = addDays(d, 1)) {
+    const a = log?.[d];
+    const b = back ? log?.[shift(d, back)] : undefined;
+    chart.push({
+      label: shortDate(d),
+      High: T(a?.hi), Low: T(a?.lo), Normal: T(normals?.[d.slice(5)]),
+      mm: a?.mm ?? null, 'vs avg': delta(a),
+      HighB: T(b?.hi), mmB: b?.mm ?? null, 'vs avgB': delta(b),
+    });
+  }
+  const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(chart.length / 6) - 1) } };
+  const hi = { name: 'High', label: back ? `${t('city.high')} ${thisYear}` : t('city.high'), color: 'signal.4' };
+  const hiB = { name: 'HighB', label: `${t('city.high')} ${yearB}`, color: 'dark.2' };
+
+  return (
+    <Box px={20}>
+      <div className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</div>
+      <div className="metric-tabs" role="tablist" style={{ marginBottom: 8 }}>
+        {METRICS.map((m) => (
+          <button key={m.value} type="button" role="tab" aria-selected={m.value === metric}
+            data-active={m.value === metric || undefined} onClick={() => setMetric(m.value)}>{t(m.label)}</button>
+        ))}
+      </div>
+      <div className="metric-tabs" role="tablist" style={{ marginBottom: 8 }}>
+        {LENGTHS.map((d) => (
+          <button key={d} type="button" role="tab" aria-selected={d === len} data-active={d === len || undefined}
+            onClick={() => setLen(d)}>{d ? `${d === 365 ? '1y' : `${d}d`}` : t('history.all')}</button>
+        ))}
+      </div>
+      <Text fz={12} c="dimmed" pb={4}>{t('history.compare')}</Text>
+      <div className="metric-tabs" role="tablist">
+        {BACK_YEARS.map((y) => (
+          <button key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
+            onClick={() => setBack(y)}>{y ? t('history.yearsAgo', { n: y }) : t('history.off')}</button>
+        ))}
+      </div>
+
+      {busy && (
+        <Group gap={8} py={8} wrap="nowrap" role="status">
+          <Loader size="xs" />
+          <Text fz={12} c="dimmed">{t('history.loadingDays')}</Text>
+        </Group>
+      )}
+      {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
+
+      {metric === 'temp' && (
+        <>
+          <Text fz={12} c="dimmed" pt={12} pb={4}>{t('history.trendTemp')}</Text>
+          <LineChart {...base} h={180} withDots={chart.length < 15} unit="°" data={chart}
+            series={back
+              ? [hi, hiB]
+              : [hi, { name: 'Low', label: t('city.low'), color: 'signal.2' }, { name: 'Normal', label: t('history.normal'), color: 'dark.2' }]} />
+        </>
+      )}
+      {metric === 'delta' && (
+        <>
+          <Text fz={12} c="dimmed" pt={12} pb={4}>{t('history.trendDelta')}</Text>
+          <BarChart {...base} h={160} unit="°" withLegend={!!back} data={chart}
+            series={back
+              ? [{ name: 'vs avg', label: thisYear, color: 'signal.4' }, { name: 'vs avgB', label: yearB, color: 'dark.2' }]
+              : [{ name: 'vs avg', label: t('history.vsAvg'), color: 'signal.5' }]}
+            getBarColor={back ? undefined : (v) => (v >= 0 ? 'signal.4' : 'dark.3')}
+            referenceLines={[{ y: 0, color: 'dark.2' }]} />
+        </>
+      )}
+      {metric === 'rain' && (
+        <>
+          <Text fz={12} c="dimmed" pt={12} pb={4}>{t('history.trendPrecip')}</Text>
+          <BarChart {...base} h={160} withLegend={!!back} data={chart}
+            series={back
+              ? [{ name: 'mm', label: thisYear, color: 'signal.4' }, { name: 'mmB', label: yearB, color: 'dark.2' }]
+              : [{ name: 'mm', label: t('chart.mm'), color: 'signal.6' }]} />
+        </>
+      )}
     </Box>
   );
 }
