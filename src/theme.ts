@@ -31,13 +31,13 @@ const chartStyles = {
   legendItem: { paddingInline: '0 12px', gap: 6 },
   legendItemColor: { borderRadius: 0, width: 12, height: 3, minWidth: 12, minHeight: 3, boxShadow: 'none' },
   legendItemName: { fontSize: 11, color: 'var(--mantine-color-dark-2)' },
-  tooltip: { borderRadius: 0, border: '2px solid var(--rule)', background: '#000', boxShadow: '0 6px 18px rgba(0,0,0,.6)', padding: '4px 8px', fontSize: 11 },
-  tooltipLabel: { fontSize: 11, marginBottom: 2 },
+  tooltip: { borderRadius: 0, border: '2px solid var(--rule)', background: '#000', boxShadow: '0 6px 18px rgba(0,0,0,.6)', padding: '3px 6px', fontSize: 10 },
+  tooltipLabel: { fontSize: 10, marginBottom: 1, fontWeight: 800 },
   tooltipBody: { padding: 0 },
-  tooltipItem: { fontSize: 11, lineHeight: 1.3, gap: 6 },
-  tooltipItemColor: { width: 8, height: 8, borderRadius: 0 },
-  tooltipItemName: { fontSize: 11 },
-  tooltipItemData: { fontSize: 11, fontWeight: 800 },
+  tooltipItem: { fontSize: 10, lineHeight: 1.2, gap: 6 },
+  tooltipItemColor: { width: 6, height: 6, borderRadius: 0 },
+  tooltipItemName: { fontSize: 10, marginRight: 8 },
+  tooltipItemData: { fontSize: 10, fontWeight: 800 },
 };
 const chartBase = {
   gridAxis: 'y' as const,
@@ -48,6 +48,7 @@ const chartBase = {
   withLegend: true,
   legendProps: { verticalAlign: 'bottom' as const, height: 28 },
   tooltipAnimationDuration: 100,
+  valueFormatter: (v: number) => String(Math.round(v * 10) / 10),
   yAxisProps: { width: 34 },
 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
