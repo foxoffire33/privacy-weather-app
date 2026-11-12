@@ -150,7 +150,7 @@ export function Settings() {
                 disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setParts({ ...parts, cities: e.currentTarget.checked })} />
               <Switch label={`History (${countDays(pending)} days)`} description="Only for cities you follow."
                 disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setParts({ ...parts, history: e.currentTarget.checked })} />
-              <Switch label="Settings" description="Units, accent colour and server. Your API key is never part of a backup."
+              <Switch label="Settings" description="Units and accent colour. The server and your API key are never imported."
                 disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setParts({ ...parts, settings: e.currentTarget.checked })} />
             </Stack>
             <Group mt={12} gap={8}>

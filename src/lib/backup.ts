@@ -46,7 +46,6 @@ export function parseBackup(text: string): Backup {
   if (typeof s.backfill === 'boolean') settings.backfill = s.backfill;
   if (['green', 'red', 'blue', 'off', 'custom'].includes(s.accent as string)) settings.accent = s.accent as Settings['accent'];
   if (isStr(s.accentColor) && /^#[0-9a-f]{6}$/i.test(s.accentColor)) settings.accentColor = s.accentColor;
-  if (isStr(s.server)) settings.server = s.server;
 
   if (!cities.length && !Object.keys(history).length && !Object.keys(settings).length) throw new Error('No cities, history or settings found in this file.');
   return { version: 1, exportedAt: isStr(raw.exportedAt) ? raw.exportedAt : '', settings, cities, history };
