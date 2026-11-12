@@ -47,6 +47,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   for (let i = from; i < end; i++) {
     const t = time[i];
     data.push({
+      when: `${weekday(t.slice(0, 10))} ${hourOf(t)}:00`,
       label: hourOf(t) === '00' && i !== from ? weekday(t.slice(0, 10)) : hourOf(t),
       Air: convTemp(at('temperature_2m', i), s.tempUnit),
       'Feels like': convTemp(at('apparent_temperature', i), s.tempUnit),
