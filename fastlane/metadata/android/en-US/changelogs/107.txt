@@ -1,0 +1,6 @@
+New home-screen widgets: Now, Timeline, On this day, Next 2 hours and Hourly.
+Swipe a day left in your log to delete it.
+Download a range of past dates into your log.
+Dates you look up are saved to your log.
+Custom accent colours get a closer matching app icon.
+Simpler charts: plain lines and bars.
