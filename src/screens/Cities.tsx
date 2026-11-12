@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
+import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../storesV2';
+import { useUiStore } from '../store/uiStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { fmtTemp } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -9,28 +10,22 @@ import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
 import { t, tl } from '../i18n';
 
-const EDGE = 70; // px from the list edge where dragging auto-scrolls
+const EDGE = 70;
 
 interface Drag { from: number; to: number; dy: number }
 
 export function Cities() {
-  const { cities, forecasts, history, tempUnit, reorderCities, unfollowCity, goHome, navigate } = useWeatherStore(useShallow((s) => ({
-    cities: s.cities,
-    forecasts: s.forecasts,
-    history: s.history,
-    tempUnit: s.settings.tempUnit,
-    reorderCities: s.reorderCities,
-    unfollowCity: s.unfollowCity,
-    goHome: s.goHome,
-    navigate: s.navigate,
-  })));
+  const cities = useCities();
+  const forecasts = useForecastStore((s) => s.forecasts);
+  const logged = useLogStore((s) => s.dates);
+  const tempUnit = useUnits().temp;
+  const reorderCities = useCityStore((s) => s.reorder);
+  const { goHome, navigate } = useUiStore(useShallow((s) => ({ goHome: s.goHome, navigate: s.navigate })));
   const n = cities.length;
   const scroller = useRef<HTMLDivElement>(null);
   const firstRow = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
-  // Gesture bookkeeping that must not trigger renders.
   const g = useRef({ startY: 0, startScroll: 0, pointerY: 0, rowH: 1, from: 0, raf: 0 });
-
   const update = () => {
     const el = scroller.current;
     if (!el) return;
@@ -38,8 +33,6 @@ export function Cities() {
     const to = Math.max(0, Math.min(n - 1, g.current.from + Math.round(dy / g.current.rowH)));
     setDrag({ from: g.current.from, to, dy });
   };
-
-  // While dragging near the top or bottom of the list, keep scrolling it.
   const tick = () => {
     const el = scroller.current;
     if (el) {
@@ -51,7 +44,6 @@ export function Cities() {
     g.current.raf = requestAnimationFrame(tick);
   };
   useEffect(() => () => cancelAnimationFrame(g.current.raf), []);
-
   const onDown = (e: PointerEvent<HTMLElement>, i: number) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     g.current = { ...g.current, startY: e.clientY, pointerY: e.clientY, startScroll: scroller.current?.scrollTop ?? 0, rowH: firstRow.current?.offsetHeight || 1, from: i };
@@ -68,15 +60,12 @@ export function Cities() {
     if (drag && drag.from !== drag.to) reorderCities(drag.from, drag.to);
     setDrag(null);
   };
-
-  // Rows between the dragged row's origin and target slide one row out of the way.
   const shift = (i: number) => {
     if (!drag || i === drag.from) return 0;
     if (drag.from < drag.to && i > drag.from && i <= drag.to) return -g.current.rowH;
     if (drag.from > drag.to && i < drag.from && i >= drag.to) return g.current.rowH;
     return 0;
   };
-
   return (
     <div className="screen" style={{ overflow: 'hidden' }}>
       <div className="cities-scroll" ref={scroller} style={{ overflowY: drag ? 'hidden' : undefined }}>
@@ -87,7 +76,7 @@ export function Cities() {
         <Box className="rule-top">
           {cities.map((c, i) => {
             const f = forecasts[c.id];
-            const days = Object.keys(history[c.id] ?? {}).length;
+            const days = (logged[c.id] ?? []).length;
             const dragging = drag?.from === i;
             return (
               <Box key={c.id} ref={i === 0 ? firstRow : undefined} className="city-row" data-dragging={dragging || undefined}

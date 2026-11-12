@@ -1,6 +1,5 @@
 import { Box, Group, Text, Title } from '@mantine/core';
-import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
+import { useCity, useForecast, useUnits } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
 import { nowIndex } from '../lib/insights';
@@ -26,16 +25,10 @@ function HourBlockSk() {
   );
 }
 
-// Every remaining hour of the 7-day forecast as a readable block, grouped by day.
 export function Hourly({ cityId }: { cityId: string }) {
-  const s = useWeatherStore(useShallow((st) => ({
-    city: st.cities.find((c) => c.id === cityId),
-    entry: st.forecasts[cityId],
-    tempUnit: st.settings.tempUnit,
-    windUnit: st.settings.windUnit,
-  })));
+  const units = useUnits();
+  const s = { city: useCity(cityId), entry: useForecast(cityId), tempUnit: units.temp, windUnit: units.wind };
   if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
-
   const header = (
     <>
       <ScreenHeader />

@@ -2,8 +2,6 @@ import { useState } from 'react';
 
 export interface ToggleSeries { name: string; label?: string; color: string }
 
-// Click-to-toggle legend. Mantine's own legend is not interactive, so charts pass withLegend={false}
-// and draw only the series that are not switched off.
 export function useSeriesToggle(scope: string) {
   const [off, setOff] = useState<Set<string>>(new Set());
   const key = (name: string) => `${scope}:${name}`;

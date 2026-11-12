@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
-import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
+import { openDay, useCity, useDay, useDayQuery, useDayRecord, useNormals, useUnits } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
 import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';
@@ -17,26 +16,21 @@ const max = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Ma
 const min = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Math.min(...n) : null; };
 const f = (v: number | null | undefined, d = 0) => (v == null ? '–' : v.toFixed(d));
 
-// A logged (or looked-up) day loaded in full, laid out like the city page.
 export function DayView({ cityId, date }: { cityId: string; date: string }) {
-  const key = `${cityId}:${date}`;
-  const s = useWeatherStore(useShallow((st) => ({
-    city: st.cities.find((c) => c.id === cityId),
-    day: st.days[key],
-    status: st.dayStatus[key],
-    record: st.history[cityId]?.[date],
-    normal: st.normals[cityId]?.[date.slice(5)],
-    tempUnit: st.settings.tempUnit,
-    windUnit: st.settings.windUnit,
-    loadDay: st.loadDay,
-  })));
-  const { loadDay } = s;
-  useEffect(() => { void loadDay(cityId, date); }, [cityId, date, loadDay]);
-
+  const units = useUnits();
+  const s = {
+    city: useCity(cityId),
+    day: useDay(cityId, date),
+    query: useDayQuery(cityId, date),
+    record: useDayRecord(cityId, date),
+    normal: useNormals(cityId)?.[date.slice(5)],
+    tempUnit: units.temp,
+    windUnit: units.wind,
+  };
+  useEffect(() => { void openDay(cityId, date); }, [cityId, date]);
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
   if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
-
   const day = s.day;
   const d = day?.daily.v ?? {};
   const h = day?.hourly.v ?? {};
@@ -45,7 +39,6 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
   const aqi = day?.air ? Object.fromEntries(day.air.time.map((t, i) => [t, day.air!.v.european_aqi?.[i] ?? null])) : undefined;
   const aqiMax = max(day?.air?.v.european_aqi);
   const aqiLvl = euAqiLevel(aqiMax);
-
   return (
     <div className="screen">
       <div className="hero" style={{ paddingTop: 8 }}>
@@ -74,12 +67,12 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
       </div>
 
       {!day && (
-        <Box p={s.status?.error ? 20 : 0}>
-          {s.status?.error ? (
+        <Box p={s.query.error ? 20 : 0}>
+          {s.query.error ? (
             <>
               <Text fw={800}>{t('dayView.couldNotLoad')}</Text>
-              <Text fz={13} c="dimmed">{s.status.error}</Text>
-              <Button mt={12} variant="outline" color="gray" onClick={() => { useWeatherStore.setState((st) => ({ dayStatus: { ...st.dayStatus, [key]: { loading: false, error: null } } })); void loadDay(cityId, date); }}>{t('common.tryAgain')}</Button>
+              <Text fz={13} c="dimmed">{s.query.error}</Text>
+              <Button mt={12} variant="outline" color="gray" onClick={() => void openDay(cityId, date)}>{t('common.tryAgain')}</Button>
             </>
           ) : (
             <>

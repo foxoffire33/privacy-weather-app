@@ -2,36 +2,34 @@ import { useEffect } from 'react';
 import { Box, Button, Group, Loader, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
-import { useWeatherStore } from '../store';
-import type { GeoResult } from '../types';
+import { followCity, useCityStore, useSearchStore } from '../storesV2';
+import { useUiStore } from '../store/uiStore';
+import type { GeoResult } from '../storesV2';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 
 export function Search() {
-  const s = useWeatherStore(useShallow((st) => ({
+  const s = useSearchStore(useShallow((st) => ({
     query: st.query,
     results: st.results,
-    searching: st.searching,
-    searchError: st.searchError,
+    searching: st.request.status === 'loading',
+    searchError: st.request.error,
     setQuery: st.setQuery,
-    runSearch: st.runSearch,
-    followedIds: st.cities.map((c) => c.id).join('|'),
-    followCity: st.followCity,
-    goHome: st.goHome,
+    runSearch: st.run,
   })));
+  const followedIds = useCityStore((st) => st.cityIds.join('|'));
+  const goHome = useUiStore((st) => st.goHome);
   const [debounced] = useDebouncedValue(s.query, 300);
   const { runSearch } = s;
   useEffect(() => { void runSearch(debounced); }, [debounced, runSearch]);
-  const followed = new Set(s.followedIds.split('|'));
-
+  const followed = new Set(followedIds.split('|'));
   const follow = (r: GeoResult) => {
-    const i = s.followCity(r);
+    const i = followCity(r);
     s.setQuery('');
-    s.goHome(i);
+    goHome(i);
   };
-
   return (
     <div className="screen">
       <ScreenHeader />

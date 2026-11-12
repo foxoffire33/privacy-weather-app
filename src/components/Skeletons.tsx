@@ -3,13 +3,10 @@ import { Box, Group, Paper, Skeleton } from '@mantine/core';
 import { Section } from './city/parts';
 import { t } from '../i18n';
 
-// Placeholder block, Mantine's Skeleton in the app's flat style. Width/height match the
-// content it stands in for, so nothing moves once the real thing arrives.
 export function Sk({ w = '100%', h = 14, mt = 0, style }: { w?: number | string; h?: number; mt?: number; style?: CSSProperties }) {
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
 }
 
-// One Stat: kicker 15 + value 30 + sub 18, padding 10.
 export function StatSk() {
   return (
     <Box py={10} className="row">
@@ -50,7 +47,6 @@ export function ChartSk({ h = 180 }: { h?: number }) {
   );
 }
 
-// Mirrors CityPage below the hero.
 export function CityBodySk() {
   return (
     <>

@@ -1,16 +1,13 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-import { useWeatherStore } from '../store';
-import type { StoreState } from '../store/types';
-import { addDays, convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
+import { followedCities, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../storesV2';
+import { useEntityCache } from '../storesV2';
+import type { ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../storesV2';
+import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
+import { addDays } from '../storesV2';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
 import { t as tx, useI18n } from '../i18n';
-
-// Home-screen widgets (Android) for the default city. The app builds one snapshot of
-// past, present and future from the store and hands it to the native side
-// (android/.../WidgetsPlugin.java), which draws every widget from it. All text is
-// formatted here, in the user's units, so the widgets match the app exactly.
 
 interface WidgetsPlugin {
   update(options: { json: string }): Promise<void>;
@@ -33,12 +30,19 @@ export interface WidgetSnapshot {
   hours: { label: string; temp: string; p: number }[];
 }
 
-export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
-  const city = st.cities[0];
-  const entry = city && st.forecasts[city.id];
-  if (!city || !entry) return null;
+export interface SnapshotInput {
+  city: City | undefined;
+  entry: ForecastEntry | undefined;
+  tempUnit: TempUnit;
+  normals: Record<string, number>;
+  log: Record<string, DayRecord>;
+  years: ArchiveYear[];
+}
 
-  const unit = st.settings.tempUnit;
+export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
+  const { city, entry } = input;
+  if (!city || !entry) return null;
+  const unit = input.tempUnit;
   const T = (c?: number | null) => fmtTemp(c, unit);
   const N = (c?: number | null) => convTemp(c, unit);
   const { data, pastDays: t, fetchedAt } = entry;
@@ -47,13 +51,10 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
   const hv = data.hourly.v;
   const h0 = nowIndex(data);
   const today = data.daily.time[t];
-  const normals = st.normals[city.id] ?? {};
-  const log = st.history[city.id] ?? {};
+  const { normals, log } = input;
   const normalOf = (date: string) => N(normals[date.slice(5)]);
   const hiToday = dv.temperature_2m_max[t];
   const avgToday = normals[today.slice(5)];
-
-  // Past (the user's own log), today and the forecast on one axis.
   const days: Day[] = [];
   for (let k = 7; k >= 1; k--) {
     const date = addDays(today, -k);
@@ -69,14 +70,12 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
     });
   }
 
-  // On this day: today against the 1991–2020 average and earlier years.
   const rows: Row[] = [{ label: tx('common.today'), v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
   if (avgToday != null) rows.push({ label: tx('widgets.average_row'), v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });
-  for (const y of st.thisDay[`${city.id}:${today.slice(5)}`] ?? []) {
+  for (const y of input.years) {
     if (!y.error && y.hi != null) rows.push({ label: String(y.year), v: N(y.hi), text: `${T(y.hi)}°`, kind: 'year' });
   }
 
-  // Next 2 hours in 15-minute steps; without nowcast data, the chance of rain per hour.
   const mq = data.minutely15;
   let rain: WidgetSnapshot['rain'];
   if (mq && mq.precipitation.length) {
@@ -104,7 +103,6 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
       p: hv.precipitation_probability[i] ?? 0,
     };
   });
-
   const delta = hiToday != null && avgToday != null ? fmtDelta(hiToday - avgToday, unit) : null;
   return {
     v: 1,
@@ -133,21 +131,14 @@ export function buildSnapshot(st: StoreState): WidgetSnapshot | null {
 let last = '';
 let timer: number | undefined;
 
-/** Keeps the widgets in step with the store (Android only). Returns an unsubscribe function. */
 export function startWidgetSync(): () => void {
   if (Capacitor.getPlatform() !== 'android') return () => undefined;
   const push = () => {
-    const st = useWeatherStore.getState();
-    const city = st.cities[0];
-    const entry = city && st.forecasts[city.id];
-    // Past years for "On this day" (cached per date, like the History screen).
-    if (city && entry) void st.loadThisDay(city.id, entry.data.daily.time[entry.pastDays]);
-    const snap = buildSnapshot(st);
+    const snap = buildSnapshot(readSnapshotInput());
     const json = snap ? JSON.stringify(snap) : '';
     if (json === last) return;
     last = json;
     Widgets.update({ json }).catch(() => {
-      // Older native build without widgets.
     });
   };
   push();
@@ -155,7 +146,32 @@ export function startWidgetSync(): () => void {
     window.clearTimeout(timer);
     timer = window.setTimeout(push, 800);
   };
-  const unsub = useWeatherStore.subscribe(later);
-  const unsubLang = useI18n.subscribe(later); // widget text follows the app language
-  return () => { unsub(); unsubLang(); window.clearTimeout(timer); };
+  const unsubs = [useEntityCache, useForecastStore, useLogStore, useAlmanacStore, useSettingsStore]
+    .map((store) => store.subscribe(later));
+  unsubs.push(useI18n.subscribe(later));
+  return () => { for (const off of unsubs) off(); window.clearTimeout(timer); };
+}
+
+function readSnapshotInput(): SnapshotInput {
+  const city = followedCities()[0];
+  const settings = useSettingsStore.getState().settings;
+  if (city === undefined) return { city: undefined, entry: undefined, tempUnit: settings.tempUnit, normals: {}, log: {}, years: [] };
+  const entry = useForecastStore.getState().forecasts[city.id];
+  const almanac = useAlmanacStore.getState();
+  const today = entry ? entry.data.daily.time[entry.pastDays] : undefined;
+  if (today !== undefined) void almanac.ensureThisDay(city, today);
+  const dates = useLogStore.getState().dates[city.id] ?? [];
+  const log: Record<string, DayRecord> = {};
+  for (const record of useEntityCache.getState().getMany('dayRecord', dates.map((d) => `${city.id}:${d}`))) {
+    log[record.date] = record;
+  }
+
+  return {
+    city,
+    entry,
+    tempUnit: settings.tempUnit,
+    normals: almanac.normals[city.id] ?? {},
+    log,
+    years: (today === undefined ? undefined : almanac.thisDay[`${city.id}:${today.slice(5)}`]) ?? [],
+  };
 }

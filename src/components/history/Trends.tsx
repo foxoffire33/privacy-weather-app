@@ -3,14 +3,14 @@ import { ActionIcon, Box, Button, Checkbox, Group, Paper, Text, TextInput } from
 import { BarChart, LineChart } from '@mantine/charts';
 
 import { t, type MessageKey } from '../../i18n';
-import { addDays, convTemp, convWind, daysBetween, shortDate, windUnitLabel } from '../../lib/format';
-import type { DayRecord, TempUnit, WindUnit } from '../../types';
+import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
+import { addDays, daysBetween } from '../../storesV2';
+import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
 import { Icon } from '../Icon';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
+import { fillRange } from '../../storesV2';
 
-// Everything a logged day holds, as chart attributes. Attributes sharing a unit share a chart;
-// each group becomes its own chart, so nothing is drawn on a scale it does not belong to.
 type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
 interface Attr {
   key: string;
@@ -51,12 +51,7 @@ const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.
 const LENGTHS = [30, 90, 365, 0];
 const BACK_YEARS = [0, 1, 10, 30];
 
-/**
- * Trends: the logged days of a period, drawn attribute by attribute, optionally against the
- * same period in an earlier year. Days either period is missing are downloaded from the
- * archive into the log, so comparing also fills the history.
- */
-export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit, importRange }: {
+export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: {
   cityId: string;
   log?: Record<string, DayRecord>;
   normals?: Record<string, number>;
@@ -64,7 +59,6 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   followedAt: string;
   tempUnit: TempUnit;
   windUnit: WindUnit;
-  importRange: (id: string, start: string, end: string) => Promise<{ added: number; updated: number; kept: number }>;
 }) {
   const [picked, setPicked] = useState<string[]>(DEFAULT_ATTRS);
   const [len, setLen] = useState<number>(30);
@@ -74,13 +68,10 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetched = useRef<Set<string>>(new Set());
-
   const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
   const shift = (date: string, years: number) => (years ? `${+date.slice(0, 4) - years}${date.slice(4)}` : date);
-
-  // Fill whatever the chosen periods are missing, once per period.
   useEffect(() => {
     const windows = [{ from, to }];
     if (back) windows.push({ from: shift(from, back), to: shift(to, back) });
@@ -99,7 +90,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       for (const w of wanted) {
         fetched.current.add(`${cityId}:${w.from}:${w.to}`);
         try {
-          await importRange(cityId, w.from, w.to);
+          await fillRange(cityId, w.from, w.to);
         } catch (e) {
           if (active) setError((e as Error).message);
         }
@@ -107,16 +98,13 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       if (active) setBusy(false);
     })();
     return () => { active = false; };
-  }, [cityId, from, to, back]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  }, [cityId, from, to, back]);
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
   const yearB = back ? String(+to.slice(0, 4) - back) : '';
-
   const nameA = (a: Attr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
   const nameB = (a: Attr) => `${t(a.label)} ${yearB}`;
-
   const data: Record<string, string | number | null>[] = [];
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const row: Record<string, string | number | null> = { label: shortDate(d) };
@@ -129,11 +117,9 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   }
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
   const unitOf = (g: Group) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
-
   const rangeLabel = custom
     ? `${shortDate(custom.from)} – ${shortDate(custom.to)}`
     : len ? (len === 365 ? '1y' : `${len}d`) : t('history.all');
-
   return (
     <Box px={20}>
       <div className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</div>
@@ -166,8 +152,6 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
       {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
-      {/* Until the days are in the store there is nothing honest to plot, so each chart
-          waits as a skeleton of its own size and the content takes its place. */}
       {busy
         ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
         : GROUPS.map((g) => {
@@ -194,9 +178,6 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   );
 }
 
-// One group's chart. The legend is the app's click-to-toggle one, drawn below the chart in
-// normal flow: it wraps to as many lines as the labels need and can never run into what
-// follows, which a height reserved inside the chart always risked.
 function GroupChart({ group, series, data, base, unit }: {
   group: { key: Group; title: MessageKey; bars?: boolean };
   series: { name: string; color: string }[];
@@ -218,7 +199,6 @@ function GroupChart({ group, series, data, base, unit }: {
   );
 }
 
-// Full-screen list of every attribute, each with a checkbox before its name.
 function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: (keys: string[]) => void; onClose: () => void }) {
   const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
   return (
@@ -246,7 +226,6 @@ function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: 
   );
 }
 
-// From/to pickers for a period of your own.
 function RangeSheet({ from, to, max, onApply, onClose }: {
   from: string; to: string; max: string;
   onApply: (r: { from: string; to: string }) => void;

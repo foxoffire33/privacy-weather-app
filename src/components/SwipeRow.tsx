@@ -4,28 +4,21 @@ import { t } from '../i18n';
 const ACTION_W = 88;
 const REMOVE_MS = 220;
 
-// iOS-style swipe to delete: drag the row left to reveal a red Delete button, or swipe
-// it most of the way across to delete at once. Either way the row slides the rest of the
-// way out before it is removed. Vertical scrolling is left to the page.
 export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete: () => void;
   disabled?: boolean;
-  label: string; // what is deleted, for screen readers
+  label: string;
   children: ReactNode;
 }) {
   const [dragX, setDragX] = useState<number | null>(null);
   const [removing, setRemoving] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number; base: number; dir: 'h' | 'v' | null; width: number } | null>(null);
-  // A horizontal drag must not be read as a tap. The flag is cleared when the next gesture
-  // starts, because a drag often ends without any click event to clear it.
   const swallowClick = useRef(false);
   const width = root.current?.offsetWidth ?? 420;
   const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);
-
-  // Slide the row out, then let the parent remove it.
   const remove = () => {
     if (removing) return;
     setDragX(null);
@@ -35,8 +28,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     if (!removing) return;
     const timer = window.setTimeout(onDelete, REMOVE_MS);
     return () => window.clearTimeout(timer);
-  }, [removing]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  }, [removing]);
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     swallowClick.current = false;
     if (disabled || removing || e.button > 0) return;
@@ -56,7 +48,6 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
       }
     }
     if (d.dir !== 'h') return;
-    // Rubber band past the button, like iOS; never further right than closed.
     const raw = d.base + mx;
     setDragX(Math.min(0, raw < -ACTION_W ? -ACTION_W + (raw + ACTION_W) * 0.9 : raw));
   };
@@ -69,12 +60,10 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     if (x < -d.width * 0.6) remove();
     else onOpenChange(x < -ACTION_W / 2);
   };
-
   return (
     <div ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
-        // A drag is not a tap, and tapping an open row anywhere but Delete closes it.
         if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
           e.preventDefault();
           e.stopPropagation();
