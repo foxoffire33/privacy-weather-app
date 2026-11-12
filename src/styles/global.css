@@ -49,6 +49,8 @@ body { font-variant-numeric: tabular-nums; }
 .metric-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--rule); }
 .hourly-strip { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 2px solid rgba(248, 244, 244, .2); touch-action: pan-x pan-y; cursor: grab; user-select: none; overscroll-behavior-x: contain; }
 .hourly-strip > * { flex: none; width: 52px; padding: 10px 0 10px 10px; }
+.hourly-strip > .day-divider { width: 18px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800; line-height: 1; color: var(--mantine-color-signal-3); }
+.day-divider i { flex: 1; width: 2px; background: var(--rule); }
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
 .bar { height: 4px; background: rgba(255, 255, 255, .12); position: relative; }
 .bar > div { position: absolute; inset: 0 auto 0 0; }
