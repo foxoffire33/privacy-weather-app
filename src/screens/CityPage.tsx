@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
@@ -17,6 +18,12 @@ import { convTemp } from '../lib/format';
 import { CityBodySk, Sk } from '../components/Skeletons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
+
+const WEEK_SERIES = [
+  { name: 'mm', type: 'bar' as const, color: 'signal.7', yAxisId: 'right' },
+  { name: 'High', type: 'line' as const, color: 'signal.4' },
+  { name: 'Low', type: 'line' as const, color: 'signal.2' },
+];
 
 const POLLUTANTS = [
   { key: 'pm2_5', name: 'Fine particles', unit: 'PM2.5 · µg/m³' },
@@ -51,6 +58,7 @@ export function CityPage({ city, isDefault }: { city: City; isDefault: boolean }
 }
 
 function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }) {
+  const weekTg = useSeriesToggle('week');
   const s = useWeatherStore(useShallow((st) => ({
     entry: st.forecasts[city.id],
     status: st.status[city.id],
@@ -250,11 +258,8 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
               Low: convTemp(dv.temperature_2m_min[i], s.tempUnit),
               mm: dv.precipitation_sum[i],
             }))}
-            series={[
-              { name: 'mm', type: 'bar', color: 'signal.7', yAxisId: 'right' },
-              { name: 'High', type: 'line', color: 'signal.4' },
-              { name: 'Low', type: 'line', color: 'signal.2' },
-            ]} />
+            withLegend={false} series={weekTg.visible(WEEK_SERIES)} />
+          {weekTg.legend(WEEK_SERIES)}
         </Box>
       </Section>
 
