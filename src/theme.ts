@@ -2,7 +2,7 @@ import {
   ActionIcon, Badge, Button, Paper, SegmentedControl, Select, Switch, TextInput, PasswordInput,
   createTheme, type MantineColorsTuple,
 } from '@mantine/core';
-import { AreaChart, BarChart, CompositeChart, LineChart } from '@mantine/charts';
+import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 
 import { CompactTooltip } from './components/charts/CompactTooltip';
 import type { Accent } from './types';
@@ -25,7 +25,7 @@ const dark: MantineColorsTuple = [
 
 const font = 'Archivo, system-ui, sans-serif';
 
-// Charts: quiet by default. Dotted horizontal grid only, small grey ticks, flat legend swatches,
+// Charts: plain lines and solid bars only, no area fills or gradients. Quiet by default. Dotted horizontal grid only, small grey ticks, flat legend swatches,
 // tooltips as square black panels. Series colours are set per chart from white/grey, red only for emphasis.
 const chartStyles = {
   legend: { paddingTop: 6 },
@@ -99,7 +99,6 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     Select: Select.extend({ defaultProps: { radius: 0 } }),
     SegmentedControl: SegmentedControl.extend({ defaultProps: { radius: 0 } }),
     Switch: Switch.extend({ defaultProps: { radius: 0, color: 'signal' } }),
-    AreaChart: AreaChart.extend({ defaultProps: { ...lineBase, withGradient: true, fillOpacity: 0.35 }, styles: chartStyles }),
     LineChart: LineChart.extend({ defaultProps: lineBase, styles: chartStyles }),
     BarChart: BarChart.extend({ defaultProps: { ...chartBase, maxBarWidth: 14 }, styles: chartStyles }),
     CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),

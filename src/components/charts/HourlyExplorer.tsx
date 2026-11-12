@@ -1,4 +1,4 @@
-import { AreaChart, BarChart, CompositeChart, LineChart } from '@mantine/charts';
+import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 import { Box } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../../store';
@@ -78,7 +78,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
         ))}
       </div>
       {active === 'temp' && (
-        <AreaChart {...LINE} xAxisProps={xAxisProps} unit="°"
+        <LineChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
           withLegend={false} series={tg.visible(TEMP)} data={data} />
       )}
@@ -100,7 +100,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
           series={[{ name: 'UV', color: 'signal.4' }]} data={data} />
       )}
       {active === 'clouds' && (
-        <AreaChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }}
+        <LineChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }}
           withLegend={false} series={tg.visible(CLOUDS)} data={data} />
       )}
       {active === 'clouds' && tg.legend(CLOUDS)}
@@ -110,11 +110,11 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
           series={[{ name: 'hPa', color: 'signal.4' }]} data={data} />
       )}
       {active === 'humidity' && (
-        <AreaChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }} withLegend={false}
+        <LineChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }} withLegend={false}
           series={[{ name: 'Humidity', color: 'signal.4' }]} data={data} />
       )}
       {active === 'air' && (
-        <AreaChart {...LINE} xAxisProps={xAxisProps} withLegend={false}
+        <LineChart {...LINE} xAxisProps={xAxisProps} withLegend={false}
           referenceLines={[{ y: 20, label: 'Good', color: 'dark.4' }, { y: 40, label: 'Fair', color: 'dark.4' }, { y: 60, label: 'Moderate', color: 'signal.5' }]}
           series={[{ name: 'AQI', color: 'signal.4' }]} data={data} />
       )}
