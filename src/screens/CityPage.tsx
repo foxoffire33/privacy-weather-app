@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
@@ -73,6 +73,12 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   })));
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const strip = useDragScroll<HTMLDivElement>();
+  // Selecting a day scrolls the hourly strip to its first hour.
+  useEffect(() => {
+    const el = strip.ref.current;
+    const first = s.expanded ? el?.querySelector<HTMLElement>(`[data-date="${s.expanded}"]`) : null;
+    if (el && first) el.scrollTo({ left: (first.previousElementSibling as HTMLElement | null)?.classList.contains('day-divider') ? (first.previousElementSibling as HTMLElement).offsetLeft : first.offsetLeft, behavior: 'smooth' });
+  }, [s.expanded]); // eslint-disable-line react-hooks/exhaustive-deps
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
   const n0 = (v: number | null | undefined, digits = 0) => (v == null ? '–' : v.toFixed(digits));
 
@@ -123,6 +129,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
     const i = h0 + k;
     return {
       time,
+      date: time.slice(0, 10),
       label: k === 0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
       dayBreak: k > 0 && hourOf(time) === '00',
       dayName: k > 0 && hourOf(time) === '00' ? weekday(time.slice(0, 10)).toUpperCase() : '',
@@ -191,13 +198,13 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
           {hours.map((h) => (
             <Fragment key={h.time}>
             {h.dayName && (
-              <div className="day-divider" aria-label={h.dayName}>
+              <div className="day-divider" data-on={h.date === s.expanded || undefined} aria-label={h.dayName}>
                 <i />
                 {[...h.dayName].map((ch, n) => <span key={n}>{ch}</span>)}
                 <i />
               </div>
             )}
-            <Box>
+            <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-on={h.date === s.expanded || undefined}>
               <Text fz={11} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
               <Text fz={10} fw={600} c="signal.3">{h.p}%</Text>
@@ -215,7 +222,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
         {days.map(({ date, i, label }) => {
           const open = s.expanded === date;
           return (
-            <Box key={date} className="row">
+            <Box key={date} className="row" data-on={open || undefined}>
               <UnstyledButton w="100%" px={12} py={9} onClick={() => s.toggleDay(city.id, date)}
                 style={{ display: 'grid', gridTemplateColumns: '52px 1fr 44px 40px 32px', alignItems: 'center', gap: 4 }}>
                 <Text fz={14} fw={800}>{label}</Text>
