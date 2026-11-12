@@ -76,15 +76,12 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
             data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{label}</button>
         ))}
       </div>
-      {active === 'temp' && tg.legend(TEMP)}
-      {active === 'wind' && tg.legend(WIND)}
-      {active === 'clouds' && tg.legend(CLOUDS)}
-      {active === 'rain' && hasChance && tg.legend(RAIN)}
       {active === 'temp' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
           withLegend={false} series={tg.visible(TEMP)} data={data} />
       )}
+      {active === 'temp' && tg.legend(TEMP)}
       {active === 'rain' && (hasChance ? (
         <CompositeChart {...LINE} xAxisProps={xAxisProps} withRightYAxis rightYAxisProps={{ domain: [0, 100], width: 36 }}
           withLegend={false} series={tg.visible(RAIN)} data={data} />
@@ -95,6 +92,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
         <LineChart {...LINE} xAxisProps={xAxisProps} unit={` ${windUnitLabel(s.windUnit)}`} yAxisProps={{ width: 44 }}
           withLegend={false} series={tg.visible(WIND)} data={data} />
       )}
+      {active === 'wind' && tg.legend(WIND)}
       {active === 'uv' && (
         <BarChart {...BASE} xAxisProps={xAxisProps}
           getBarColor={(val) => (val >= 8 ? 'signal.5' : val >= 6 ? 'signal.4' : val >= 3 ? 'signal.7' : 'dark.4')}
@@ -104,6 +102,8 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }}
           withLegend={false} series={tg.visible(CLOUDS)} data={data} />
       )}
+      {active === 'clouds' && tg.legend(CLOUDS)}
+      {active === 'rain' && hasChance && tg.legend(RAIN)}
       {active === 'pressure' && (
         <LineChart {...LINE} xAxisProps={xAxisProps} withLegend={false} yAxisProps={{ width: 44, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
           series={[{ name: 'hPa', color: 'signal.4' }]} data={data} />

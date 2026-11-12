@@ -267,7 +267,6 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
 
       <Section title="Next 7 days">
         <Box pt={12}><Deferred h={230}>
-          {weekTg.legend(WEEK_SERIES)}
           <CompositeChart h={200} dataKey="label"
             yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }} withRightYAxis rightYAxisProps={{ width: 32 }}
             data={days.map(({ i, label }) => ({
@@ -277,6 +276,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
               mm: dv.precipitation_sum[i],
             }))}
             withLegend={false} series={weekTg.visible(WEEK_SERIES)} />
+          {weekTg.legend(WEEK_SERIES)}
         </Deferred></Box>
       </Section>
 
