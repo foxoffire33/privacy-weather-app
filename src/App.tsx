@@ -1,3 +1,4 @@
+import { App as CapApp } from '@capacitor/app';
 import { useEffect } from 'react';
 import { Center, Loader } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
@@ -30,6 +31,16 @@ export default function App() {
     document.addEventListener('visibilitychange', onVisible);
     return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
   }, [hydrated, snapshotMinutes, refreshAll]);
+
+  // Hardware/gesture back: step back through screens, close the app from the home screen.
+  useEffect(() => {
+    const sub = CapApp.addListener('backButton', () => {
+      const { route: r, stack, back } = useWeatherStore.getState();
+      if (r.name === 'home' && !stack.length) void CapApp.exitApp();
+      else back();
+    });
+    return () => { void sub.then((h) => h.remove()); };
+  }, []);
 
   let screen;
   if (!hydrated) screen = <Center flex={1}><Loader /></Center>;

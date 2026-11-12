@@ -116,6 +116,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
       time,
       label: k === 0 ? 'Now' : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
       dayBreak: k > 0 && hourOf(time) === '00',
+      dayLetter: k > 0 && hourOf(time) === '00' ? weekday(time.slice(0, 10)).charAt(0) : '',
       temp: k === 0 ? c.temperature_2m : hv.temperature_2m[i],
       p: hv.precipitation_probability[i] ?? 0,
       wind: hv.wind_speed_10m[i],
@@ -179,11 +180,12 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
 
         <div className="hourly-strip" {...strip}>
           {hours.map((h) => (
-            <Box key={h.time} className={h.dayBreak ? 'day-break' : undefined}>
+            <Box key={h.time}>
               <Text fz={11} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
               <Text fz={10} fw={600} c="signal.3">{h.p}%</Text>
               <Text fz={10} c="dimmed">{h.wind == null ? '–' : Math.round(h.wind)}</Text>
+              <Text fz={10} fw={800} c="signal.3" h={14} lh="14px">{h.dayLetter}</Text>
             </Box>
           ))}
         </div>
