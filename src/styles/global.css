@@ -46,8 +46,8 @@ body { font-variant-numeric: tabular-nums; }
 [data-accent=off] .hero, [data-accent=off] .accent-field { background: #000; }
 .hero-temp { font-size: 168px; font-weight: 800; line-height: .85; letter-spacing: -.06em; margin-top: 8px; }
 /* Loading placeholders: same box as the content they stand in for, so nothing shifts. */
-.sk { background: rgba(255, 255, 255, .08); animation: sk-pulse 1.4s ease-in-out infinite; }
-@keyframes sk-pulse { 50% { opacity: .45; } }
+/* Mantine's Skeleton, toned down to the app's palette (its dark default is far too bright). */
+.mantine-Skeleton-root::after { background-color: rgba(255, 255, 255, .08); }
 /* Background refresh indicator */
 .spin { display: inline-flex; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }

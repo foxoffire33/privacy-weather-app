@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Box, Button, Checkbox, Group, Loader, Paper, Text, TextInput } from '@mantine/core';
+import { ActionIcon, Box, Button, Checkbox, Group, Paper, Text, TextInput } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
 import { t, type MessageKey } from '../../i18n';
 import { addDays, convTemp, convWind, daysBetween, shortDate, windUnitLabel } from '../../lib/format';
 import type { DayRecord, TempUnit, WindUnit } from '../../types';
 import { Icon } from '../Icon';
+import { ChartSk } from '../Skeletons';
 
 // Everything a logged day holds, as chart attributes. Attributes sharing a unit share a chart;
 // each group becomes its own chart, so nothing is drawn on a scale it does not belong to.
@@ -160,16 +161,15 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         ))}
       </div>
 
-      {busy && (
-        <Group gap={8} py={8} wrap="nowrap" role="status">
-          <Loader size="xs" />
-          <Text fz={12} c="dimmed">{t('history.loadingDays')}</Text>
-        </Group>
-      )}
+      {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
       {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
       {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
-      {GROUPS.map((g) => {
+      {/* Until the days are in the store there is nothing honest to plot, so each chart
+          waits as a skeleton of its own size and the content takes its place. */}
+      {busy
+        ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
+        : GROUPS.map((g) => {
         const mine = attrs.filter((a) => a.group === g.key);
         if (!mine.length) return null;
         const series = mine.flatMap((a, i) => [
@@ -192,7 +192,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
               : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
           </Box>
         );
-      })}
+        })}
 
       {sheet === 'attrs' && (
         <AttrSheet picked={picked} onChange={setPicked} onClose={() => setSheet(null)} />

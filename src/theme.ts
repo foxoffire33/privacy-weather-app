@@ -1,5 +1,5 @@
 import {
-  ActionIcon, Badge, Button, Paper, SegmentedControl, Select, Switch, TextInput, PasswordInput,
+  ActionIcon, Badge, Button, Paper, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
   createTheme, type MantineColorsTuple,
 } from '@mantine/core';
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
@@ -101,6 +101,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     ActionIcon: ActionIcon.extend({ defaultProps: { size: 44, variant: 'subtle', color: 'gray' } }),
     Badge: Badge.extend({ defaultProps: { radius: 0, fw: 800 } }),
     Paper: Paper.extend({ defaultProps: { radius: 0 } }),
+    Skeleton: Skeleton.extend({ defaultProps: { radius: 0 } }),
     TextInput: TextInput.extend({ defaultProps: { radius: 0 } }),
     PasswordInput: PasswordInput.extend({ defaultProps: { radius: 0 } }),
     Select: Select.extend({ defaultProps: { radius: 0 } }),
