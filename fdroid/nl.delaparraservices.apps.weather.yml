@@ -1,0 +1,45 @@
+# F-Droid build recipe for Weather Log.
+# This file is not used by this repo's build. Submit it to F-Droid by opening a
+# merge request that adds it as metadata/nl.delaparraservices.apps.weather.yml in
+# https://gitlab.com/fdroid/fdroiddata (see fdroid/README.md).
+
+Categories:
+  - Weather
+License: GPL-3.0-or-later
+AuthorName: foxoffire33
+SourceCode: https://github.com/foxoffire33/privacy-weather-app
+IssueTracker: https://github.com/foxoffire33/privacy-weather-app/issues
+Changelog: https://github.com/foxoffire33/privacy-weather-app/releases
+
+AutoName: Weather Log
+
+RepoType: git
+Repo: https://github.com/foxoffire33/privacy-weather-app.git
+
+Builds:
+  - versionName: 0.1.4
+    versionCode: 104
+    commit: v0.1.4
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y npm
+    init: cd ../.. && npm ci
+    gradle:
+      - yes
+    prebuild: cd ../.. && npm run build && npx cap sync android
+    scandelete:
+      - node_modules/@esbuild
+      - node_modules/@rollup
+      - node_modules/esbuild
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+CurrentVersion: 0.1.4
+CurrentVersionCode: 104
+
+MaintainerNotes: |-
+  Capacitor app: the web app is built with Vite (needs Node 20.19+) and copied into
+  android/ by `cap sync`; the Capacitor Android library comes from node_modules.
+  versionCode = MAJOR*10000 + MINOR*100 + PATCH, kept in build.gradle by
+  scripts/android-version.mjs and checked on every GitHub release.
