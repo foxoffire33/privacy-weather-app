@@ -1,5 +1,5 @@
 import { AreaChart, BarChart, CompositeChart, LineChart } from '@mantine/charts';
-import { Box, ScrollArea, SegmentedControl } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../../store';
 import type { HourlyVar } from '../../api/variables';
@@ -63,10 +63,12 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
 
   return (
     <Box>
-      <ScrollArea type="never" mb={10}>
-        <SegmentedControl size="md" color="signal" value={active} onChange={s.setMetric}
-          data={available.map(({ value, label }) => ({ value, label }))} />
-      </ScrollArea>
+      <div className="metric-tabs" role="tablist">
+        {available.map(({ value, label }) => (
+          <button key={value} type="button" role="tab" aria-selected={value === active}
+            data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{label}</button>
+        ))}
+      </div>
       {active === 'temp' && (
         <AreaChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}

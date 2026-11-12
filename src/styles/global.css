@@ -61,3 +61,9 @@ body { font-variant-numeric: tabular-nums; }
 .recharts-cartesian-axis-tick-value { font-size: 10px; font-variant-numeric: tabular-nums; }
 .recharts-reference-line-label { font-size: 10px; fill: var(--mantine-color-dark-2); }
 .recharts-active-dot circle { stroke: #000; stroke-width: 2; }
+
+/* Chart metric picker: equal-size buttons, four per row, all visible. */
+.metric-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+.metric-tabs button { height: 40px; padding: 0 4px; font: inherit; font-size: 13px; font-weight: 800; color: var(--mantine-color-dark-2); background: transparent; border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer; }
+.metric-tabs button[data-active] { color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5); }
+[data-accent=off] .metric-tabs button[data-active] { color: #000; background: #fff; border-color: #fff; }
