@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ActionIcon, Badge, Box, Button, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Badge, Box, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
@@ -34,8 +34,17 @@ export function History({ cityId }: { cityId: string }) {
       back: st.back,
     };
   }));
-  const { loadThisDay, today } = s;
+  const { loadThisDay, today, lookupDate, draft } = s;
   useEffect(() => { void loadThisDay(cityId, today); }, [cityId, today, loadThisDay]);
+  // A complete, in-range date is looked up as soon as it is entered (debounced while the year is still being typed).
+  const maxLookupDate = addDays(today, -5); // archive lags ~5 days
+  const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
+  const lookedUp = !!s.lookup;
+  useEffect(() => {
+    if (!validDraft || lookedUp) return;
+    const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
+    return () => window.clearTimeout(t);
+  }, [validDraft, lookedUp, cityId, draft, lookupDate]);
 
   if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>This city is no longer followed.</Text></div>;
 
@@ -81,17 +90,34 @@ export function History({ cityId }: { cityId: string }) {
           ))}
         </div>
         <Box p={12} style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
-          <Group gap={8} wrap="nowrap" align="flex-end">
-            <TextInput type="date" label="Look up any date since 1940" style={{ flex: 1 }}
-              min="1940-01-01" max={maxLookup} value={s.draft}
-              onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
-            <Button disabled={!s.draft} loading={s.lookup?.loading} onClick={() => s.lookupDate(cityId, s.draft)}>Look up</Button>
-          </Group>
-          {s.lookup && !s.lookup.loading && (
-            <UnstyledButton mt={8} disabled={!!s.lookup.error} onClick={() => open(s.draft)}>
-            <Text fz={13} c={s.lookup.error ? 'signal.3' : undefined}>
-              {s.lookup.error ?? `${longDate(s.draft)}: ${conditionLabel(s.lookup.code)}, ${T(s.lookup.hi)}° / ${T(s.lookup.lo)}°, ${(s.lookup.mm ?? 0).toFixed(1)} mm, wind ${fmtWind(s.lookup.wind, s.windUnit)} →`}
-            </Text>
+          <TextInput type="date" label="Look up any date since 1940"
+            min="1940-01-01" max={maxLookup} value={s.draft}
+            onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
+          {validDraft && (
+            <UnstyledButton mt={12} w="100%" disabled={!s.lookup || !!s.lookup.loading || !!s.lookup.error} onClick={() => open(s.draft)}
+              style={{ border: '2px solid var(--rule)', display: 'block' }}>
+              {!s.lookup || s.lookup.loading ? (
+                <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
+              ) : s.lookup.error ? (
+                <Box p={14}><Text fz={13} c="signal.3">{s.lookup.error}</Text></Box>
+              ) : (
+                <>
+                  <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
+                    <Text fz={12} fw={800} tt="uppercase" style={{ letterSpacing: '.06em' }}>{longDate(s.draft)}</Text>
+                    <Icon name="arrow" size={16} />
+                  </Group>
+                  <Box p={14}>
+                    <Group justify="space-between" align="flex-end" wrap="nowrap">
+                      <Text fz={16} fw={800}>{conditionLabel(s.lookup.code)}</Text>
+                      <Text fz={40} fw={800} lh={1}>{T(s.lookup.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(s.lookup.lo)}°</Text></Text>
+                    </Group>
+                    <div className="stat-grid" style={{ marginTop: 12 }}>
+                      <Box><Text fz={10} tt="uppercase" c="dimmed">Rain</Text><Text fz={16} fw={800}>{(s.lookup.mm ?? 0).toFixed(1)} mm</Text></Box>
+                      <Box><Text fz={10} tt="uppercase" c="dimmed">Max wind</Text><Text fz={16} fw={800}>{fmtWind(s.lookup.wind, s.windUnit)}</Text></Box>
+                    </div>
+                  </Box>
+                </>
+              )}
             </UnstyledButton>
           )}
         </Box>
