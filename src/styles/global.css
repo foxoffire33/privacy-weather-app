@@ -28,7 +28,7 @@ body { font-variant-numeric: tabular-nums; }
 .glass { background: #000; border: 2px solid var(--rule); }
 
 /* Home pager */
-.pager { position: absolute; inset: 0; display: flex; touch-action: pan-y; user-select: none; }
+.pager { position: absolute; inset: 0; display: flex; touch-action: pan-y; user-select: none; transition: transform .35s cubic-bezier(.2,.8,.2,1); will-change: transform; }
 .page { touch-action: pan-y; width: 100%; height: 100%; flex: none; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
 /* Accent field: hero, top bar and onboarding. Black when the accent is off. */
 .hero, .accent-field { background: var(--mantine-color-signal-5); color: #fff; }

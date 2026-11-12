@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { memo, useEffect, useRef, type PointerEvent } from 'react';
 import { ActionIcon, Group } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
@@ -17,7 +17,8 @@ export function Home() {
   })));
   const n = cities.length;
   const idx = Math.min(pageIndex, n - 1);
-  const [dx, setDx] = useState(0);
+  const pagerRef = useRef<HTMLDivElement>(null);
+  const dx = useRef(0);
   const drag = useRef<{ x: number; y: number; id: number; active: boolean } | null>(null);
   const justDragged = useRef(false);
 
@@ -29,6 +30,14 @@ export function Home() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [idx, n, setPage]);
+
+  // The visible city refreshes after the slide has settled, never during it.
+  const activeId = cities[idx]?.id;
+  useEffect(() => {
+    if (!activeId) return;
+    const t = window.setTimeout(() => void useWeatherStore.getState().refreshCity(activeId), 450);
+    return () => window.clearTimeout(t);
+  }, [activeId]);
 
   const onDown = (e: PointerEvent) => {
     // Horizontal scrollers (hourly strip) keep their own drag.
@@ -44,33 +53,38 @@ export function Home() {
       if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) {
         d.active = true;
         e.currentTarget.setPointerCapture(d.id);
+        e.currentTarget.style.transition = 'none';
       } else if (Math.abs(my) > 8) {
         drag.current = null;
         return;
       } else return;
     }
     const atEdge = (idx === 0 && mx > 0) || (idx === n - 1 && mx < 0);
-    setDx(atEdge ? mx / 3 : mx);
+    // Follow the finger by writing the transform directly: no React render per pointer move.
+    dx.current = atEdge ? mx / 3 : mx;
+    e.currentTarget.style.transform = `translateX(calc(${-idx * 100}% + ${dx.current}px))`;
   };
   const onUp = () => {
     const d = drag.current;
     drag.current = null;
     if (!d?.active) return;
     justDragged.current = true;
-    if (dx < -60 && idx < n - 1) setPage(idx + 1);
-    else if (dx > 60 && idx > 0) setPage(idx - 1);
-    setDx(0);
+    const moved = dx.current;
+    dx.current = 0;
+    const next = moved < -60 && idx < n - 1 ? idx + 1 : moved > 60 && idx > 0 ? idx - 1 : idx;
+    const el = pagerRef.current;
+    if (el) { el.style.transition = ''; el.style.transform = `translateX(${-next * 100}%)`; }
+    if (next !== idx) setPage(next);
   };
 
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      <div className="pager" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+      <div className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}
-        style={{
-          transform: `translateX(calc(${-idx * 100}% + ${dx}px))`,
-          transition: dx ? 'none' : 'transform .35s cubic-bezier(.2,.8,.2,1)',
-        }}>
-        {cities.map((c, i) => <CityPage key={c.id} city={c} isDefault={i === 0} />)}
+        style={{ transform: `translateX(${-idx * 100}%)` }}>
+        {cities.map((c, i) => (Math.abs(i - idx) <= 1
+          ? <CityPage key={c.id} city={c} isDefault={i === 0} />
+          : <div key={c.id} className="page" />))}
       </div>
       <div className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label="Cities" onClick={() => navigate({ name: 'cities' })}>

@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react';
+import { Fragment, memo, useEffect, useState, type ReactNode } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
@@ -15,7 +15,7 @@ import { Bar, Section, Stat, levelColor } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { CompositeChart } from '@mantine/charts';
 import { convTemp } from '../lib/format';
-import { CityBodySk, Sk } from '../components/Skeletons';
+import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
 
@@ -38,7 +38,7 @@ const POLLEN = [
   ['mugwort_pollen', 'Mugwort'], ['olive_pollen', 'Olive'], ['ragweed_pollen', 'Ragweed'],
 ] as const;
 
-export function CityPage({ city, isDefault }: { city: City; isDefault: boolean }) {
+export const CityPage = memo(function CityPage({ city, isDefault }: { city: City; isDefault: boolean }) {
   const { busy, refreshCity } = useWeatherStore(useShallow((st) => ({ busy: !!st.status[city.id]?.loading, refreshCity: st.refreshCity })));
   const { pull, armed, bind } = usePullToRefresh(() => void refreshCity(city.id, { maxAgeMs: 0 }));
   return (
@@ -55,6 +55,16 @@ export function CityPage({ city, isDefault }: { city: City; isDefault: boolean }
       {busy && <span className="sr-only" role="status">Updating {city.name}</span>}
     </div>
   );
+});
+
+// Charts are the heavy part of a page: mount them just after the page itself so a slide never waits on them.
+function Deferred({ h, children }: { h: number; children: ReactNode }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setReady(true), 250);
+    return () => window.clearTimeout(t);
+  }, []);
+  return ready ? <>{children}</> : <ChartSk h={h} />;
 }
 
 function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }) {
@@ -249,14 +259,14 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
       </Paper>
 
       <Section title="Next 48 hours">
-        <Box pt={12}>
+        <Box pt={12}><Deferred h={270}>
           <HourlyExplorer time={data.hourly.time} v={hv} from={h0} to={h0 + 48}
             aqi={air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined} />
-        </Box>
+        </Deferred></Box>
       </Section>
 
       <Section title="Next 7 days">
-        <Box pt={12}>
+        <Box pt={12}><Deferred h={230}>
           <CompositeChart h={200} dataKey="label"
             yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }} withRightYAxis rightYAxisProps={{ width: 32 }}
             data={days.map(({ i, label }) => ({
@@ -267,7 +277,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
             }))}
             withLegend={false} series={weekTg.visible(WEEK_SERIES)} />
           {weekTg.legend(WEEK_SERIES)}
-        </Box>
+        </Deferred></Box>
       </Section>
 
       <Section title="Feels like" summary={`${feelsLabel(c.apparent_temperature)}. ${Math.abs(windChill) >= 1 ? `Feels ${Math.abs(Math.round(windChill))}° ${windChill < 0 ? 'colder' : 'warmer'} than the air temperature${windChill < 0 ? ' because of wind and humidity' : ''}.` : 'Close to the air temperature.'}`}>
