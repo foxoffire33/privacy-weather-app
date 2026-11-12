@@ -17,9 +17,9 @@ RepoType: git
 Repo: https://github.com/foxoffire33/privacy-weather-app.git
 
 Builds:
-  - versionName: 0.1.5
-    versionCode: 105
-    commit: v0.1.5
+  - versionName: 0.1.6
+    versionCode: 106
+    commit: v0.1.6
     subdir: android/app
     sudo:
       - apt-get update
@@ -35,8 +35,8 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 0.1.5
-CurrentVersionCode: 105
+CurrentVersion: 0.1.6
+CurrentVersionCode: 106
 
 MaintainerNotes: |-
   Capacitor app: the web app is built with Vite (needs Node 20.19+) and copied into

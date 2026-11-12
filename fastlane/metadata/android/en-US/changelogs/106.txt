@@ -1,1 +1,2 @@
 First release on F-Droid.
+New app icon.
