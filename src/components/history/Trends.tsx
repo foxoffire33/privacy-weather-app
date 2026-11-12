@@ -7,6 +7,7 @@ import { addDays, convTemp, convWind, daysBetween, shortDate, windUnitLabel } fr
 import type { DayRecord, TempUnit, WindUnit } from '../../types';
 import { Icon } from '../Icon';
 import { ChartSk } from '../Skeletons';
+import { useSeriesToggle } from '../charts/SeriesToggle';
 
 // Everything a logged day holds, as chart attributes. Attributes sharing a unit share a chart;
 // each group becomes its own chart, so nothing is drawn on a scale it does not belong to.
@@ -170,28 +171,15 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       {busy
         ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
         : GROUPS.map((g) => {
-        const mine = attrs.filter((a) => a.group === g.key);
-        if (!mine.length) return null;
-        const series = mine.flatMap((a, i) => [
-          { name: nameA(a), color: COLORS[i % COLORS.length] },
-          ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
-        ]);
-        // The legend wraps at roughly three entries a line; reserve a line's height for each
-        // so it never runs into whatever follows the chart.
-        const lines = Math.ceil(series.length / 3);
-        const common = {
-          ...base, unit: unitOf(g.key), data, series, withLegend: true,
-          h: 180 + (lines - 1) * 24,
-          legendProps: { verticalAlign: 'bottom' as const, height: lines * 24 + 4 },
-        };
-        return (
-          <Box key={g.key} pt={12}>
-            <Text fz={12} c="dimmed" pb={4}>{t(g.title)}</Text>
-            {g.bars
-              ? <BarChart {...common} />
-              : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
-          </Box>
-        );
+          const mine = attrs.filter((a) => a.group === g.key);
+          if (!mine.length) return null;
+          return (
+            <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
+              series={mine.flatMap((a, i) => [
+                { name: nameA(a), color: COLORS[i % COLORS.length] },
+                ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
+              ])} />
+          );
         })}
 
       {sheet === 'attrs' && (
@@ -202,6 +190,30 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
           onClose={() => setSheet(null)}
           onApply={(r) => { setCustom(r); setSheet(null); }} />
       )}
+    </Box>
+  );
+}
+
+// One group's chart. The legend is the app's click-to-toggle one, drawn below the chart in
+// normal flow: it wraps to as many lines as the labels need and can never run into what
+// follows, which a height reserved inside the chart always risked.
+function GroupChart({ group, series, data, base, unit }: {
+  group: { key: Group; title: MessageKey; bars?: boolean };
+  series: { name: string; color: string }[];
+  data: Record<string, string | number | null>[];
+  base: { dataKey: string; xAxisProps: { interval: number } };
+  unit: string;
+}) {
+  const toggle = useSeriesToggle(`trend:${group.key}`);
+  const shown = toggle.visible(series);
+  const common = { ...base, h: 180, unit, data, series: shown, withLegend: false };
+  return (
+    <Box pt={12}>
+      <Text fz={12} c="dimmed" pb={4}>{t(group.title)}</Text>
+      {group.bars
+        ? <BarChart {...common} />
+        : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
+      {toggle.legend(series)}
     </Box>
   );
 }
