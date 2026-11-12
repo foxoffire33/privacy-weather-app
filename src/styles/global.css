@@ -63,6 +63,9 @@ body { font-variant-numeric: tabular-nums; }
 .nowcast { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; align-items: end; height: 36px; }
 .archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
+/* A chart owns horizontal gestures; the page keeps vertical scrolling. */
+.chart-surface { touch-action: pan-y; }
+
 /* Chart text: small, grey, tabular. Active dot as a plain square-edged marker. */
 .recharts-cartesian-axis-tick-value { font-size: 11px; font-variant-numeric: tabular-nums; }
 .recharts-reference-line-label { font-size: 11px; fill: var(--mantine-color-dark-2); }

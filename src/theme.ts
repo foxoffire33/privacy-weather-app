@@ -45,6 +45,10 @@ const chartStyles = {
 // A wide, soft vertical stroke reads as a selected column, like .row[data-on].
 const cursorBand = { stroke: 'var(--selected-bg)', strokeWidth: 26, strokeDasharray: '0' };
 const chartBase = {
+  // Charts handle horizontal drags themselves (cursor + tooltip): data-noswipe keeps the city
+  // pager and pull-to-refresh out of it, and pan-y leaves vertical page scrolling alone.
+  'data-noswipe': true,
+  className: 'chart-surface',
   gridAxis: 'none' as const,
   strokeDasharray: '0',
   textColor: 'dark.2',
