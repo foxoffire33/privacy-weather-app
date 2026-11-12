@@ -167,7 +167,7 @@ export function Settings() {
 
         <div className="kicker">About</div>
         <Stack gap={4} py={12}>
-          <Text fz={13} c="dimmed">Open source · GPL-3.0 · v0.1.2</Text>
+          <Text fz={13} c="dimmed">Open source · GPL-3.0 · v0.1.3</Text>
           <Text fz={13} c="dimmed">Weather data by Open-Meteo.com (CC BY 4.0)</Text>
         </Stack>
       </Stack>
