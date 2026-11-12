@@ -69,8 +69,8 @@ body { font-variant-numeric: tabular-nums; }
 [data-accent=off] .metric-tabs button[data-active] { color: #000; background: #fff; border-color: #fff; }
 
 /* Click-to-toggle chart legend */
-.toggle-legend { display: flex; flex-wrap: wrap; gap: 4px 4px; padding-top: 2px; }
-.toggle-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 8px 0 4px; font: inherit; font-size: 10px; color: var(--mantine-color-dark-2); background: transparent; border: 0; cursor: pointer; }
+.toggle-legend { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 6px; }
+.toggle-legend button { flex: 1 1 0; justify-content: center; display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 0 8px 0 4px; font: inherit; font-size: 10px; color: var(--mantine-color-dark-2); background: transparent; border: 0; cursor: pointer; }
 .toggle-legend button i { width: 10px; height: 3px; }
 .toggle-legend button[aria-pressed=false] { opacity: .4; text-decoration: line-through; }
 
