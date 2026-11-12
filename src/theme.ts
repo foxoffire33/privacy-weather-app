@@ -49,7 +49,7 @@ const chartBase = {
   withLegend: true,
   legendProps: { verticalAlign: 'bottom' as const, height: 28 },
   tooltipAnimationDuration: 100,
-  tooltipProps: { content: CompactTooltip },
+  tooltipProps: { content: CompactTooltip, position: { y: -24 }, allowEscapeViewBox: { x: false, y: true }, isAnimationActive: false },
   yAxisProps: { width: 34 },
 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };

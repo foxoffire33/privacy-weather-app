@@ -63,7 +63,7 @@ body { font-variant-numeric: tabular-nums; }
 .recharts-active-dot circle { stroke: #000; stroke-width: 2; }
 
 /* Chart metric picker: equal-size buttons, four per row, all visible. */
-.metric-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px; }
+.metric-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 26px; }
 .metric-tabs button { height: 40px; padding: 0 4px; font: inherit; font-size: 13px; font-weight: 800; color: var(--mantine-color-dark-2); background: transparent; border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer; }
 .metric-tabs button[data-active] { color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5); }
 [data-accent=off] .metric-tabs button[data-active] { color: #000; background: #fff; border-color: #fff; }
@@ -79,3 +79,6 @@ body { font-variant-numeric: tabular-nums; }
 .hourly-strip > .day-divider[data-on] { color: #fff; }
 .row[data-on] { background: color-mix(in srgb, var(--mantine-color-signal-5) 18%, transparent); box-shadow: inset 3px 0 0 var(--mantine-color-signal-5); }
 [data-accent=off] .hourly-strip > [data-on], [data-accent=off] .row[data-on] { background: rgba(255, 255, 255, .1); }
+
+/* Tooltips float above the chart, outside its box. */
+.recharts-wrapper, .recharts-responsive-container { overflow: visible !important; }
