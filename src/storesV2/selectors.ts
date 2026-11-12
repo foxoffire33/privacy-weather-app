@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { initialQueryState, type QueryState } from './core/types';
+import { IDLE_QUERY, type QueryState } from './core/types';
 import { useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { useCityStore } from './stores/city-store';
@@ -33,7 +33,7 @@ export const useCityIndex = (cityId: string): number => useCityStore((s) => s.ci
 export const useForecast = (cityId: string): ForecastEntry | undefined => useForecastStore((s) => s.forecasts[cityId]);
 
 export const useForecastQuery = (cityId: string): QueryState =>
-  useForecastStore((s) => s.queries[cityId] ?? initialQueryState());
+  useForecastStore((s) => s.queries[cityId] ?? IDLE_QUERY);
 
 export const useAnyForecastLoading = (): boolean =>
   useForecastStore((s) => Object.values(s.queries).some((q) => q.status === 'loading'));
@@ -58,18 +58,18 @@ export const useDayRecord = (cityId: string, date: string): DayRecord | undefine
 
 export function useLookup(cityId: string, date: string): { record: DayRecord | undefined; query: QueryState } {
   const record = useDayRecord(cityId, date);
-  const query = useLogStore((s) => s.queries[dayKey(cityId, date)] ?? initialQueryState());
+  const query = useLogStore((s) => s.queries[dayKey(cityId, date)] ?? IDLE_QUERY);
   return { record, query };
 }
 
 export const useImportQuery = (cityId: string): QueryState =>
-  useLogStore((s) => s.queries[`import:${cityId}`] ?? initialQueryState());
+  useLogStore((s) => s.queries[`import:${cityId}`] ?? IDLE_QUERY);
 
 export const useDay = (cityId: string, date: string): DayData | undefined =>
   useDayStore((s) => s.days[dayKey(cityId, date)]);
 
 export const useDayQuery = (cityId: string, date: string): QueryState =>
-  useDayStore((s) => s.queries[dayKey(cityId, date)] ?? initialQueryState());
+  useDayStore((s) => s.queries[dayKey(cityId, date)] ?? IDLE_QUERY);
 
 export const useNormals = (cityId: string): Record<string, number> | undefined =>
   useAlmanacStore((s) => s.normals[cityId]);
