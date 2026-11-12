@@ -3,6 +3,8 @@ import type {
   ArchiveYear, City, DayData, DayRecord, ForecastData, ForecastEntry, GeoResult, Lookup, Route, Settings,
 } from '../types';
 
+import type { Backup, BackupParts } from '../lib/backup';
+
 export interface SettingsSlice {
   settings: Settings;
   updateSettings: (patch: Partial<Settings>) => void;
@@ -15,6 +17,7 @@ export interface CitiesSlice {
   unfollowCity: (id: string) => void;
   reorderCities: (from: number, to: number) => void;
   makeDefault: (id: string) => void;
+  importBackup: (backup: Backup, parts: BackupParts) => { cities: number; days: number };
 }
 
 export interface ForecastSlice {

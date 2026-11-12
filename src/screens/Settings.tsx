@@ -1,9 +1,11 @@
 import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
 import type { Accent, TempUnit, WindUnit } from '../types';
 import { ACCENTS } from '../theme';
 import { downloadFile } from '../lib/format';
+import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
 
 export function Settings() {
@@ -14,13 +16,39 @@ export function Settings() {
     updateSettings: st.updateSettings,
     refreshAll: st.refreshAll,
     clearHistory: st.clearHistory,
+    importBackup: st.importBackup,
   })));
   const set = s.updateSettings;
+
+  // Import: read the file, show what it holds, let the user pick the parts, then merge.
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [pending, setPending] = useState<Backup | null>(null);
+  const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
+  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const onFile = async (file?: File) => {
+    setImportMsg(null);
+    if (!file) return;
+    try {
+      const b = parseBackup(await file.text());
+      setParts({ cities: b.cities.length > 0, history: countDays(b) > 0, settings: false });
+      setPending(b);
+    } catch (e) {
+      setPending(null);
+      setImportMsg({ ok: false, text: (e as Error).message });
+    }
+    if (fileInput.current) fileInput.current.value = '';
+  };
+  const doImport = () => {
+    if (!pending) return;
+    const r = s.importBackup(pending, parts);
+    setImportMsg({ ok: true, text: `Imported ${r.cities} new ${r.cities === 1 ? 'city' : 'cities'} and ${r.days} ${r.days === 1 ? 'day' : 'days'}.` });
+    setPending(null);
+  };
 
   const exportAll = () => {
     const { cities, history, settings } = useWeatherStore.getState();
     const { apiKey: _omit, ...safeSettings } = settings;
-    downloadFile('weather-log.json', JSON.stringify({ exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
+    downloadFile('weather-log.json', JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
   };
 
   return (
@@ -105,8 +133,33 @@ export function Settings() {
             <Text fz={14} fw={600}>Stored on this device</Text>
             <Text fz={12} c="dimmed">{s.cityCount} cities · {s.dayCount} days · IndexedDB</Text>
           </Box>
-          <Button variant="outline" color="gray" onClick={exportAll}>Export JSON</Button>
+          <Group gap={8} wrap="nowrap">
+            <Button variant="outline" color="gray" onClick={exportAll}>Export</Button>
+            <Button variant="outline" color="gray" onClick={() => fileInput.current?.click()}>Import</Button>
+          </Group>
+          <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={(e) => void onFile(e.currentTarget.files?.[0])} />
         </Group>
+        {pending && (
+          <Box py={12} className="row">
+            <Text fz={14} fw={600}>Import from backup</Text>
+            <Text fz={12} c="dimmed" mb={8}>
+              {pending.exportedAt ? `Exported ${pending.exportedAt.slice(0, 10)}. ` : ''}Merges into what is on this device; days you logged here are kept.
+            </Text>
+            <Stack gap={10}>
+              <Switch label={`Cities (${pending.cities.length})`} description="Cities you do not follow yet are added at the end."
+                disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setParts({ ...parts, cities: e.currentTarget.checked })} />
+              <Switch label={`History (${countDays(pending)} days)`} description="Only for cities you follow."
+                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setParts({ ...parts, history: e.currentTarget.checked })} />
+              <Switch label="Settings" description="Units, accent colour and server. Your API key is never part of a backup."
+                disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setParts({ ...parts, settings: e.currentTarget.checked })} />
+            </Stack>
+            <Group mt={12} gap={8}>
+              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={doImport}>Import selected</Button>
+              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>Cancel</Button>
+            </Group>
+          </Box>
+        )}
+        {importMsg && <Text fz={13} py={8} c={importMsg.ok ? undefined : 'signal.3'} role="status">{importMsg.text}</Text>}
         <Button variant="subtle" color="signal" mt={8}
           onClick={() => { if (window.confirm('Delete all logged history? This cannot be undone.')) s.clearHistory(); }}>
           Delete all history
