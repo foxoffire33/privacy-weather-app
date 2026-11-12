@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import type { TempUnit, WindUnit } from '../types';
 
 // Stored data is always metric (°C, km/h, mm); units apply only when formatting.
@@ -51,7 +54,14 @@ export function aqiLabel(a?: number | null): string {
   if (a == null) return 'Unavailable';
   return a <= 20 ? 'Good' : a <= 40 ? 'Fair' : a <= 60 ? 'Moderate' : a <= 80 ? 'Poor' : a <= 100 ? 'Very poor' : 'Extremely poor';
 }
-export function downloadFile(name: string, text: string, type: string) {
+// Browsers download via a link. The Android WebView ignores that for blobs, so the app writes the file to
+// its cache and hands it to the system share sheet (save to Files, Drive, mail, ...).
+export async function downloadFile(name: string, text: string, type: string) {
+  if (Capacitor.isNativePlatform()) {
+    const { uri } = await Filesystem.writeFile({ path: name, data: text, directory: Directory.Cache, encoding: Encoding.UTF8 });
+    await Share.share({ title: name, url: uri, dialogTitle: 'Save or share' }).catch(() => undefined); // closing the sheet is not an error
+    return;
+  }
   const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement('a');
   a.href = url;
