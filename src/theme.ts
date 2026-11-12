@@ -31,12 +31,12 @@ const chartStyles = {
   legendItem: { paddingInline: '0 12px', gap: 6 },
   legendItemColor: { borderRadius: 0, width: 12, height: 3, minWidth: 12, minHeight: 3, boxShadow: 'none' },
   legendItemName: { fontSize: 11, color: 'var(--mantine-color-dark-2)' },
-  tooltip: { borderRadius: 0, border: '2px solid var(--rule)', background: '#000', boxShadow: 'none', padding: '6px 10px' },
+  tooltip: { borderRadius: 0, border: '2px solid var(--rule)', background: '#000', boxShadow: '0 6px 18px rgba(0,0,0,.6)', padding: '8px 12px' },
 };
 const chartBase = {
   gridAxis: 'y' as const,
-  strokeDasharray: '1 6',
-  gridColor: 'dark.4',
+  strokeDasharray: '2 5',
+  gridColor: 'dark.5',
   textColor: 'dark.2',
   tickLine: 'none' as const,
   withLegend: true,
@@ -44,7 +44,7 @@ const chartBase = {
   tooltipAnimationDuration: 100,
   yAxisProps: { width: 34 },
 };
-const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2 };
+const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
 
 export const buildTheme = (accent: Accent) => createTheme({
   primaryColor: 'signal',
@@ -74,7 +74,7 @@ export const buildTheme = (accent: Accent) => createTheme({
     Select: Select.extend({ defaultProps: { radius: 0 } }),
     SegmentedControl: SegmentedControl.extend({ defaultProps: { radius: 0 } }),
     Switch: Switch.extend({ defaultProps: { radius: 0, color: 'signal' } }),
-    AreaChart: AreaChart.extend({ defaultProps: { ...lineBase, fillOpacity: 0.12 }, styles: chartStyles }),
+    AreaChart: AreaChart.extend({ defaultProps: { ...lineBase, withGradient: true, fillOpacity: 0.35 }, styles: chartStyles }),
     LineChart: LineChart.extend({ defaultProps: lineBase, styles: chartStyles }),
     BarChart: BarChart.extend({ defaultProps: { ...chartBase, maxBarWidth: 14 }, styles: chartStyles }),
     CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),
