@@ -5,5 +5,31 @@
     <color name="ic_launcher_red">#EC3013</color>
     <color name="ic_launcher_blue">#2F62F5</color>
     <color name="ic_launcher_off">#000000</color>
+    <!-- Custom accents: the nearest of these is used (AppIconPlugin). -->
+    <color name="ic_launcher_h000l">#D51A1A</color>
+    <color name="ic_launcher_h000d">#8C1717</color>
+    <color name="ic_launcher_h030l">#D5781A</color>
+    <color name="ic_launcher_h030d">#8C5217</color>
+    <color name="ic_launcher_h060l">#D5D51A</color>
+    <color name="ic_launcher_h060d">#8C8C17</color>
+    <color name="ic_launcher_h090l">#78D51A</color>
+    <color name="ic_launcher_h090d">#528C17</color>
+    <color name="ic_launcher_h120l">#1AD51A</color>
+    <color name="ic_launcher_h120d">#178C17</color>
+    <color name="ic_launcher_h150l">#1AD578</color>
+    <color name="ic_launcher_h150d">#178C52</color>
+    <color name="ic_launcher_h180l">#1AD5D5</color>
+    <color name="ic_launcher_h180d">#178C8C</color>
+    <color name="ic_launcher_h210l">#1A78D5</color>
+    <color name="ic_launcher_h210d">#17528C</color>
+    <color name="ic_launcher_h240l">#1A1AD5</color>
+    <color name="ic_launcher_h240d">#17178C</color>
+    <color name="ic_launcher_h270l">#781AD5</color>
+    <color name="ic_launcher_h270d">#52178C</color>
+    <color name="ic_launcher_h300l">#D51AD5</color>
+    <color name="ic_launcher_h300d">#8C178C</color>
+    <color name="ic_launcher_h330l">#D51A78</color>
+    <color name="ic_launcher_h330d">#8C1752</color>
+    <color name="ic_launcher_grey">#6E6B6B</color>
     <color name="ic_launcher_background">@color/ic_launcher_green</color>
 </resources>

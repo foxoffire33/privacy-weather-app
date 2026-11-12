@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ActionIcon, Badge, Box, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { ActionIcon, Badge, Box, Button, Group, Paper, SegmentedControl, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeatherStore } from '../store';
@@ -8,6 +8,7 @@ import { addDays, convTemp, daysBetween, downloadFile, fmtDelta, fmtTemp, fmtWin
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
+import { SwipeRow } from '../components/SwipeRow';
 
 export function History({ cityId }: { cityId: string }) {
   const s = useWeatherStore(useShallow((st) => {
@@ -26,6 +27,8 @@ export function History({ cityId }: { cityId: string }) {
       loadThisDay: st.loadThisDay,
       setLookupDraft: st.setLookupDraft,
       lookupDate: st.lookupDate,
+      deleteLogDay: st.deleteLogDay,
+      importRange: st.importRange,
       navigate: st.navigate,
       goHome: st.goHome,
       range: st.historyRange,
@@ -40,6 +43,7 @@ export function History({ cityId }: { cityId: string }) {
   const maxLookupDate = addDays(today, -5); // archive lags ~5 days
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
   const lookedUp = !!s.lookup;
+  const [swiped, setSwiped] = useState<string | null>(null);
   useEffect(() => {
     if (!validDraft || lookedUp) return;
     const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
@@ -94,7 +98,11 @@ export function History({ cityId }: { cityId: string }) {
             min="1940-01-01" max={maxLookup} value={s.draft}
             onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
           {validDraft && (
-            <UnstyledButton mt={12} w="100%" disabled={!s.lookup || !!s.lookup.loading || !!s.lookup.error} onClick={() => open(s.draft)}
+            <UnstyledButton mt={12} w="100%" disabled={!s.lookup || !!s.lookup.loading || !!s.lookup.error} onClick={() => {
+                // A looked-up date is saved to the log before it opens.
+                void s.importRange(cityId, s.draft, s.draft).catch(() => undefined);
+                open(s.draft);
+              }}
               style={{ border: '2px solid var(--rule)', display: 'block' }}>
               {!s.lookup || s.lookup.loading ? (
                 <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
@@ -157,13 +165,19 @@ export function History({ cityId }: { cityId: string }) {
       })()}
 
       <Box px={20} pb={24}>
-        <div className="kicker">Your log · {rows.length} {rows.length === 1 ? 'day' : 'days'} since {shortDate(s.city.followedAt)}</div>
+        <Group justify="space-between" className="kicker" wrap="nowrap">
+          <span>Your log · {rows.length} {rows.length === 1 ? 'day' : 'days'}</span>
+          <ImportRange cityId={cityId} maxDate={maxLookup} importRange={s.importRange} />
+        </Group>
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">The first snapshot is saved after the forecast loads.</Text>}
         {rows.map((r) => {
           const normal = s.normals?.[r.date.slice(5)];
           const delta = normal != null && r.hi != null ? fmtDelta(r.hi - normal, s.tempUnit) : null;
           return (
-            <UnstyledButton key={r.date} className="row" py={10} w="100%" onClick={() => open(r.date)}
+            <SwipeRow key={r.date} label={longDate(r.date)} disabled={r.date === today}
+              open={swiped === r.date} onOpenChange={(o) => setSwiped(o ? r.date : null)}
+              onDelete={() => { s.deleteLogDay(cityId, r.date); setSwiped(null); }}>
+            <UnstyledButton className="row" py={10} w="100%" onClick={() => open(r.date)}
               style={{ display: 'grid', gridTemplateColumns: '72px 1fr auto', alignItems: 'baseline', gap: 8 }}>
               <Text fz={14} fw={800}>{r.date === today ? 'Today' : shortDate(r.date)}</Text>
               <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
@@ -175,9 +189,73 @@ export function History({ cityId }: { cityId: string }) {
                 {delta && <Text span fz={12} ml={6} c={delta.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta}</Text>}
               </Text>
             </UnstyledButton>
+            </SwipeRow>
           );
         })}
       </Box>
     </div>
+  );
+}
+
+// Download a range of past days from the archive into the log.
+function ImportRange({ cityId, maxDate, importRange }: {
+  cityId: string;
+  maxDate: string;
+  importRange: (id: string, start: string, end: string) => Promise<{ added: number; updated: number; kept: number }>;
+}) {
+  const [show, setShow] = useState(false);
+  const [from, setFrom] = useState(() => addDays(maxDate, -29));
+  const [to, setTo] = useState(maxDate);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const days = from && to ? daysBetween(from, to) + 1 : 0;
+  const tooLong = days > 3660;
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(from) && /^\d{4}-\d{2}-\d{2}$/.test(to)
+    && from >= '1940-01-01' && to <= maxDate && days > 0 && !tooLong;
+
+  const run = async () => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const c = await importRange(cityId, from, to);
+      setMsg(`Added ${c.added} ${c.added === 1 ? 'day' : 'days'}, updated ${c.updated}`
+        + (c.kept ? `, kept ${c.kept} the app logged itself` : '') + '.');
+    } catch (e) {
+      setMsg(`Could not download: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!show) {
+    return (
+      <UnstyledButton onClick={() => setShow(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 800 }}>
+        <Icon name="plus" size={14} /> Add dates
+      </UnstyledButton>
+    );
+  }
+  return (
+    <Box style={{ position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+      onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
+      <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
+        role="dialog" aria-label="Add dates to your log">
+        <Group justify="space-between" mb={8}>
+          <Text fz={16} fw={800}>Add dates to your log</Text>
+          <ActionIcon aria-label="Close" onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={18} /></ActionIcon>
+        </Group>
+        <div className="stat-grid">
+          <TextInput type="date" label="From" min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
+          <TextInput type="date" label="To" min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
+        </div>
+        <Text fz={12} c="dimmed" mt={8}>
+          Daily weather from the historical archive (1940 until 5 days ago). Days the app logged itself are kept.
+        </Text>
+        {tooLong && <Text fz={12} c="signal.3" mt={6}>Pick at most 10 years at a time.</Text>}
+        <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run()}>
+          {valid ? `Download ${days} ${days === 1 ? 'day' : 'days'}` : 'Download'}
+        </Button>
+        {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}
+      </Paper>
+    </Box>
   );
 }
