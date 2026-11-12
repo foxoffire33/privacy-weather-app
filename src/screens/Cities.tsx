@@ -24,12 +24,13 @@ export function Cities() {
   const n = cities.length;
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ overflow: 'hidden' }}>
+      <div className="cities-scroll">
       <ScreenHeader />
       <Title className="display">{WORDS[n] ?? n}<br />{n === 1 ? 'city.' : 'cities.'}</Title>
       <Text px={20} pb={16} fz={13} c="dimmed">Reorder with the arrows. The top city opens first.</Text>
 
-      <Box className="rule-top" style={{ flex: 1 }}>
+      <Box className="rule-top">
         {cities.map((c, i) => {
           const f = forecasts[c.id];
           const days = Object.keys(history[c.id] ?? {}).length;
@@ -70,6 +71,7 @@ export function Cities() {
           );
         })}
       </Box>
+      </div>
 
       <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => navigate({ name: 'search' })}>
         Follow a city
