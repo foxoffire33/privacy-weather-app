@@ -20,7 +20,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
  * called when the app goes to the background, so it never interrupts the user.
  *
  * The accent is also stored in SharedPreferences ("accent_color", a #rrggbb hex) so
- * native parts such as home-screen widgets can use the same colour.
+ * the home-screen widgets (WidgetPainter) use the same colour.
  */
 @CapacitorPlugin(name = "AppIcon")
 public class AppIconPlugin extends Plugin {
@@ -43,6 +43,8 @@ public class AppIconPlugin extends Plugin {
             .putString(KEY_ALIAS, alias)
             .putString(KEY_ACCENT_COLOR, color)
             .apply();
+        // Widgets use the accent too: redraw them right away.
+        Widgets.updateAll(getContext());
         call.resolve();
     }
 

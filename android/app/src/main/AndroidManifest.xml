@@ -76,6 +76,67 @@
             </intent-filter>
         </activity-alias>
 
+        <!-- Home-screen widgets: drawn from the snapshot the app sends (Widgets.java). -->
+        <receiver
+            android:name=".NowWidget"
+            android:label="@string/widget_now"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_now" />
+        </receiver>
+
+        <receiver
+            android:name=".TimelineWidget"
+            android:label="@string/widget_timeline"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_timeline" />
+        </receiver>
+
+        <receiver
+            android:name=".ThisDayWidget"
+            android:label="@string/widget_thisday"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_thisday" />
+        </receiver>
+
+        <receiver
+            android:name=".RainWidget"
+            android:label="@string/widget_rain"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_rain" />
+        </receiver>
+
+        <receiver
+            android:name=".HourlyWidget"
+            android:label="@string/widget_hourly"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_hourly" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -12,6 +12,7 @@ import { Hourly } from './screens/Hourly';
 import { DayView } from './screens/DayView';
 import { Settings } from './screens/Settings';
 import { syncAppIcon } from './lib/appIcon';
+import { startWidgetSync } from './lib/widgets';
 
 export default function App() {
   const { hydrated, route, hasCities, snapshotMinutes, refreshAll, accent, accentColor } = useWeatherStore(useShallow((s) => ({
@@ -38,6 +39,9 @@ export default function App() {
   useEffect(() => {
     if (hydrated) syncAppIcon(accent, accentColor);
   }, [hydrated, accent, accentColor]);
+
+  // Home-screen widgets (Android) follow the store.
+  useEffect(() => (hydrated ? startWidgetSync() : undefined), [hydrated]);
 
   // Hardware/gesture back: step back through screens, close the app from the home screen.
   useEffect(() => {
