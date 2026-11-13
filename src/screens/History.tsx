@@ -1,16 +1,16 @@
-import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { Suspense, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import { HistoryLog } from '../components/history/HistoryLog';
 import { Trends } from '../components/history/Trends';
 import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
-import { SwipeRow } from '../components/SwipeRow';
 import { t } from '../i18n';
 import { fireAndForget } from '../lib/fireAndForget';
-import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
+import { downloadFile, fmtTemp, fmtWind, longDate } from '../lib/format';
 import { conditionLabel } from '../lib/weatherCodes';
 import {
   addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
@@ -45,17 +45,12 @@ export function History({ cityId }: CityScreenProps): ReactElement {
     windUnit: units.wind,
     deleteLogDay: useLogStore((st) => st.removeDay),
     cityIndex: useCityIndex(cityId),
-    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome, logFilter: st.logFilter, setLogFilter: st.setLogFilter }))),
+    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
   };
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
-  const [swiped, setSwiped] = useState<string | null>(null);
   if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
-  const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
-  const q = s.logFilter.trim().toLowerCase();
-  const visible = q === '' ? rows : rows.filter((r) =>
-    [r.date, longDate(r.date), shortDate(r.date), conditionLabel(r.code), r.source].some((v) => v.toLowerCase().includes(q)));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => {
     if (date === today) { s.goHome(s.cityIndex); } else { s.navigate({ name: 'day', cityId, date }); }
@@ -100,30 +95,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
-        {rows.length > 0 && (
-          <TextInput mt={14} placeholder={t('history.search')} aria-label={t('history.search')}
-            leftSection={<Icon name="search" size={16} />} value={s.logFilter}
-            onChange={(e) => { s.setLogFilter(e.currentTarget.value); }} />
-        )}
-        {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
-        {rows.length > 0 && visible.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.noMatches')}</Text>}
-        {visible.map((r) => {
-          const normal = s.normals?.[r.date.slice(5)];
-          const delta = normal !== undefined && (r.hi !== null && r.hi !== undefined) ? fmtDelta(r.hi - normal, s.tempUnit) : null;
-          return (
-            <SwipeRow key={r.date} label={longDate(r.date)} disabled={r.date === today}
-              open={swiped === r.date} onOpenChange={(o) => { setSwiped(o ? r.date : null); }}
-              onDelete={() => { s.deleteLogDay(cityId, r.date); setSwiped(null); }}>
-            <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => { open(r.date); }}>
-              <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
-              <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm ?? 0).toFixed(1) })}{(r.feelsHi === null || r.feelsHi === undefined) ? '' : t('history.rowFeels', { t: T(r.feelsHi) })}</Text>
-              <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</Box>
-              <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
-              <Text fz={12} ta="right" c={(delta?.startsWith('+') === true) ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
-            </UnstyledButton>
-            </SwipeRow>
-          );
-        })}
+        <HistoryLog cityId={cityId} rows={rows} today={today} onOpen={open} />
       </Box>
     </Box>
   );
