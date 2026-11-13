@@ -5,6 +5,7 @@ import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './a
 import { fetchDailyRange } from './api/openMeteo';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
+import { inSequence } from './core/guards';
 import { idbStorage } from './core/persistStorage';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
@@ -22,7 +23,7 @@ const FORECAST_PAST_DAYS = 92;
 export const NO_ARCHIVE_DATA = 'no-archive-data';
 
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
-  [...new Set([...existing, ...added])].sort();
+  [...new Set([...existing, ...added])].toSorted((a, b) => a.localeCompare(b));
 
 function sources(start: string, end: string): SourceSpan[] {
   const horizon = addDays(todayISO(), -FORECAST_PAST_DAYS);
@@ -72,7 +73,7 @@ export const useLogStore = create<LogState>()(
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
         try {
           const recent = date >= addDays(todayISO(), -FORECAST_PAST_DAYS);
-          const rows = await fetchDailyRange(city, date, date, recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, recent ? 'forecast' : 'archive');
+          const rows = await fetchDailyRange(city, { from: date, to: date }, recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, recent ? 'forecast' : 'archive');
           const record = fromRangeRow(city.id, rows, 0);
           if (isEmptyRecord(record)) { throw new Error(NO_ARCHIVE_DATA); }
           entityCache.upsert('dayRecord', record);
@@ -87,12 +88,12 @@ export const useLogStore = create<LogState>()(
         try {
           const parts = sources(start, end);
           const fetched = await Promise.all(parts.map(async (p) => fetchDailyRange(
-            city, p.from, p.to, p.recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, p.recent ? 'forecast' : 'archive',
+            city, p, p.recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, p.recent ? 'forecast' : 'archive',
           )));
           const counts: ImportCounts = { added: 0, updated: 0, kept: 0 };
           const records: DayRecord[] = [];
           for (const rows of fetched) {
-            for (const [i, date] of rows.time.entries()) {
+            for (const i of rows.time.keys()) {
               const record = fromRangeRow(city.id, rows, i);
               if (isEmptyRecord(record)) { continue; }
               const prev = entityCache.getOne('dayRecord', record.id);
@@ -128,15 +129,15 @@ export const useLogStore = create<LogState>()(
             continue;
           }
           const last = runs.at(-1);
-          if (last !== undefined && last.to === addDays(d, -1)) { last.to = d; }
+          if (last?.to === addDays(d, -1)) { last.to = d; }
           else {runs.push({ from: d, to: d });}
         }
         total.added += get().addDates(city.id, cached);
-        for (const run of runs) {
+        await inSequence(runs, async (run) => {
           const counts = await get().addRange(city, run.from, run.to);
           total.added += counts.added;
           total.updated += counts.updated;
-        }
+        });
         return total;
       },
       removeDay: (cityId, date) => {

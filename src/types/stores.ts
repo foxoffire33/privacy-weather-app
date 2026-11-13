@@ -47,7 +47,7 @@ export interface TrendsState {
   setCustom: (range: DateRange | null) => void;
   setBack: (years: number) => void;
   setRangeDraft: (patch: Partial<DateRange>) => void;
-  ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  ensureWindows: (cityId: string, windows: DateRange[]) => PromiseLike<void>;
   retryFailed: (cityId: string, windows: DateRange[]) => Promise<void>;
 }
 

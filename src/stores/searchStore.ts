@@ -13,7 +13,7 @@ const MIN_TERM = 2;
 
 let controller: AbortController | null = null;
 
-export const useSearchStore = create<SearchState>()((set, get) => ({
+export const useSearchStore = create<SearchState>()((set) => ({
   query: '',
   results: [],
   request: initialQueryState(),

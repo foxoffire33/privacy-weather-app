@@ -1,8 +1,10 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
+
 import { t as tx, useI18n } from '../i18n';
 import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
 
+import { fireAndForget } from './fireAndForget';
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourLabel, shortDate, weekday } from './format';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
@@ -106,20 +108,23 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
 let last = '';
 let timer: number | undefined;
 
-export function startWidgetSync(): () => void {
-  if (Capacitor.getPlatform() !== 'android') {return () => {};}
-  const push = () => {
-    const snap = buildSnapshot(readSnapshotInput());
-    const json = snap ? JSON.stringify(snap) : '';
-    if (json === last) { return; }
-    last = json;
-    Widgets.update({ json }).catch(() => {});
-  };
-  push();
-  const later = () => {
-    globalThis.clearTimeout(timer);
-    timer = globalThis.setTimeout(push, 800);
-  };
+function pushSnapshot(): void {
+  const snap = buildSnapshot(readSnapshotInput());
+  const json = snap ? JSON.stringify(snap) : '';
+  if (json === last) { return; }
+  last = json;
+  fireAndForget(Widgets.update({ json }));
+}
+
+function pushLater(): void {
+  globalThis.clearTimeout(timer);
+  timer = globalThis.setTimeout(pushSnapshot, 800);
+}
+
+export function startWidgetSync(): (() => void) | undefined {
+  if (Capacitor.getPlatform() !== 'android') { return undefined; }
+  pushSnapshot();
+  const later = pushLater;
   const unsubs = [useEntityCache, useForecastStore, useLogStore, useAlmanacStore, useSettingsStore]
     .map((store) => store.subscribe(later));
   unsubs.push(useI18n.subscribe(later));

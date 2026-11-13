@@ -22,7 +22,7 @@ function fit(value: unknown): string {
 const PER_ROW = 3;
 
 export function CompactTooltip({ active, label, payload }: CompactTooltipProps): ReactElement {
-  const rows: readonly TooltipEntry[] = active && payload !== undefined ? payload : [];
+  const rows: readonly TooltipEntry[] = active ? payload : [];
   const point: unknown = rows.at(0)?.payload;
   const title = isRecord(point) && typeof point.when === 'string' ? point.when : label;
   const grid = rows.length > PER_ROW;
@@ -44,11 +44,11 @@ export function CompactTooltip({ active, label, payload }: CompactTooltipProps):
         <>
           <Group gap={12} align="baseline" wrap="nowrap">
             <Text span inherit fw={700} fz={13} mr="auto">{title}</Text>
-            {!grid && rows.map(cell)}
+            {!grid && rows.map((e) => cell(e))}
           </Group>
           {grid && (
             <SimpleGrid cols={PER_ROW} spacing={12} verticalSpacing={2}>
-              {rows.map(cell)}
+              {rows.map((e) => cell(e))}
             </SimpleGrid>
           )}
         </>

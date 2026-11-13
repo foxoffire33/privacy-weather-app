@@ -1,7 +1,6 @@
 import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../stores';
 import type { MessageKey } from './i18n';
-import type { TooltipContentProps, TooltipPayloadEntry, TooltipValueType } from 'recharts';
-import type { NameType } from 'recharts/types/component/DefaultTooltipContent';
+import type { TooltipContentProps, TooltipPayloadEntry } from 'recharts';
 
 export interface ToggleSeries {
   name: string;

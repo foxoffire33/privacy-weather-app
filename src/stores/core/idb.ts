@@ -13,73 +13,58 @@ function keyToString(key: IDBValidKey): string {
 }
 
 async function openDb(): Promise<IDBDatabase> {
-  if (dbPromise !== null) {return dbPromise;}
-
-  dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
+  dbPromise ??= new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
+    request.addEventListener('upgradeneeded', () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {db.createObjectStore(STORE_NAME);}
-    };
-    request.onsuccess = () => { resolve(request.result); };
-    request.onerror = () => { reject(request.error ?? new Error('IndexedDB open failed')); };
+      if (!db.objectStoreNames.contains(STORE_NAME)) { db.createObjectStore(STORE_NAME); }
+    });
+    request.addEventListener('success', () => { resolve(request.result); });
+    request.addEventListener('error', () => { reject(request.error ?? new Error('IndexedDB open failed')); });
   });
-
   return dbPromise;
 }
 
+async function database(): Promise<IDBDatabase | null> {
+  if (!hasIndexedDb()) { return null; }
+  return openDb().catch(() => null);
+}
+
+async function read<T>(request: (store: IDBObjectStore) => IDBRequest<T>): Promise<T | null> {
+  const db = await database();
+  if (db === null) { return null; }
+  return new Promise<T | null>((resolve) => {
+    const req = request(db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME));
+    req.addEventListener('success', () => { resolve(req.result); });
+    req.addEventListener('error', () => { resolve(null); });
+  }).catch(() => null);
+}
+
+async function write(change: (store: IDBObjectStore) => void): Promise<void> {
+  const db = await database();
+  if (db === null) { return; }
+  await new Promise<void>((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    change(tx.objectStore(STORE_NAME));
+    tx.addEventListener('complete', () => { resolve(); });
+    tx.addEventListener('error', () => { resolve(); });
+  }).catch(() => null);
+}
+
 export async function idbGet(key: string): Promise<unknown> {
-  if (!hasIndexedDb()) {return null;}
-  try {
-    const db = await openDb();
-    return await new Promise<unknown>((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).get(key);
-      req.onsuccess = () => { resolve(req.result ?? null); };
-      req.onerror = () => { resolve(null); };
-    });
-  } catch {
-    return null;
-  }
+  const value: unknown = await read((store) => store.get(key));
+  return value ?? null;
 }
 
 export async function idbSet(key: string, value: unknown): Promise<void> {
-  if (!hasIndexedDb()) {return;}
-  try {
-    const db = await openDb();
-    await new Promise<void>((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      tx.objectStore(STORE_NAME).put(value, key);
-      tx.oncomplete = () => { resolve(); };
-      tx.onerror = () => { resolve(); };
-    });
-  } catch {}
+  await write((store) => { store.put(value, key); });
 }
 
 export async function idbDel(key: string): Promise<void> {
-  if (!hasIndexedDb()) {return;}
-  try {
-    const db = await openDb();
-    await new Promise<void>((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      tx.objectStore(STORE_NAME).delete(key);
-      tx.oncomplete = () => { resolve(); };
-      tx.onerror = () => { resolve(); };
-    });
-  } catch {}
+  await write((store) => { store.delete(key); });
 }
 
 export async function idbKeys(): Promise<string[]> {
-  if (!hasIndexedDb()) {return [];}
-  try {
-    const db = await openDb();
-    return await new Promise<string[]>((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).getAllKeys();
-      req.onsuccess = () => { resolve(req.result.map(keyToString)); };
-      req.onerror = () => { resolve([]); };
-    });
-  } catch {
-    return [];
-  }
+  const keys = await read((store) => store.getAllKeys());
+  return (keys ?? []).map((key) => keyToString(key));
 }

@@ -4,6 +4,7 @@ import type { PullPast } from '../types';
 import type { PointerEvent, RefObject, TouchEvent } from 'react';
 
 const TRIGGER = 64;
+const notTouch = (e: PointerEvent) => e.pointerType !== 'touch';
 const MAX = 96;
 
 export function usePullPast(ref: RefObject<HTMLElement | null>, onLoad: () => void, enabled: boolean): PullPast {
@@ -42,7 +43,6 @@ export function usePullPast(ref: RefObject<HTMLElement | null>, onLoad: () => vo
     if (d <= 0 || (ref.current?.scrollLeft ?? 0) > 0) { if (pull.current !== 0) {set(0);} return; }
     set(Math.min(MAX, d * 0.5));
   };
-  const notTouch = (e: PointerEvent) => e.pointerType !== 'touch';
   return {
     armed,
     indicatorRef: indicator,

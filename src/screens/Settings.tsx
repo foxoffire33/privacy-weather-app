@@ -11,7 +11,6 @@ import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings 
 import { useBackupStore } from '../stores/backupStore';
 import { ACCENT_NAMES, ACCENTS } from '../theme';
 
-import type { Accent, TempUnit, WindUnit } from '../stores';
 import type { BackupResult, StatusMessage } from '../types';
 import type { ReactElement } from 'react';
 
@@ -46,7 +45,7 @@ export function Settings(): ReactElement {
         <Box className="kicker">{t('settings.language')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
-            value={s.settings.language} onChange={(v) => (v !== null && v !== '') && set({ language: v })}
+            value={s.settings.language} onChange={(v) => { if (v !== null && v !== '') { set({ language: v }); } }}
             data={[
               { value: 'system', label: t('settings.languageSystem', { name: LANGUAGES.find((l) => l.code === systemLanguage())?.name }) },
               ...LANGUAGES.map((l) => ({ value: l.code, label: l.name })),
@@ -113,7 +112,7 @@ export function Settings(): ReactElement {
         <Box py={12} className="row">
           <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
             description={t('settings.intervalNote')}
-            onChange={(v) => (v !== null && v !== '') && set({ snapshotMinutes: Number(v) })}
+            onChange={(v) => { if (v !== null && v !== '') { set({ snapshotMinutes: Number(v) }); } }}
             data={[
               { value: '15', label: t('settings.every15') },
               { value: '30', label: t('settings.every30') },

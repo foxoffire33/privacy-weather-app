@@ -41,3 +41,5 @@ export interface Rehydratable extends HydratablePersist {
 export interface RehydrateHandle {
   rehydrate: () => Promise<void> | void;
 }
+
+export type Pending = PromiseLike<void>;

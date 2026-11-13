@@ -33,7 +33,7 @@ export async function importLegacyStore(): Promise<boolean> {
       dayTable[id] = { ...rec, id, cityId, date };
       logged.push(date);
     }
-    dates[cityId] = logged.sort();
+    dates[cityId] = logged.toSorted((a, b) => a.localeCompare(b));
   }
 
   await Promise.all([

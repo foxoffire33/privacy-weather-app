@@ -71,8 +71,8 @@ export function customTuple(hex: string): MantineColorsTuple {
   while (luminance(b) > 0.5) { b = mix(b, BLACK, 0.1); }
   while (luminance(b) < 0.12) { b = mix(b, WHITE, 0.1); }
   const light = (t: number) => toHex(mix(b, WHITE, t));
-  const dark = (t: number) => toHex(mix(b, BLACK, t));
-  return [light(0.92), light(0.82), light(0.65), light(0.45), light(0.25), toHex(b), dark(0.15), dark(0.3), dark(0.5), dark(0.7)];
+  const shade = (t: number) => toHex(mix(b, BLACK, t));
+  return [light(0.92), light(0.82), light(0.65), light(0.45), light(0.25), toHex(b), shade(0.15), shade(0.3), shade(0.5), shade(0.7)];
 }
 
 export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThemeOverride => createTheme({

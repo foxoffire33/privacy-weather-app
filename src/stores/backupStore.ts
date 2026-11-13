@@ -45,6 +45,6 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
     const { cities, history, settings } = exportSnapshot();
     const { apiKey: _omit, ...safeSettings } = settings;
     const file = { version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history };
-    downloadFile('weather-log.json', JSON.stringify(file, null, 2), 'application/json');
+    void downloadFile('weather-log.json', JSON.stringify(file, null, 2), 'application/json');
   },
 }));

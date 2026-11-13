@@ -18,8 +18,8 @@ function GestureHint({ multiple }: GestureHintProps) {
   const close = useUiStore((s) => s.dismissGestureHint);
   useEffect(() => {
     if (seen) { return; }
-    const t = globalThis.setTimeout(close, 12_000);
-    return () => { globalThis.clearTimeout(t); };
+    const timer = globalThis.setTimeout(close, 12_000);
+    return () => { globalThis.clearTimeout(timer); };
   }, [seen, close]);
   if (seen) { return null; }
   return (
@@ -51,11 +51,11 @@ export function Home(): ReactElement {
     ['ArrowRight', () => { if (idx < n - 1) { setPage(idx + 1); } }],
     ['ArrowLeft', () => { if (idx > 0) { setPage(idx - 1); } }],
   ]);
-  const activeId = cities[idx]?.id;
+  const activeId = cities.at(idx)?.id;
   useEffect(() => {
-    if (activeId === '') { return; }
-    const t = globalThis.setTimeout(() => void refreshCity(activeId), 450);
-    return () => { globalThis.clearTimeout(t); };
+    if (activeId === undefined) { return; }
+    const timer = globalThis.setTimeout(() => void refreshCity(activeId), 450);
+    return () => { globalThis.clearTimeout(timer); };
   }, [activeId]);
   const onDown = (e: PointerEvent) => {
     if (e.target instanceof Element && e.target.closest('[data-noswipe]') !== null) { return; }
@@ -70,7 +70,7 @@ export function Home(): ReactElement {
       if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) {
         d.active = true;
         e.currentTarget.setPointerCapture(d.id);
-        e.currentTarget.style.transition = 'none';
+        if (pagerRef.current) { pagerRef.current.style.transition = 'none'; }
       } else if (Math.abs(my) > 8) {
         drag.current = null;
         return;
@@ -78,7 +78,7 @@ export function Home(): ReactElement {
     }
     const atEdge = (idx === 0 && mx > 0) || (idx === n - 1 && mx < 0);
     dx.current = atEdge ? mx / 3 : mx;
-    e.currentTarget.style.transform = `translateX(calc(${String(-idx * 100)}% + ${String(dx.current)}px))`;
+    if (pagerRef.current) { pagerRef.current.style.transform = `translateX(calc(${String(-idx * 100)}% + ${String(dx.current)}px))`; }
   };
   const onUp = () => {
     const d = drag.current;
@@ -114,7 +114,7 @@ export function Home(): ReactElement {
         </Group>
         <Group gap={0} wrap="nowrap">
           <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
-            onClick={async () => refreshAll({ maxAgeMs: 0 })}>
+            onClick={() => { void refreshAll({ maxAgeMs: 0 }); }}>
             <Box component="span" className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></Box>
           </ActionIcon>
           <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => { navigate({ name: 'settings' }); }}>

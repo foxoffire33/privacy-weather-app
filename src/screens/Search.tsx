@@ -38,7 +38,7 @@ export function Search(): ReactElement {
       <ScreenHeader />
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('search.title')}</Title>
       <Box px={20}>
-        <TextInput size="lg" placeholder={t('search.placeholder')} autoFocus value={s.query}
+        <TextInput size="lg" placeholder={t('search.placeholder')} value={s.query}
           leftSection={<Icon name="search" size={20} />}
           rightSection={s.searching ? <Loader size="xs" /> : null}
           onChange={(e) => { s.setQuery(e.currentTarget.value); }}

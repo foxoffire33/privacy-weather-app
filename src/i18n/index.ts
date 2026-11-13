@@ -59,7 +59,7 @@ const DONE: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfille
 const loading = new Map<Language, Promise<void>>();
 const loaded = new Map<Language, Promise<void>>();
 
-export async function ensureLanguage(lang: Language): Promise<void> {
+export function ensureLanguage(lang: Language): PromiseLike<void> {
   const pending = loading.get(lang);
   if (pending !== undefined) { return pending; }
   const promise = Promise.resolve().then(async () => useI18n.getState().setLanguage(lang));
@@ -71,7 +71,7 @@ export async function ensureLanguage(lang: Language): Promise<void> {
   return promise;
 }
 
-export async function languageLoaded(lang: Language): Promise<void> {
+export function languageLoaded(lang: Language): PromiseLike<void> {
   return loaded.get(lang) ?? DONE;
 }
 
@@ -86,7 +86,8 @@ export const useI18n = create<I18nState>((set, get) => ({
     let messages: Messages = en;
     if (lang !== 'en') {
       try {
-        messages = (await loaders[`./locales/${lang}.json`]()).default;
+        const mod = await loaders[`./locales/${lang}.json`]();
+        messages = mod.default;
       } catch {
         messages = en;
       }

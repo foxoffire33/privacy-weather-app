@@ -116,9 +116,10 @@ export function pressureTrend(data: ForecastData, h0: number): PressureTrend | n
   return { delta: d, label: t(pressureKey(d)) };
 }
 
+const utcMs = (iso: string) => new Date(`${iso}Z`).getTime();
+
 export function sunProgress(nowIso: string, sunrise?: string, sunset?: string): number | null {
   if ((sunrise === undefined || sunrise === '') || (sunset === undefined || sunset === '')) {return null;}
-  const t = (s: string) => new Date(`${s  }Z`).getTime();
-  const p = (t(nowIso) - t(sunrise)) / (t(sunset) - t(sunrise));
+  const p = (utcMs(nowIso) - utcMs(sunrise)) / (utcMs(sunset) - utcMs(sunrise));
   return p < 0 || p > 1 ? null : p;
 }

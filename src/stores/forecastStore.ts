@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 import { fetchAirQuality, fetchForecast, fetchMarine } from './api/openMeteo';
 import { errorMessage } from './core/errors';
+import { without } from './core/guards';
 import { idbStorage } from './core/persistStorage';
 import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
@@ -18,6 +19,10 @@ function loadedQueries(forecasts: ForecastState['forecasts']): QueryMap {
     if (entry !== undefined) { queries[cityId] = { status: 'success', error: null, lastLoadedAt: entry.fetchedAt }; }
   }
   return queries;
+}
+
+function markLoaded(state: ForecastState | undefined): void {
+  if (state !== undefined) { useForecastStore.setState({ queries: loadedQueries(state.forecasts) }); }
 }
 
 export const useForecastStore = create<ForecastState>()(
@@ -47,13 +52,7 @@ export const useForecastStore = create<ForecastState>()(
           return null;
         }
       },
-      drop: (cityId) => set((s) => {
-        const forecasts = { ...s.forecasts };
-        delete forecasts[cityId];
-        const queries = { ...s.queries };
-        delete queries[cityId];
-        return { forecasts, queries };
-      }),
+      drop: (cityId) => { set((s) => ({ forecasts: without(s.forecasts, [cityId]), queries: without(s.queries, [cityId]) })); },
       clear: () => { set({ forecasts: {}, queries: {} }); },
     }),
     {
@@ -62,9 +61,7 @@ export const useForecastStore = create<ForecastState>()(
       storage: idbStorage(),
       skipHydration: true,
       partialize: (s) => ({ forecasts: s.forecasts }),
-      onRehydrateStorage: () => (state) => {
-        if (state !== undefined) { useForecastStore.setState({ queries: loadedQueries(state.forecasts) }); }
-      },
+      onRehydrateStorage: () => markLoaded,
     },
   ),
 );

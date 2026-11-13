@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { definedOnly, isRecord } from '../core/guards';
+import { definedOnly, isRecord, without } from '../core/guards';
 import { idbStorage } from '../core/persistStorage';
 
-import { ENTITY_NAMES, FOLD_RULES } from './schema';
+import { FOLD_RULES } from './schema';
 
 import type { EntityName, EntityTypeMap } from './schema';
 import type { CacheTables, EntityCacheState, PersistedEntities, Table } from './types';
@@ -13,6 +13,13 @@ export type { CacheTables, EntityCacheState } from './types';
 
 function emptyTables(): CacheTables {
   return { city: {}, dayRecord: {} };
+}
+
+function dropFrom(tables: CacheTables, name: EntityName, ids: readonly string[]): CacheTables {
+  switch (name) {
+    case 'city': { return { ...tables, city: without(tables.city, ids) }; }
+    case 'dayRecord': { return { ...tables, dayRecord: without(tables.dayRecord, ids) }; }
+  }
 }
 
 function hasTables(value: unknown): value is PersistedEntities {
@@ -51,20 +58,12 @@ export const useEntityCache = create<EntityCacheState>()(
         return { tables: { ...s.tables, [name]: { ...s.tables[name], [id]: { ...existing, ...patch } } } };
       }),
       remove: (name, id) => set((s) => {
-        if (s.tables[name][id] === undefined) {return s;}
-        const table = { ...s.tables[name] };
-        delete table[id];
-        return { tables: { ...s.tables, [name]: table } };
+        if (s.tables[name][id] === undefined) { return s; }
+        return { tables: dropFrom(s.tables, name, [id]) };
       }),
       removeMany: (name, ids) => set((s) => {
-        const table = { ...s.tables[name] };
-        let changed = false;
-        for (const id of ids) {
-          if (table[id] === undefined) {continue;}
-          delete table[id];
-          changed = true;
-        }
-        return changed ? { tables: { ...s.tables, [name]: table } } : s;
+        const present = ids.filter((id) => s.tables[name][id] !== undefined);
+        return present.length === 0 ? s : { tables: dropFrom(s.tables, name, present) };
       }),
       getOne: (name, id) => get().tables[name][id],
       getMany: (name, ids) => {

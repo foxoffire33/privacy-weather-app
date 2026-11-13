@@ -47,10 +47,10 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
   const at = (k: HourlyVar, i: number) => v[k]?.[i] ?? null;
   const data = [];
   for (let i = from; i < end; i++) {
-    const t = time[i];
+    const stamp = time[i];
     data.push({
-      when: tt('chart.hourLabel', { day: weekday(t.slice(0, 10)), hour: hourOf(t) }),
-      label: hourOf(t) === '00' && i !== from ? weekday(t.slice(0, 10)) : hourOf(t),
+      when: tt('chart.hourLabel', { day: weekday(stamp.slice(0, 10)), hour: hourOf(stamp) }),
+      label: hourOf(stamp) === '00' && i !== from ? weekday(stamp.slice(0, 10)) : hourOf(stamp),
       Air: convTemp(at('temperature_2m', i), units.temp),
       'Feels like': convTemp(at('apparent_temperature', i), units.temp),
       'Dew point': convTemp(at('dew_point_2m', i), units.temp),
@@ -64,10 +64,10 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
       High: at('cloud_cover_high', i),
       hPa: at('pressure_msl', i),
       Humidity: at('relative_humidity_2m', i),
-      AQI: aqi?.[t] ?? null,
+      AQI: aqi?.[stamp] ?? null,
     });
   }
-  const tg = useSeriesToggle(String(active));
+  const tg = useSeriesToggle(active);
   const xAxisProps = { interval: Math.max(0, Math.ceil(data.length / 8) - 1) };
   const hasChance = has('precipitation_probability');
   return (

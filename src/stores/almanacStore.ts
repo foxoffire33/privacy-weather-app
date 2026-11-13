@@ -35,7 +35,7 @@ export const useAlmanacStore = create<AlmanacState>()(
             totals.set(md, { sum: total.sum + value, n: total.n + 1 });
           }
           const means: Record<string, number> = {};
-          for (const [md, total] of totals) { means[md] = +(total.sum / total.n).toFixed(2); }
+          for (const [md, total] of totals) { means[md] = Number((total.sum / total.n).toFixed(2)); }
           set((s) => ({ normals: { ...s.normals, [city.id]: means }, queries: setQuery(s.queries, key, succeed()) }));
         } catch (error) {
           set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
@@ -45,7 +45,7 @@ export const useAlmanacStore = create<AlmanacState>()(
         const key = `${city.id}:${date.slice(5)}`;
         if (get().thisDay[key] !== undefined || isLoading(get().queries[key])) { return; }
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
-        const thisYear = +date.slice(0, 4);
+        const thisYear = Number(date.slice(0, 4));
         const years = [...BACK.map((n) => thisYear - n), FIRST_YEAR];
         const rows: ArchiveYear[] = await Promise.all(years.map(async (year) => {
           const day = `${String(year)}${date.slice(4)}`;

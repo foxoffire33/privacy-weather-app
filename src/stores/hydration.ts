@@ -9,7 +9,7 @@ import { useLogStore } from './logStore';
 import { importLegacyStore } from './migrateLegacy';
 import { useSettingsStore } from './settingsStore';
 
-import type { Rehydratable } from './core/types';
+import type { Pending, Rehydratable } from './core/types';
 
 const PERSISTED: Rehydratable[] = [
   useEntityCache,
@@ -27,7 +27,7 @@ export function alreadyHydrated(): boolean {
 
 let booting: Promise<void> | null = null;
 
-export async function hydrateAll(): Promise<void> {
+export function hydrateAll(): Pending {
   booting ??= (async () => {
     await importLegacyStore().catch(() => false);
     await Promise.all(PERSISTED.map(async (store) => {

@@ -54,7 +54,7 @@ export function aqiLabel(a?: number | null): string {
 export async function downloadFile(name: string, text: string, type: string): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     const { uri } = await Filesystem.writeFile({ path: name, data: text, directory: Directory.Cache, encoding: Encoding.UTF8 });
-    await Share.share({ title: name, url: uri, dialogTitle: 'Save or share' }).catch(() => {});
+    await Promise.allSettled([Share.share({ title: name, url: uri, dialogTitle: 'Save or share' })]);
     return;
   }
   const url = URL.createObjectURL(new Blob([text], { type }));

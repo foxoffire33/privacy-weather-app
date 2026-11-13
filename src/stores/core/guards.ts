@@ -17,3 +17,14 @@ export function definedOnly<T extends object>(obj: T): Partial<T> {
 export function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((v) => typeof v === 'string');
 }
+
+export function without<V>(record: Readonly<Record<string, V>>, keys: readonly string[]): Record<string, V> {
+  const drop = new Set(keys);
+  return Object.fromEntries(Object.entries(record).filter(([key]) => !drop.has(key)));
+}
+
+export async function inSequence<T>(items: readonly T[], task: (item: T) => Promise<void>): Promise<void> {
+  let chain: Promise<void> = Promise.resolve();
+  for (const item of items) { chain = chain.then(async () => { await task(item); }); }
+  await chain;
+}

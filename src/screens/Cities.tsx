@@ -40,7 +40,7 @@ export function Cities(): ReactElement {
     if (!el) { return; }
     const dy = g.current.pointerY - g.current.startY + (el.scrollTop - g.current.startScroll);
     const to = Math.max(0, Math.min(n - 1, g.current.from + Math.round(dy / g.current.rowH)));
-    setDrag({ from: g.current.from, to, dy });
+    setDrag({ from: g.current.from, to, dy, rowH: g.current.rowH });
   };
   const tick = () => {
     const el = scroller.current;
@@ -56,7 +56,7 @@ export function Cities(): ReactElement {
   const onDown = (e: PointerEvent<HTMLElement>, i: number) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     g.current = { ...g.current, startY: e.clientY, pointerY: e.clientY, startScroll: scroller.current?.scrollTop ?? 0, rowH: Math.max(1, firstRow.current?.offsetHeight ?? 0), from: i };
-    setDrag({ from: i, to: i, dy: 0 });
+    setDrag({ from: i, to: i, dy: 0, rowH: g.current.rowH });
     g.current.raf = requestAnimationFrame(tick);
   };
   const onMove = (e: PointerEvent<HTMLElement>) => {
@@ -71,8 +71,8 @@ export function Cities(): ReactElement {
   };
   const shift = (i: number) => {
     if (!drag || i === drag.from) { return 0; }
-    if (drag.from < drag.to && i > drag.from && i <= drag.to) { return -g.current.rowH; }
-    if (drag.from > drag.to && i < drag.from && i >= drag.to) { return g.current.rowH; }
+    if (drag.from < drag.to && i > drag.from && i <= drag.to) { return -drag.rowH; }
+    if (drag.from > drag.to && i < drag.from && i >= drag.to) { return drag.rowH; }
     return 0;
   };
   return (

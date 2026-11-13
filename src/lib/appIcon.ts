@@ -2,6 +2,8 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { ACCENTS, customTuple } from '../theme';
 
+import { fireAndForget } from './fireAndForget';
+
 import type { Accent } from '../stores';
 import type { AppIconPlugin } from '../types';
 
@@ -15,5 +17,5 @@ export function accentHex(accent: Accent, accentColor: string): string {
 
 export function syncAppIcon(accent: Accent, accentColor: string): void {
   if (Capacitor.getPlatform() !== 'android') { return; }
-  AppIcon.setAccent({ accent, color: accentHex(accent, accentColor) }).catch(() => {});
+  fireAndForget(AppIcon.setAccent({ accent, color: accentHex(accent, accentColor) }));
 }

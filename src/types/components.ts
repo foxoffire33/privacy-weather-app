@@ -153,6 +153,7 @@ export interface ReorderDrag {
   from: number;
   to: number;
   dy: number;
+  rowH: number;
 }
 
 export interface StripCell {
@@ -200,7 +201,7 @@ export interface LookupCardProps {
 export interface TrendsFillProps {
   cityId: string;
   windows: DateRange[];
-  ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  ensureWindows: (cityId: string, windows: DateRange[]) => PromiseLike<void>;
   children: ReactNode;
 }
 

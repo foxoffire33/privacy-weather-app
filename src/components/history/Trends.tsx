@@ -1,6 +1,6 @@
 import { BarChart, LineChart } from '@mantine/charts';
 import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
-import { Suspense, use, useEffect, useState } from 'react';
+import { Suspense, use, useEffect, useEffectEvent, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
@@ -17,7 +17,7 @@ import type { ReactElement } from 'react';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
-export const ATTRS: TrendAttr[] = [
+const ATTRS: TrendAttr[] = [
   { key: 'hi', label: 'city.high', group: 'temp', value: (r, _n, u) => T(r?.hi, u.temp) },
   { key: 'lo', label: 'city.low', group: 'temp', value: (r, _n, u) => T(r?.lo, u.temp) },
   { key: 'normal', label: 'history.normal', group: 'temp', value: (_r, n, u) => T(n, u.temp) },
@@ -52,7 +52,7 @@ function lenLabel(len: number): string {
   return len === 365 ? '1y' : `${String(len)}d`;
 }
 
-async function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => Promise<unknown>): Promise<unknown> {
+function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => PromiseLike<void>): PromiseLike<void> {
   if (cached) { return lastSettled(key); }
   return missing ? download() : latest(key);
 }
@@ -68,12 +68,12 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const days = len === 0 ? Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1)) : len;
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
-  const shift = (date: string, years: number) => (years === 0 ? date : `${String(+date.slice(0, 4) - years)}${date.slice(4)}`);
+  const shift = (date: string, years: number) => (years === 0 ? date : `${String(Number(date.slice(0, 4)) - years)}${date.slice(4)}`);
   const windows = back === 0 ? [{ from, to }] : [{ from, to }, { from: shift(from, back), to: shift(to, back) }];
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
-  const yearB = back === 0 ? '' : String(+to.slice(0, 4) - back);
+  const yearB = back === 0 ? '' : String(Number(to.slice(0, 4)) - back);
   const nameA = (a: TrendAttr) => (back === 0 ? t(a.label) : `${t(a.label)} ${yearA}`);
   const nameB = (a: TrendAttr) => `${t(a.label)} ${yearB}`;
   const data: Record<string, string | number | null>[] = [];
@@ -114,7 +114,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       <Box className="tab-row" role="tablist">
         {BACK_YEARS.map((y) => (
           <UnstyledButton key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => { setBack(y); }}>{y === 0 ? t('history.off') : String(+to.slice(0, 4) - y)}</UnstyledButton>
+            onClick={() => { setBack(y); }}>{y === 0 ? t('history.off') : String(Number(to.slice(0, 4)) - y)}</UnstyledButton>
         ))}
       </Box>
 
@@ -166,10 +166,11 @@ function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProp
   const key = trendsKey(cityId, windows);
   const missing = windows.some((w) => hasGap(logged, w) && !attempted.includes(windowKey(cityId, w)));
   const cached = windows.some((w) => hasLogged(logged, w));
+  const download = useEffectEvent(() => { void ensureWindows(cityId, windows); });
   useEffect(() => {
-    if (cached && missing) { void ensureWindows(cityId, windows); }
+    if (cached && missing) { download(); }
   }, [cached, missing, key]);
-  use(windowsPromise(cached, missing, key, async () => ensureWindows(cityId, windows)));
+  use(windowsPromise(cached, missing, key, () => ensureWindows(cityId, windows)));
   return <>{children}</>;
 }
 

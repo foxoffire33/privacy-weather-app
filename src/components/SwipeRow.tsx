@@ -1,5 +1,5 @@
 import { Box, UnstyledButton } from '@mantine/core';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { t } from '../i18n';
 
@@ -11,20 +11,21 @@ const REMOVE_MS = 220;
 
 export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps): ReactElement {
   const [dragX, setDragX] = useState<number | null>(null);
-  const [removing, setRemoving] = useState(false);
+  const [removingWidth, setRemovingWidth] = useState<number | null>(null);
+  const removing = removingWidth !== null;
   const root = useRef<HTMLDivElement>(null);
   const drag = useRef<SwipeGesture | null>(null);
   const swallowClick = useRef(false);
-  const width = root.current?.offsetWidth ?? 420;
-  const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);
+  const offset = removingWidth === null ? dragX ?? (open ? -ACTION_W : 0) : -removingWidth;
   const remove = () => {
     if (removing) { return; }
     setDragX(null);
-    setRemoving(true);
+    setRemovingWidth(root.current?.offsetWidth ?? 420);
   };
+  const deleteNow = useEffectEvent(() => { onDelete(); });
   useEffect(() => {
     if (!removing) { return; }
-    const timer = globalThis.setTimeout(onDelete, REMOVE_MS);
+    const timer = globalThis.setTimeout(() => { deleteNow(); }, REMOVE_MS);
     return () => { globalThis.clearTimeout(timer); };
   }, [removing]);
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -52,7 +53,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
   const onPointerUp = () => {
     const d = drag.current;
     drag.current = null;
-    if (!d || d.dir !== 'h' || dragX === null) { setDragX(null); return; }
+    if (d?.dir !== 'h' || dragX === null) { setDragX(null); return; }
     const x = dragX;
     setDragX(null);
     if (x < -d.width * 0.6) { remove(); }

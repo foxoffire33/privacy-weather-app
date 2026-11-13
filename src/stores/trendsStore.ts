@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { inSequence } from './core/guards';
+
 import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, once, succeed, useLogStore } from '.';
 
 import type { DateRange, TrendsState } from '../types';
@@ -43,21 +45,21 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
   setBack: (back) => { set({ back }); },
   setRangeDraft: (patch) => { set((s) => ({ rangeDraft: { ...s.rangeDraft, ...patch } })); },
 
-  ensureWindows: async (cityId, windows) => once(trendsKey(cityId, windows), async () => {
+  ensureWindows: (cityId, windows) => once(trendsKey(cityId, windows), async () => {
     const tried = new Set(get().attempted);
     const wanted = windows.filter((w) => hasGap(loggedDates(cityId), w) && !tried.has(windowKey(cityId, w)));
     if (wanted.length === 0) { return; }
     set((s) => ({ download: begin(s.download), attempted: [...s.attempted, ...wanted.map((w) => windowKey(cityId, w))] }));
     let error: string | null = null;
     const failed: string[] = [];
-    for (const w of wanted) {
+    await inSequence(wanted, async (w) => {
       try {
         await fillRange(cityId, w.from, w.to);
       } catch (error_) {
         error = errorMessage(error_);
         failed.push(windowKey(cityId, w));
       }
-    }
+    });
     set((s) => ({
       download: error === null ? succeed() : fail(s.download, error),
       failed: [...s.failed.filter((k) => !wanted.some((w) => windowKey(cityId, w) === k)), ...failed],

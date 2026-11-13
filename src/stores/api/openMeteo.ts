@@ -5,6 +5,7 @@ import { isRecord } from '../core/guards';
 
 import { AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS,  } from './variables';
 
+import type { DateSpan } from '../storeTypes';
 import type { AirData, City, DayData, ForecastData, GeoResult, MarineData } from '../types';
 import type { AirVar, CurrentVar, DailyVar, EndpointKind, HourlyVar, MarineVar, RangeRows, SdkBlock,  } from './types';
 
@@ -112,8 +113,9 @@ export async function fetchMarine(city: City): Promise<MarineData | null> {
   return current.wave_height === null && current.sea_surface_temperature === null ? null : { current };
 }
 
-export async function fetchDailyRange(city: City, start: string, end: string,
-  daily: readonly string[], source: 'archive' | 'forecast' = 'archive'): Promise<RangeRows> {
+export async function fetchDailyRange(city: City, span: DateSpan, daily: readonly string[],
+  source: 'archive' | 'forecast' = 'archive'): Promise<RangeRows> {
+  const { from: start, to: end } = span;
   const url = source === 'archive' ? endpoint('archive', '/v1/archive') : endpoint('forecast', '/v1/forecast');
   const [r] = await fetchWeatherApi(url, withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: start, end_date: end, daily: [...daily],
@@ -123,7 +125,7 @@ export async function fetchDailyRange(city: City, start: string, end: string,
 }
 
 export const fetchArchive = async (city: City, start: string, end: string, daily: readonly string[] = ARCHIVE_VARS): Promise<RangeRows> =>
-  fetchDailyRange(city, start, end, daily, 'archive');
+  fetchDailyRange(city, { from: start, to: end }, daily, 'archive');
 
 export async function fetchDay(city: City, date: string, recent: boolean): Promise<DayData> {
   const hourly: readonly string[] = recent ? HOURLY_VARS : ARCHIVE_HOURLY_VARS;

@@ -8,19 +8,20 @@ import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
 import { useSettingsStore } from './settingsStore';
 
+import type { Pending } from './core/types';
 import type { ImportCounts } from './storeTypes';
 import type { Backup, BackupDay, BackupParts, City, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Snapshot, StoredCounts,  } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 
 export const resourceKey = {
-  forecast: (cityId: string) => `forecast:${cityId}`,
-  day: (cityId: string, date: string) => `day:${cityId}:${date}`,
-  lookup: (cityId: string, date: string) => `lookup:${cityId}:${date}`,
-  thisDay: (cityId: string, date: string) => `thisDay:${cityId}:${date.slice(5)}`,
+  forecast: (cityId: string): string => `forecast:${cityId}`,
+  day: (cityId: string, date: string): string => `day:${cityId}:${date}`,
+  lookup: (cityId: string, date: string): string => `lookup:${cityId}:${date}`,
+  thisDay: (cityId: string, date: string): string => `thisDay:${cityId}:${date.slice(5)}`,
 };
 
-export async function refreshCity(cityId: string, opts: RefreshOptions = {}): Promise<void> {
+export function refreshCity(cityId: string, opts: RefreshOptions = {}): Pending {
   return once(resourceKey.forecast(cityId), async () => { await runRefresh(cityId, opts); });
 }
 
@@ -51,7 +52,7 @@ export function unfollowCity(cityId: string): void {
   useForecastStore.getState().drop(cityId);
 }
 
-export async function openDay(cityId: string, date: string): Promise<void> {
+export function openDay(cityId: string, date: string): Pending {
   return once(resourceKey.day(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined) { return; }
@@ -60,7 +61,7 @@ export async function openDay(cityId: string, date: string): Promise<void> {
   });
 }
 
-export async function lookupDate(cityId: string, date: string): Promise<void> {
+export function lookupDate(cityId: string, date: string): Pending {
   return once(resourceKey.lookup(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined || date === '') { return; }
@@ -68,7 +69,7 @@ export async function lookupDate(cityId: string, date: string): Promise<void> {
   });
 }
 
-export async function loadThisDay(cityId: string, date: string): Promise<void> {
+export function loadThisDay(cityId: string, date: string): Pending {
   return once(resourceKey.thisDay(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined) { return; }

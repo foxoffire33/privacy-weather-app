@@ -9,6 +9,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { SwipeRow } from '../components/SwipeRow';
 import { t } from '../i18n';
+import { fireAndForget } from '../lib/fireAndForget';
 import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
 import { conditionLabel } from '../lib/weatherCodes';
 import {
@@ -51,7 +52,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const [swiped, setSwiped] = useState<string | null>(null);
   if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
-  const rows = Object.values(s.log).sort((a, b) => b.date.localeCompare(a.date));
+  const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
   const q = s.logFilter.trim().toLowerCase();
   const visible = q === '' ? rows : rows.filter((r) =>
     [r.date, longDate(r.date), shortDate(r.date), conditionLabel(r.code), r.source].some((v) => v.toLowerCase().includes(q)));
@@ -63,7 +64,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const exportCsv = () => {
     const head = 'date,max_c,min_c,feels_max_c,feels_min_c,precip_mm,snow_cm,wind_max_kmh,gust_max_kmh,sunshine_s,uv_max,weather_code,source';
     const body = rows.map((r) => [r.date, r.hi, r.lo, r.feelsHi, r.feelsLo, r.mm, r.snow, r.wind, r.gust, r.sunshine, r.uv, r.code, r.source].map((x) => x ?? '').join(',')).join('\n');
-    downloadFile(`${cityName.toLowerCase().replaceAll(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
+    void downloadFile(`${cityName.toLowerCase().replaceAll(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
   return (
     <Box className="screen">
@@ -187,7 +188,7 @@ function LookupCard({ cityId, date, onOpen }: LookupCardProps) {
   }
   return (
     <UnstyledButton mt={12} w="100%" style={{ border: '2px solid var(--rule)', display: 'block' }}
-      onClick={() => { void addDayToLog(cityId, date).catch(() => {}); onOpen(date); }}>
+      onClick={() => { fireAndForget(addDayToLog(cityId, date)); onOpen(date); }}>
       <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
         <Text fz={12} fw={800} tt="uppercase" style={{ letterSpacing: '.06em' }}>{longDate(date)}</Text>
         <Icon name="arrow" size={16} />
