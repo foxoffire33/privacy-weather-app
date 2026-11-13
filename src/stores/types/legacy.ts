@@ -17,3 +17,8 @@ export interface LegacyEnvelope {
   state?: LegacyState;
   version?: number;
 }
+
+export interface LegacyLog {
+  dayTable: Record<string, DayRecord>;
+  dates: Record<string, string[]>;
+}

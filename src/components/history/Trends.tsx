@@ -12,7 +12,10 @@ import { useSeriesToggle } from '../charts/SeriesToggle';
 import { ChartSk } from '../Skeletons';
 
 import type { TempUnit } from '../../stores';
-import type { ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
+import type {
+  ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendChartsProps, TrendControlsProps, TrendGroup, TrendGroupDef,
+  TrendNames, TrendRangeInput, TrendRowInput, TrendsFillProps, TrendsProps, TrendsSheet, TrendWindow,
+} from '../../types';
 import type { ReactElement } from 'react';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
@@ -57,52 +60,57 @@ function windowsPromise(cached: boolean, missing: boolean, key: string, download
   return missing ? download() : latest(key);
 }
 
-export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps): ReactElement {
-  const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows, retryFailed } = useTrendsStore(useShallow((st) => ({
-    picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
-    setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
-    retryFailed: st.retryFailed,
-  })));
-  const [sheet, setSheet] = useState<TrendsSheet>(null);
-  const error = download.error;
+const shiftYears = (date: string, years: number) => (years === 0 ? date : `${String(Number(date.slice(0, 4)) - years)}${date.slice(4)}`);
+
+function trendWindow({ len, custom, back, today, followedAt }: TrendRangeInput): TrendWindow {
   const days = len === 0 ? Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1)) : len;
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
-  const shift = (date: string, years: number) => (years === 0 ? date : `${String(Number(date.slice(0, 4)) - years)}${date.slice(4)}`);
-  const windows = back === 0 ? [{ from, to }] : [{ from, to }, { from: shift(from, back), to: shift(to, back) }];
-  const units = { temp: tempUnit, wind: windUnit };
-  const attrs = ATTRS.filter((a) => picked.includes(a.key));
-  const yearA = to.slice(0, 4);
-  const yearB = back === 0 ? '' : String(Number(to.slice(0, 4)) - back);
-  const nameA = (a: TrendAttr) => (back === 0 ? t(a.label) : `${t(a.label)} ${yearA}`);
-  const nameB = (a: TrendAttr) => `${t(a.label)} ${yearB}`;
-  const data: Record<string, string | number | null>[] = [];
-  for (let d = from; d <= to; d = addDays(d, 1)) {
-    const row: Record<string, string | number | null> = { label: shortDate(d) };
-    const dayB = back === 0 ? '' : shift(d, back);
-    for (const a of attrs) {
-      row[nameA(a)] = a.value(log?.[d], normals?.[d.slice(5)] ?? null, units);
-      if (back !== 0) { row[nameB(a)] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units); }
-    }
-    data.push(row);
-  }
-  const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
-  const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
-  const unitOf = (g: TrendGroup) => unitSuffix[g];
-  const rangeLabel = custom ? `${shortDate(custom.from)} – ${shortDate(custom.to)}` : lenLabel(len);
-  return (
-    <Box px={20}>
-      <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
+  const windows = back === 0 ? [{ from, to }] : [{ from, to }, { from: shiftYears(from, back), to: shiftYears(to, back) }];
+  return { from, to, windows };
+}
 
+function trendNames(back: number, to: string): TrendNames {
+  const yearA = to.slice(0, 4);
+  const yearB = String(Number(yearA) - back);
+  return {
+    a: (attr) => (back === 0 ? t(attr.label) : `${t(attr.label)} ${yearA}`),
+    b: (attr) => `${t(attr.label)} ${yearB}`,
+  };
+}
+
+function trendRows({ range, back, attrs, names, log, normals, units }: TrendRowInput): Record<string, string | number | null>[] {
+  const rows: Record<string, string | number | null>[] = [];
+  for (let d = range.from; d <= range.to; d = addDays(d, 1)) {
+    const row: Record<string, string | number | null> = { label: shortDate(d) };
+    const dayB = shiftYears(d, back);
+    for (const a of attrs) {
+      row[names.a(a)] = a.value(log?.[d], normals?.[d.slice(5)] ?? null, units);
+      if (back !== 0) { row[names.b(a)] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units); }
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
+  const { picked, len, custom, back, setLen, setBack, setRangeDraft } = useTrendsStore(useShallow((st) => ({
+    picked: st.picked, len: st.len, custom: st.custom, back: st.back, setLen: st.setLen, setBack: st.setBack, setRangeDraft: st.setRangeDraft,
+  })));
+  const year = Number(range.to.slice(0, 4));
+  return (
+    <>
       <Box className="tab-row">
-        <UnstyledButton onClick={() => { setSheet('attrs'); }}>{t('history.attributes')} · {picked.length}</UnstyledButton>
-        <UnstyledButton aria-pressed={Boolean(custom)} data-active={custom ? true : undefined}
-          onClick={() => { setRangeDraft({ from, to }); setSheet('range'); }}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
+        <UnstyledButton onClick={() => { onSheet('attrs'); }}>{t('history.attributes')} · {picked.length}</UnstyledButton>
+        <UnstyledButton aria-pressed={custom !== null} data-active={custom === null ? undefined : true}
+          onClick={() => { setRangeDraft({ from: range.from, to: range.to }); onSheet('range'); }}>
+          {custom === null ? t('history.custom') : `${shortDate(custom.from)} – ${shortDate(custom.to)}`}
+        </UnstyledButton>
       </Box>
 
       <Box className="tab-row" role="tablist">
         {LENGTHS.map((d) => {
-          const on = !custom && d === len;
+          const on = custom === null && d === len;
           return (
             <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
               onClick={() => { setLen(d); }}>{lenLabel(d)}</UnstyledButton>
@@ -114,9 +122,57 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       <Box className="tab-row" role="tablist">
         {BACK_YEARS.map((y) => (
           <UnstyledButton key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => { setBack(y); }}>{y === 0 ? t('history.off') : String(Number(to.slice(0, 4)) - y)}</UnstyledButton>
+            onClick={() => { setBack(y); }}>{y === 0 ? t('history.off') : String(year - y)}</UnstyledButton>
         ))}
       </Box>
+    </>
+  );
+}
+
+function TrendCharts({ cityId, range, attrs, names, data, windUnit }: TrendChartsProps): ReactElement {
+  const { back, download, retryFailed } = useTrendsStore(useShallow((st) => ({ back: st.back, download: st.download, retryFailed: st.retryFailed })));
+  const error = download.error;
+  const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
+  const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
+  return (
+    <>
+      {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
+      {error !== null && error !== '' && (
+        <Box py={8}>
+          <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
+          <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, range.windows)}>
+            {t('common.tryAgain')}
+          </Button>
+        </Box>
+      )}
+      {GROUPS.map((g) => {
+        const mine = attrs.filter((a) => a.group === g.key);
+        if (mine.length === 0) { return null; }
+        return (
+          <GroupChart key={g.key} id={`trend:${cityId}:${g.key}`} group={g} data={data} base={base} unit={unitSuffix[g.key]}
+            series={mine.flatMap((a, i) => [
+              { name: names.a(a), color: COLORS[i % COLORS.length] },
+              ...(back === 0 ? [] : [{ name: names.b(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }]),
+            ])} />
+        );
+      })}
+    </>
+  );
+}
+
+export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps): ReactElement {
+  const { picked, len, custom, back, setCustom, ensureWindows } = useTrendsStore(useShallow((st) => ({
+    picked: st.picked, len: st.len, custom: st.custom, back: st.back, setCustom: st.setCustom, ensureWindows: st.ensureWindows,
+  })));
+  const [sheet, setSheet] = useState<TrendsSheet>(null);
+  const range = trendWindow({ len, custom, back, today, followedAt });
+  const attrs = ATTRS.filter((a) => picked.includes(a.key));
+  const names = trendNames(back, range.to);
+  const data = trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } });
+  return (
+    <Box px={20}>
+      <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
+      <TrendControls range={range} onSheet={setSheet} />
 
       {attrs.length === 0 && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
@@ -126,27 +182,8 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
           {GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)}
         </>
       )}>
-        <TrendsFill cityId={cityId} windows={windows} ensureWindows={ensureWindows}>
-          {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-          {(error !== null && error !== '') && (
-            <Box py={8}>
-              <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
-              <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, windows)}>
-                {t('common.tryAgain')}
-              </Button>
-            </Box>
-          )}
-          {GROUPS.map((g) => {
-            const mine = attrs.filter((a) => a.group === g.key);
-            if (mine.length === 0) { return null; }
-            return (
-              <GroupChart key={g.key} id={`trend:${cityId}:${g.key}`} group={g} data={data} base={base} unit={unitOf(g.key)}
-                series={mine.flatMap((a, i) => [
-                  { name: nameA(a), color: COLORS[i % COLORS.length] },
-                  ...(back === 0 ? [] : [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }]),
-                ])} />
-            );
-          })}
+        <TrendsFill cityId={cityId} windows={range.windows} ensureWindows={ensureWindows}>
+          <TrendCharts cityId={cityId} range={range} attrs={attrs} names={names} data={data} windUnit={windUnit} />
         </TrendsFill>
       </Suspense>
 

@@ -1,25 +1,19 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 import { Suspense } from 'react';
 
-import { ExpandButton, FullscreenChart } from '../components/charts/FullscreenChart';
-import { HourlyExplorer } from '../components/charts/HourlyExplorer';
-import { Section, Stat } from '../components/city/Parts';
+import { Section } from '../components/city/Parts';
+import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature, DayWind } from '../components/day/DaySections';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
-import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';
+import { fmtDelta, fmtTemp, fullDate } from '../lib/format';
 import { conditionLabel } from '../lib/weatherCodes';
 import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
 
-import type { DayBodyProps, DayHeaderProps, DayViewProps } from '../types';
+import type { DayData, DayRecord } from '../stores';
+import type { DayBodyProps, DayHeaderProps, DayHeroValues, DayViewProps } from '../types';
 import type { ReactElement } from 'react';
 
-const nums = (a?: (number | null)[]) => (a ?? []).filter((x): x is number => x !== null);
-const avg = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? n.reduce((x, y) => x + y, 0) / n.length : null; };
-const max = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? Math.max(...n) : null; };
-const min = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? Math.min(...n) : null; };
-const f = (v: number | null | undefined, d = 0) => ((v === null || v === undefined) ? '–' : v.toFixed(d));
 
 export function DayView({ cityId, date }: DayViewProps): ReactElement {
   const city = useCity(cityId);
@@ -61,15 +55,25 @@ function DayDetailsSk() {
   );
 }
 
-function DayBody({ cityId, date, cityName }: DayBodyProps) {
+function heroValues(day: DayData | undefined, record: DayRecord | undefined): DayHeroValues {
+  const d = day?.daily.v ?? {};
+  return {
+    hi: d.temperature_2m_max ?? record?.hi ?? null,
+    lo: d.temperature_2m_min ?? record?.lo,
+    feelsHi: d.apparent_temperature_max ?? record?.feelsHi,
+    feelsLo: d.apparent_temperature_min ?? record?.feelsLo,
+    code: d.weather_code ?? record?.code,
+  };
+}
+
+function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const units = useUnits();
   const record = useDayRecord(cityId, date);
   const day = useDayData(cityId, date, record === undefined);
   const normal = useNormals(cityId)?.[date.slice(5)];
   const T = (c?: number | null) => fmtTemp(c, units.temp);
-  const d = day?.daily.v ?? {};
-  const hi = d.temperature_2m_max ?? record?.hi ?? null;
-  const delta = normal !== undefined && hi !== null ? fmtDelta(hi - normal, units.temp) : null;
+  const v = heroValues(day, record);
+  const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
   return (
     <>
       <Box className="hero" style={{ paddingTop: 8 }}>
@@ -79,11 +83,11 @@ function DayBody({ cityId, date, cityName }: DayBodyProps) {
           {record && <Badge variant="white" color="dark" size="sm">{record.source === 'log' ? t('dayView.logged') : t('dayView.filled')}</Badge>}
         </Group>
         <Text fz={13} fw={600}>{fullDate(date)}</Text>
-        <Box className="hero-temp">{T(hi)}°</Box>
-        <Text fz={20} fw={800} mt={8}>{conditionLabel(d.weather_code ?? record?.code)}</Text>
+        <Box className="hero-temp">{T(v.hi)}°</Box>
+        <Text fz={20} fw={800} mt={8}>{conditionLabel(v.code)}</Text>
         <Text fz={13} fw={600}>
-          {t('dayView.lowLine', { lo: T(d.temperature_2m_min ?? record?.lo), fhi: T(d.apparent_temperature_max ?? record?.feelsHi), flo: T(d.apparent_temperature_min ?? record?.feelsLo) })}
-          {(delta !== null && delta !== '') && ` · ${t('city.vsAverage', { delta })}`}
+          {t('dayView.lowLine', { lo: T(v.lo), fhi: T(v.feelsHi), flo: T(v.feelsLo) })}
+          {delta !== '' && ` · ${t('city.vsAverage', { delta })}`}
         </Text>
       </Box>
 
@@ -94,14 +98,11 @@ function DayBody({ cityId, date, cityName }: DayBodyProps) {
   );
 }
 
-function DayDetails({ cityId, date }: DayViewProps) {
+function DayDetails({ cityId, date }: DayViewProps): ReactElement {
   const units = useUnits();
   const day = useDayData(cityId, date);
   const query = useDayQuery(cityId, date);
   const normal = useNormals(cityId)?.[date.slice(5)];
-  const s = { normal };
-  const T = (c?: number | null) => fmtTemp(c, units.temp);
-  const W = (k?: number | null) => fmtWind(k, units.wind);
   if (!day) {
     return (
       <Box p={20}>
@@ -111,77 +112,16 @@ function DayDetails({ cityId, date }: DayViewProps) {
       </Box>
     );
   }
-  const d = day.daily.v;
-  const h = day.hourly.v;
-  const air = day.air;
-  const aqi = air ? Object.fromEntries(air.time.map((time, i) => [time, air.v.european_aqi?.[i] ?? null])) : undefined;
-  const aqiMax = max(day.air?.v.european_aqi);
-  const aqiLvl = euAqiLevel(aqiMax);
   return (
     <>
-      <Section title={t('dayView.hourByHour')} action={<ExpandButton id={`day:${cityId}:${date}`} />}>
-        <Box pt={12}><HourlyExplorer time={day.hourly.time} v={h} aqi={aqi} /></Box>
-        <FullscreenChart id={`day:${cityId}:${date}`} title={t('dayView.hourByHour')}
-          render={(height) => <HourlyExplorer time={day.hourly.time} v={h} aqi={aqi} height={height} />} />
-      </Section>
-
-      <Section title={t('dayView.temperature')}>
-        <Box className="stat-grid">
-          <Stat k={t('dayView.highLow')} v={`${T(d.temperature_2m_max)}° / ${T(d.temperature_2m_min)}°`} s={s.normal === undefined ? undefined : t('dayView.normalHigh', { t: T(s.normal) })} />
-          <Stat k={t('city.day.feelsLike')} v={`${T(d.apparent_temperature_max)}° / ${T(d.apparent_temperature_min)}°`} />
-          <Stat k={t('city.feels.humidity')} v={`${f(avg(h.relative_humidity_2m))}%`} s={t('dayView.dailyAverage')} />
-          <Stat k={t('city.feels.dewPoint')} v={`${T(avg(h.dew_point_2m))}°`} s={t('dayView.dailyAverage')} />
-        </Box>
-      </Section>
-
-      <Section title={t('city.precip.title')}>
-        <Box className="stat-grid">
-          <Stat k={t('city.day.precipitation')} v={`${f(d.precipitation_sum, 1)} mm`} s={t('dayView.wet', { h: f(d.precipitation_hours) })} />
-          <Stat k={t('history.rain')} v={`${f(d.rain_sum, 1)} mm`} />
-          <Stat k={t('city.day.snowfall')} v={`${f(d.snowfall_sum, 1)} cm`} s={(max(h.snow_depth) ?? 0) > 0 ? t('dayView.snowDepth', { cm: Math.round((max(h.snow_depth) ?? 0) * 100) }) : undefined} />
-          {(d.precipitation_probability_max !== null && d.precipitation_probability_max !== undefined) && <Stat k={t('dayView.forecastChance')} v={`${f(d.precipitation_probability_max)}%`} />}
-        </Box>
-      </Section>
-
-      <Section title={t('city.wind.title')} summary={t('dayView.windSummary', { force: beaufort(d.wind_speed_10m_max ?? null).toLocaleLowerCase(), dir: compass(d.wind_direction_10m_dominant ?? 0) })}>
-        <Box className="stat-grid">
-          <Stat k={t('dayView.maxWind')} v={W(d.wind_speed_10m_max)} />
-          <Stat k={t('dayView.maxGusts')} v={W(d.wind_gusts_10m_max)} s={beaufort(d.wind_gusts_10m_max ?? null)} />
-        </Box>
-      </Section>
-
-      <Section title={t('city.sun.title')}>
-        <Box className="stat-grid">
-          <Stat k={t('city.sun.sunrise')} v={hhmm(day.daily.sunrise)} s={t('city.sun.sunsetAt', { time: hhmm(day.daily.sunset) })} />
-          <Stat k={t('dayView.daylight')} v={duration(d.daylight_duration ?? null)} s={t('dayView.sunshine', { d: duration(d.sunshine_duration ?? null) })} />
-          {(d.uv_index_max !== null && d.uv_index_max !== undefined) && <Stat k={t('city.day.uvMax')} v={f(d.uv_index_max)} s={uvAdvice(d.uv_index_max)} />}
-          <Stat k={t('city.day.solarEnergy')} v={`${f(d.shortwave_radiation_sum, 1)} MJ/m²`} />
-        </Box>
-      </Section>
-
-      <Section title={t('dayView.skyAtmosphere')}>
-        <Box className="stat-grid">
-          <Stat k={t('city.sky.cloudCover')} v={`${f(avg(h.cloud_cover))}%`} s={t('dayView.dailyAverage')} />
-          <Stat k={t('city.atmosphere.pressure')} v={`${f(min(h.pressure_msl))}–${f(max(h.pressure_msl))}`} s={t('dayView.pressureNote')} />
-          <Stat k={t('city.atmosphere.evaporation')} v={`${f(d.et0_fao_evapotranspiration, 1)} mm`} s="ET₀" />
-          {h.cape && <Stat k={t('dayView.maxCape')} v={f(max(h.cape))} s={t('dayView.capeNote')} />}
-        </Box>
-      </Section>
-
-      {day.air && (
-        <Section title={t('city.air.title')} summary={t('dayView.airSummary', { v: f(aqiMax), level: aqiLvl === null ? '–' : levelName(aqiLvl) })}>
-          <Box className="stat-grid">
-            <Stat k={t('dayView.pm25')} v={`${f(avg(day.air.v.pm2_5))} µg/m³`} />
-            <Stat k={t('dayView.pm10')} v={`${f(avg(day.air.v.pm10))} µg/m³`} />
-            <Stat k={t('dayView.no2')} v={`${f(avg(day.air.v.nitrogen_dioxide))} µg/m³`} />
-            <Stat k={t('dayView.ozoneMax')} v={`${f(max(day.air.v.ozone))} µg/m³`} />
-          </Box>
-        </Section>
-      )}
-
-      <Text px={12} py={20} fz={12} c="dimmed">
-        {day.source === 'forecast' ? t('dayView.sourceForecast') : t('dayView.sourceArchive')} · {t('common.dataBy')}
-      </Text>
+      <DayHourly day={day} units={units} cityId={cityId} />
+      <DayTemperature day={day} units={units} normal={normal} />
+      <DayPrecip day={day} units={units} />
+      <DayWind day={day} units={units} />
+      <DaySun day={day} units={units} />
+      <DaySky day={day} units={units} />
+      <DayAir day={day} units={units} />
+      <DaySource day={day} units={units} />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import type { City, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
+import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
@@ -281,4 +281,25 @@ export interface PollutantRowProps {
   unit: string;
   value: number | null;
   level: number | null;
+}
+
+export interface DaySectionProps {
+  day: DayData;
+  units: Units;
+}
+
+export interface DayTempProps extends DaySectionProps {
+  normal: number | undefined;
+}
+
+export interface DayHeroValues {
+  hi: number | null;
+  lo: number | null | undefined;
+  feelsHi: number | null | undefined;
+  feelsLo: number | null | undefined;
+  code: number | null | undefined;
+}
+
+export interface DayHourlyProps extends DaySectionProps {
+  cityId: string;
 }
