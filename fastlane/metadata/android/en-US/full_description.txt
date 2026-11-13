@@ -1,0 +1,19 @@
+Weather Log is an open-source weather app built on Open-Meteo. It keeps a full history of every city you follow, stored only on your device.
+
+<b>Private by design</b>
+<ul>
+<li>Never asks for your location: you search for and add cities yourself</li>
+<li>No account, no ads, no trackers</li>
+<li>All data (cities, history, settings) stays in on-device storage</li>
+<li>Optional custom forecast server URL for self-hosted Open-Meteo</li>
+</ul>
+
+<b>Features</b>
+<ul>
+<li>Current conditions, hourly and daily forecasts, and air quality</li>
+<li>A daily log of past weather for each city you follow, with historical archive data</li>
+<li>Interactive hourly charts</li>
+<li>Backup and restore of your cities, history and settings</li>
+</ul>
+
+Weather data by Open-Meteo.com (CC BY 4.0). Weather Log is free software under the GNU GPL v3 or later.

@@ -1,0 +1,4 @@
+Trends: choose which attributes to chart from a full list, including feels like, snowfall, wind, gusts, sunshine and UV.
+Compare a period with the same period 1, 10 or 30 years ago, or pick your own from and to dates.
+Missing days are downloaded into your log with every attribute.
+Button rows fill the width and keep their labels on one line.

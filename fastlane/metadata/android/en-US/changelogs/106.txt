@@ -1,0 +1,2 @@
+First release on F-Droid.
+New app icon that follows the accent colour you pick in Settings.

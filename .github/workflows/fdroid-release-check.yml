@@ -1,0 +1,36 @@
+name: F-Droid release check
+
+# Runs next to the "Android APK" workflow on every published release.
+# F-Droid builds each new vX.Y.Z tag on its own, from the versionName and
+# versionCode committed in android/app/build.gradle at that tag. This job fails
+# (and says how to fix it) when the tag and the committed versions disagree,
+# so a release never silently goes missing on F-Droid.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to check, e.g. v0.1.4
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tag, package.json and build.gradle agree
+        run: node scripts/android-version.mjs --check "$TAG"

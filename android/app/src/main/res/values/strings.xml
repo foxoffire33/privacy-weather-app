@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Weather Log</string>
+    <string name="title_activity_main">Weather Log</string>
+    <string name="package_name">nl.delaparraservices.apps.weather</string>
+    <string name="custom_url_scheme">nl.delaparraservices.apps.weather</string>
+    <string name="widget_now">Now</string>
+    <string name="widget_now_description">Current temperature on your accent colour, with today against the average</string>
+    <string name="widget_timeline">Timeline</string>
+    <string name="widget_timeline_description">Your last 7 logged days, today and the next 6 days, with the average</string>
+    <string name="widget_thisday">On this day</string>
+    <string name="widget_thisday_description">Today\'s high against the average and the same date in earlier years</string>
+    <string name="widget_rain">Next 2 hours</string>
+    <string name="widget_rain_description">Rain outlook with 15-minute bars</string>
+    <string name="widget_hourly">Hourly</string>
+    <string name="widget_hourly_description">Temperature and chance of rain for the coming hours</string>
+</resources>
