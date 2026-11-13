@@ -1,6 +1,6 @@
 import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
-import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
   openDay, refreshCity, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
@@ -20,7 +20,6 @@ import { CompositeChart } from '@mantine/charts';
 import { convTemp } from '../lib/format';
 import { addDays } from '../storesV2';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
-import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';
 import { t as tx, type MessageKey } from '../i18n';
@@ -43,20 +42,11 @@ const POLLEN = ['alder_pollen', 'birch_pollen', 'grass_pollen', 'mugwort_pollen'
 
 export const CityPage = memo(function CityPage({ city, isDefault }: { city: City; isDefault: boolean }) {
   const busy = useForecastQuery(city.id).status === 'loading';
-  const { pull, armed, bind } = usePullToRefresh(() => void refreshCity(city.id, { maxAgeMs: 0 }));
   return (
-    <div className="page" {...bind} style={{ position: 'relative' }}>
-      <div aria-hidden style={{
-        position: 'absolute', left: 0, right: 0, top: 64, display: 'flex', justifyContent: 'center',
-        opacity: Math.min(1, pull / 40), color: armed ? 'var(--mantine-color-signal-5)' : '#fff', pointerEvents: 'none',
-      }}>
-        <span style={{ display: 'inline-flex', transform: `rotate(${pull * 4}deg)` }}><Icon name="refresh" size={20} /></span>
-      </div>
-      <div style={{ transform: `translateY(${pull}px)`, transition: pull ? 'none' : 'transform .25s ease' }}>
-        <CityPageContent city={city} isDefault={isDefault} />
-      </div>
-      {busy && <span className="sr-only" role="status">{tx('city.updatingCity', { name: city.name })}</span>}
-    </div>
+    <Box className="page">
+      <CityPageContent city={city} isDefault={isDefault} />
+      {busy && <VisuallyHidden role="status">{tx('city.updatingCity', { name: city.name })}</VisuallyHidden>}
+    </Box>
   );
 });
 
