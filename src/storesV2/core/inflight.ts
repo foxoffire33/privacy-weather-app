@@ -11,6 +11,7 @@ export function once(key: string, run: () => Promise<unknown>): Promise<void> {
   const promise = Promise.resolve().then(run).then(settle, settle);
   running.set(key, promise);
   void promise.then(() => {
+    Object.assign(promise, { status: 'fulfilled', value: undefined });
     running.delete(key);
     settled.set(key, promise);
   });
