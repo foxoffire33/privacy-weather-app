@@ -3,6 +3,7 @@ import { Box } from '@mantine/core';
 import { Fragment, Suspense, use, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import { ScreenTransition } from './components/ScreenTransition';
 import { BootSk } from './components/Skeletons';
 import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
 import { syncAppIcon } from './native/appIcon';
@@ -74,7 +75,11 @@ function Screens() {
   useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
   useEffect(() => startWidgetSync(), []);
   const onboarding = !hasCities && route.name !== 'search' && route.name !== 'settings';
-  return <Fragment key={lang}>{onboarding ? <Onboarding /> : screenFor(route)}</Fragment>;
+  return (
+    <Fragment key={lang}>
+      {onboarding ? <Onboarding /> : <ScreenTransition key={JSON.stringify(route)}>{screenFor(route)}</ScreenTransition>}
+    </Fragment>
+  );
 }
 
 function screenFor(route: Route) {
