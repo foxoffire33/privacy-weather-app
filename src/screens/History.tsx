@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Badge, Box, Button, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
   addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
@@ -50,7 +50,7 @@ export function History({ cityId }: { cityId: string }) {
     const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
     return () => window.clearTimeout(t);
   }, [validDraft, lookedUp, cityId, draft, lookupDate]);
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
+  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const loadingLookup = s.lookup.query.status === 'loading';
   const lookupError = s.lookup.query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : s.lookup.query.error;
@@ -64,7 +64,7 @@ export function History({ cityId }: { cityId: string }) {
     downloadFile(`${s.city!.name.toLowerCase().replace(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
   return (
-    <div className="screen">
+    <Box className="screen">
       <ScreenHeader right={
         <ActionIcon aria-label={t('history.export')} disabled={!rows.length} onClick={exportCsv}><Icon name="download" size={20} /></ActionIcon>
       } />
@@ -72,7 +72,7 @@ export function History({ cityId }: { cityId: string }) {
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('history.title')}</Title>
 
       <Paper className="glass" mx={12}>
-        <div className="archive-grid">
+        <Box className="archive-grid">
           {(s.years ?? [0, 1, 2, 3].map(() => null)).map((y, i) => (
             <UnstyledButton key={y?.year ?? i} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
               disabled={!y || y.error} onClick={() => y && open(`${y.year}${today.slice(4)}`)}>
@@ -91,7 +91,7 @@ export function History({ cityId }: { cityId: string }) {
               )}
             </UnstyledButton>
           ))}
-        </div>
+        </Box>
         <Box p={12} style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
           <TextInput type="date" label={t('history.lookup')}
             min="1940-01-01" max={maxLookup} value={s.draft}
@@ -117,10 +117,10 @@ export function History({ cityId }: { cityId: string }) {
                       <Text fz={16} fw={800}>{conditionLabel(lookupRecord.code)}</Text>
                       <Text fz={40} fw={800} lh={1}>{T(lookupRecord.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(lookupRecord.lo)}°</Text></Text>
                     </Group>
-                    <div className="stat-grid" style={{ marginTop: 12 }}>
+                    <Box className="stat-grid" style={{ marginTop: 12 }}>
                       <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(lookupRecord.mm ?? 0).toFixed(1)} mm</Text></Box>
                       <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(lookupRecord.wind, s.windUnit)}</Text></Box>
-                    </div>
+                    </Box>
                   </Box>
                 </>
               )}
@@ -136,7 +136,7 @@ export function History({ cityId }: { cityId: string }) {
 
       <Box px={20} pb={24}>
         <Group justify="space-between" className="kicker" wrap="nowrap">
-          <span>{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</span>
+          <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
@@ -150,7 +150,7 @@ export function History({ cityId }: { cityId: string }) {
             <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => open(r.date)}>
               <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
               <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi != null ? t('history.rowFeels', { t: T(r.feelsHi) }) : ''}</Text>
-              <span>{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</span>
+              <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</Box>
               <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
               <Text fz={12} ta="right" c={delta?.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
             </UnstyledButton>
@@ -158,7 +158,7 @@ export function History({ cityId }: { cityId: string }) {
           );
         })}
       </Box>
-    </div>
+    </Box>
   );
 }
 
@@ -186,32 +186,27 @@ function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
   };
   if (!show) {
     return (
-      <button type="button" className="tab-button" onClick={() => setShow(true)}>
+      <UnstyledButton className="tab-button" onClick={() => setShow(true)}>
         <Icon name="plus" size={14} />{t('history.addDates')}
-      </button>
+      </UnstyledButton>
     );
   }
   return (
-    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
-      <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
-        role="dialog" aria-label={t('history.addTitle')}>
-        <Group justify="space-between" mb={8}>
-          <Text fz={16} fw={800}>{t('history.addTitle')}</Text>
-          <ActionIcon size={44} aria-label={t('common.close')} onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={20} /></ActionIcon>
-        </Group>
-        <div className="stat-grid">
-          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
-          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
-        </div>
-        <Text fz={12} c="dimmed" mt={8}>
-          {t('history.addNote')}
-        </Text>
-        {tooLong && <Text fz={12} c="signal.3" mt={6}>{t('history.tooLong')}</Text>}
-        <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run()}>
-          {valid ? t('history.downloadDays', { count: days }) : t('history.download')}
-        </Button>
-        {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}
-      </Paper>
-    </Box>
+    <Drawer opened onClose={() => setShow(false)} title={t('history.addTitle')}
+      closeOnClickOutside={!busy} closeOnEscape={!busy}
+      closeButtonProps={{ size: 44, iconSize: 20, disabled: busy, 'aria-label': t('common.close') }}>
+      <Box className="stat-grid">
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
+      </Box>
+      <Text fz={12} c="dimmed" mt={8}>
+        {t('history.addNote')}
+      </Text>
+      {tooLong && <Text fz={12} c="signal.3" mt={6}>{t('history.tooLong')}</Text>}
+      <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run()}>
+        {valid ? t('history.downloadDays', { count: days }) : t('history.download')}
+      </Button>
+      {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}
+    </Drawer>
   );
 }

@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Box, Button, Checkbox, Group, Paper, Text, TextInput } from '@mantine/core';
+import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
 import { t, type MessageKey } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
 import { addDays, daysBetween } from '../../storesV2';
 import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
-import { Icon } from '../Icon';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
 import { fillRange } from '../../storesV2';
@@ -122,31 +121,31 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     : len ? (len === 365 ? '1y' : `${len}d`) : t('history.all');
   return (
     <Box px={20}>
-      <div className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</div>
+      <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
 
-      <div className="tab-row">
-        <button type="button" onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</button>
-        <button type="button" aria-pressed={!!custom} data-active={custom ? true : undefined}
-          onClick={() => setSheet('range')}>{custom ? rangeLabel : t('history.custom')}</button>
-      </div>
+      <Box className="tab-row">
+        <UnstyledButton onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</UnstyledButton>
+        <UnstyledButton aria-pressed={!!custom} data-active={custom ? true : undefined}
+          onClick={() => setSheet('range')}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
+      </Box>
 
-      <div className="tab-row" role="tablist">
+      <Box className="tab-row" role="tablist">
         {LENGTHS.map((d) => {
           const on = !custom && d === len;
           return (
-            <button key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setCustom(null); setLen(d); }}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</button>
+            <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
+              onClick={() => { setCustom(null); setLen(d); }}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</UnstyledButton>
           );
         })}
-      </div>
+      </Box>
 
       <Text fz={12} c="dimmed" pb={4}>{t('history.compare')}</Text>
-      <div className="tab-row" role="tablist">
+      <Box className="tab-row" role="tablist">
         {BACK_YEARS.map((y) => (
-          <button key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => setBack(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</button>
+          <UnstyledButton key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
+            onClick={() => setBack(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</UnstyledButton>
         ))}
-      </div>
+      </Box>
 
       {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
       {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
@@ -202,27 +201,21 @@ function GroupChart({ group, series, data, base, unit }: {
 function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: (keys: string[]) => void; onClose: () => void }) {
   const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
   return (
-    <div className="sheet" role="dialog" aria-label={t('history.attrTitle')}>
-      <Group justify="space-between" px={14} py={8} wrap="nowrap" className="sheet-head">
-        <Text fz={16} fw={800} pl={6}>{t('history.attrTitle')}</Text>
-        <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={22} /></ActionIcon>
-      </Group>
-      <div className="sheet-body">
-        {GROUPS.map((g) => {
-          const mine = ATTRS.filter((a) => a.group === g.key);
-          return (
-            <Box key={g.key} px={20}>
-              <div className="kicker">{t(g.title)}</div>
-              {mine.map((a) => (
-                <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
-                  checked={picked.includes(a.key)} onChange={() => toggle(a.key)}
-                  label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
-              ))}
-            </Box>
-          );
-        })}
-      </div>
-    </div>
+    <Modal opened onClose={onClose} fullScreen title={t('history.attrTitle')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
+      {GROUPS.map((g) => {
+        const mine = ATTRS.filter((a) => a.group === g.key);
+        return (
+          <Box key={g.key} px={20}>
+            <Box className="kicker">{t(g.title)}</Box>
+            {mine.map((a) => (
+              <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
+                checked={picked.includes(a.key)} onChange={() => toggle(a.key)}
+                label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
+            ))}
+          </Box>
+        );
+      })}
+    </Modal>
   );
 }
 
@@ -236,22 +229,15 @@ function RangeSheet({ from, to, max, onApply, onClose }: {
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(a) && /^\d{4}-\d{2}-\d{2}$/.test(b) && a <= b && a >= '1940-01-01' && b <= max;
   const span = valid ? daysBetween(a, b) + 1 : 0;
   return (
-    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
-        role="dialog" aria-label={t('history.custom')}>
-        <Group justify="space-between" mb={8}>
-          <Text fz={16} fw={800}>{t('history.custom')}</Text>
-          <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={20} /></ActionIcon>
-        </Group>
-        <div className="stat-grid">
-          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />
-          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setB(e.currentTarget.value)} />
-        </div>
-        <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
-        <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>
-          {valid ? t('common.days', { count: span }) : t('history.custom')}
-        </Button>
-      </Paper>
-    </Box>
+    <Drawer opened onClose={onClose} title={t('history.custom')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
+      <Box className="stat-grid">
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setB(e.currentTarget.value)} />
+      </Box>
+      <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
+      <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>
+        {valid ? t('common.days', { count: span }) : t('history.custom')}
+      </Button>
+    </Drawer>
   );
 }

@@ -1,5 +1,5 @@
 import {
-  ActionIcon, Badge, Button, Paper, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
+  ActionIcon, Badge, Button, Drawer, Modal, Paper, Progress, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
   createTheme, type MantineColorsTuple,
 } from '@mantine/core';
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
@@ -90,6 +90,30 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     Badge: Badge.extend({ defaultProps: { radius: 0, fw: 800 } }),
     Paper: Paper.extend({ defaultProps: { radius: 0 } }),
     Skeleton: Skeleton.extend({ defaultProps: { radius: 0 } }),
+    Modal: Modal.extend({
+      defaultProps: { radius: 0, portalProps: { target: '.device' }, closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 } },
+      styles: {
+        header: { paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))', borderBottom: '2px solid var(--rule)' },
+        title: { fontSize: 16, fontWeight: 800 },
+        body: { padding: 0, paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' },
+      },
+    }),
+    Drawer: Drawer.extend({
+      defaultProps: {
+        radius: 0, portalProps: { target: '.device' }, position: 'bottom',
+        closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 },
+      },
+      styles: {
+        content: { height: 'auto', background: '#000', borderTop: '2px solid var(--rule)', textTransform: 'none', letterSpacing: 0 },
+        header: { background: '#000' },
+        title: { fontSize: 16, fontWeight: 800 },
+        body: { paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' },
+      },
+    }),
+    Progress: Progress.extend({
+      defaultProps: { radius: 0, size: 4, transitionDuration: 0 },
+      styles: { root: { background: 'rgba(255, 255, 255, .12)' } },
+    }),
     TextInput: TextInput.extend({ defaultProps: { radius: 0 } }),
     PasswordInput: PasswordInput.extend({ defaultProps: { radius: 0 } }),
     Select: Select.extend({ defaultProps: { radius: 0 } }),

@@ -67,8 +67,8 @@ export function Cities() {
     return 0;
   };
   return (
-    <div className="screen" style={{ overflow: 'hidden' }}>
-      <div className="cities-scroll" ref={scroller} style={{ overflowY: drag ? 'hidden' : undefined }}>
+    <Box className="screen" style={{ overflow: 'hidden' }}>
+      <Box className="cities-scroll" ref={scroller} style={{ overflowY: drag ? 'hidden' : undefined }}>
         <ScreenHeader />
         <Title className="display" style={{ whiteSpace: 'pre-line' }}>{t('cities.title', { count: n, word: tl('cities.count')[n] ?? n })}</Title>
         <Text px={20} pb={16} fz={13} c="dimmed">{t('cities.hint')}</Text>
@@ -85,10 +85,10 @@ export function Cities() {
                   transition: dragging ? 'none' : 'transform .18s ease',
                 }}>
                 <Group gap={0} wrap="nowrap" align="stretch">
-                  <div className="drag-handle" role="button" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
+                  <Box className="drag-handle" role="button" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
                     onPointerDown={(e) => onDown(e, i)} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                     <Icon name="grip" size={20} />
-                  </div>
+                  </Box>
                   <Group justify="space-between" align="center" wrap="nowrap" style={{ flex: 1, minWidth: 0 }} py={16} pr={8}>
                     <UnstyledButton onClick={() => goHome(i)} style={{ flex: 1, minWidth: 0 }}>
                       <Group gap={8} wrap="nowrap">
@@ -116,11 +116,11 @@ export function Cities() {
             );
           })}
         </Box>
-      </div>
+      </Box>
 
       <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => navigate({ name: 'search' })}>
         {t('cities.followCity')}
       </Button>
-    </div>
+    </Box>
   );
 }

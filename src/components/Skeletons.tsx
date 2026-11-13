@@ -18,7 +18,7 @@ export function StatSk() {
 }
 
 export function StatGridSk({ n = 4 }: { n?: number }) {
-  return <div className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</div>;
+  return <Box className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</Box>;
 }
 
 export function SectionSk({ title, n = 4 }: { title: string; n?: number }) {
@@ -56,11 +56,11 @@ export function CityBodySk() {
           <Sk h={36} mt={8} />
           <Sk h={10} mt={6} />
         </Box>
-        <div className="hourly-strip">
+        <Box className="hourly-strip">
           {Array.from({ length: 7 }, (_, i) => (
             <Box key={i}><Sk w={26} h={11} /><Sk w={30} h={18} mt={6} /><Sk w={22} h={10} mt={6} /><Sk w={16} h={10} mt={4} /></Box>
           ))}
-        </div>
+        </Box>
         <Box px={12} py={10} style={{ borderBottom: '1px solid rgba(248,244,244,.2)' }}><Sk w={160} h={16} /></Box>
         <Box px={12}><RowsSk n={7} h={39} /></Box>
       </Paper>

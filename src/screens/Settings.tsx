@@ -1,4 +1,4 @@
-import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useRef, useState } from 'react';
 import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
 import type { Accent, TempUnit, WindUnit } from '../storesV2';
@@ -16,11 +16,11 @@ export function Settings() {
   const set = useUpdateSettings();
   const counts = storedCounts();
   const s = { settings };
-  const fileInput = useRef<HTMLInputElement>(null);
+  const resetFile = useRef<() => void>(null);
   const [pending, setPending] = useState<Backup | null>(null);
   const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const onFile = async (file?: File) => {
+  const onFile = async (file: File | null) => {
     setImportMsg(null);
     if (!file) return;
     try {
@@ -31,7 +31,7 @@ export function Settings() {
       setPending(null);
       setImportMsg({ ok: false, text: (e as Error).message });
     }
-    if (fileInput.current) fileInput.current.value = '';
+    resetFile.current?.();
   };
   const doImport = () => {
     if (!pending) return;
@@ -45,11 +45,11 @@ export function Settings() {
     downloadFile('weather-log.json', JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
   };
   return (
-    <div className="screen">
+    <Box className="screen">
       <ScreenHeader />
       <Title className="display display-sm">{t('settings.title')}</Title>
       <Stack gap={0} px={20} pb={24}>
-        <div className="kicker">{t('settings.language')}</div>
+        <Box className="kicker">{t('settings.language')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
             value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v })}
@@ -59,7 +59,7 @@ export function Settings() {
             ]} />
         </Box>
 
-        <div className="kicker">{t('settings.dataSource')}</div>
+        <Box className="kicker">{t('settings.dataSource')}</Box>
         <Box py={12} className="row">
           <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
             description={t('settings.apiKeyNote')}
@@ -72,7 +72,7 @@ export function Settings() {
         </Box>
         <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
-        <div className="kicker">{t('settings.appearance')}</div>
+        <Box className="kicker">{t('settings.appearance')}</Box>
         <Box py={12} className="row">
           <Text fz={14} fw={600}>{t('settings.accent')}</Text>
           <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
@@ -81,14 +81,14 @@ export function Settings() {
               <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                   border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>
-                <span style={{ width: 16, height: 16, background: a === 'off' ? '#000' : ACCENTS[a].tuple[5], border: '1px solid var(--rule)' }} />
+                <ColorSwatch color={a === 'off' ? '#000' : ACCENTS[a].tuple[5]} size={16} radius={0} withShadow={false} style={{ border: '1px solid var(--rule)' }} />
                 <Text fz={13} fw={800}>{t(ACCENT_KEYS[a])}</Text>
               </UnstyledButton>
             ))}
             <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                 border: `2px solid ${s.settings.accent === 'custom' ? '#fff' : 'var(--rule-soft)'}` }}>
-              <span style={{ width: 16, height: 16, background: s.settings.accentColor, border: '1px solid var(--rule)' }} />
+              <ColorSwatch color={s.settings.accentColor} size={16} radius={0} withShadow={false} style={{ border: '1px solid var(--rule)' }} />
               <Text fz={13} fw={800}>{t('settings.custom')}</Text>
             </UnstyledButton>
           </Group>
@@ -103,7 +103,7 @@ export function Settings() {
           )}
         </Box>
 
-        <div className="kicker">{t('settings.units')}</div>
+        <Box className="kicker">{t('settings.units')}</Box>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.temperature')}</Text>
           <SegmentedControl value={s.settings.tempUnit} onChange={(v) => set({ tempUnit: v as TempUnit })}
@@ -115,7 +115,7 @@ export function Settings() {
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
 
-        <div className="kicker">{t('settings.history')}</div>
+        <Box className="kicker">{t('settings.history')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
             description={t('settings.intervalNote')}
@@ -138,9 +138,10 @@ export function Settings() {
           </Box>
           <Group gap={8} wrap="nowrap">
             <Button variant="outline" color="gray" onClick={exportAll}>{t('settings.export')}</Button>
-            <Button variant="outline" color="gray" onClick={() => fileInput.current?.click()}>{t('settings.import')}</Button>
+            <FileButton resetRef={resetFile} accept="application/json,.json" onChange={(file) => void onFile(file)}>
+              {(props) => <Button {...props} variant="outline" color="gray">{t('settings.import')}</Button>}
+            </FileButton>
           </Group>
-          <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={(e) => void onFile(e.currentTarget.files?.[0])} />
         </Group>
         {pending && (
           <Box py={12} className="row">
@@ -168,12 +169,12 @@ export function Settings() {
           {t('settings.deleteAll')}
         </Button>
 
-        <div className="kicker">{t('settings.about')}</div>
+        <Box className="kicker">{t('settings.about')}</Box>
         <Stack gap={4} py={12}>
           <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
           <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
         </Stack>
       </Stack>
-    </div>
+    </Box>
   );
 }

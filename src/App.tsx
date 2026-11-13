@@ -1,6 +1,6 @@
 import { App as CapApp } from '@capacitor/app';
 import { Fragment, useEffect } from 'react';
-import { Center, Loader } from '@mantine/core';
+import { Box, Center, Loader } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, useCityStore, useHydrated, useSettings } from './storesV2';
 import { useUiStore } from './store/uiStore';
@@ -56,5 +56,5 @@ export default function App() {
   else if (route.name === 'day') screen = <DayView cityId={route.cityId} date={route.date} />;
   else screen = <Home />;
   const topAccent = hydrated && (route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings'));
-  return <div className="stage"><div className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}><Fragment key={lang}>{screen}</Fragment></div></div>;
+  return <Box className="stage"><Box className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}><Fragment key={lang}>{screen}</Fragment></Box></Box>;
 }

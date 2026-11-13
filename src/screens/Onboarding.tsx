@@ -11,7 +11,7 @@ export function Onboarding() {
     { t: t('onboarding.step3Title'), d: t('onboarding.step3Text') },
   ];
   return (
-    <div className="screen accent-field">
+    <Box className="screen accent-field">
       <Title className="display" style={{ fontSize: 72, paddingTop: 56, whiteSpace: 'pre-line' }}>{t('onboarding.title')}</Title>
       <Stack gap={0} mx={20} style={{ borderTop: '2px solid #fff', flex: 1 }}>
         {STEPS.map((s, i) => (
@@ -29,6 +29,6 @@ export function Onboarding() {
         onClick={() => navigate({ name: 'search' })}>
         {t('onboarding.start')}
       </Button>
-    </div>
+    </Box>
   );
 }

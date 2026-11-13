@@ -1,4 +1,4 @@
-import { Box, Group, Text, Title } from '@mantine/core';
+import { Box, Group, SimpleGrid, Text, Title } from '@mantine/core';
 import { useCity, useForecast, useUnits } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
@@ -28,7 +28,7 @@ function HourBlockSk() {
 export function Hourly({ cityId }: { cityId: string }) {
   const units = useUnits();
   const s = { city: useCity(cityId), entry: useForecast(cityId), tempUnit: units.temp, windUnit: units.wind };
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
+  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const header = (
     <>
       <ScreenHeader />
@@ -37,7 +37,7 @@ export function Hourly({ cityId }: { cityId: string }) {
     </>
   );
   if (!s.entry) {
-    return <div className="screen">{header}<Box px={12} pb={24}><Sk w={180} h={12} mt={20} />{[0, 1, 2].map((i) => <HourBlockSk key={i} />)}</Box></div>;
+    return <Box className="screen">{header}<Box px={12} pb={24}><Sk w={180} h={12} mt={20} />{[0, 1, 2].map((i) => <HourBlockSk key={i} />)}</Box></Box>;
   }
 
   const { data } = s.entry;
@@ -53,12 +53,12 @@ export function Hourly({ cityId }: { cityId: string }) {
   }
 
   return (
-    <div className="screen">
+    <Box className="screen">
       {header}
       <Box px={12} pb={24}>
         {groups.map((g) => (
           <Box key={g.date}>
-            <Box px={8}><div className="kicker">{longDate(g.date)}</div></Box>
+            <Box px={8}><Box className="kicker">{longDate(g.date)}</Box></Box>
             {g.rows.map((i) => {
               const mm = v.precipitation[i] ?? 0;
               const isNow = i === h0;
@@ -72,7 +72,7 @@ export function Hourly({ cityId }: { cityId: string }) {
                     </Box>
                     <Text fz={48} fw={800} lh={0.9} style={{ letterSpacing: '-.04em' }}>{T(v.temperature_2m[i])}°</Text>
                   </Group>
-                  <Box mt={10} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderTop: '1px solid var(--rule-soft)' }}>
+                  <SimpleGrid mt={10} cols={3} spacing={0} verticalSpacing={0} style={{ borderTop: '1px solid var(--rule-soft)' }}>
                     <Cell k={t('hourly.feelsLike')} v={`${T(v.apparent_temperature[i])}°`} />
                     <Cell k={t('hourly.rainChance')} v={`${v.precipitation_probability[i] ?? 0}%`} />
                     <Cell k={t('hourly.rain')} v={`${mm.toFixed(1)} mm`} />
@@ -82,7 +82,7 @@ export function Hourly({ cityId }: { cityId: string }) {
                     <Cell k={t('hourly.clouds')} v={`${v.cloud_cover[i] ?? '–'}%`} />
                     <Cell k={t('hourly.humidity')} v={`${v.relative_humidity_2m[i] ?? '–'}%`} />
                     <Cell k={t('hourly.visibility')} v={v.visibility[i] == null ? '–' : `${Math.round(v.visibility[i]! / 1000)} km`} />
-                  </Box>
+                  </SimpleGrid>
                 </Box>
               );
             })}
@@ -90,6 +90,6 @@ export function Hourly({ cityId }: { cityId: string }) {
         ))}
         <Text fz={12} c="dimmed" pt={16} px={8}>{t('common.dataBy')}</Text>
       </Box>
-    </div>
+    </Box>
   );
 }
