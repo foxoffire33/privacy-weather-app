@@ -4,7 +4,7 @@ import type { DateRange } from './stores';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'expand';
 
 export interface IconProps {
   name: IconName;
@@ -67,6 +67,7 @@ export interface BarProps {
 export interface SectionProps {
   title: string;
   summary?: ReactNode;
+  action?: ReactNode;
   children?: ReactNode;
 }
 
@@ -201,4 +202,16 @@ export interface TrendsFillProps {
   windows: DateRange[];
   ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
   children: ReactNode;
+}
+
+export type ChartHeight = number | string;
+
+export interface FullscreenChartProps {
+  id: string;
+  title: string;
+  render: (height: ChartHeight) => ReactNode;
+}
+
+export interface ExpandButtonProps {
+  id: string;
 }

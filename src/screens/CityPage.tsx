@@ -1,5 +1,6 @@
 import { Fragment, Suspense, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
+import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../components/charts/FullscreenChart';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
@@ -22,7 +23,7 @@ import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';
 import { t as tx, type MessageKey } from '../i18n';
-import type { AqiPeak, CityPageProps, DeferredProps, StripCell } from '../types';
+import type { AqiPeak, ChartHeight, CityPageProps, DeferredProps, StripCell } from '../types';
 
 const weekSeries = () => [
   { name: 'mm', label: tx('chart.mm'), type: 'bar' as const, color: 'signal.7', yAxisId: 'right' },
@@ -198,6 +199,24 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   const pollen = air ? POLLEN.map((k) => ({ name: tx(`city.pollen.${k}`), v: air.current[k], lvl: pollenLevel(air.current[k]) })).filter((p) => p.v != null) : [];
   const trend = pressureTrend(data, h0);
   const windChill = c.apparent_temperature != null && c.temperature_2m != null ? c.apparent_temperature - c.temperature_2m : 0;
+  const airByTime = air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined;
+  const next48 = (height: ChartHeight) => (
+    <HourlyExplorer time={data.hourly.time} v={hv} from={h0} to={h0 + 48} aqi={airByTime} height={height} />
+  );
+  const next7 = (height: ChartHeight) => (
+    <>
+      <CompositeChart h={height} dataKey="label"
+        yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }} withRightYAxis rightYAxisProps={{ width: 32 }}
+        data={days.map(({ i, label }) => ({
+          label,
+          High: convTemp(dv.temperature_2m_max[i], s.tempUnit),
+          Low: convTemp(dv.temperature_2m_min[i], s.tempUnit),
+          mm: dv.precipitation_sum[i],
+        }))}
+        withLegend={false} series={weekTg.visible(weekSeries())} />
+      {weekTg.legend(weekSeries())}
+    </>
+  );
   return (
     <>
       <Box className="hero">
@@ -286,26 +305,14 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         })}
       </Paper>
 
-      <Section title={tx('city.next48')}>
-        <Box pt={12}><Deferred h={270}>
-          <HourlyExplorer time={data.hourly.time} v={hv} from={h0} to={h0 + 48}
-            aqi={air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined} />
-        </Deferred></Box>
+      <Section title={tx('city.next48')} action={<ExpandButton id={`next48:${city.id}`} />}>
+        <Box pt={12}><Deferred h={270}>{next48(INLINE_HEIGHT)}</Deferred></Box>
+        <FullscreenChart id={`next48:${city.id}`} title={tx('city.next48')} render={next48} />
       </Section>
 
-      <Section title={tx('city.next7')}>
-        <Box pt={12}><Deferred h={230}>
-          <CompositeChart h={200} dataKey="label"
-            yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }} withRightYAxis rightYAxisProps={{ width: 32 }}
-            data={days.map(({ i, label }) => ({
-              label,
-              High: convTemp(dv.temperature_2m_max[i], s.tempUnit),
-              Low: convTemp(dv.temperature_2m_min[i], s.tempUnit),
-              mm: dv.precipitation_sum[i],
-            }))}
-            withLegend={false} series={weekTg.visible(weekSeries())} />
-          {weekTg.legend(weekSeries())}
-        </Deferred></Box>
+      <Section title={tx('city.next7')} action={<ExpandButton id={`next7:${city.id}`} />}>
+        <Box pt={12}><Deferred h={230}>{next7(200)}</Deferred></Box>
+        <FullscreenChart id={`next7:${city.id}`} title={tx('city.next7')} render={next7} />
       </Section>
 
       <Section title={tx('city.feels.title')} summary={tx(Math.abs(windChill) < 1 ? 'city.feels.close' : windChill < 0 ? 'city.feels.colder' : 'city.feels.warmer', { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>

@@ -13,6 +13,7 @@ import { Hourly } from './screens/Hourly';
 import { DayView } from './screens/DayView';
 import { Settings } from './screens/Settings';
 import { syncAppIcon } from './lib/appIcon';
+import { allowLandscape } from './lib/orientation';
 import { startWidgetSync } from './lib/widgets';
 import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
 import { BootSk } from './components/Skeletons';
@@ -35,8 +36,9 @@ function Frame({ children }: FrameProps) {
   const hasCities = useCityStore((s) => s.cityIds.length > 0);
   useEffect(() => {
     const sub = CapApp.addListener('backButton', () => {
-      const { route: r, stack, back } = useUiStore.getState();
-      if (r.name === 'home' && !stack.length) void CapApp.exitApp();
+      const { route: r, stack, back, fullscreenChart, closeChart } = useUiStore.getState();
+      if (fullscreenChart !== null) closeChart();
+      else if (r.name === 'home' && !stack.length) void CapApp.exitApp();
       else back();
     });
     return () => { void sub.then((h) => h.remove()); };
@@ -64,6 +66,8 @@ function Screens() {
     document.addEventListener('visibilitychange', onVisible);
     return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
   }, [snapshotMinutes]);
+  const chartOpen = useUiStore((s) => s.fullscreenChart !== null);
+  useEffect(() => { allowLandscape(chartOpen); }, [chartOpen]);
   useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
   useEffect(() => startWidgetSync(), []);
   let screen;

@@ -16,12 +16,15 @@ export interface UiState {
   lookupDraft: string;
   hiddenSeries: Record<string, string[]>;
   gestureHintSeen: boolean;
+  fullscreenChart: string | null;
   setChartMetric: (m: string) => void;
   setHistoryRange: (d: number) => void;
   setLookupDraft: (date: string) => void;
   toggleDay: (cityId: string, date: string) => void;
   toggleSeries: (scope: string, name: string) => void;
   dismissGestureHint: () => void;
+  openChart: (id: string) => void;
+  closeChart: () => void;
   navigate: (route: Route) => void;
   back: () => void;
   goHome: (pageIndex?: number) => void;

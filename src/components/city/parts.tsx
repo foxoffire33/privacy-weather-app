@@ -1,4 +1,4 @@
-import { Box, Progress, Text } from '@mantine/core';
+import { Box, Group, Progress, Text } from '@mantine/core';
 import type { BarProps, SectionProps, StatProps } from '../../types';
 
 export function levelColor(level: number | null | undefined) {
@@ -15,10 +15,17 @@ export function Bar({ pct, level, color }: BarProps) {
   );
 }
 
-export function Section({ title, summary, children }: SectionProps) {
+export function Section({ title, summary, action, children }: SectionProps) {
   return (
     <Box mx={12} mt={20}>
-      <Box className="kicker" style={{ paddingTop: 0 }}>{title}</Box>
+      {action
+        ? (
+          <Group className="kicker" justify="space-between" wrap="nowrap" gap={8} style={{ paddingTop: 0, paddingBottom: 0 }}>
+            <Box component="span">{title}</Box>
+            {action}
+          </Group>
+        )
+        : <Box className="kicker" style={{ paddingTop: 0 }}>{title}</Box>}
       {summary && <Text fz={15} fw={600} pt={10} style={{ textWrap: 'pretty' }}>{summary}</Text>}
       {children}
     </Box>

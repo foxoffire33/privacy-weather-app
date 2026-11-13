@@ -372,7 +372,8 @@
     "good": "Dobra",
     "fair": "Sprejemljiva",
     "moderate": "Zmerna",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Celozaslonski način"
   },
   "hourly": {
     "title": "Uro\nza uro.",

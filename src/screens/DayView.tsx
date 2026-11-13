@@ -7,6 +7,7 @@ import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insi
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Section, Stat } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
+import { ExpandButton, FullscreenChart } from '../components/charts/FullscreenChart';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import type { DayBodyProps, DayHeaderProps, DayViewProps } from '../types';
@@ -114,8 +115,10 @@ function DayDetails({ cityId, date }: DayViewProps) {
   const aqiLvl = euAqiLevel(aqiMax);
   return (
     <>
-      <Section title={t('dayView.hourByHour')}>
+      <Section title={t('dayView.hourByHour')} action={<ExpandButton id={`day:${cityId}:${date}`} />}>
         <Box pt={12}><HourlyExplorer time={day.hourly.time} v={h} aqi={aqi} /></Box>
+        <FullscreenChart id={`day:${cityId}:${date}`} title={t('dayView.hourByHour')}
+          render={(height) => <HourlyExplorer time={day.hourly.time} v={h} aqi={aqi} height={height} />} />
       </Section>
 
       <Section title={t('dayView.temperature')}>

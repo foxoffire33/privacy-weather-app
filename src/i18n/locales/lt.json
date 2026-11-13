@@ -372,7 +372,8 @@
     "good": "Gera",
     "fair": "Pakankama",
     "moderate": "Vidutinė",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Visas ekranas"
   },
   "hourly": {
     "title": "Valanda\npo valandos.",

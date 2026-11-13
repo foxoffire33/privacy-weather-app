@@ -369,7 +369,8 @@
     "good": "Boa",
     "fair": "Razoável",
     "moderate": "Moderada",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Ecrã inteiro"
   },
   "hourly": {
     "title": "Hora\na hora.",

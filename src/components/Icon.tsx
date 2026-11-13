@@ -16,6 +16,7 @@ const ICONS: Record<IconName, ReactNode> = {
   refresh: <path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" />,
   arrow: <path d="M5 12h14M12 5l7 7-7 7" />,
   arrowUp: <path d="M12 19V5M5 12l7-7 7 7" />,
+  expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
   lock: <><rect x="4" y="11" width="16" height="10" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
 };
 

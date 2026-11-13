@@ -366,7 +366,8 @@
     "good": "Καλή",
     "fair": "Ικανοποιητική",
     "moderate": "Μέτρια",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Πλήρης οθόνη"
   },
   "hourly": {
     "title": "Ώρα\nμε την ώρα.",

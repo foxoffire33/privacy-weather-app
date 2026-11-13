@@ -366,7 +366,8 @@
     "good": "Good",
     "fair": "Fair",
     "moderate": "Moderate",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Full screen"
   },
   "hourly": {
     "title": "Hour\nby hour.",

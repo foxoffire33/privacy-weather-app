@@ -369,7 +369,8 @@
     "good": "Buona",
     "fair": "Discreta",
     "moderate": "Moderata",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Schermo intero"
   },
   "hourly": {
     "title": "Ora\nper ora.",

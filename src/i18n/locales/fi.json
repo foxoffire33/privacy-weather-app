@@ -366,7 +366,8 @@
     "good": "Hyvä",
     "fair": "Tyydyttävä",
     "moderate": "Kohtalainen",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Koko näyttö"
   },
   "hourly": {
     "title": "Tunti\ntunnilta.",

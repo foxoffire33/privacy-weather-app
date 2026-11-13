@@ -366,7 +366,8 @@
     "good": "Добро",
     "fair": "Задоволително",
     "moderate": "Умерено",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Цял екран"
   },
   "hourly": {
     "title": "Час\nпо час.",

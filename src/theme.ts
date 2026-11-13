@@ -94,6 +94,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     Modal: Modal.extend({
       defaultProps: { radius: 0, portalProps: { target: '.device' }, closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 } },
       styles: {
+        content: { paddingLeft: 'env(safe-area-inset-left, 0px)', paddingRight: 'env(safe-area-inset-right, 0px)' },
         header: { paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))', borderBottom: '2px solid var(--rule)' },
         title: { fontSize: 16, fontWeight: 800 },
         body: { padding: 0, paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' },

@@ -366,7 +366,8 @@
     "good": "Jó",
     "fair": "Megfelelő",
     "moderate": "Közepes",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Teljes képernyő"
   },
   "hourly": {
     "title": "Óráról\nórára.",

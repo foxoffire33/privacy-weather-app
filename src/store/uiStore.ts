@@ -26,6 +26,7 @@ export const useUiStore = create<UiState>()(
       lookupDraft: '',
       hiddenSeries: {},
       gestureHintSeen: legacyHintSeen(),
+      fullscreenChart: null,
       setChartMetric: (chartMetric) => set({ chartMetric }),
       setHistoryRange: (historyRange) => set({ historyRange }),
       setLookupDraft: (lookupDraft) => set({ lookupDraft }),
@@ -38,6 +39,8 @@ export const useUiStore = create<UiState>()(
         return { hiddenSeries: { ...s.hiddenSeries, [scope]: next } };
       }),
       dismissGestureHint: () => set({ gestureHintSeen: true }),
+      openChart: (fullscreenChart) => set({ fullscreenChart }),
+      closeChart: () => set({ fullscreenChart: null }),
       navigate: (route) => set((s) => ({ stack: [...s.stack, s.route], route })),
       back: () => set((s) => (s.stack.length
         ? { route: s.stack[s.stack.length - 1], stack: s.stack.slice(0, -1) }

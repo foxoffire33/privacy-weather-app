@@ -49,6 +49,7 @@ export interface HourlyExplorerProps {
   aqi?: Record<string, number | null>;
   from?: number;
   to?: number;
+  height?: number | string;
 }
 
 export type TrendGroup = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
@@ -77,6 +78,7 @@ export interface GroupChartSeries {
 }
 
 export interface GroupChartProps {
+  id: string;
   group: TrendGroupDef;
   series: GroupChartSeries[];
   data: Record<string, string | number | null>[];

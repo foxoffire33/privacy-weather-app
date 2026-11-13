@@ -1,6 +1,6 @@
 import { Suspense, use, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Box, Button, Checkbox, Drawer, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
+import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
 import { t } from '../../i18n';
@@ -9,9 +9,10 @@ import { addDays, daysBetween } from '../../storesV2';
 import type { TempUnit } from '../../storesV2';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
+import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { hasGap, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
 import { lastSettled } from '../../storesV2';
-import type { GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
+import type { ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
@@ -119,7 +120,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
             const mine = attrs.filter((a) => a.group === g.key);
             if (!mine.length) return null;
             return (
-              <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
+              <GroupChart key={g.key} id={`trend:${cityId}:${g.key}`} group={g} data={data} base={base} unit={unitOf(g.key)}
                 series={mine.flatMap((a, i) => [
                   { name: nameA(a), color: COLORS[i % COLORS.length] },
                   ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
@@ -146,17 +147,28 @@ function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProp
   return <>{children}</>;
 }
 
-function GroupChart({ group, series, data, base, unit }: GroupChartProps) {
+function GroupChart({ id, group, series, data, base, unit }: GroupChartProps) {
   const toggle = useSeriesToggle(`trend:${group.key}`);
   const shown = toggle.visible(series);
-  const common = { ...base, h: 180, unit, data, series: shown, withLegend: false };
+  const chart = (height: ChartHeight) => {
+    const common = { ...base, h: height, unit, data, series: shown, withLegend: false };
+    return (
+      <>
+        {group.bars
+          ? <BarChart {...common} />
+          : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
+        {toggle.legend(series)}
+      </>
+    );
+  };
   return (
     <Box pt={12}>
-      <Text fz={12} c="dimmed" pb={4}>{t(group.title)}</Text>
-      {group.bars
-        ? <BarChart {...common} />
-        : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
-      {toggle.legend(series)}
+      <Group justify="space-between" wrap="nowrap" gap={8}>
+        <Text fz={12} c="dimmed">{t(group.title)}</Text>
+        <ExpandButton id={id} />
+      </Group>
+      {chart(INLINE_HEIGHT)}
+      <FullscreenChart id={id} title={t(group.title)} render={chart} />
     </Box>
   );
 }
