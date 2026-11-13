@@ -1,5 +1,5 @@
 import type { QueryMap, QueryState } from '../core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastData, ForecastEntry, GeoResult, Settings } from '../types';
+import type { ArchiveYear, City, DayData, ForecastData, ForecastEntry, GeoResult, Settings } from '../types';
 
 export interface ImportCounts { added: number; updated: number; kept: number }
 
@@ -62,4 +62,10 @@ export interface SearchState {
 export interface SettingsState {
   settings: Settings;
   updateSettings: (patch: Partial<Settings>) => void;
+}
+
+export interface SourceSpan {
+  from: string;
+  to: string;
+  recent: boolean;
 }

@@ -6,8 +6,9 @@ import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 
 import { CompactTooltip } from './components/charts/CompactTooltip';
 import type { Accent } from './storesV2';
+import type { AccentDef } from './types';
 
-export const ACCENTS: Record<Exclude<Accent, 'custom'>, { label: string; tuple: MantineColorsTuple }> = {
+export const ACCENTS: Record<Exclude<Accent, 'custom'>, AccentDef> = {
   green: { label: 'Green', tuple: ['#ebfaf0', '#cff2dc', '#a3e5bd', '#6fd399', '#40bf77', '#178a4a', '#127a40', '#0e6334', '#0a4c28', '#063019'] },
   red: { label: 'Red', tuple: ['#fff2ef', '#ffe0d9', '#ffc4b8', '#ff9783', '#ff563c', '#ec3013', '#dd2b0f', '#ae1800', '#7c1405', '#4d170e'] },
   blue: { label: 'Blue', tuple: ['#eef4ff', '#d9e6ff', '#b6ccff', '#86a8ff', '#5a85ff', '#2f62f5', '#2350d6', '#1a3da6', '#132c75', '#0c1c4a'] },

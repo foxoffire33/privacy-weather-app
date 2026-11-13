@@ -2,42 +2,17 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { followedCities, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../storesV2';
 import { useEntityCache } from '../storesV2';
-import type { ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../storesV2';
+import type { DayRecord } from '../storesV2';
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
 import { addDays } from '../storesV2';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
 import { t as tx, useI18n } from '../i18n';
+import type { SnapshotInput, WidgetDay, WidgetRow, WidgetSnapshot, WidgetsPlugin } from '../types';
 
-interface WidgetsPlugin {
-  update(options: { json: string }): Promise<void>;
-}
 const Widgets = registerPlugin<WidgetsPlugin>('Widgets');
 
-type Day = { label: string; hi: number | null; lo: number | null; normal: number | null; kind: 'past' | 'today' | 'future' };
-type Row = { label: string; v: number | null; text: string; kind: 'today' | 'avg' | 'year' };
-type RainBar = { f: number; wet: boolean };
-
-export interface WidgetSnapshot {
-  v: 1;
-  city: string;
-  updated: string;
-  now: { temp: string; cond: string; hi: string; lo: string; rain: string; rainLabel: string; delta: string | null };
-  labels: { past7: string; forecast: string; average: string; onThisDay: string; earlierYears: string };
-  timeline: { days: Day[]; todayHi: string };
-  thisDay: { date: string; rows: Row[] };
-  rain: { text: string; bars: RainBar[]; from: string; to: string; caption: string };
-  hours: { label: string; temp: string; p: number }[];
-}
-
-export interface SnapshotInput {
-  city: City | undefined;
-  entry: ForecastEntry | undefined;
-  tempUnit: TempUnit;
-  normals: Record<string, number>;
-  log: Record<string, DayRecord>;
-  years: ArchiveYear[];
-}
+export type { SnapshotInput, WidgetSnapshot } from '../types';
 
 export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const { city, entry } = input;
@@ -55,7 +30,7 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const normalOf = (date: string) => N(normals[date.slice(5)]);
   const hiToday = dv.temperature_2m_max[t];
   const avgToday = normals[today.slice(5)];
-  const days: Day[] = [];
+  const days: WidgetDay[] = [];
   for (let k = 7; k >= 1; k--) {
     const date = addDays(today, -k);
     const rec = log[date];
@@ -70,7 +45,7 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
     });
   }
 
-  const rows: Row[] = [{ label: tx('common.today'), v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
+  const rows: WidgetRow[] = [{ label: tx('common.today'), v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
   if (avgToday != null) rows.push({ label: tx('widgets.average_row'), v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });
   for (const y of input.years) {
     if (!y.error && y.hi != null) rows.push({ label: String(y.year), v: N(y.hi), text: `${T(y.hi)}°`, kind: 'year' });

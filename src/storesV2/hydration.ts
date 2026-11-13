@@ -1,4 +1,5 @@
-import { waitForHydration, type HydratablePersist } from './core/persist-storage';
+import { waitForHydration } from './core/persist-storage';
+import type { Rehydratable } from './core/types';
 import { importLegacyStore } from './migrate-legacy';
 import { useEntityCache } from './entities/cache';
 import { useSettingsStore } from './stores/settings-store';
@@ -7,10 +8,6 @@ import { useForecastStore } from './stores/forecast-store';
 import { useLogStore } from './stores/log-store';
 import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
-
-interface Rehydratable extends HydratablePersist {
-  persist: HydratablePersist['persist'] & { rehydrate: () => Promise<void> | void };
-}
 
 const PERSISTED: Rehydratable[] = [
   useEntityCache,

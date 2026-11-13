@@ -2,10 +2,7 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { ACCENTS, customTuple } from '../theme';
 import type { Accent } from '../storesV2';
-
-interface AppIconPlugin {
-  setAccent(options: { accent: Accent; color: string }): Promise<void>;
-}
+import type { AppIconPlugin } from '../types';
 
 const AppIcon = registerPlugin<AppIconPlugin>('AppIcon');
 

@@ -1,28 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
+import { Box, Button, Checkbox, Drawer, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
-import { t, type MessageKey } from '../../i18n';
+import { t } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
 import { addDays, daysBetween } from '../../storesV2';
-import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
-import type { TrendsSheet } from '../../types';
+import type { TempUnit } from '../../storesV2';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
 import { useTrendsStore } from '../../store/trendsStore';
-
-type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
-interface Attr {
-  key: string;
-  label: MessageKey;
-  group: Group;
-  value: (r: DayRecord | undefined, normal: number | null, units: { temp: TempUnit; wind: WindUnit }) => number | null;
-}
+import type { GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
-export const ATTRS: Attr[] = [
+export const ATTRS: TrendAttr[] = [
   { key: 'hi', label: 'city.high', group: 'temp', value: (r, _n, u) => T(r?.hi, u.temp) },
   { key: 'lo', label: 'city.low', group: 'temp', value: (r, _n, u) => T(r?.lo, u.temp) },
   { key: 'normal', label: 'history.normal', group: 'temp', value: (_r, n, u) => T(n, u.temp) },
@@ -37,7 +29,7 @@ export const ATTRS: Attr[] = [
   { key: 'uv', label: 'city.day.uvMax', group: 'uv', value: (r) => r?.uv ?? null },
 ];
 
-const GROUPS: { key: Group; title: MessageKey; bars?: boolean }[] = [
+const GROUPS: TrendGroupDef[] = [
   { key: 'temp', title: 'dayView.temperature' },
   { key: 'rain', title: 'city.day.precipitation', bars: true },
   { key: 'snow', title: 'city.day.snowfall', bars: true },
@@ -51,15 +43,7 @@ const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.
 const LENGTHS = [30, 90, 365, 0];
 const BACK_YEARS = [0, 1, 10, 30];
 
-export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: {
-  cityId: string;
-  log?: Record<string, DayRecord>;
-  normals?: Record<string, number>;
-  today: string;
-  followedAt: string;
-  tempUnit: TempUnit;
-  windUnit: WindUnit;
-}) {
+export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps) {
   const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows } = useTrendsStore(useShallow((st) => ({
     picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
     setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
@@ -80,8 +64,8 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
   const yearB = back ? String(+to.slice(0, 4) - back) : '';
-  const nameA = (a: Attr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
-  const nameB = (a: Attr) => `${t(a.label)} ${yearB}`;
+  const nameA = (a: TrendAttr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
+  const nameB = (a: TrendAttr) => `${t(a.label)} ${yearB}`;
   const data: Record<string, string | number | null>[] = [];
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const row: Record<string, string | number | null> = { label: shortDate(d) };
@@ -93,7 +77,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     data.push(row);
   }
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
-  const unitOf = (g: Group) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
+  const unitOf = (g: TrendGroup) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
   const rangeLabel = custom
     ? `${shortDate(custom.from)} – ${shortDate(custom.to)}`
     : len ? (len === 365 ? '1y' : `${len}d`) : t('history.all');
@@ -153,13 +137,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   );
 }
 
-function GroupChart({ group, series, data, base, unit }: {
-  group: { key: Group; title: MessageKey; bars?: boolean };
-  series: { name: string; color: string }[];
-  data: Record<string, string | number | null>[];
-  base: { dataKey: string; xAxisProps: { interval: number } };
-  unit: string;
-}) {
+function GroupChart({ group, series, data, base, unit }: GroupChartProps) {
   const toggle = useSeriesToggle(`trend:${group.key}`);
   const shown = toggle.visible(series);
   const common = { ...base, h: 180, unit, data, series: shown, withLegend: false };
@@ -174,7 +152,7 @@ function GroupChart({ group, series, data, base, unit }: {
   );
 }
 
-function AttrSheet({ onClose }: { onClose: () => void }) {
+function AttrSheet({ onClose }: SheetCloseProps) {
   const picked = useTrendsStore((st) => st.picked);
   const toggle = useTrendsStore((st) => st.togglePicked);
   return (
@@ -196,11 +174,7 @@ function AttrSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-function RangeSheet({ max, onApply, onClose }: {
-  max: string;
-  onApply: (r: { from: string; to: string }) => void;
-  onClose: () => void;
-}) {
+function RangeSheet({ max, onApply, onClose }: RangeSheetProps) {
   const { from: a, to: b } = useTrendsStore((st) => st.rangeDraft);
   const setDraft = useTrendsStore((st) => st.setRangeDraft);
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(a) && /^\d{4}-\d{2}-\d{2}$/.test(b) && a <= b && a >= '1940-01-01' && b <= max;

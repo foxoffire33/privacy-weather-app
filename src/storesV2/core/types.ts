@@ -28,3 +28,16 @@ export interface DataLayerConfig {
   server: string;
   fetch: typeof fetch | null;
 }
+
+export interface PendingWrite {
+  value: unknown;
+  timer: ReturnType<typeof setTimeout>;
+}
+
+export interface Rehydratable extends HydratablePersist {
+  persist: HydratablePersist['persist'] & RehydrateHandle;
+}
+
+export interface RehydrateHandle {
+  rehydrate: () => Promise<void> | void;
+}

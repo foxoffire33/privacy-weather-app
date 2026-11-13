@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { Box, Progress, Text } from '@mantine/core';
+import type { BarProps, SectionProps, StatProps } from '../../types';
 
 export function levelColor(level: number | null | undefined) {
   if (level == null) return 'var(--mantine-color-dark-3)';
@@ -9,13 +9,13 @@ export function levelColor(level: number | null | undefined) {
   return 'var(--mantine-color-signal-5)';
 }
 
-export function Bar({ pct, level, color }: { pct: number; level?: number | null; color?: string }) {
+export function Bar({ pct, level, color }: BarProps) {
   return (
     <Progress value={Math.max(0, Math.min(100, pct))} color={color ?? levelColor(level)} />
   );
 }
 
-export function Section({ title, summary, children }: { title: string; summary?: ReactNode; children?: ReactNode }) {
+export function Section({ title, summary, children }: SectionProps) {
   return (
     <Box mx={12} mt={20}>
       <Box className="kicker" style={{ paddingTop: 0 }}>{title}</Box>
@@ -25,7 +25,7 @@ export function Section({ title, summary, children }: { title: string; summary?:
   );
 }
 
-export function Stat({ k, v, s, children }: { k: string; v: ReactNode; s?: ReactNode; children?: ReactNode }) {
+export function Stat({ k, v, s, children }: StatProps) {
   return (
     <Box py={10} className="row">
       <Text fz={12} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>

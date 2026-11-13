@@ -9,6 +9,7 @@ import { Section, Stat } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import type { DayViewProps } from '../types';
 
 const nums = (a?: (number | null)[]) => (a ?? []).filter((x): x is number => x != null);
 const avg = (a?: (number | null)[]) => { const n = nums(a); return n.length ? n.reduce((x, y) => x + y, 0) / n.length : null; };
@@ -16,7 +17,7 @@ const max = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Ma
 const min = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Math.min(...n) : null; };
 const f = (v: number | null | undefined, d = 0) => (v == null ? '–' : v.toFixed(d));
 
-export function DayView({ cityId, date }: { cityId: string; date: string }) {
+export function DayView({ cityId, date }: DayViewProps) {
   const units = useUnits();
   const s = {
     city: useCity(cityId),

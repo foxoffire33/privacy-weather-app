@@ -1,24 +1,13 @@
 import { del as legacyDel, get as legacyGet } from 'idb-keyval';
 import { idbGet, idbSet } from './core/idb';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
+import type { City, DayRecord, LegacyEnvelope } from './types';
 
 const LEGACY_KEY = 'open-weather-log';
-
-interface LegacyState {
-  settings?: Settings;
-  cities?: City[];
-  onboarded?: boolean;
-  forecasts?: Record<string, ForecastEntry>;
-  history?: Record<string, Record<string, Omit<DayRecord, 'id' | 'cityId'>>>;
-  normals?: Record<string, Record<string, number>>;
-  thisDay?: Record<string, ArchiveYear[]>;
-  days?: Record<string, DayData>;
-}
 
 const envelope = <T>(state: T) => ({ state, version: 1 });
 
 export async function importLegacyStore(): Promise<boolean> {
-  const stored = await legacyGet<{ state?: LegacyState; version?: number }>(LEGACY_KEY);
+  const stored = await legacyGet<LegacyEnvelope>(LEGACY_KEY);
   if (stored?.state === undefined) return false;
   if ((await idbGet('wl2-cities')) !== null) {
     await legacyDel(LEGACY_KEY);

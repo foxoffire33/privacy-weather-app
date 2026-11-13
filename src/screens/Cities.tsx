@@ -9,10 +9,9 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
 import { t, tl } from '../i18n';
+import type { ReorderDrag } from '../types';
 
 const EDGE = 70;
-
-interface Drag { from: number; to: number; dy: number }
 
 export function Cities() {
   const cities = useCities();
@@ -24,7 +23,7 @@ export function Cities() {
   const n = cities.length;
   const scroller = useRef<HTMLDivElement>(null);
   const firstRow = useRef<HTMLDivElement>(null);
-  const [drag, setDrag] = useState<Drag | null>(null);
+  const [drag, setDrag] = useState<ReorderDrag | null>(null);
   const g = useRef({ startY: 0, startScroll: 0, pointerY: 0, rowH: 1, from: 0, raf: 0 });
   const update = () => {
     const el = scroller.current;

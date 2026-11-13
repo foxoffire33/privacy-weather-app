@@ -6,8 +6,9 @@ import { nowIndex } from '../lib/insights';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import type { CityScreenProps, HourGroup, HourlyCellProps } from '../types';
 
-function Cell({ k, v }: { k: string; v: string }) {
+function Cell({ k, v }: HourlyCellProps) {
   return (
     <Box py={8} pr={8}>
       <Text fz={12} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
@@ -25,7 +26,7 @@ function HourBlockSk() {
   );
 }
 
-export function Hourly({ cityId }: { cityId: string }) {
+export function Hourly({ cityId }: CityScreenProps) {
   const units = useUnits();
   const s = { city: useCity(cityId), entry: useForecast(cityId), tempUnit: units.temp, windUnit: units.wind };
   if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
@@ -45,7 +46,7 @@ export function Hourly({ cityId }: { cityId: string }) {
   const h0 = nowIndex(data);
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
-  const groups: { date: string; rows: number[] }[] = [];
+  const groups: HourGroup[] = [];
   for (let i = h0; i < data.hourly.time.length; i++) {
     const date = data.hourly.time[i].slice(0, 10);
     if (!groups.length || groups[groups.length - 1].date !== date) groups.push({ date, rows: [] });

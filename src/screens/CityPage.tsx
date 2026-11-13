@@ -1,4 +1,4 @@
-import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
@@ -6,7 +6,6 @@ import {
   openDay, refreshCity, useDayQuery, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
 } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
-import type { City } from '../storesV2';
 import { conditionLabel } from '../lib/weatherCodes';
 import { ago, compass, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, weekday } from '../lib/format';
 import {
@@ -23,6 +22,7 @@ import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';
 import { t as tx, type MessageKey } from '../i18n';
+import type { AqiPeak, CityPageProps, DeferredProps, StripCell } from '../types';
 
 const weekSeries = () => [
   { name: 'mm', label: tx('chart.mm'), type: 'bar' as const, color: 'signal.7', yAxisId: 'right' },
@@ -40,7 +40,7 @@ const POLLUTANTS = [
 ] as const;
 const POLLEN = ['alder_pollen', 'birch_pollen', 'grass_pollen', 'mugwort_pollen', 'olive_pollen', 'ragweed_pollen'] as const;
 
-export const CityPage = memo(function CityPage({ city, isDefault }: { city: City; isDefault: boolean }) {
+export const CityPage = memo(function CityPage({ city, isDefault }: CityPageProps) {
   const busy = useForecastQuery(city.id).status === 'loading';
   return (
     <Box className="page">
@@ -50,7 +50,7 @@ export const CityPage = memo(function CityPage({ city, isDefault }: { city: City
   );
 });
 
-function Deferred({ h, children }: { h: number; children: ReactNode }) {
+function Deferred({ h, children }: DeferredProps) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const t = window.setTimeout(() => setReady(true), 250);
@@ -59,7 +59,7 @@ function Deferred({ h, children }: { h: number; children: ReactNode }) {
   return ready ? <>{children}</> : <ChartSk h={h} />;
 }
 
-function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }) {
+function CityPageContent({ city, isDefault }: CityPageProps) {
   const weekTg = useSeriesToggle('week');
   const entry = useForecast(city.id);
   const query = useForecastQuery(city.id);
@@ -149,8 +149,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const normal = s.normals?.[today.slice(5)];
   const delta = normal != null && dv.temperature_2m_max[t] != null ? dv.temperature_2m_max[t]! - normal : null;
   const precipProb = dv.precipitation_probability_max[t] ?? 0;
-  type Cell = { time: string; date: string; isNow: boolean; past: boolean; temp: number | null | undefined; p: number | null; wind: number | null | undefined };
-  const cells: Cell[] = [];
+  const cells: StripCell[] = [];
   for (let n = back; n >= 2; n--) {
     const day = s.days[`${city.id}:${addDays(today, -n)}`];
     if (!day) continue;
@@ -184,7 +183,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const sunPos = sunProgress(data.current.time, data.daily.sunrise[t], data.daily.sunset[t]);
   const aqi = air?.current.european_aqi ?? null;
   const aqiLvl = euAqiLevel(aqi);
-  const aqiAhead = air ? air.hourly.time.reduce<{ v: number; time: string } | null>((worst, time, i) => {
+  const aqiAhead = air ? air.hourly.time.reduce<AqiPeak | null>((worst, time, i) => {
     const v = air.hourly.aqi[i];
     if (time < data.hourly.time[h0] || v == null || time > data.hourly.time[h0 + 24]) return worst;
     return !worst || v > worst.v ? { v, time } : worst;

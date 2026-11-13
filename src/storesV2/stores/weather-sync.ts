@@ -6,11 +6,14 @@ import { useAlmanacStore } from './almanac-store';
 import { useDayStore } from './day-store';
 import { useSettingsStore } from './settings-store';
 import { dayKey } from '../entities/schema';
-import type { Backup, BackupParts, City, DayRecord, GeoResult, Settings } from '../types';
+import type {
+  Backup, BackupDay, BackupParts, City, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Snapshot, StoredCounts,
+} from '../types';
+import type { ImportCounts } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 
-export async function refreshCity(cityId: string, opts: { maxAgeMs?: number } = {}): Promise<void> {
+export async function refreshCity(cityId: string, opts: RefreshOptions = {}): Promise<void> {
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) return;
   const log = useLogStore.getState();
@@ -22,7 +25,7 @@ export async function refreshCity(cityId: string, opts: { maxAgeMs?: number } = 
   void useAlmanacStore.getState().ensureNormals(city);
 }
 
-export async function refreshAll(opts: { maxAgeMs?: number } = {}): Promise<void> {
+export async function refreshAll(opts: RefreshOptions = {}): Promise<void> {
   await Promise.all(useCityStore.getState().cityIds.map(async (id) => { await refreshCity(id, opts); }));
 }
 
@@ -50,7 +53,7 @@ export async function lookupDate(cityId: string, date: string): Promise<void> {
   await useLogStore.getState().lookup(city, date);
 }
 
-export async function addDateRange(cityId: string, start: string, end: string): Promise<{ added: number; updated: number; kept: number }> {
+export async function addDateRange(cityId: string, start: string, end: string): Promise<ImportCounts> {
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) throw new Error('city-not-followed');
   return await useLogStore.getState().addRange(city, start, end);
@@ -62,7 +65,7 @@ export async function fillRange(cityId: string, start: string, end: string): Pro
   await useLogStore.getState().fillMissing(city, start, end);
 }
 
-export function importBackup(backup: Backup, parts: BackupParts): { cities: number; days: number } {
+export function importBackup(backup: Backup, parts: BackupParts): ImportedCounts {
   const addedIds = parts.cities ? useCityStore.getState().addMany(backup.cities) : [];
   let days = 0;
   if (parts.history) {
@@ -83,11 +86,11 @@ export function importBackup(backup: Backup, parts: BackupParts): { cities: numb
   return { cities: addedIds.length, days };
 }
 
-export function exportSnapshot(): { cities: City[]; history: Record<string, Record<string, Omit<DayRecord, 'id' | 'cityId'>>>; settings: Settings } {
-  const history: Record<string, Record<string, Omit<DayRecord, 'id' | 'cityId'>>> = {};
+export function exportSnapshot(): Snapshot {
+  const history: Snapshot['history'] = {};
   const { dates } = useLogStore.getState();
   for (const [cityId, days] of Object.entries(dates)) {
-    const byDate: Record<string, Omit<DayRecord, 'id' | 'cityId'>> = {};
+    const byDate: Record<string, BackupDay> = {};
     for (const record of entityCache.getMany('dayRecord', days.map((d) => dayKey(cityId, d)))) {
       const { id: _id, cityId: _cityId, ...rest } = record;
       byDate[record.date] = rest;
@@ -97,7 +100,7 @@ export function exportSnapshot(): { cities: City[]; history: Record<string, Reco
   return { cities: followedCities(), history, settings: useSettingsStore.getState().settings };
 }
 
-export function storedCounts(): { cities: number; days: number } {
+export function storedCounts(): StoredCounts {
   const { dates } = useLogStore.getState();
   return {
     cities: useCityStore.getState().cityIds.length,

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { errorMessage } from '../core/errors';
 import { idbStorage } from '../core/persist-storage';
-import type { QueryMap, QueryState } from '../core/types';
+import type { QueryState } from '../core/types';
 import { entityCache } from '../entities/cache';
 import { dayKey } from '../entities/schema';
 import { begin, fail, IDLE_QUERY, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
@@ -10,8 +10,8 @@ import { fetchDailyRange } from '../api/open-meteo';
 import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from '../api/day-record';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from '../api/variables';
 import { addDays, daysBetween, todayISO } from '../core/time';
-import type { City, DayData, DayRecord, ForecastData } from '../types';
-import type { ImportCounts, LogState } from './types';
+import type { DayRecord } from '../types';
+import type { ImportCounts, LogState, SourceSpan } from './types';
 
 export type { ImportCounts, LogState } from './types';
 
@@ -22,9 +22,9 @@ export const NO_ARCHIVE_DATA = 'no-archive-data';
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
   [...new Set([...existing, ...added])].sort();
 
-function sources(start: string, end: string): { from: string; to: string; recent: boolean }[] {
+function sources(start: string, end: string): SourceSpan[] {
   const horizon = addDays(todayISO(), -FORECAST_PAST_DAYS);
-  const parts: { from: string; to: string; recent: boolean }[] = [];
+  const parts: SourceSpan[] = [];
   if (start < horizon) parts.push({ from: start, to: end < horizon ? end : addDays(horizon, -1), recent: false });
   if (end >= horizon) parts.push({ from: start > horizon ? start : horizon, to: end, recent: true });
   return parts;

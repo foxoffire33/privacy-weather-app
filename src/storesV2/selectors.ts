@@ -10,12 +10,12 @@ import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
 import { useSettingsStore } from './stores/settings-store';
 import { alreadyHydrated, hydrateAll } from './hydration';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LookupView, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
 export const useUpdateSettings = (): ((patch: Partial<Settings>) => void) => useSettingsStore((s) => s.updateSettings);
 
-export const useUnits = (): { temp: Settings['tempUnit']; wind: Settings['windUnit'] } =>
+export const useUnits = (): Units =>
   useSettingsStore(useShallow((s) => ({ temp: s.settings.tempUnit, wind: s.settings.windUnit })));
 
 export function useCities(): City[] {
@@ -56,7 +56,7 @@ export const useLogCount = (cityId: string): number => useLogStore((s) => (s.dat
 export const useDayRecord = (cityId: string, date: string): DayRecord | undefined =>
   useEntityCache((s) => s.tables.dayRecord[dayKey(cityId, date)]);
 
-export function useLookup(cityId: string, date: string): { record: DayRecord | undefined; query: QueryState } {
+export function useLookup(cityId: string, date: string): LookupView {
   const record = useDayRecord(cityId, date);
   const query = useLogStore((s) => s.queries[dayKey(cityId, date)] ?? IDLE_QUERY);
   return { record, query };

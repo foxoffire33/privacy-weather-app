@@ -1,7 +1,6 @@
-import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { t } from '../../i18n';
-
-interface Entry { name?: string; value?: number | string; color?: string; stroke?: string; fill?: string; unit?: string; dataKey?: string }
+import type { CompactTooltipProps, TooltipEntry, TooltipRowPayload } from '../../types';
 
 const WIDTH = 4;
 
@@ -18,11 +17,11 @@ function fit(value: number | string | undefined): string {
 
 const PER_ROW = 3;
 
-export function CompactTooltip({ active, label, payload }: { active?: boolean; label?: string | number; payload?: readonly object[] }) {
-  const rows = (active && payload ? payload : []) as Entry[];
-  const title = (rows[0] as { payload?: { when?: string } } | undefined)?.payload?.when ?? label;
+export function CompactTooltip({ active, label, payload }: CompactTooltipProps) {
+  const rows = (active && payload ? payload : []) as TooltipEntry[];
+  const title = (rows[0] as TooltipRowPayload | undefined)?.payload?.when ?? label;
   const grid = rows.length > PER_ROW;
-  const cell = (e: Entry, i: number) => (
+  const cell = (e: TooltipEntry, i: number) => (
     <Group key={e.dataKey ?? e.name ?? i} component="b" gap={4} align="baseline" wrap="nowrap"
       style={{ color: e.color ?? e.stroke ?? e.fill, flex: '1 1 auto', minWidth: 0 }}>
       <Text span inherit fw={400} opacity={0.8} truncate="end" miw={0}>{e.name}</Text>

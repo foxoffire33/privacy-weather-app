@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
@@ -15,8 +15,9 @@ import { Sk } from '../components/Skeletons';
 import { SwipeRow } from '../components/SwipeRow';
 import { Trends } from '../components/history/Trends';
 import { t } from '../i18n';
+import type { CityScreenProps, ImportRangeProps } from '../types';
 
-export function History({ cityId }: { cityId: string }) {
+export function History({ cityId }: CityScreenProps) {
   const city = useCity(cityId);
   const entry = useForecast(cityId);
   const units = useUnits();
@@ -160,7 +161,7 @@ export function History({ cityId }: { cityId: string }) {
   );
 }
 
-function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
+function ImportRange({ cityId, maxDate }: ImportRangeProps) {
   const [show, setShow] = useState(false);
   const { draft: { from, to }, result, reset, setDraft, run } = useAddDatesStore(useShallow((st) => ({
     draft: st.draft, result: st.result, reset: st.reset, setDraft: st.setDraft, run: st.run,

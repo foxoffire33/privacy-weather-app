@@ -1,5 +1,85 @@
+import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../storesV2';
+import type { MessageKey } from './i18n';
+
 export interface ToggleSeries {
   name: string;
   label?: string;
   color: string;
+}
+
+export interface Named {
+  name: string;
+}
+
+export interface Labelled {
+  label: MessageKey;
+}
+
+export interface TooltipEntry {
+  name?: string;
+  value?: number | string;
+  color?: string;
+  stroke?: string;
+  fill?: string;
+  unit?: string;
+  dataKey?: string;
+}
+
+export interface TooltipRowPayload {
+  payload?: { when?: string };
+}
+
+export interface CompactTooltipProps {
+  active?: boolean;
+  label?: string | number;
+  payload?: readonly object[];
+}
+
+export type HourlySeries = Partial<Record<HourlyVar, (number | null)[]>>;
+
+export interface HourlyMetric {
+  value: string;
+  label: MessageKey;
+  needs: HourlyVar | 'aqi';
+}
+
+export interface HourlyExplorerProps {
+  time: string[];
+  v: HourlySeries;
+  aqi?: Record<string, number | null>;
+  from?: number;
+  to?: number;
+}
+
+export type TrendGroup = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
+
+export interface TrendUnits {
+  temp: TempUnit;
+  wind: WindUnit;
+}
+
+export interface TrendAttr {
+  key: string;
+  label: MessageKey;
+  group: TrendGroup;
+  value: (r: DayRecord | undefined, normal: number | null, units: TrendUnits) => number | null;
+}
+
+export interface TrendGroupDef {
+  key: TrendGroup;
+  title: MessageKey;
+  bars?: boolean;
+}
+
+export interface GroupChartSeries {
+  name: string;
+  color: string;
+}
+
+export interface GroupChartProps {
+  group: TrendGroupDef;
+  series: GroupChartSeries[];
+  data: Record<string, string | number | null>[];
+  base: { dataKey: string; xAxisProps: { interval: number } };
+  unit: string;
 }

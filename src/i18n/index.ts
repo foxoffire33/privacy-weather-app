@@ -1,13 +1,9 @@
 import { create } from 'zustand';
 
 import en from './locales/en.json';
+import type { I18nState, Language, LocaleModule, MessageKey, Messages, Vars } from '../types';
 
-export type Messages = typeof en;
-type Plural = { one: string; other: string };
-type Leaves<T, P extends string = ''> = {
-  [K in keyof T & string]: T[K] extends string | Plural | readonly string[] ? `${P}${K}` : Leaves<T[K], `${P}${K}.`>;
-}[keyof T & string];
-export type MessageKey = Leaves<Messages>;
+export type { Language, MessageKey, Messages } from '../types';
 
 export const LANGUAGES = [
   { code: 'bg', name: 'Български', locale: 'bg-BG' },
@@ -36,9 +32,7 @@ export const LANGUAGES = [
   { code: 'sv', name: 'Svenska', locale: 'sv-SE' },
 ] as const;
 
-export type Language = (typeof LANGUAGES)[number]['code'];
-
-const loaders = import.meta.glob<{ default: Messages }>(['./locales/*.json', '!./locales/en.json']);
+const loaders = import.meta.glob<LocaleModule>(['./locales/*.json', '!./locales/en.json']);
 
 export function systemLanguage(): Language {
   const prefs = typeof navigator === 'undefined' ? [] : (navigator.languages?.length ? navigator.languages : [navigator.language]);
@@ -47,14 +41,6 @@ export function systemLanguage(): Language {
     if (LANGUAGES.some((l) => l.code === base)) return base as Language;
   }
   return 'en';
-}
-
-interface I18nState {
-  lang: Language;
-  locale: string;
-  messages: Messages;
-  ready: boolean;
-  setLanguage: (pref: string | undefined) => Promise<void>;
 }
 
 export const useI18n = create<I18nState>((set, get) => ({
@@ -98,8 +84,6 @@ function pluralCategory(locale: string, n: number) {
   }
   return rules.select(n);
 }
-
-type Vars = Record<string, string | number | null | undefined>;
 
 export function t(key: MessageKey, vars?: Vars): string {
   const { messages, locale } = useI18n.getState();

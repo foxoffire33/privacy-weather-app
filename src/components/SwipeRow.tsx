@@ -1,22 +1,16 @@
 import { Box, UnstyledButton } from '@mantine/core';
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { t } from '../i18n';
+import type { SwipeGesture, SwipeRowProps } from '../types';
 
 const ACTION_W = 88;
 const REMOVE_MS = 220;
 
-export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onDelete: () => void;
-  disabled?: boolean;
-  label: string;
-  children: ReactNode;
-}) {
+export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps) {
   const [dragX, setDragX] = useState<number | null>(null);
   const [removing, setRemoving] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ x: number; y: number; base: number; dir: 'h' | 'v' | null; width: number } | null>(null);
+  const drag = useRef<SwipeGesture | null>(null);
   const swallowClick = useRef(false);
   const width = root.current?.offsetWidth ?? 420;
   const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);

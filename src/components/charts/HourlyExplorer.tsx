@@ -6,9 +6,8 @@ import { useUiStore } from '../../store/uiStore';
 import { useSeriesToggle } from './SeriesToggle';
 import type { HourlyVar } from '../../storesV2/api/variables';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
-import { t, t as tt, type MessageKey } from '../../i18n';
-
-type Series = Partial<Record<HourlyVar, (number | null)[]>>;
+import { t, t as tt } from '../../i18n';
+import type { HourlyExplorerProps, HourlyMetric, Labelled } from '../../types';
 
 const BASE = { h: 180, dataKey: 'label' };
 const LINE = BASE;
@@ -17,9 +16,9 @@ const TEMP = [{ name: 'Air', label: 'chart.airTemp', color: 'signal.4' }, { name
 const RAIN = [{ name: 'mm', label: 'chart.mm', type: 'bar' as const, color: 'signal.7' }, { name: 'Chance %', label: 'chart.chance', type: 'line' as const, color: 'signal.4', yAxisId: 'right' }] as const;
 const WIND = [{ name: 'Wind', label: 'chart.wind', color: 'signal.4' }, { name: 'Gusts', label: 'chart.gusts', color: 'signal.7' }] as const;
 const CLOUDS = [{ name: 'Total', label: 'chart.total', color: 'signal.4' }, { name: 'Low', label: 'chart.low', color: 'signal.7' }, { name: 'High', label: 'chart.high', color: 'dark.4' }] as const;
-const tr = <S extends { label: MessageKey }>(series: readonly S[]) => series.map((x) => ({ ...x, label: t(x.label) }));
+const tr = <S extends Labelled>(series: readonly S[]) => series.map((x) => ({ ...x, label: t(x.label) }));
 
-const METRICS: { value: string; label: MessageKey; needs: HourlyVar | 'aqi' }[] = [
+const METRICS: HourlyMetric[] = [
   { value: 'temp', label: 'chart.temp', needs: 'temperature_2m' },
   { value: 'rain', label: 'chart.rain', needs: 'precipitation' },
   { value: 'wind', label: 'chart.wind', needs: 'wind_speed_10m' },
@@ -30,9 +29,7 @@ const METRICS: { value: string; label: MessageKey; needs: HourlyVar | 'aqi' }[] 
   { value: 'air', label: 'chart.air', needs: 'aqi' },
 ];
 
-export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
-  time: string[]; v: Series; aqi?: Record<string, number | null>; from?: number; to?: number;
-}) {
+export function HourlyExplorer({ time, v, aqi, from = 0, to }: HourlyExplorerProps) {
   const units = useUnits();
   const s = useUiStore(useShallow((st) => ({ metric: st.chartMetric, setMetric: st.setChartMetric })));
   const end = Math.min(to ?? time.length, time.length);

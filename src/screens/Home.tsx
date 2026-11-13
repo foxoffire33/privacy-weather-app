@@ -6,8 +6,9 @@ import { useUiStore } from '../store/uiStore';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';
+import type { GestureHintProps, PagerGesture } from '../types';
 
-function GestureHint({ multiple }: { multiple: boolean }) {
+function GestureHint({ multiple }: GestureHintProps) {
   const seen = useUiStore((s) => s.gestureHintSeen);
   const close = useUiStore((s) => s.dismissGestureHint);
   useEffect(() => {
@@ -33,7 +34,7 @@ export function Home() {
   const idx = Math.min(pageIndex, n - 1);
   const pagerRef = useRef<HTMLDivElement>(null);
   const dx = useRef(0);
-  const drag = useRef<{ x: number; y: number; id: number; active: boolean } | null>(null);
+  const drag = useRef<PagerGesture | null>(null);
   const justDragged = useRef(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

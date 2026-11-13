@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { idbStorage } from '../core/persist-storage';
 import { entityCache } from '../entities/cache';
 import { todayISO } from '../core/time';
-import type { City, GeoResult } from '../types';
+import type { City } from '../types';
 import type { CityState } from './types';
 
 export type { CityState } from './types';

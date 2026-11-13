@@ -1,6 +1,6 @@
 import { Box, UnstyledButton } from '@mantine/core';
 import { useUiStore } from '../../store/uiStore';
-import type { ToggleSeries } from '../../types';
+import type { Named, ToggleSeries } from '../../types';
 
 const NONE: string[] = [];
 
@@ -8,7 +8,7 @@ export function useSeriesToggle(scope: string) {
   const hidden = useUiStore((s) => s.hiddenSeries[scope] ?? NONE);
   const toggle = useUiStore((s) => s.toggleSeries);
   return {
-    visible: <T extends { name: string }>(series: T[]) => series.filter((s) => !hidden.includes(s.name)),
+    visible: <T extends Named>(series: T[]) => series.filter((s) => !hidden.includes(s.name)),
     legend: (series: ToggleSeries[]) => (
       <Box className="toggle-legend">
         {series.map((s) => (

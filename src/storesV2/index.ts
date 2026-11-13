@@ -19,3 +19,4 @@ export { alreadyHydrated, hydrateAll } from './hydration';
 export { importLegacyStore } from './migrate-legacy';
 
 export type * from './types';
+export type * from './api/types';

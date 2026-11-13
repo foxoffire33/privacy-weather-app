@@ -1,9 +1,9 @@
-import type { CSSProperties } from 'react';
 import { Box, Group, Paper, Skeleton } from '@mantine/core';
 import { Section } from './city/parts';
 import { t } from '../i18n';
+import type { ChartSkProps, RowsSkProps, SectionSkProps, SkProps, StatGridSkProps } from '../types';
 
-export function Sk({ w = '100%', h = 14, mt = 0, style }: { w?: number | string; h?: number; mt?: number; style?: CSSProperties }) {
+export function Sk({ w = '100%', h = 14, mt = 0, style }: SkProps) {
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
 }
 
@@ -17,15 +17,15 @@ export function StatSk() {
   );
 }
 
-export function StatGridSk({ n = 4 }: { n?: number }) {
+export function StatGridSk({ n = 4 }: StatGridSkProps) {
   return <Box className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</Box>;
 }
 
-export function SectionSk({ title, n = 4 }: { title: string; n?: number }) {
+export function SectionSk({ title, n = 4 }: SectionSkProps) {
   return <Section title={title}><StatGridSk n={n} /></Section>;
 }
 
-export function RowsSk({ n, h = 40 }: { n: number; h?: number }) {
+export function RowsSk({ n, h = 40 }: RowsSkProps) {
   return (
     <>
       {Array.from({ length: n }, (_, i) => (
@@ -38,7 +38,7 @@ export function RowsSk({ n, h = 40 }: { n: number; h?: number }) {
   );
 }
 
-export function ChartSk({ h = 180 }: { h?: number }) {
+export function ChartSk({ h = 180 }: ChartSkProps) {
   return (
     <Box pt={12}>
       <Sk w={260} h={26} />
