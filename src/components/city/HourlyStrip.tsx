@@ -103,7 +103,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
     widthBefore.current = el.scrollWidth;
     setBack(n);
   };
-  const { armed, indicatorRef, touch } = usePullPast(stripRef, () => void loadPast(), !loadingPast);
+  const { armed, indicatorRef, touch, mouse } = usePullPast(stripRef, () => void loadPast(), !loadingPast);
   useLayoutEffect(() => {
     const el = stripRef.current;
     if (!el || back === 0) { return; }
@@ -129,7 +129,11 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const first = hours.at(0);
   return (
     <>
-      <Box className="hourly-strip" ref={stripRef} {...stripHandlers} {...touch}>
+      <Box className="hourly-strip" ref={stripRef} {...stripHandlers} {...touch}
+        onPointerDown={(e) => { stripHandlers.onPointerDown(e); mouse.onPointerDown(e); }}
+        onPointerMove={(e) => { stripHandlers.onPointerMove(e); mouse.onPointerMove(e); }}
+        onPointerUp={(e) => { stripHandlers.onPointerUp(); mouse.onPointerUp(e); }}
+        onPointerCancel={(e) => { stripHandlers.onPointerCancel(); mouse.onPointerCancel(e); }}>
         <Box ref={indicatorRef} className="pull-past" data-armed={armed || undefined}>
           {pullLabel(loadingPast, armed, back)}
         </Box>

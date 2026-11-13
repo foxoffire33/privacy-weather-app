@@ -52,8 +52,6 @@ export function usePullPast(ref: RefObject<HTMLElement | null>, onLoad: () => vo
       onTouchEnd: () => { end(true); },
       onTouchCancel: () => { end(false); },
     },
-    // Mouse/pen (desktop browser): no touch events fire there, so the same gesture is
-    // offered on pointer events. Touch keeps the touch path above (avoids double firing).
     mouse: {
       onPointerDown: (e: PointerEvent) => { if (notTouch(e)) {begin(e.clientX);} },
       onPointerMove: (e: PointerEvent) => { if (notTouch(e) && start.current !== null) {move(e.clientX);} },
