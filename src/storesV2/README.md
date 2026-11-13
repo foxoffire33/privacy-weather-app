@@ -51,15 +51,21 @@ rehydrate, after the legacy migration has run.
 **6. Loading and error state goes through `factory/query-state`** — `begin` / `succeed` /
 `fail`, read with `isLoading` / `isFresh`. No per-store loading booleans.
 
-**7. No UI concerns in the layer.** Record the failure in a `QueryState` and let the screen
+**7. A selector returns a stable reference.** Anything a component subscribes to must be the
+same object between renders when nothing changed — a store field, a primitive derived from one,
+or a `useMemo` over them. A fallback that builds a value (`?? initialQueryState()`) makes every
+render a new snapshot, and React re-renders until it gives up: that is how the history screen
+came back blank. Use the shared frozen `IDLE_QUERY`, and `useShallow` for a projected object.
+
+**8. No UI concerns in the layer.** Record the failure in a `QueryState` and let the screen
 render it. A message the user should read in their own language is reported as a code
 (`NO_ARCHIVE_DATA`) and translated by the screen.
 
-**8. The layer never imports app modules.** What it needs of the user's choices — the API key
+**9. The layer never imports app modules.** What it needs of the user's choices — the API key
 and the host override — the host pushes in through `configureDataLayer` (`core/config.ts`);
 `settings-store` does that on every change. Reach for `getConfig()`, never an app import.
 
-**9. Commands that span domains live in `stores/weather-sync.ts`.** No store imports another.
+**10. Commands that span domains live in `stores/weather-sync.ts`.** No store imports another.
 A refresh measures the gap, fetches, logs what came back and makes sure the normals exist — in
 that order, in one readable place.
 

@@ -12,6 +12,8 @@ export function initialQueryState(): QueryState {
   return { status: 'idle', error: null, lastLoadedAt: null };
 }
 
+export const IDLE_QUERY: QueryState = Object.freeze({ status: 'idle', error: null, lastLoadedAt: null });
+
 export type QueryMap = Record<string, QueryState>;
 
 export interface HydratablePersist {

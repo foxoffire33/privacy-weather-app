@@ -5,7 +5,7 @@ import { idbStorage } from '../core/persist-storage';
 import type { QueryMap, QueryState } from '../core/types';
 import { entityCache } from '../entities/cache';
 import { dayKey } from '../entities/schema';
-import { begin, fail, initialQueryState, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
+import { begin, fail, IDLE_QUERY, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
 import { fetchDailyRange } from '../api/open-meteo';
 import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from '../api/day-record';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from '../api/variables';
@@ -147,4 +147,4 @@ export const useLogStore = create<LogState>()(
 );
 
 export const lookupQuery = (cityId: string, date: string): QueryState =>
-  useLogStore.getState().queries[dayKey(cityId, date)] ?? initialQueryState();
+  useLogStore.getState().queries[dayKey(cityId, date)] ?? IDLE_QUERY;

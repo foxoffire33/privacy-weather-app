@@ -1,6 +1,6 @@
-import { initialQueryState, type QueryMap, type QueryState } from '../core/types';
+import { IDLE_QUERY, initialQueryState, type QueryMap, type QueryState } from '../core/types';
 
-export { initialQueryState };
+export { IDLE_QUERY, initialQueryState };
 export type { QueryMap, QueryState };
 
 export function begin(q: QueryState): QueryState {
@@ -26,7 +26,7 @@ export function isFresh(q: QueryState | undefined, staleMs = STALE_MS): boolean 
 }
 
 export function queryAt(map: QueryMap, key: string): QueryState {
-  return map[key] ?? initialQueryState();
+  return map[key] ?? IDLE_QUERY;
 }
 
 export function setQuery(map: QueryMap, key: string, q: QueryState): QueryMap {
