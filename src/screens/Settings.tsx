@@ -1,5 +1,6 @@
 import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
-import { useRef, useState } from 'react';
+import { useFileDialog } from '@mantine/hooks';
+import { useState } from 'react';
 import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import type { Accent, TempUnit, WindUnit } from '../stores';
 import { ACCENTS } from '../theme';
@@ -16,7 +17,6 @@ export function Settings() {
   const set = useUpdateSettings();
   const counts = storedCounts();
   const s = { settings };
-  const fileInput = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<Backup | null>(null);
   const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -31,8 +31,12 @@ export function Settings() {
       setPending(null);
       setImportMsg({ ok: false, text: (e as Error).message });
     }
-    if (fileInput.current) fileInput.current.value = '';
   };
+  const { open: openImportPicker } = useFileDialog({
+    accept: 'application/json,.json',
+    multiple: false,
+    onChange: (files) => void onFile(files?.[0]),
+  });
   const doImport = () => {
     if (!pending) return;
     const r = importBackup(pending, parts);
@@ -134,9 +138,8 @@ export function Settings() {
           </Box>
           <Group gap={8} wrap="nowrap">
             <Button variant="outline" color="gray" onClick={exportAll}>{t('settings.export')}</Button>
-            <Button variant="outline" color="gray" onClick={() => fileInput.current?.click()}>{t('settings.import')}</Button>
+            <Button variant="outline" color="gray" onClick={openImportPicker}>{t('settings.import')}</Button>
           </Group>
-          <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={(e) => void onFile(e.currentTarget.files?.[0])} />
         </Group>
         {pending && (
           <Box py={12} className="row">

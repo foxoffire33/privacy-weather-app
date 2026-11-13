@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { useEffect, useRef, type CSSProperties, type PointerEvent } from 'react';
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
+import { useHotkeys, useLocalStorage, useTimeout } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
@@ -8,19 +9,19 @@ import { CityPage } from './CityPage';
 import { t } from '../i18n';
 
 const HINT_KEY = 'weather-log-hint-seen';
-const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
 
 function GestureHint({ multiple }: { multiple: boolean }) {
-  const [open, setOpen] = useState(() => !hintSeen());
-  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch {} };
+  const [seen, setSeen] = useLocalStorage({ key: HINT_KEY, defaultValue: '0' });
+  const open = seen !== '1';
+  const { start, clear } = useTimeout(() => setSeen('1'), 12_000);
   useEffect(() => {
     if (!open) return;
-    const t = window.setTimeout(close, 12000);
-    return () => window.clearTimeout(t);
-  }, [open]);
+    start();
+    return clear;
+  }, [open, start, clear]);
   if (!open) return null;
   return (
-    <UnstyledButton className="gesture-hint" onClick={close}>
+    <UnstyledButton className="gesture-hint" onClick={() => setSeen('1')}>
       {multiple ? t('home.hintSwipe') : ''}{t('home.hint')}
     </UnstyledButton>
   );
@@ -38,20 +39,17 @@ export function Home() {
   const dx = useRef(0);
   const drag = useRef<{ x: number; y: number; id: number; active: boolean } | null>(null);
   const justDragged = useRef(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && idx < n - 1) setPage(idx + 1);
-      if (e.key === 'ArrowLeft' && idx > 0) setPage(idx - 1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [idx, n, setPage]);
+  useHotkeys([
+    ['ArrowRight', () => { if (idx < n - 1) setPage(idx + 1); }],
+    ['ArrowLeft', () => { if (idx > 0) setPage(idx - 1); }],
+  ]);
   const activeId = cities[idx]?.id;
+  const { start: startPageRefresh, clear: clearPageRefresh } = useTimeout(() => { if (activeId) void refreshCity(activeId); }, 450);
   useEffect(() => {
     if (!activeId) return;
-    const t = window.setTimeout(() => void refreshCity(activeId), 450);
-    return () => window.clearTimeout(t);
-  }, [activeId]);
+    startPageRefresh();
+    return clearPageRefresh;
+  }, [activeId, startPageRefresh, clearPageRefresh]);
   const onDown = (e: PointerEvent) => {
     if ((e.target as HTMLElement).closest('[data-noswipe]')) return;
     drag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, active: false };

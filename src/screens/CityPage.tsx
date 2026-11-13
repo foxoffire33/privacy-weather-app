@@ -1,6 +1,7 @@
 import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
-import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Collapse, Group, Paper, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
+import { useTimeout } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import {
   openDay, refreshCity, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
@@ -52,10 +53,8 @@ export const CityPage = memo(function CityPage({ city, isDefault }: { city: City
 
 function Deferred({ h, children }: { h: number; children: ReactNode }) {
   const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), 250);
-    return () => window.clearTimeout(t);
-  }, []);
+  const { start, clear } = useTimeout(() => setReady(true), 250);
+  useEffect(() => { start(); return clear; }, [start, clear]);
   return ready ? <>{children}</> : <ChartSk h={h} />;
 }
 
@@ -206,7 +205,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
         </Text>
       </Box>
 
-      <Paper className="glass" mx={12} mt={-36} pos="relative">
+      <Paper mx={12} mt={-36} pos="relative">
         <Box px={12} pt={12} pb={10} className="border-bottom-soft">
           <Text fz={14} fw={800}>{rainOutlook(data, h0)}</Text>
           {mq && (
@@ -264,7 +263,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
                 <Text fz={14} fw={800}>{T(dv.temperature_2m_max[i])}°</Text>
                 <Text fz={14} c="dimmed">{T(dv.temperature_2m_min[i])}°</Text>
               </UnstyledButton>
-              {open && (
+              <Collapse expanded={open} keepMounted={false}>
                 <Box className="stat-grid" px={12} pb={8}>
                   <Stat k={tx('city.day.feelsLike')} v={`${T(dv.apparent_temperature_max[i])}° / ${T(dv.apparent_temperature_min[i])}°`} />
                   <Stat k={tx('city.day.precipitation')} v={`${n0(dv.precipitation_sum[i], 1)} mm`} s={tx('city.day.precipDetail', { h: n0(dv.precipitation_hours[i]), rain: n0(dv.rain_sum[i], 1), showers: n0(dv.showers_sum[i], 1) })} />
@@ -275,7 +274,7 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
                   <Stat k={tx('city.day.sunrise')} v={hhmm(data.daily.sunrise[i])} s={tx('city.sun.sunsetAt', { time: hhmm(data.daily.sunset[i]) })} />
                   <Stat k={tx('city.day.solarEnergy')} v={`${n0(dv.shortwave_radiation_sum[i], 1)} MJ/m²`} />
                 </Box>
-              )}
+              </Collapse>
             </Box>
           );
         })}
@@ -431,7 +430,8 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
       )}
 
       <Box mx={12} mt={24}>
-        <Button className="glass" variant="default" size="lg" fullWidth
+        <Button variant="default" size="lg" fullWidth
+          styles={{ root: { background: '#000', border: '2px solid var(--rule)' } }}
           rightSection={<Icon name="arrow" size={18} />} onClick={() => s.navigate({ name: 'history', cityId: city.id })}>
           {tx('city.historyButton', { logged: tx('common.daysLogged', { count: s.logged }) })}
         </Button>

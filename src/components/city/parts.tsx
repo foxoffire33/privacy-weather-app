@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { Box, Text } from '@mantine/core';
+import type { ReactNode } from 'react';
+import { Box, Progress, Text } from '@mantine/core';
 
 export function levelColor(level: number | null | undefined) {
   if (level == null) return 'var(--mantine-color-dark-3)';
@@ -11,9 +11,9 @@ export function levelColor(level: number | null | undefined) {
 
 export function Bar({ pct, level, color }: { pct: number; level?: number | null; color?: string }) {
   return (
-    <Box className="bar">
-      <Box className="bar-fill" style={{ '--bar-w': `${Math.max(0, Math.min(100, pct))}%`, '--bar-c': color ?? levelColor(level) } as CSSProperties} />
-    </Box>
+    <Progress value={Math.max(0, Math.min(100, pct))} size={4} radius={0}
+      color={color ?? levelColor(level)}
+      styles={{ root: { background: 'rgba(255, 255, 255, .12)' } }} />
   );
 }
 
