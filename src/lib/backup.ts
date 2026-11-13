@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import type { Backup, BackupDay, BackupParts, City, Settings } from '../storesV2';
+import type { Backup, BackupDay, BackupParts, City, Settings } from '../stores';
 
 
 export type { Backup, BackupParts };

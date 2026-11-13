@@ -4,13 +4,13 @@ import { useShallow } from 'zustand/react/shallow';
 import {
   addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
   useLookup, useNormals, useThisDay, useUnits,
-} from '../storesV2';
-import { useUiStore } from '../store/uiStore';
-import { useAlmanacStore } from '../storesV2';
-import { useLogStore } from '../storesV2';
+} from '../stores';
+import { useUiStore } from '../stores/uiStore';
+import { useAlmanacStore } from '../stores';
+import { useLogStore } from '../stores';
 import { conditionLabel } from '../lib/weatherCodes';
 import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
-import { addDays, daysBetween, todayISO } from '../storesV2';
+import { addDays, daysBetween, todayISO } from '../stores';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';

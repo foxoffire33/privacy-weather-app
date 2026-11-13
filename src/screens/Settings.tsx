@@ -1,7 +1,7 @@
 import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useRef, useState } from 'react';
-import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
-import type { Accent, TempUnit, WindUnit } from '../storesV2';
+import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
+import type { Accent, TempUnit, WindUnit } from '../stores';
 import { ACCENTS } from '../theme';
 import { downloadFile } from '../lib/format';
 import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';

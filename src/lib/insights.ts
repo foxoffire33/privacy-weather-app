@@ -1,4 +1,4 @@
-import type { ForecastData } from '../storesV2';
+import type { ForecastData } from '../stores';
 import { hhmm } from './format';
 import { t, tl } from '../i18n';
 

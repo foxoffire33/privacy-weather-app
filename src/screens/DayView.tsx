@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
-import { openDay, useCity, useDay, useDayQuery, useDayRecord, useNormals, useUnits } from '../storesV2';
+import { openDay, useCity, useDay, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
 import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';

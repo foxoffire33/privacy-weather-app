@@ -1,12 +1,12 @@
-import { entityCache } from '../entities/cache';
+import { entityCache } from './entities/cache';
 import { followedCities, useCityStore } from './city-store';
 import { useForecastStore } from './forecast-store';
 import { useLogStore } from './log-store';
 import { useAlmanacStore } from './almanac-store';
 import { useDayStore } from './day-store';
 import { useSettingsStore } from './settings-store';
-import { dayKey } from '../entities/schema';
-import type { Backup, BackupParts, City, DayRecord, GeoResult, Settings } from '../types';
+import { dayKey } from './entities/schema';
+import type { Backup, BackupParts, City, DayRecord, GeoResult, Settings } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 

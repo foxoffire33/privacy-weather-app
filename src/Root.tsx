@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { buildTheme } from './theme';
-import { useSettings } from './storesV2';
+import { useSettings } from './stores';
 import App from './App';
 
 export function Root() {

@@ -1,6 +1,6 @@
 # The data layer
 
-`src/storesV2` is a self-contained data layer: Zustand stores over a normalized entity cache,
+`src/stores` is a self-contained data layer: Zustand stores over a normalized entity cache,
 persisted to IndexedDB, fed by typed Open-Meteo endpoint functions.
 
 ```
@@ -20,7 +20,8 @@ persisted to IndexedDB, fed by typed Open-Meteo endpoint functions.
 | `entities/` | the normalized cache (`useEntityCache`), the entity-name → type registry, read selectors |
 | `api/` | pure typed endpoint functions and the mappers into entities — **no cache side effects** |
 | `factory/` | query-state reducers |
-| `stores/` | one Zustand store per domain, plus `weather-sync.ts` for the commands that span domains |
+| `*-store.ts` | one Zustand store per domain, with their state contracts in `store-types.ts` |
+| `weather-sync.ts` | the commands that span domains |
 | `selectors.ts` | joined read hooks — what screens subscribe to |
 | `hydration.ts` | `hydrateAll()` — awaits rehydration of every persisted store |
 | `migrate-legacy.ts` | one-time import of the pre-split `open-weather-log` key |
@@ -65,7 +66,7 @@ render it. A message the user should read in their own language is reported as a
 and the host override — the host pushes in through `configureDataLayer` (`core/config.ts`);
 `settings-store` does that on every change. Reach for `getConfig()`, never an app import.
 
-**10. Commands that span domains live in `stores/weather-sync.ts`.** No store imports another.
+**10. Commands that span domains live in `weather-sync.ts`.** No store imports another.
 A refresh measures the gap, fetches, logs what came back and makes sure the normals exist — in
 that order, in one readable place.
 

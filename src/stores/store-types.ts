@@ -1,5 +1,5 @@
-import type { QueryMap, QueryState } from '../core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastData, ForecastEntry, GeoResult, Settings } from '../types';
+import type { QueryMap, QueryState } from './core/types';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastData, ForecastEntry, GeoResult, Settings } from './types';
 
 export interface ImportCounts { added: number; updated: number; kept: number }
 

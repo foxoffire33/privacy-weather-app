@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { errorMessage } from '../core/errors';
-import { idbStorage } from '../core/persist-storage';
-import type { QueryMap } from '../core/types';
-import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
-import { fetchAirQuality, fetchForecast, fetchMarine } from '../api/open-meteo';
-import type { City, ForecastEntry } from '../types';
-import type { ForecastState } from './types';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persist-storage';
+import type { QueryMap } from './core/types';
+import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/query-state';
+import { fetchAirQuality, fetchForecast, fetchMarine } from './api/open-meteo';
+import type { City, ForecastEntry } from './types';
+import type { ForecastState } from './store-types';
 
-export type { ForecastState } from './types';
+export type { ForecastState } from './store-types';
 
 export const useForecastStore = create<ForecastState>()(
   persist(

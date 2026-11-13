@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { configureDataLayer } from '../core/config';
-import { idbStorage } from '../core/persist-storage';
-import type { Settings } from '../types';
-import type { SettingsState } from './types';
+import { configureDataLayer } from './core/config';
+import { idbStorage } from './core/persist-storage';
+import type { Settings } from './types';
+import type { SettingsState } from './store-types';
 
-export type { SettingsState } from './types';
+export type { SettingsState } from './store-types';
 
 export const defaultSettings: Settings = {
   apiKey: '',

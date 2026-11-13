@@ -4,12 +4,12 @@ import { BarChart, LineChart } from '@mantine/charts';
 
 import { t, type MessageKey } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
-import { addDays, daysBetween } from '../../storesV2';
-import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
+import { addDays, daysBetween } from '../../stores';
+import type { DayRecord, TempUnit, WindUnit } from '../../stores';
 import { Icon } from '../Icon';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
-import { fillRange } from '../../storesV2';
+import { fillRange } from '../../stores';
 
 type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
 interface Attr {
