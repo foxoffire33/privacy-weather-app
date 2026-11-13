@@ -1,4 +1,5 @@
-import { waitForHydration, type HydratablePersist } from './core/persist-storage';
+import { waitForHydration } from './core/persist-storage';
+import type { Rehydratable } from './core/types';
 import { importLegacyStore } from './migrate-legacy';
 import { useEntityCache } from './entities/cache';
 import { useSettingsStore } from './stores/settings-store';
@@ -7,10 +8,7 @@ import { useForecastStore } from './stores/forecast-store';
 import { useLogStore } from './stores/log-store';
 import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
-
-interface Rehydratable extends HydratablePersist {
-  persist: HydratablePersist['persist'] & { rehydrate: () => Promise<void> | void };
-}
+import { useBootStore } from './stores/boot-store';
 
 const PERSISTED: Rehydratable[] = [
   useEntityCache,
@@ -28,13 +26,14 @@ export function alreadyHydrated(): boolean {
 
 let booting: Promise<void> | null = null;
 
-export async function hydrateAll(): Promise<void> {
+export function hydrateAll(): Promise<void> {
   booting ??= (async () => {
     await importLegacyStore().catch(() => false);
     await Promise.all(PERSISTED.map(async (store) => {
       await store.persist.rehydrate();
       await waitForHydration(store);
     }));
+    useBootStore.setState({ hydrated: true });
   })();
-  await booting;
+  return booting;
 }

@@ -366,7 +366,8 @@
     "good": "Hea",
     "fair": "Rahuldav",
     "moderate": "Mõõdukas",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Täisekraan"
   },
   "hourly": {
     "title": "Tund\ntunni haaval.",

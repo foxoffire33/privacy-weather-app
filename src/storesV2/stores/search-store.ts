@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { errorMessage, isAbort } from '../core/errors';
-import { initialQueryState, type QueryState } from '../core/types';
+import { initialQueryState } from '../core/types';
 import { begin, fail, succeed } from '../factory/query-state';
 import { searchCities } from '../api/open-meteo';
-import type { GeoResult } from '../types';
 import type { SearchState } from './types';
 
 export type { SearchState } from './types';

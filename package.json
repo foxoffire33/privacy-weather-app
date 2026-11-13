@@ -17,6 +17,7 @@
     "@capacitor/app": "^7.1.2",
     "@capacitor/core": "^7.6.10",
     "@capacitor/filesystem": "^7.1.9",
+    "@capacitor/screen-orientation": "^7.0.4",
     "@capacitor/share": "^7.0.4",
     "@mantine/charts": "^9.7.1",
     "@mantine/core": "^9.7.1",

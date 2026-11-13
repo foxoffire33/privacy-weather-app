@@ -366,7 +366,8 @@
     "good": "God",
     "fair": "Rimelig",
     "moderate": "Moderat",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Fuld skærm"
   },
   "hourly": {
     "title": "Time\nfor time.",

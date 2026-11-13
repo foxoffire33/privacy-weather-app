@@ -369,7 +369,8 @@
     "good": "Bună",
     "fair": "Acceptabilă",
     "moderate": "Moderată",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Ecran complet"
   },
   "hourly": {
     "title": "Oră\ncu oră.",

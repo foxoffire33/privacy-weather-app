@@ -375,7 +375,8 @@
     "good": "Tajba",
     "fair": "Aċċettabbli",
     "moderate": "Moderata",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Skrin sħiħ"
   },
   "hourly": {
     "title": "Siegħa\nb'siegħa.",

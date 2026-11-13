@@ -1,8 +1,8 @@
 import { App as CapApp } from '@capacitor/app';
-import { Fragment, useEffect } from 'react';
-import { Center, Loader } from '@mantine/core';
+import { Fragment, Suspense, use, useEffect } from 'react';
+import { Box } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { refreshAll, useCityStore, useHydrated, useSettings } from './storesV2';
+import { refreshAll, useCityStore, useHydration, useIsHydrated, useSettings } from './storesV2';
 import { useUiStore } from './store/uiStore';
 import { Onboarding } from './screens/Onboarding';
 import { Home } from './screens/Home';
@@ -13,41 +13,65 @@ import { Hourly } from './screens/Hourly';
 import { DayView } from './screens/DayView';
 import { Settings } from './screens/Settings';
 import { syncAppIcon } from './lib/appIcon';
+import { allowLandscape } from './lib/orientation';
 import { startWidgetSync } from './lib/widgets';
-import { useI18n } from './i18n';
+import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
+import { BootSk } from './components/Skeletons';
+import type { FrameProps } from './types';
 
 export default function App() {
-  const hydrated = useHydrated();
-  const { snapshotMinutes, accent, accentColor, language } = useSettings();
+  return (
+    <Frame>
+      <Suspense fallback={<BootSk />}>
+        <Screens />
+      </Suspense>
+    </Frame>
+  );
+}
+
+function Frame({ children }: FrameProps) {
+  const { accent } = useSettings();
+  const hydrated = useIsHydrated();
   const route = useUiStore((s) => s.route);
   const hasCities = useCityStore((s) => s.cityIds.length > 0);
-  const { lang, i18nReady, setLanguage } = useI18n(useShallow((s) => ({ lang: s.lang, i18nReady: s.ready, setLanguage: s.setLanguage })));
-  useEffect(() => {
-    if (hydrated) void setLanguage(language);
-  }, [hydrated, language, setLanguage]);
-  useEffect(() => {
-    if (!hydrated) return;
-    void refreshAll({ maxAgeMs: 0 });
-    const timer = window.setInterval(() => void refreshAll({ maxAgeMs: 0 }), snapshotMinutes * 60_000);
-    const onVisible = () => { if (document.visibilityState === 'visible') void refreshAll({ maxAgeMs: 0 }); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
-  }, [hydrated, snapshotMinutes]);
-  useEffect(() => {
-    if (hydrated) syncAppIcon(accent, accentColor);
-  }, [hydrated, accent, accentColor]);
-  useEffect(() => (hydrated ? startWidgetSync() : undefined), [hydrated]);
   useEffect(() => {
     const sub = CapApp.addListener('backButton', () => {
-      const { route: r, stack, back } = useUiStore.getState();
-      if (r.name === 'home' && !stack.length) void CapApp.exitApp();
+      const { route: r, stack, back, fullscreenChart, closeChart } = useUiStore.getState();
+      if (fullscreenChart !== null) closeChart();
+      else if (r.name === 'home' && !stack.length) void CapApp.exitApp();
       else back();
     });
     return () => { void sub.then((h) => h.remove()); };
   }, []);
+  const topAccent = !hydrated || route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings');
+  return (
+    <Box className="stage">
+      <Box className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}>{children}</Box>
+    </Box>
+  );
+}
+
+function Screens() {
+  useHydration();
+  const { snapshotMinutes, accent, accentColor, language } = useSettings();
+  const wanted = resolveLanguage(language);
+  const { lang, ready } = useI18n(useShallow((s) => ({ lang: s.lang, ready: s.ready })));
+  use(ready && lang === wanted ? languageLoaded(wanted) : ensureLanguage(wanted));
+  const route = useUiStore((s) => s.route);
+  const hasCities = useCityStore((s) => s.cityIds.length > 0);
+  useEffect(() => {
+    void refreshAll();
+    const timer = window.setInterval(() => void refreshAll({ maxAgeMs: 0 }), snapshotMinutes * 60_000);
+    const onVisible = () => { if (document.visibilityState === 'visible') void refreshAll(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
+  }, [snapshotMinutes]);
+  const chartOpen = useUiStore((s) => s.fullscreenChart !== null);
+  useEffect(() => { allowLandscape(chartOpen); }, [chartOpen]);
+  useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
+  useEffect(() => startWidgetSync(), []);
   let screen;
-  if (!hydrated || !i18nReady) screen = <Center flex={1}><Loader /></Center>;
-  else if (!hasCities && route.name !== 'search' && route.name !== 'settings') screen = <Onboarding />;
+  if (!hasCities && route.name !== 'search' && route.name !== 'settings') screen = <Onboarding />;
   else if (route.name === 'cities') screen = <Cities />;
   else if (route.name === 'search') screen = <Search />;
   else if (route.name === 'settings') screen = <Settings />;
@@ -55,6 +79,5 @@ export default function App() {
   else if (route.name === 'hourly') screen = <Hourly cityId={route.cityId} />;
   else if (route.name === 'day') screen = <DayView cityId={route.cityId} date={route.date} />;
   else screen = <Home />;
-  const topAccent = hydrated && (route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings'));
-  return <div className="stage"><div className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}><Fragment key={lang}>{screen}</Fragment></div></div>;
+  return <Fragment key={lang}>{screen}</Fragment>;
 }

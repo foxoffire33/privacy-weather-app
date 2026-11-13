@@ -369,7 +369,8 @@
     "good": "Buena",
     "fair": "Razonable",
     "moderate": "Moderada",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Pantalla completa"
   },
   "hourly": {
     "title": "Hora\na hora.",

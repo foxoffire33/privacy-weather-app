@@ -366,7 +366,8 @@
     "good": "Goed",
     "fair": "Redelijk",
     "moderate": "Matig",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Volledig scherm"
   },
   "hourly": {
     "title": "Uur\nvoor uur.",

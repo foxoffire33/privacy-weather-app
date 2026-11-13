@@ -1,9 +1,9 @@
-import type { CSSProperties } from 'react';
 import { Box, Group, Paper, Skeleton } from '@mantine/core';
 import { Section } from './city/parts';
 import { t } from '../i18n';
+import type { ChartSkProps, RowsSkProps, SectionSkProps, SkProps, StatGridSkProps } from '../types';
 
-export function Sk({ w = '100%', h = 14, mt = 0, style }: { w?: number | string; h?: number; mt?: number; style?: CSSProperties }) {
+export function Sk({ w = '100%', h = 14, mt = 0, style }: SkProps) {
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
 }
 
@@ -17,15 +17,15 @@ export function StatSk() {
   );
 }
 
-export function StatGridSk({ n = 4 }: { n?: number }) {
-  return <div className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</div>;
+export function StatGridSk({ n = 4 }: StatGridSkProps) {
+  return <Box className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</Box>;
 }
 
-export function SectionSk({ title, n = 4 }: { title: string; n?: number }) {
+export function SectionSk({ title, n = 4 }: SectionSkProps) {
   return <Section title={title}><StatGridSk n={n} /></Section>;
 }
 
-export function RowsSk({ n, h = 40 }: { n: number; h?: number }) {
+export function RowsSk({ n, h = 40 }: RowsSkProps) {
   return (
     <>
       {Array.from({ length: n }, (_, i) => (
@@ -38,7 +38,7 @@ export function RowsSk({ n, h = 40 }: { n: number; h?: number }) {
   );
 }
 
-export function ChartSk({ h = 180 }: { h?: number }) {
+export function ChartSk({ h = 180 }: ChartSkProps) {
   return (
     <Box pt={12}>
       <Sk w={260} h={26} />
@@ -56,11 +56,11 @@ export function CityBodySk() {
           <Sk h={36} mt={8} />
           <Sk h={10} mt={6} />
         </Box>
-        <div className="hourly-strip">
+        <Box className="hourly-strip">
           {Array.from({ length: 7 }, (_, i) => (
             <Box key={i}><Sk w={26} h={11} /><Sk w={30} h={18} mt={6} /><Sk w={22} h={10} mt={6} /><Sk w={16} h={10} mt={4} /></Box>
           ))}
-        </div>
+        </Box>
         <Box px={12} py={10} style={{ borderBottom: '1px solid rgba(248,244,244,.2)' }}><Sk w={160} h={16} /></Box>
         <Box px={12}><RowsSk n={7} h={39} /></Box>
       </Paper>
@@ -69,5 +69,18 @@ export function CityBodySk() {
       <SectionSk title={t('city.feels.title')} />
       <SectionSk title={t('city.sun.title')} />
     </>
+  );
+}
+
+export function BootSk() {
+  return (
+    <Box className="page">
+      <Box className="hero">
+        <Sk w={140} h={18} />
+        <Sk w={220} h={140} mt={16} />
+        <Sk w={180} h={22} mt={16} />
+      </Box>
+      <CityBodySk />
+    </Box>
   );
 }

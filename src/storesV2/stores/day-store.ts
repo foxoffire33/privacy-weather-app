@@ -2,12 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { errorMessage } from '../core/errors';
 import { idbStorage } from '../core/persist-storage';
-import type { QueryMap } from '../core/types';
 import { begin, fail, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
 import { fetchAirDay, fetchDay } from '../api/open-meteo';
 import { dayKey } from '../entities/schema';
 import { daysBetween, todayISO } from '../core/time';
-import type { City, DayData } from '../types';
+import type { DayData } from '../types';
 import type { DayState } from './types';
 
 export type { DayState } from './types';

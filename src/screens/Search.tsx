@@ -31,7 +31,7 @@ export function Search() {
     goHome(i);
   };
   return (
-    <div className="screen">
+    <Box className="screen">
       <ScreenHeader />
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('search.title')}</Title>
       <Box px={20}>
@@ -43,7 +43,7 @@ export function Search() {
       </Box>
 
       <Box px={20} style={{ flex: 1 }}>
-        <div className="kicker">{t('search.results')}</div>
+        <Box className="kicker">{t('search.results')}</Box>
         {s.searchError && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
         {!s.searchError && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
         {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && !s.searchError && (
@@ -77,6 +77,6 @@ export function Search() {
         <Icon name="lock" size={16} />
         <Text fz={12} c="dimmed">{t('search.privacy')}</Text>
       </Group>
-    </div>
+    </Box>
   );
 }

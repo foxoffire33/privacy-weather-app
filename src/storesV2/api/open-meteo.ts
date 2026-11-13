@@ -3,11 +3,12 @@ import { getConfig } from '../core/config';
 import type { AirData, City, DayData, ForecastData, GeoResult, MarineData } from '../types';
 import {
   AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS,
-  type AirVar, type CurrentVar, type DailyVar, type HourlyVar, type MarineVar,
 } from './variables';
+import type {
+  AirVar, CurrentVar, DailyVar, EndpointKind, HourlyVar, MarineVar, RangeRows, SdkBlock,
+} from './types';
 
-type Kind = 'forecast' | 'archive' | 'air' | 'marine' | 'geo';
-const HOSTS: Record<Kind, [string, string]> = {
+const HOSTS: Record<EndpointKind, [string, string]> = {
   forecast: ['https://api.open-meteo.com', 'https://customer-api.open-meteo.com'],
   archive: ['https://archive-api.open-meteo.com', 'https://customer-archive-api.open-meteo.com'],
   air: ['https://air-quality-api.open-meteo.com', 'https://customer-air-quality-api.open-meteo.com'],
@@ -15,7 +16,7 @@ const HOSTS: Record<Kind, [string, string]> = {
   geo: ['https://geocoding-api.open-meteo.com', 'https://customer-geocoding-api.open-meteo.com'],
 };
 
-function endpoint(kind: Kind, path: string) {
+function endpoint(kind: EndpointKind, path: string) {
   const { apiKey, server } = getConfig();
   let base = HOSTS[kind][apiKey ? 1 : 0];
   if (kind === 'forecast' && server) base = server.replace(/\/$/, '');
@@ -26,18 +27,15 @@ const withKey = <T extends object>(params: T) => {
   return apiKey ? { ...params, apikey: apiKey } : params;
 };
 
-type SdkResponse = Awaited<ReturnType<typeof fetchWeatherApi>>[number];
-type Block = NonNullable<ReturnType<SdkResponse['hourly']>>;
-
 const localIso = (sec: number, offset: number) => new Date((sec + offset) * 1000).toISOString().slice(0, 16);
 const clean = (v: number | undefined) => (v == null || Number.isNaN(v) ? null : v);
 
-function times(b: Block, offset: number) {
+function times(b: SdkBlock, offset: number) {
   const out: string[] = [];
   for (let t = Number(b.time()); t < Number(b.timeEnd()); t += b.interval()) out.push(localIso(t, offset));
   return out;
 }
-function series<K extends string>(b: Block, names: readonly string[], skip: string[] = []) {
+function series<K extends string>(b: SdkBlock, names: readonly string[], skip: string[] = []) {
   const out = {} as Record<K, (number | null)[]>;
   names.forEach((name, i) => {
     if (skip.includes(name)) return;
@@ -45,12 +43,12 @@ function series<K extends string>(b: Block, names: readonly string[], skip: stri
   });
   return out;
 }
-function point<K extends string>(b: Block, names: readonly string[]) {
+function point<K extends string>(b: SdkBlock, names: readonly string[]) {
   const out = {} as Record<K, number | null>;
   names.forEach((name, i) => { out[name as K] = clean(b.variables(i)?.value()); });
   return out;
 }
-function instants(b: Block, i: number, offset: number) {
+function instants(b: SdkBlock, i: number, offset: number) {
   const v = b.variables(i)!;
   return Array.from({ length: v.valuesInt64Length() }, (_, k) => localIso(Number(v.valuesInt64(k)), offset));
 }
@@ -117,8 +115,7 @@ export async function fetchDailyRange(city: City, start: string, end: string,
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: start, end_date: end, daily: [...daily],
   }));
   const d = r.daily()!;
-  return { time: times(d, r.utcOffsetSeconds()).map((t) => t.slice(0, 10)), ...series<string>(d, daily) } as
-    { time: string[] } & Record<string, (number | null)[]>;
+  return { time: times(d, r.utcOffsetSeconds()).map((t) => t.slice(0, 10)), ...series<string>(d, daily) } as RangeRows;
 }
 
 export const fetchArchive = (city: City, start: string, end: string, daily: readonly string[] = ARCHIVE_VARS) =>

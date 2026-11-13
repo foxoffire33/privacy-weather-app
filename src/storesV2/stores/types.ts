@@ -1,5 +1,5 @@
 import type { QueryMap, QueryState } from '../core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastData, ForecastEntry, GeoResult, Settings } from '../types';
+import type { ArchiveYear, City, DayData, ForecastData, ForecastEntry, GeoResult, Settings } from '../types';
 
 export interface ImportCounts { added: number; updated: number; kept: number }
 
@@ -45,7 +45,7 @@ export interface LogState {
   logDay: (cityId: string, day: DayData) => void;
   lookup: (city: City, date: string) => Promise<void>;
   addRange: (city: City, start: string, end: string) => Promise<ImportCounts>;
-  fillMissing: (city: City, start: string, end: string) => Promise<ImportCounts | null>;
+  fillMissing: (city: City, start: string, end: string) => Promise<ImportCounts>;
   removeDay: (cityId: string, date: string) => void;
   addDates: (cityId: string, dates: string[]) => number;
   clear: () => void;
@@ -62,4 +62,19 @@ export interface SearchState {
 export interface SettingsState {
   settings: Settings;
   updateSettings: (patch: Partial<Settings>) => void;
+}
+
+export interface SourceSpan {
+  from: string;
+  to: string;
+  recent: boolean;
+}
+
+export interface DateSpan {
+  from: string;
+  to: string;
+}
+
+export interface BootState {
+  hydrated: boolean;
 }

@@ -1,28 +1,26 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
-import { ActionIcon, Group } from '@mantine/core';
+import { useEffect, useRef, type PointerEvent } from 'react';
+import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';
+import type { GestureHintProps, PagerGesture } from '../types';
 
-const HINT_KEY = 'weather-log-hint-seen';
-const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
-
-function GestureHint({ multiple }: { multiple: boolean }) {
-  const [open, setOpen] = useState(() => !hintSeen());
-  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch {} };
+function GestureHint({ multiple }: GestureHintProps) {
+  const seen = useUiStore((s) => s.gestureHintSeen);
+  const close = useUiStore((s) => s.dismissGestureHint);
   useEffect(() => {
-    if (!open) return;
+    if (seen) return;
     const t = window.setTimeout(close, 12000);
     return () => window.clearTimeout(t);
-  }, [open]);
-  if (!open) return null;
+  }, [seen, close]);
+  if (seen) return null;
   return (
-    <button type="button" className="gesture-hint" onClick={close}>
+    <UnstyledButton className="gesture-hint" onClick={close}>
       {multiple ? t('home.hintSwipe') : ''}{t('home.hint')}
-    </button>
+    </UnstyledButton>
   );
 }
 
@@ -36,7 +34,7 @@ export function Home() {
   const idx = Math.min(pageIndex, n - 1);
   const pagerRef = useRef<HTMLDivElement>(null);
   const dx = useRef(0);
-  const drag = useRef<{ x: number; y: number; id: number; active: boolean } | null>(null);
+  const drag = useRef<PagerGesture | null>(null);
   const justDragged = useRef(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -88,35 +86,35 @@ export function Home() {
     if (next !== idx) setPage(next);
   };
   return (
-    <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      <div className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+    <Box style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+      <Box className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}
         style={{ transform: `translateX(${-idx * 100}%)` }}>
         {cities.map((c, i) => (Math.abs(i - idx) <= 1
           ? <CityPage key={c.id} city={c} isDefault={i === 0} />
-          : <div key={c.id} className="page" />))}
-      </div>
+          : <Box key={c.id} className="page" />))}
+      </Box>
       <GestureHint multiple={n > 1} />
-      <div className="overlay">
+      <Box className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => navigate({ name: 'cities' })}>
           <Icon name="list" />
         </ActionIcon>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <Group gap={6} wrap="nowrap">
           {cities.map((c, i) => (
-            <button key={c.id} className="dot" data-active={i === idx || undefined}
+            <UnstyledButton key={c.id} className="dot" data-active={i === idx || undefined}
               aria-label={t('home.show', { name: c.name })} onClick={() => setPage(i)} />
           ))}
-        </div>
+        </Group>
         <Group gap={0} wrap="nowrap">
           <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
             onClick={() => refreshAll({ maxAgeMs: 0 })}>
-            <span className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></span>
+            <Box component="span" className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></Box>
           </ActionIcon>
           <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => navigate({ name: 'settings' })}>
             <Icon name="sliders" />
           </ActionIcon>
         </Group>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

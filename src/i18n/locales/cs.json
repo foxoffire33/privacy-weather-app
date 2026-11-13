@@ -372,7 +372,8 @@
     "good": "Dobrá",
     "fair": "Přijatelná",
     "moderate": "Mírná",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Celá obrazovka"
   },
   "hourly": {
     "title": "Hodinu\npo hodině.",

@@ -1,4 +1,15 @@
-import type { EntityName, EntityTypeMap } from './schema';
+import type { City, DayRecord } from '../types';
+
+export interface EntityTypeMap {
+  city: City;
+  dayRecord: DayRecord;
+}
+
+export type EntityName = keyof EntityTypeMap;
+
+export type FoldRule<N extends EntityName> = (prev: EntityTypeMap[N], next: EntityTypeMap[N]) => Partial<EntityTypeMap[N]>;
+
+export type FoldRules = { [N in EntityName]?: FoldRule<N> };
 
 export type Table<N extends EntityName> = Record<string, EntityTypeMap[N]>;
 export type CacheTables = { [N in EntityName]: Table<N> };

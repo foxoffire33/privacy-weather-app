@@ -1,12 +1,12 @@
 import { idbDel, idbGet, idbSet } from './idb';
 import type { PersistStorage, StorageValue } from 'zustand/middleware';
-import type { HydratablePersist } from './types';
+import type { HydratablePersist, PendingWrite } from './types';
 
 export type { HydratablePersist };
 
 const WRITE_DEBOUNCE_MS = 250;
 
-const pending = new Map<string, { value: unknown; timer: ReturnType<typeof setTimeout> }>();
+const pending = new Map<string, PendingWrite>();
 
 function flush(name: string): void {
   const write = pending.get(name);

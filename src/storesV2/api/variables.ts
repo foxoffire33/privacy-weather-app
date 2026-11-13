@@ -57,8 +57,4 @@ export const ARCHIVE_DAY_DAILY_VARS = [
   'shortwave_radiation_sum', 'et0_fao_evapotranspiration',
 ] as const;
 
-export type CurrentVar = typeof CURRENT_VARS[number];
-export type HourlyVar = typeof HOURLY_VARS[number];
-export type DailyVar = Exclude<typeof DAILY_VARS[number], 'sunrise' | 'sunset'>;
-export type AirVar = typeof AIR_VARS[number];
-export type MarineVar = typeof MARINE_VARS[number];
+export type { AirVar, CurrentVar, DailyVar, HourlyVar, MarineVar } from './types';

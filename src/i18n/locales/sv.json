@@ -366,7 +366,8 @@
     "good": "Bra",
     "fair": "Godtagbar",
     "moderate": "Måttlig",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Helskärm"
   },
   "hourly": {
     "title": "Timme\nför timme.",

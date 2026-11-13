@@ -1,6 +1,6 @@
+import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { t } from '../../i18n';
-
-interface Entry { name?: string; value?: number | string; color?: string; stroke?: string; fill?: string; unit?: string; dataKey?: string }
+import type { CompactTooltipProps, TooltipEntry, TooltipRowPayload } from '../../types';
 
 const WIDTH = 4;
 
@@ -17,39 +17,37 @@ function fit(value: number | string | undefined): string {
 
 const PER_ROW = 3;
 
-export function CompactTooltip({ active, label, payload }: { active?: boolean; label?: string | number; payload?: readonly object[] }) {
-  const rows = (active && payload ? payload : []) as Entry[];
-  const title = (rows[0] as { payload?: { when?: string } } | undefined)?.payload?.when ?? label;
+export function CompactTooltip({ active, label, payload }: CompactTooltipProps) {
+  const rows = (active && payload ? payload : []) as TooltipEntry[];
+  const title = (rows[0] as TooltipRowPayload | undefined)?.payload?.when ?? label;
   const grid = rows.length > PER_ROW;
-  const cell = (e: Entry, i: number) => (
-    <b key={e.dataKey ?? e.name ?? i}
-      style={{ color: e.color ?? e.stroke ?? e.fill, display: 'flex', alignItems: 'baseline', gap: 4, flex: '1 1 auto', minWidth: 0 }}>
-      <span style={{ fontWeight: 400, opacity: .8, overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{e.name}</span>
-      <span style={{ marginLeft: 'auto', flex: 'none', minWidth: `${WIDTH}ch`, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+  const cell = (e: TooltipEntry, i: number) => (
+    <Group key={e.dataKey ?? e.name ?? i} component="b" gap={4} align="baseline" wrap="nowrap"
+      style={{ color: e.color ?? e.stroke ?? e.fill, flex: '1 1 auto', minWidth: 0 }}>
+      <Text span inherit fw={400} opacity={0.8} truncate="end" miw={0}>{e.name}</Text>
+      <Text span inherit ml="auto" miw={`${WIDTH}ch`} ta="right" style={{ flex: 'none', fontVariantNumeric: 'tabular-nums' }}>
         {fit(e.value)}{e.unit ?? ''}
-      </span>
-    </b>
+      </Text>
+    </Group>
   );
   return (
-    <div style={{
+    <Stack gap={2} justify="center" w="100%" mih={24} px={8} py={3} fz={12} lh="16px" style={{
       border: `1px solid ${rows.length ? 'var(--rule)' : 'rgba(255,255,255,.12)'}`, background: rows.length ? '#000' : 'transparent',
-      padding: '3px 8px', minHeight: 24, fontSize: 12, lineHeight: '16px',
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
-      width: '100%', boxSizing: 'border-box', overflow: 'hidden', whiteSpace: 'nowrap',
+      boxSizing: 'border-box', overflow: 'hidden', whiteSpace: 'nowrap',
     }}>
       {rows.length ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-            <b style={{ marginRight: 'auto', fontSize: 13 }}>{title}</b>
+          <Group gap={12} align="baseline" wrap="nowrap">
+            <Text span inherit fw={700} fz={13} mr="auto">{title}</Text>
             {!grid && rows.map(cell)}
-          </div>
+          </Group>
           {grid && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${PER_ROW}, minmax(0, 1fr))`, gap: '2px 12px' }}>
+            <SimpleGrid cols={PER_ROW} spacing={12} verticalSpacing={2}>
               {rows.map(cell)}
-            </div>
+            </SimpleGrid>
           )}
         </>
-      ) : <span style={{ color: 'rgba(255,255,255,.3)' }}>{t('common.touchChart')}</span>}
-    </div>
+      ) : <Text span inherit c="rgba(255,255,255,.3)">{t('common.touchChart')}</Text>}
+    </Stack>
   );
 }

@@ -1,13 +1,14 @@
 import {
-  ActionIcon, Badge, Button, Paper, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
+  ActionIcon, Badge, Button, Drawer, Modal, Paper, Progress, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
   createTheme, type MantineColorsTuple,
 } from '@mantine/core';
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 
 import { CompactTooltip } from './components/charts/CompactTooltip';
 import type { Accent } from './storesV2';
+import type { AccentDef } from './types';
 
-export const ACCENTS: Record<Exclude<Accent, 'custom'>, { label: string; tuple: MantineColorsTuple }> = {
+export const ACCENTS: Record<Exclude<Accent, 'custom'>, AccentDef> = {
   green: { label: 'Green', tuple: ['#ebfaf0', '#cff2dc', '#a3e5bd', '#6fd399', '#40bf77', '#178a4a', '#127a40', '#0e6334', '#0a4c28', '#063019'] },
   red: { label: 'Red', tuple: ['#fff2ef', '#ffe0d9', '#ffc4b8', '#ff9783', '#ff563c', '#ec3013', '#dd2b0f', '#ae1800', '#7c1405', '#4d170e'] },
   blue: { label: 'Blue', tuple: ['#eef4ff', '#d9e6ff', '#b6ccff', '#86a8ff', '#5a85ff', '#2f62f5', '#2350d6', '#1a3da6', '#132c75', '#0c1c4a'] },
@@ -90,6 +91,31 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     Badge: Badge.extend({ defaultProps: { radius: 0, fw: 800 } }),
     Paper: Paper.extend({ defaultProps: { radius: 0 } }),
     Skeleton: Skeleton.extend({ defaultProps: { radius: 0 } }),
+    Modal: Modal.extend({
+      defaultProps: { radius: 0, portalProps: { target: '.device' }, closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 } },
+      styles: {
+        content: { paddingLeft: 'env(safe-area-inset-left, 0px)', paddingRight: 'env(safe-area-inset-right, 0px)' },
+        header: { paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))', borderBottom: '2px solid var(--rule)' },
+        title: { fontSize: 16, fontWeight: 800 },
+        body: { padding: 0, paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' },
+      },
+    }),
+    Drawer: Drawer.extend({
+      defaultProps: {
+        radius: 0, portalProps: { target: '.device' }, position: 'bottom',
+        closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 },
+      },
+      styles: {
+        content: { height: 'auto', background: '#000', borderTop: '2px solid var(--rule)', textTransform: 'none', letterSpacing: 0 },
+        header: { background: '#000' },
+        title: { fontSize: 16, fontWeight: 800 },
+        body: { paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))' },
+      },
+    }),
+    Progress: Progress.extend({
+      defaultProps: { radius: 0, size: 4, transitionDuration: 0 },
+      styles: { root: { background: 'rgba(255, 255, 255, .12)' } },
+    }),
     TextInput: TextInput.extend({ defaultProps: { radius: 0 } }),
     PasswordInput: PasswordInput.extend({ defaultProps: { radius: 0 } }),
     Select: Select.extend({ defaultProps: { radius: 0 } }),

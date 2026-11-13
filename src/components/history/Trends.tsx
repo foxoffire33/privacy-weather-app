@@ -1,27 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Box, Button, Checkbox, Group, Paper, Text, TextInput } from '@mantine/core';
+import { Suspense, use, useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
-import { t, type MessageKey } from '../../i18n';
+import { t } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
 import { addDays, daysBetween } from '../../storesV2';
-import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
-import { Icon } from '../Icon';
+import type { TempUnit } from '../../storesV2';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
-import { fillRange } from '../../storesV2';
-
-type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
-interface Attr {
-  key: string;
-  label: MessageKey;
-  group: Group;
-  value: (r: DayRecord | undefined, normal: number | null, units: { temp: TempUnit; wind: WindUnit }) => number | null;
-}
+import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
+import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
+import { lastSettled, latest, useLogStore } from '../../storesV2';
+import type { ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
-export const ATTRS: Attr[] = [
+export const ATTRS: TrendAttr[] = [
   { key: 'hi', label: 'city.high', group: 'temp', value: (r, _n, u) => T(r?.hi, u.temp) },
   { key: 'lo', label: 'city.low', group: 'temp', value: (r, _n, u) => T(r?.lo, u.temp) },
   { key: 'normal', label: 'history.normal', group: 'temp', value: (_r, n, u) => T(n, u.temp) },
@@ -36,7 +31,7 @@ export const ATTRS: Attr[] = [
   { key: 'uv', label: 'city.day.uvMax', group: 'uv', value: (r) => r?.uv ?? null },
 ];
 
-const GROUPS: { key: Group; title: MessageKey; bars?: boolean }[] = [
+const GROUPS: TrendGroupDef[] = [
   { key: 'temp', title: 'dayView.temperature' },
   { key: 'rain', title: 'city.day.precipitation', bars: true },
   { key: 'snow', title: 'city.day.snowfall', bars: true },
@@ -45,66 +40,31 @@ const GROUPS: { key: Group; title: MessageKey; bars?: boolean }[] = [
   { key: 'uv', title: 'city.day.uvMax' },
 ];
 
-const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
+const NO_DATES: string[] = [];
 const COLORS = ['signal.4', 'signal.2', 'dark.2', 'signal.7', 'dark.4', 'dark.1'];
 const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.4'];
 const LENGTHS = [30, 90, 365, 0];
 const BACK_YEARS = [0, 1, 10, 30];
 
-export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: {
-  cityId: string;
-  log?: Record<string, DayRecord>;
-  normals?: Record<string, number>;
-  today: string;
-  followedAt: string;
-  tempUnit: TempUnit;
-  windUnit: WindUnit;
-}) {
-  const [picked, setPicked] = useState<string[]>(DEFAULT_ATTRS);
-  const [len, setLen] = useState<number>(30);
-  const [custom, setCustom] = useState<{ from: string; to: string } | null>(null);
-  const [back, setBack] = useState(0);
-  const [sheet, setSheet] = useState<'attrs' | 'range' | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fetched = useRef<Set<string>>(new Set());
+export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps) {
+  const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows, retryFailed } = useTrendsStore(useShallow((st) => ({
+    picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
+    setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
+    retryFailed: st.retryFailed,
+  })));
+  const [sheet, setSheet] = useState<TrendsSheet>(null);
+  const error = download.error;
   const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
   const shift = (date: string, years: number) => (years ? `${+date.slice(0, 4) - years}${date.slice(4)}` : date);
-  useEffect(() => {
-    const windows = [{ from, to }];
-    if (back) windows.push({ from: shift(from, back), to: shift(to, back) });
-    const wanted = windows
-      .filter((w) => {
-        if (w.from > w.to) return false;
-        for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!log?.[d]) return true;
-        return false;
-      })
-      .filter((w) => !fetched.current.has(`${cityId}:${w.from}:${w.to}`));
-    if (!wanted.length) return;
-    let active = true;
-    setBusy(true);
-    setError(null);
-    void (async () => {
-      for (const w of wanted) {
-        fetched.current.add(`${cityId}:${w.from}:${w.to}`);
-        try {
-          await fillRange(cityId, w.from, w.to);
-        } catch (e) {
-          if (active) setError((e as Error).message);
-        }
-      }
-      if (active) setBusy(false);
-    })();
-    return () => { active = false; };
-  }, [cityId, from, to, back]);
+  const windows = back ? [{ from, to }, { from: shift(from, back), to: shift(to, back) }] : [{ from, to }];
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
   const yearB = back ? String(+to.slice(0, 4) - back) : '';
-  const nameA = (a: Attr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
-  const nameB = (a: Attr) => `${t(a.label)} ${yearB}`;
+  const nameA = (a: TrendAttr) => (back ? `${t(a.label)} ${yearA}` : t(a.label));
+  const nameB = (a: TrendAttr) => `${t(a.label)} ${yearB}`;
   const data: Record<string, string | number | null>[] = [];
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const row: Record<string, string | number | null> = { label: shortDate(d) };
@@ -116,61 +76,73 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     data.push(row);
   }
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
-  const unitOf = (g: Group) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
+  const unitOf = (g: TrendGroup) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
   const rangeLabel = custom
     ? `${shortDate(custom.from)} – ${shortDate(custom.to)}`
     : len ? (len === 365 ? '1y' : `${len}d`) : t('history.all');
   return (
     <Box px={20}>
-      <div className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</div>
+      <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
 
-      <div className="tab-row">
-        <button type="button" onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</button>
-        <button type="button" aria-pressed={!!custom} data-active={custom ? true : undefined}
-          onClick={() => setSheet('range')}>{custom ? rangeLabel : t('history.custom')}</button>
-      </div>
+      <Box className="tab-row">
+        <UnstyledButton onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</UnstyledButton>
+        <UnstyledButton aria-pressed={!!custom} data-active={custom ? true : undefined}
+          onClick={() => { setRangeDraft({ from, to }); setSheet('range'); }}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
+      </Box>
 
-      <div className="tab-row" role="tablist">
+      <Box className="tab-row" role="tablist">
         {LENGTHS.map((d) => {
           const on = !custom && d === len;
           return (
-            <button key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setCustom(null); setLen(d); }}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</button>
+            <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
+              onClick={() => setLen(d)}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</UnstyledButton>
           );
         })}
-      </div>
+      </Box>
 
       <Text fz={12} c="dimmed" pb={4}>{t('history.compare')}</Text>
-      <div className="tab-row" role="tablist">
+      <Box className="tab-row" role="tablist">
         {BACK_YEARS.map((y) => (
-          <button key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => setBack(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</button>
+          <UnstyledButton key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
+            onClick={() => setBack(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</UnstyledButton>
         ))}
-      </div>
+      </Box>
 
-      {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-      {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
       {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
-      {busy
-        ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
-        : GROUPS.map((g) => {
-          const mine = attrs.filter((a) => a.group === g.key);
-          if (!mine.length) return null;
-          return (
-            <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
-              series={mine.flatMap((a, i) => [
-                { name: nameA(a), color: COLORS[i % COLORS.length] },
-                ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
-              ])} />
-          );
-        })}
+      <Suspense fallback={(
+        <>
+          <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>
+          {GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)}
+        </>
+      )}>
+        <TrendsFill cityId={cityId} windows={windows} ensureWindows={ensureWindows}>
+          {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
+          {error && (
+            <Box py={8}>
+              <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
+              <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, windows)}>
+                {t('common.tryAgain')}
+              </Button>
+            </Box>
+          )}
+          {GROUPS.map((g) => {
+            const mine = attrs.filter((a) => a.group === g.key);
+            if (!mine.length) return null;
+            return (
+              <GroupChart key={g.key} id={`trend:${cityId}:${g.key}`} group={g} data={data} base={base} unit={unitOf(g.key)}
+                series={mine.flatMap((a, i) => [
+                  { name: nameA(a), color: COLORS[i % COLORS.length] },
+                  ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
+                ])} />
+            );
+          })}
+        </TrendsFill>
+      </Suspense>
 
-      {sheet === 'attrs' && (
-        <AttrSheet picked={picked} onChange={setPicked} onClose={() => setSheet(null)} />
-      )}
+      {sheet === 'attrs' && <AttrSheet onClose={() => setSheet(null)} />}
       {sheet === 'range' && (
-        <RangeSheet from={from} to={to} max={today}
+        <RangeSheet max={today}
           onClose={() => setSheet(null)}
           onApply={(r) => { setCustom(r); setSheet(null); }} />
       )}
@@ -178,80 +150,82 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   );
 }
 
-function GroupChart({ group, series, data, base, unit }: {
-  group: { key: Group; title: MessageKey; bars?: boolean };
-  series: { name: string; color: string }[];
-  data: Record<string, string | number | null>[];
-  base: { dataKey: string; xAxisProps: { interval: number } };
-  unit: string;
-}) {
+function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProps) {
+  const attempted = useTrendsStore((st) => st.attempted);
+  const logged = useLogStore((st) => st.dates[cityId] ?? NO_DATES);
+  const key = trendsKey(cityId, windows);
+  const missing = windows.some((w) => hasGap(logged, w) && !attempted.includes(windowKey(cityId, w)));
+  const cached = windows.some((w) => hasLogged(logged, w));
+  useEffect(() => {
+    if (cached && missing) void ensureWindows(cityId, windows);
+  }, [cached, missing, key]);
+  use(cached ? lastSettled(key) : missing ? ensureWindows(cityId, windows) : latest(key));
+  return <>{children}</>;
+}
+
+function GroupChart({ id, group, series, data, base, unit }: GroupChartProps) {
   const toggle = useSeriesToggle(`trend:${group.key}`);
   const shown = toggle.visible(series);
-  const common = { ...base, h: 180, unit, data, series: shown, withLegend: false };
+  const chart = (height: ChartHeight) => {
+    const common = { ...base, h: height, unit, data, series: shown, withLegend: false };
+    return (
+      <>
+        {group.bars
+          ? <BarChart {...common} />
+          : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
+        {toggle.legend(series)}
+      </>
+    );
+  };
   return (
     <Box pt={12}>
-      <Text fz={12} c="dimmed" pb={4}>{t(group.title)}</Text>
-      {group.bars
-        ? <BarChart {...common} />
-        : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
-      {toggle.legend(series)}
+      <Group justify="space-between" wrap="nowrap" gap={8}>
+        <Text fz={12} c="dimmed">{t(group.title)}</Text>
+        <ExpandButton id={id} />
+      </Group>
+      {chart(INLINE_HEIGHT)}
+      <FullscreenChart id={id} title={t(group.title)} render={chart} />
     </Box>
   );
 }
 
-function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: (keys: string[]) => void; onClose: () => void }) {
-  const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
+function AttrSheet({ onClose }: SheetCloseProps) {
+  const picked = useTrendsStore((st) => st.picked);
+  const toggle = useTrendsStore((st) => st.togglePicked);
   return (
-    <div className="sheet" role="dialog" aria-label={t('history.attrTitle')}>
-      <Group justify="space-between" px={14} py={8} wrap="nowrap" className="sheet-head">
-        <Text fz={16} fw={800} pl={6}>{t('history.attrTitle')}</Text>
-        <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={22} /></ActionIcon>
-      </Group>
-      <div className="sheet-body">
-        {GROUPS.map((g) => {
-          const mine = ATTRS.filter((a) => a.group === g.key);
-          return (
-            <Box key={g.key} px={20}>
-              <div className="kicker">{t(g.title)}</div>
-              {mine.map((a) => (
-                <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
-                  checked={picked.includes(a.key)} onChange={() => toggle(a.key)}
-                  label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
-              ))}
-            </Box>
-          );
-        })}
-      </div>
-    </div>
+    <Modal opened onClose={onClose} fullScreen title={t('history.attrTitle')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
+      {GROUPS.map((g) => {
+        const mine = ATTRS.filter((a) => a.group === g.key);
+        return (
+          <Box key={g.key} px={20}>
+            <Box className="kicker">{t(g.title)}</Box>
+            {mine.map((a) => (
+              <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
+                checked={picked.includes(a.key)} onChange={() => toggle(a.key)}
+                label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
+            ))}
+          </Box>
+        );
+      })}
+    </Modal>
   );
 }
 
-function RangeSheet({ from, to, max, onApply, onClose }: {
-  from: string; to: string; max: string;
-  onApply: (r: { from: string; to: string }) => void;
-  onClose: () => void;
-}) {
-  const [a, setA] = useState(from);
-  const [b, setB] = useState(to);
+function RangeSheet({ max, onApply, onClose }: RangeSheetProps) {
+  const { from: a, to: b } = useTrendsStore((st) => st.rangeDraft);
+  const setDraft = useTrendsStore((st) => st.setRangeDraft);
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(a) && /^\d{4}-\d{2}-\d{2}$/.test(b) && a <= b && a >= '1940-01-01' && b <= max;
   const span = valid ? daysBetween(a, b) + 1 : 0;
   return (
-    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
-        role="dialog" aria-label={t('history.custom')}>
-        <Group justify="space-between" mb={8}>
-          <Text fz={16} fw={800}>{t('history.custom')}</Text>
-          <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={20} /></ActionIcon>
-        </Group>
-        <div className="stat-grid">
-          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />
-          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setB(e.currentTarget.value)} />
-        </div>
-        <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
-        <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>
-          {valid ? t('common.days', { count: span }) : t('history.custom')}
-        </Button>
-      </Paper>
-    </Box>
+    <Drawer opened onClose={onClose} title={t('history.custom')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
+      <Box className="stat-grid">
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setDraft({ from: e.currentTarget.value })} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setDraft({ to: e.currentTarget.value })} />
+      </Box>
+      <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
+      <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>
+        {valid ? t('common.days', { count: span }) : t('history.custom')}
+      </Button>
+    </Drawer>
   );
 }

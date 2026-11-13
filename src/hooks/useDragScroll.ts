@@ -1,8 +1,9 @@
 import { useRef } from 'react';
+import type { DragScroll } from '../types';
 
 export function useDragScroll<T extends HTMLElement>() {
   const ref = useRef<T>(null);
-  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
+  const drag = useRef<DragScroll | null>(null);
   return {
     ref,
     'data-noswipe': true,

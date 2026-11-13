@@ -1,21 +1,16 @@
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { Box, UnstyledButton } from '@mantine/core';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { t } from '../i18n';
+import type { SwipeGesture, SwipeRowProps } from '../types';
 
 const ACTION_W = 88;
 const REMOVE_MS = 220;
 
-export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onDelete: () => void;
-  disabled?: boolean;
-  label: string;
-  children: ReactNode;
-}) {
+export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps) {
   const [dragX, setDragX] = useState<number | null>(null);
   const [removing, setRemoving] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ x: number; y: number; base: number; dir: 'h' | 'v' | null; width: number } | null>(null);
+  const drag = useRef<SwipeGesture | null>(null);
   const swallowClick = useRef(false);
   const width = root.current?.offsetWidth ?? 420;
   const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);
@@ -61,7 +56,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     else onOpenChange(x < -ACTION_W / 2);
   };
   return (
-    <div ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
+    <Box ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
         if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
@@ -71,7 +66,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
           swallowClick.current = false;
         }
       }}>
-      <button type="button" data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
+      <UnstyledButton data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
         aria-label={t('history.deleteLabel', { date: label })}
         style={{
           position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
@@ -80,14 +75,14 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
           transition: dragX == null ? `width ${REMOVE_MS}ms ease` : 'none',
         }}>
         {t('history.delete')}
-      </button>
-      <div style={{
+      </UnstyledButton>
+      <Box style={{
         position: 'relative', background: 'var(--mantine-color-body)',
         transform: `translateX(${offset}px)`,
         transition: dragX == null ? `transform ${REMOVE_MS}ms ease` : 'none',
       }}>
         {children}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

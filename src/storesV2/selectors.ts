@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { IDLE_QUERY, type QueryState } from './core/types';
 import { useEntityCache } from './entities/cache';
@@ -9,13 +9,13 @@ import { useLogStore } from './stores/log-store';
 import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
 import { useSettingsStore } from './stores/settings-store';
-import { alreadyHydrated, hydrateAll } from './hydration';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
+import { useBootStore } from './stores/boot-store';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LookupView, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
 export const useUpdateSettings = (): ((patch: Partial<Settings>) => void) => useSettingsStore((s) => s.updateSettings);
 
-export const useUnits = (): { temp: Settings['tempUnit']; wind: Settings['windUnit'] } =>
+export const useUnits = (): Units =>
   useSettingsStore(useShallow((s) => ({ temp: s.settings.tempUnit, wind: s.settings.windUnit })));
 
 export function useCities(): City[] {
@@ -56,7 +56,7 @@ export const useLogCount = (cityId: string): number => useLogStore((s) => (s.dat
 export const useDayRecord = (cityId: string, date: string): DayRecord | undefined =>
   useEntityCache((s) => s.tables.dayRecord[dayKey(cityId, date)]);
 
-export function useLookup(cityId: string, date: string): { record: DayRecord | undefined; query: QueryState } {
+export function useLookup(cityId: string, date: string): LookupView {
   const record = useDayRecord(cityId, date);
   const query = useLogStore((s) => s.queries[dayKey(cityId, date)] ?? IDLE_QUERY);
   return { record, query };
@@ -77,13 +77,4 @@ export const useNormals = (cityId: string): Record<string, number> | undefined =
 export const useThisDay = (cityId: string, date: string): ArchiveYear[] | undefined =>
   useAlmanacStore((s) => s.thisDay[`${cityId}:${date.slice(5)}`]);
 
-export function useHydrated(): boolean {
-  const [ready, setReady] = useState(alreadyHydrated);
-  useEffect(() => {
-    if (ready) return;
-    let live = true;
-    void hydrateAll().then(() => { if (live) setReady(true); });
-    return () => { live = false; };
-  }, [ready]);
-  return ready;
-}
+export const useIsHydrated = (): boolean => useBootStore((s) => s.hydrated);

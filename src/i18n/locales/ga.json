@@ -375,7 +375,8 @@
     "good": "Go maith",
     "fair": "Measartha maith",
     "moderate": "Measartha",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Lánscáileán"
   },
   "hourly": {
     "title": "Uair\nar uair.",

@@ -369,7 +369,8 @@
     "good": "Dobra",
     "fair": "Prihvatljiva",
     "moderate": "Umjerena",
-    "hourLabel": "{day} {hour}:00"
+    "hourLabel": "{day} {hour}:00",
+    "fullscreen": "Cijeli zaslon"
   },
   "hourly": {
     "title": "Sat\npo sat.",

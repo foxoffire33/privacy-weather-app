@@ -5,7 +5,7 @@ import { idbStorage } from '../core/persist-storage';
 import type { QueryMap } from '../core/types';
 import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
 import { fetchAirQuality, fetchForecast, fetchMarine } from '../api/open-meteo';
-import type { City, ForecastEntry } from '../types';
+import type { ForecastEntry } from '../types';
 import type { ForecastState } from './types';
 
 export type { ForecastState } from './types';
