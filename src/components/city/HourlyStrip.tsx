@@ -1,0 +1,155 @@
+import { Box, Group, Text, UnstyledButton } from '@mantine/core';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+import { useDragScroll } from '../../hooks/useDragScroll';
+import { usePullPast } from '../../hooks/usePullPast';
+import { t } from '../../i18n';
+import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../lib/format';
+import { nowIndex } from '../../lib/insights';
+import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
+import { useUiStore } from '../../stores/uiStore';
+import { Icon } from '../Icon';
+
+import type { DayData, ForecastEntry } from '../../stores';
+import type { DayDividerProps, ExpandableProps, NowcastProps, StripCell, StripLabel } from '../../types';
+import type { ReactElement } from 'react';
+
+function pullLabel(loading: boolean, armed: boolean, back: number): string {
+  if (loading) { return '…'; }
+  if (armed) { return t('city.release'); }
+  return back === 0 ? t('city.yesterday') : t('city.earlier');
+}
+
+function pastCells(day: DayData): StripCell[] {
+  const v = day.hourly.v;
+  return day.hourly.time.map((time, k) => ({
+    time, date: time.slice(0, 10), isNow: false, past: true,
+    temp: v.temperature_2m?.[k], p: v.precipitation_probability?.[k] ?? null, wind: v.wind_speed_10m?.[k],
+  }));
+}
+
+function forecastCells(entry: ForecastEntry, from: number): StripCell[] {
+  const { data } = entry;
+  const h0 = nowIndex(data);
+  const hv = data.hourly.v;
+  return data.hourly.time.slice(from).map((time, k) => {
+    const i = from + k;
+    return {
+      time, date: time.slice(0, 10), isNow: i === h0, past: i < h0,
+      temp: i === h0 ? data.current.v.temperature_2m : hv.temperature_2m[i], p: hv.precipitation_probability[i] ?? 0, wind: hv.wind_speed_10m[i],
+    };
+  });
+}
+
+function labelCells(cells: StripCell[]): StripLabel[] {
+  return cells.map((h, k) => {
+    const dayBreak = hourOf(h.time) === '00' && k > 0;
+    return {
+      ...h,
+      label: h.isNow ? t('common.now') : hourLabel(h.time),
+      dayBreak,
+      dayName: dayBreak ? weekday(h.date).toLocaleUpperCase() : '',
+    };
+  });
+}
+
+function DayDivider({ name, on }: DayDividerProps): ReactElement {
+  return (
+    <Box className="day-divider" data-on={on || undefined} aria-label={name}>
+      <Box component="i" />
+      {Array.from(name, (ch, n) => ({ ch, id: `${ch}-${String(n)}` })).map(({ ch, id }) => <Box component="span" key={id}>{ch}</Box>)}
+      <Box component="i" />
+    </Box>
+  );
+}
+
+export function Nowcast({ entry }: NowcastProps): ReactElement | null {
+  const mq = entry.data.minutely15;
+  if (mq === null) { return null; }
+  const mMax = Math.max(0.5, ...mq.precipitation.map((v) => v ?? 0));
+  return (
+    <>
+      <Box className="nowcast" style={{ marginTop: 8 }}>
+        {mq.precipitation.map((v, i) => (
+          <Box key={mq.time[i]} style={{ height: `${String(Math.max(6, ((v ?? 0) / mMax) * 100))}%`, background: (v ?? 0) >= 0.1 ? 'var(--mantine-color-signal-4)' : 'rgba(255,255,255,.12)' }} />
+        ))}
+      </Box>
+      <Group justify="space-between" mt={4}>
+        <Text fz={12} c="dimmed">{hhmm(mq.time[0])}</Text>
+        <Text fz={12} c="dimmed">{t('city.nowcastCaption')}</Text>
+        <Text fz={12} c="dimmed">{hhmm(mq.time.at(-1))}</Text>
+      </Group>
+    </>
+  );
+}
+
+export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): ReactElement {
+  const days = useDayStore((st) => st.days);
+  const navigate = useUiStore((st) => st.navigate);
+  const { ref: stripRef, ...stripHandlers } = useDragScroll<HTMLDivElement>();
+  const [back, setBack] = useState(0);
+  const widthBefore = useRef(0);
+  const today = entry.data.daily.time[entry.pastDays];
+  const loadingPast = useDayQuery(city.id, addDays(today, -(back + 1))).status === 'loading';
+  const loadPast = async () => {
+    const el = stripRef.current;
+    if (!el) { return; }
+    const n = back + 1;
+    if (n > 1) {
+      const date = addDays(today, -n);
+      await openDay(city.id, date);
+      if (!useDayStore.getState().days[`${city.id}:${date}`]) { return; }
+    }
+    widthBefore.current = el.scrollWidth;
+    setBack(n);
+  };
+  const { armed, indicatorRef, touch } = usePullPast(stripRef, () => void loadPast(), !loadingPast);
+  useLayoutEffect(() => {
+    const el = stripRef.current;
+    if (!el || back === 0) { return; }
+    const added = el.scrollWidth - widthBefore.current;
+    el.scrollTo({ left: added, behavior: 'instant' });
+    el.scrollTo({ left: Math.max(0, added - 3 * 52), behavior: 'smooth' });
+  }, [back, stripRef]);
+  useEffect(() => {
+    const el = stripRef.current;
+    const first = expanded === null ? null : el?.querySelector<HTMLElement>(`[data-date="${CSS.escape(expanded)}"]`);
+    if (!el || !first) { return; }
+    const prev = first.previousElementSibling;
+    const anchor = prev instanceof HTMLElement && prev.classList.contains('day-divider') ? prev : first;
+    el.scrollTo({ left: anchor.offsetLeft, behavior: 'smooth' });
+  }, [expanded, stripRef]);
+  const cells: StripCell[] = [];
+  for (let n = back; n >= 2; n--) {
+    const day = days[`${city.id}:${addDays(today, -n)}`];
+    if (day) { cells.push(...pastCells(day)); }
+  }
+  cells.push(...forecastCells(entry, back >= 1 ? 0 : nowIndex(entry.data)));
+  const hours = labelCells(cells);
+  const first = hours.at(0);
+  return (
+    <>
+      <Box className="hourly-strip" ref={stripRef} {...stripHandlers} {...touch}>
+        <Box ref={indicatorRef} className="pull-past" data-armed={armed || undefined}>
+          {pullLabel(loadingPast, armed, back)}
+        </Box>
+        {hours.map((h) => (
+          <Fragment key={h.time}>
+            {h.dayName !== '' && <DayDivider name={h.dayName} on={h.date === expanded} />}
+            <Box data-date={h.dayBreak || h.time === first?.time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === expanded || undefined} style={h.past ? { opacity: 0.82 } : undefined}>
+              <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
+              <Text fz={16} fw={800}>{fmtTemp(h.temp, units.temp)}°</Text>
+              <Text fz={12} fw={600} c="signal.3">{h.p === null ? '–' : `${String(h.p)}%`}</Text>
+              <Text fz={12} c="dimmed">{h.wind === null || h.wind === undefined ? '–' : Math.round(h.wind)}</Text>
+            </Box>
+          </Fragment>
+        ))}
+      </Box>
+      <UnstyledButton w="100%" px={12} py={10} onClick={() => { navigate({ name: 'hourly', cityId: city.id }); }}
+        style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(248,244,244,.2)' }}>
+        <Text fz={13} fw={800}>{t('city.hourlyLink')}</Text>
+        <Icon name="arrow" size={16} />
+      </UnstyledButton>
+    </>
+  );
+}

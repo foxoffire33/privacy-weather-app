@@ -1,4 +1,4 @@
-import type { City, DayRecord, TempUnit, WindUnit } from '../stores';
+import type { City, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
@@ -223,3 +223,62 @@ export interface StatusMessage {
 }
 
 export type Rgb = readonly [number, number, number];
+
+export interface CityDataProps {
+  city: City;
+  entry: ForecastEntry;
+  units: Units;
+}
+
+export interface CityHeroProps extends CityDataProps {
+  isDefault: boolean;
+}
+
+export interface CityErrorProps extends CityPageProps {
+  error: string | null;
+}
+
+export interface ExpandableProps extends CityDataProps {
+  expanded: string | null;
+}
+
+export interface EntryProps {
+  entry: ForecastEntry;
+  units: Units;
+}
+
+export interface NowcastProps {
+  entry: ForecastEntry;
+}
+
+export interface StripLabel extends StripCell {
+  label: string;
+  dayBreak: boolean;
+  dayName: string;
+}
+
+export interface DayDividerProps {
+  name: string;
+  on: boolean;
+}
+
+export interface DayRowProps extends EntryProps {
+  cityId: string;
+  date: string;
+  index: number;
+  label: string;
+  open: boolean;
+}
+
+export interface CityFooterProps {
+  city: City;
+  entry: ForecastEntry;
+  loading: boolean;
+}
+
+export interface PollutantRowProps {
+  label: string;
+  unit: string;
+  value: number | null;
+  level: number | null;
+}
