@@ -1,8 +1,8 @@
 import { Box, Group, Progress, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
-import { compass, fmtTemp, fmtWind, hhmm } from '../../lib/format';
-import { beaufort, dewLabel, duration, feelsLabel, nowIndex, signedMinutes, sunProgress, uvAdvice } from '../../lib/insights';
+import { compass, fmtTemp, fmtWind, hhmm } from '../../utils/format';
+import { beaufort, dewLabel, duration, feelsLabel, nowIndex, signedMinutes, sunProgress, uvAdvice } from '../../weather/insights';
 import { Icon } from '../Icon';
 
 import { n0 } from './num';

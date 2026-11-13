@@ -4,11 +4,11 @@ import { Suspense, use, useEffect, useEffectEvent, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
-import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
-import { NO_HIDDEN, visibleSeries } from '../../lib/series';
 import { addDays, daysBetween, lastSettled, latest, useLogStore } from '../../stores';
 import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
 import { useUiStore } from '../../stores/uiStore';
+import { convTemp, convWind, shortDate, windUnitLabel } from '../../utils/format';
+import { NO_HIDDEN, visibleSeries } from '../../utils/series';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { SeriesLegend } from '../charts/SeriesToggle';
 import { ChartSk } from '../Skeletons';

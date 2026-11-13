@@ -1,8 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { ACCENTS, customTuple } from '../theme';
-
-import { fireAndForget } from './fireAndForget';
+import { fireAndForget } from '../utils/fireAndForget';
 
 import type { Accent } from '../stores';
 import type { AppIconPlugin } from '../types';

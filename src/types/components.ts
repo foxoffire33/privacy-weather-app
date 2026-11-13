@@ -1,5 +1,6 @@
 import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
+import type { MantineTransition } from '@mantine/core';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 export type IconName =
@@ -312,4 +313,17 @@ export interface HistoryRowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpen: (date: string) => void;
+}
+
+export type NavDirection = 'forward' | 'back';
+
+export interface ScreenMotion {
+  duration: number;
+  easing: string;
+  forward: Exclude<MantineTransition, string>;
+  back: Exclude<MantineTransition, string>;
+}
+
+export interface ScreenTransitionProps {
+  children: ReactNode;
 }

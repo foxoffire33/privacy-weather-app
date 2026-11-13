@@ -8,7 +8,7 @@ import {
 import { CompactTooltip } from './components/charts/CompactTooltip';
 
 import type { Accent } from './stores';
-import type { AccentDef, Rgb } from './types';
+import type { AccentDef, Rgb, ScreenMotion } from './types';
 import type { MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 
 export const ACCENT_NAMES: readonly Exclude<Accent, 'custom'>[] = ['green', 'red', 'blue', 'off'];
@@ -75,6 +75,26 @@ export function customTuple(hex: string): MantineColorsTuple {
   return [light(0.92), light(0.82), light(0.65), light(0.45), light(0.25), toHex(b), shade(0.15), shade(0.3), shade(0.5), shade(0.7)];
 }
 
+const MOTION_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
+const MOTION_SHIFT = 30;
+
+export const SCREEN_MOTION: ScreenMotion = {
+  duration: 300,
+  easing: MOTION_EASING,
+  forward: {
+    in: { opacity: 1, transform: 'none' },
+    out: { opacity: 0, transform: `translateX(${String(MOTION_SHIFT)}px)` },
+    transitionProperty: 'opacity, transform',
+  },
+  back: {
+    in: { opacity: 1, transform: 'none' },
+    out: { opacity: 0, transform: `translateX(${String(-MOTION_SHIFT)}px)` },
+    transitionProperty: 'opacity, transform',
+  },
+};
+
+const SHEET_TRANSITION = { duration: SCREEN_MOTION.duration, timingFunction: MOTION_EASING };
+
 export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThemeOverride => createTheme({
   primaryColor: 'signal',
   primaryShade: 5,
@@ -87,6 +107,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThem
   defaultRadius: 0,
   radius: { xs: '0', sm: '0', md: '0', lg: '0', xl: '0' },
   focusRing: 'auto',
+  respectReducedMotion: true,
   other: {
     rule: 'rgba(248,244,244,.3)',
     ruleSoft: 'rgba(248,244,244,.14)',
@@ -99,7 +120,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThem
     Paper: Paper.extend({ defaultProps: { radius: 0 } }),
     Skeleton: Skeleton.extend({ defaultProps: { radius: 0 } }),
     Modal: Modal.extend({
-      defaultProps: { radius: 0, portalProps: { target: '.device' }, closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 } },
+      defaultProps: { radius: 0, portalProps: { target: '.device' }, closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 }, transitionProps: SHEET_TRANSITION },
       styles: {
         content: { paddingLeft: 'env(safe-area-inset-left, 0px)', paddingRight: 'env(safe-area-inset-right, 0px)' },
         header: { paddingTop: 'calc(8px + env(safe-area-inset-top, 0px))', borderBottom: '2px solid var(--rule)' },
@@ -110,7 +131,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThem
     Drawer: Drawer.extend({
       defaultProps: {
         radius: 0, portalProps: { target: '.device' }, position: 'bottom',
-        closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 },
+        closeButtonProps: { size: 44, iconSize: 20 }, overlayProps: { backgroundOpacity: 0.6 }, transitionProps: SHEET_TRANSITION,
       },
       styles: {
         content: { height: 'auto', background: '#000', borderTop: '2px solid var(--rule)', textTransform: 'none', letterSpacing: 0 },

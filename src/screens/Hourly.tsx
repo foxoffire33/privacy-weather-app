@@ -4,10 +4,10 @@ import { Suspense } from 'react';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { compass, fmtTemp, fmtWind, hhmm, longDate, orDash } from '../lib/format';
-import { nowIndex } from '../lib/insights';
-import { conditionLabel } from '../lib/weatherCodes';
 import { useCity, useForecastData, useUnits } from '../stores';
+import { compass, fmtTemp, fmtWind, hhmm, longDate, orDash } from '../utils/format';
+import { nowIndex } from '../weather/insights';
+import { conditionLabel } from '../weather/weatherCodes';
 
 import type { CityScreenProps, HourGroup, HourlyCellProps } from '../types';
 import type { ReactElement } from 'react';

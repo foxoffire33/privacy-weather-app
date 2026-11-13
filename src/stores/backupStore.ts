@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-import { countDays, parseBackup } from '../lib/backup';
-import { downloadFile } from '../lib/format';
+import { countDays, parseBackup } from '../backup/backup';
+import { downloadFile } from '../utils/format';
 
 import { errorMessage, exportSnapshot, importBackup } from '.';
 

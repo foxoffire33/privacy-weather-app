@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
-import { fmtDelta, fmtTemp, longDate, shortDate } from '../../lib/format';
-import { conditionLabel } from '../../lib/weatherCodes';
 import { useLogStore, useNormals, useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
+import { fmtDelta, fmtTemp, longDate, shortDate } from '../../utils/format';
+import { conditionLabel } from '../../weather/weatherCodes';
 import { Icon } from '../Icon';
 import { SwipeRow } from '../SwipeRow';
 

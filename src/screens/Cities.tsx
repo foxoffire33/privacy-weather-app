@@ -7,10 +7,10 @@ import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t, tl } from '../i18n';
-import { fmtTemp } from '../lib/format';
-import { conditionLabel } from '../lib/weatherCodes';
 import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
+import { fmtTemp } from '../utils/format';
+import { conditionLabel } from '../weather/weatherCodes';
 
 import type { ReorderDrag } from '../types';
 import type { PointerEvent, ReactElement } from 'react';

@@ -1,10 +1,10 @@
 import { Box, Collapse, Text, UnstyledButton } from '@mantine/core';
 
 import { t } from '../../i18n';
-import { compass, fmtTemp, fmtWind, hhmm, weekday } from '../../lib/format';
-import { duration, uvAdvice } from '../../lib/insights';
-import { conditionLabel } from '../../lib/weatherCodes';
 import { useUiStore } from '../../stores/uiStore';
+import { compass, fmtTemp, fmtWind, hhmm, weekday } from '../../utils/format';
+import { duration, uvAdvice } from '../../weather/insights';
+import { conditionLabel } from '../../weather/weatherCodes';
 
 import { n0 } from './num';
 import { Stat } from './Parts';

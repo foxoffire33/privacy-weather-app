@@ -20,6 +20,7 @@ body { font-variant-numeric: tabular-nums; }
   .device { --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); width: 100%; height: 100dvh; max-height: none; border: 0; padding: var(--sat) 0 var(--sab); box-sizing: border-box; }
 }
 
+.screen-motion { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
 .display { font-size: 56px; line-height: .95; letter-spacing: -.03em; padding: 8px 20px 12px; margin: 0; }
 .display-sm { font-size: 44px; }

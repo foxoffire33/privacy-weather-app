@@ -4,9 +4,9 @@ import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { version } from '../../package.json';
+import { countDays } from '../backup/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
-import { countDays } from '../lib/backup';
 import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
 import { ACCENT_NAMES, ACCENTS } from '../theme';

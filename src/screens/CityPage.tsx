@@ -11,9 +11,9 @@ import { AtmosphereSection, CityFooter, SeaSection, SkySection } from '../compon
 import { Icon } from '../components/Icon';
 import { CityBodySk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { rainOutlook, nowIndex } from '../lib/insights';
 import { useForecastData, useForecastQuery, useLogCount, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
+import { rainOutlook, nowIndex } from '../weather/insights';
 
 import type { CityPageProps } from '../types';
 import type { ReactElement } from 'react';

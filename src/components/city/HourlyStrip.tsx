@@ -3,10 +3,10 @@ import { useDrag, useMergedRef, useScroller } from '@mantine/hooks';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { t } from '../../i18n';
-import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../lib/format';
-import { nowIndex } from '../../lib/insights';
 import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
+import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../utils/format';
+import { nowIndex } from '../../weather/insights';
 import { Icon } from '../Icon';
 
 import type { DayData, ForecastEntry } from '../../stores';

@@ -9,15 +9,15 @@ import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { fireAndForget } from '../lib/fireAndForget';
-import { downloadFile, fmtTemp, fmtWind, longDate } from '../lib/format';
-import { conditionLabel } from '../lib/weatherCodes';
 import {
   addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
   useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
 import { useUiStore } from '../stores/uiStore';
+import { fireAndForget } from '../utils/fireAndForget';
+import { downloadFile, fmtTemp, fmtWind, longDate } from '../utils/format';
+import { conditionLabel } from '../weather/weatherCodes';
 
 import type { AddDatesResult, CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
 import type { ReactElement } from 'react';

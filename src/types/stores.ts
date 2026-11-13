@@ -1,4 +1,5 @@
 import type { Backup, BackupParts, QueryState } from '../stores';
+import type { NavDirection } from './components';
 import type { Route } from './route';
 
 export interface DateRange {
@@ -9,6 +10,7 @@ export interface DateRange {
 export interface UiState {
   route: Route;
   stack: Route[];
+  navDirection: NavDirection;
   pageIndex: number;
   expandedDay: Record<string, string | null>;
   chartMetric: string;
