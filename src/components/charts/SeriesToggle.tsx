@@ -1,22 +1,21 @@
 import { Box, UnstyledButton } from '@mantine/core';
-import { useUiStore } from '../../store/uiStore';
-import type { Named, ToggleSeries } from '../../types';
 
-const NONE: string[] = [];
+import { NO_HIDDEN } from '../../lib/series';
+import { useUiStore } from '../../stores/uiStore';
 
-export function useSeriesToggle(scope: string) {
-  const hidden = useUiStore((s) => s.hiddenSeries[scope] ?? NONE);
+import type { SeriesLegendProps } from '../../types';
+import type { ReactElement } from 'react';
+
+export function SeriesLegend({ scope, series }: SeriesLegendProps): ReactElement {
+  const hidden = useUiStore((s) => s.hiddenSeries[scope] ?? NO_HIDDEN);
   const toggle = useUiStore((s) => s.toggleSeries);
-  return {
-    visible: <T extends Named>(series: T[]) => series.filter((s) => !hidden.includes(s.name)),
-    legend: (series: ToggleSeries[]) => (
-      <Box className="toggle-legend">
-        {series.map((s) => (
-          <UnstyledButton key={s.name} aria-pressed={!hidden.includes(s.name)} onClick={() => toggle(scope, s.name)}>
-            <Box component="i" style={{ background: `var(--mantine-color-${s.color.replace('.', '-')})` }} />{s.label ?? s.name}
-          </UnstyledButton>
-        ))}
-      </Box>
-    ),
-  };
+  return (
+    <Box className="toggle-legend">
+      {series.map((s) => (
+        <UnstyledButton key={s.name} aria-pressed={!hidden.includes(s.name)} onClick={() => { toggle(scope, s.name); }}>
+          <Box component="i" style={{ background: `var(--mantine-color-${s.color.replace('.', '-')})` }} />{s.label ?? s.name}
+        </UnstyledButton>
+      ))}
+    </Box>
+  );
 }

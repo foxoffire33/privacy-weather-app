@@ -1,5 +1,7 @@
-import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../storesV2';
+import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../stores';
 import type { MessageKey } from './i18n';
+import type { DateRange } from './stores';
+import type { TooltipContentProps, TooltipPayloadEntry } from 'recharts';
 
 export interface ToggleSeries {
   name: string;
@@ -15,25 +17,9 @@ export interface Labelled {
   label: MessageKey;
 }
 
-export interface TooltipEntry {
-  name?: string;
-  value?: number | string;
-  color?: string;
-  stroke?: string;
-  fill?: string;
-  unit?: string;
-  dataKey?: string;
-}
+export type TooltipEntry = TooltipPayloadEntry;
 
-export interface TooltipRowPayload {
-  payload?: { when?: string };
-}
-
-export interface CompactTooltipProps {
-  active?: boolean;
-  label?: string | number;
-  payload?: readonly object[];
-}
+export type CompactTooltipProps = Pick<TooltipContentProps, 'active' | 'label' | 'payload'>;
 
 export type HourlySeries = Partial<Record<HourlyVar, (number | null)[]>>;
 
@@ -84,4 +70,69 @@ export interface GroupChartProps {
   data: Record<string, string | number | null>[];
   base: { dataKey: string; xAxisProps: { interval: number } };
   unit: string;
+}
+
+export type HourlyRow = Record<string, string | number | null>;
+
+export interface HourlyRowInput {
+  time: string[];
+  v: HourlySeries;
+  aqi?: Record<string, number | null>;
+  from: number;
+  end: number;
+  tempUnit: TempUnit;
+  windUnit: WindUnit;
+}
+
+export interface MetricChartProps {
+  metric: string | undefined;
+  data: HourlyRow[];
+  height: number | string;
+  windUnit: WindUnit;
+  hasChance: boolean;
+  scope: string;
+  hidden: readonly string[];
+}
+
+export interface TrendRangeInput {
+  len: number;
+  custom: DateRange | null;
+  back: number;
+  today: string;
+  followedAt: string;
+}
+
+export interface TrendWindow {
+  from: string;
+  to: string;
+  windows: DateRange[];
+}
+
+export interface TrendNames {
+  a: (attr: TrendAttr) => string;
+  b: (attr: TrendAttr) => string;
+}
+
+export interface TrendRowInput {
+  range: TrendWindow;
+  back: number;
+  attrs: TrendAttr[];
+  names: TrendNames;
+  log?: Partial<Record<string, DayRecord>>;
+  normals?: Partial<Record<string, number>>;
+  units: TrendUnits;
+}
+
+export interface TrendControlsProps {
+  range: TrendWindow;
+  onSheet: (sheet: 'attrs' | 'range') => void;
+}
+
+export interface TrendChartsProps {
+  cityId: string;
+  range: TrendWindow;
+  attrs: TrendAttr[];
+  names: TrendNames;
+  data: Record<string, string | number | null>[];
+  windUnit: WindUnit;
 }

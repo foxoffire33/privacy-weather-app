@@ -4,3 +4,6 @@ android/.gradle
 android/build
 android/app/build
 android/local.properties
+.idea
+android/.idea
+*.tsbuildinfo

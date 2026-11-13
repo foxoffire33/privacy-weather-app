@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
-import type { City, DayRecord, TempUnit, WindUnit } from '../storesV2';
+import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
@@ -66,16 +66,16 @@ export interface BarProps {
 
 export interface SectionProps {
   title: string;
-  summary?: ReactNode;
-  action?: ReactNode;
+  summary?: string | null;
+  action?: ReactElement;
   children?: ReactNode;
 }
 
 export interface StatProps {
   k: string;
   v: ReactNode;
-  s?: ReactNode;
-  children?: ReactNode;
+  s?: string | ReactElement | null;
+  children?: ReactElement;
 }
 
 export interface TrendsProps {
@@ -143,16 +143,11 @@ export interface HourGroup {
   rows: number[];
 }
 
-export interface DragScroll {
-  x: number;
-  left: number;
-  moved: boolean;
-}
-
 export interface ReorderDrag {
   from: number;
   to: number;
   dy: number;
+  rowH: number;
 }
 
 export interface StripCell {
@@ -200,7 +195,7 @@ export interface LookupCardProps {
 export interface TrendsFillProps {
   cityId: string;
   windows: DateRange[];
-  ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  ensureWindows: (cityId: string, windows: DateRange[]) => PromiseLike<void>;
   children: ReactNode;
 }
 
@@ -214,4 +209,107 @@ export interface FullscreenChartProps {
 
 export interface ExpandButtonProps {
   id: string;
+}
+
+export interface StatusMessage {
+  ok: boolean;
+  text: string;
+}
+
+export type Rgb = readonly [number, number, number];
+
+export interface CityDataProps {
+  city: City;
+  entry: ForecastEntry;
+  units: Units;
+}
+
+export interface CityHeroProps extends CityDataProps {
+  isDefault: boolean;
+}
+
+export interface CityErrorProps extends CityPageProps {
+  error: string | null;
+}
+
+export interface ExpandableProps extends CityDataProps {
+  expanded: string | null;
+}
+
+export interface EntryProps {
+  entry: ForecastEntry;
+  units: Units;
+}
+
+export interface NowcastProps {
+  entry: ForecastEntry;
+}
+
+export interface StripLabel extends StripCell {
+  label: string;
+  dayBreak: boolean;
+  dayName: string;
+}
+
+export interface DayDividerProps {
+  name: string;
+  on: boolean;
+}
+
+export interface DayRowProps extends EntryProps {
+  cityId: string;
+  date: string;
+  index: number;
+  label: string;
+  open: boolean;
+}
+
+export interface CityFooterProps {
+  city: City;
+  entry: ForecastEntry;
+  loading: boolean;
+}
+
+export interface PollutantRowProps {
+  label: string;
+  unit: string;
+  value: number | null;
+  level: number | null;
+}
+
+export interface DaySectionProps {
+  day: DayData;
+  units: Units;
+}
+
+export interface DayTempProps extends DaySectionProps {
+  normal: number | undefined;
+}
+
+export interface DayHeroValues {
+  hi: number | null;
+  lo: number | null | undefined;
+  feelsHi: number | null | undefined;
+  feelsLo: number | null | undefined;
+  code: number | null | undefined;
+}
+
+export interface DayHourlyProps extends DaySectionProps {
+  cityId: string;
+}
+
+export interface HistoryLogProps {
+  cityId: string;
+  rows: DayRecord[];
+  today: string;
+  onOpen: (date: string) => void;
+}
+
+export interface HistoryRowProps {
+  cityId: string;
+  record: DayRecord;
+  today: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOpen: (date: string) => void;
 }

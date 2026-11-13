@@ -48,3 +48,15 @@ same class of mistake is not made again. Add to this list when a review finds so
 
 7. **When a change was merged separately and the branch reworked it further, the branch side wins the
    conflict.** Check afterwards that the merged tree equals the branch's intent (`git diff <branch-head>`).
+
+## Lint
+
+8. **A function whose promise is passed to `use()` must not be `async`.** An `async` wrapper returns a new
+   promise on every call, so React sees an uncached promise and suspends forever. The
+   `promise-function-async` autofix adds `async` to any function typed `Promise<…>`; type these functions
+   as `PromiseLike<void>` (`Pending` in `src/stores/core/types.ts`) instead, and check the diff of every
+   `eslint --fix` run for new `async` keywords. *From the lint pass after merging full-review.*
+
+9. **Never trust a `Record<string, T>` index to be defined.** Lookups by id or date return `undefined` at
+   runtime; type such maps as `Partial<Record<string, T>>` so the compiler and `strict-boolean-expressions`
+   see the missing case, rather than rewriting `if (!x)` as a check the type claims is impossible.

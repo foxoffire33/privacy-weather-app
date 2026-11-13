@@ -1,13 +1,17 @@
 import { Box, Group, Paper, Skeleton } from '@mantine/core';
-import { Section } from './city/parts';
-import { t } from '../i18n';
-import type { ChartSkProps, RowsSkProps, SectionSkProps, SkProps, StatGridSkProps } from '../types';
 
-export function Sk({ w = '100%', h = 14, mt = 0, style }: SkProps) {
+import { t } from '../i18n';
+
+import { Section } from './city/Parts';
+
+import type { ChartSkProps, RowsSkProps, SectionSkProps, SkProps, StatGridSkProps } from '../types';
+import type { ReactElement } from 'react';
+
+export function Sk({ w = '100%', h = 14, mt = 0, style }: SkProps): ReactElement {
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
 }
 
-export function StatSk() {
+function StatSk(): ReactElement {
   return (
     <Box py={10} className="row">
       <Sk w={64} h={10} mt={3} />
@@ -17,15 +21,15 @@ export function StatSk() {
   );
 }
 
-export function StatGridSk({ n = 4 }: StatGridSkProps) {
+function StatGridSk({ n = 4 }: StatGridSkProps): ReactElement {
   return <Box className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</Box>;
 }
 
-export function SectionSk({ title, n = 4 }: SectionSkProps) {
+export function SectionSk({ title, n = 4 }: SectionSkProps): ReactElement {
   return <Section title={title}><StatGridSk n={n} /></Section>;
 }
 
-export function RowsSk({ n, h = 40 }: RowsSkProps) {
+function RowsSk({ n, h = 40 }: RowsSkProps): ReactElement {
   return (
     <>
       {Array.from({ length: n }, (_, i) => (
@@ -38,7 +42,7 @@ export function RowsSk({ n, h = 40 }: RowsSkProps) {
   );
 }
 
-export function ChartSk({ h = 180 }: ChartSkProps) {
+export function ChartSk({ h = 180 }: ChartSkProps): ReactElement {
   return (
     <Box pt={12}>
       <Sk w={260} h={26} />
@@ -47,7 +51,7 @@ export function ChartSk({ h = 180 }: ChartSkProps) {
   );
 }
 
-export function CityBodySk() {
+export function CityBodySk(): ReactElement {
   return (
     <>
       <Paper className="glass" mx={12} mt={-36} pos="relative">
@@ -72,7 +76,7 @@ export function CityBodySk() {
   );
 }
 
-export function BootSk() {
+export function BootSk(): ReactElement {
   return (
     <Box className="page">
       <Box className="hero">

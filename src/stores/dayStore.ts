@@ -1,0 +1,47 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+import { fetchAirDay, fetchDay } from './api/openMeteo';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persistStorage';
+import { daysBetween, todayISO } from './core/time';
+import { dayKey } from './entities/schema';
+import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+
+import type { DayState } from './storeTypes';
+import type { DayData } from './types';
+
+export const useDayStore = create<DayState>()(
+  persist(
+    (set, get) => ({
+      days: {},
+      queries: {},
+      load: async (city, date) => {
+        const key = dayKey(city.id, date);
+        if (get().days[key] !== undefined || isLoading(get().queries[key])) { return null; }
+        set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
+        try {
+          const recent = daysBetween(date, todayISO()) <= 90;
+          const [day, air] = await Promise.all([
+            fetchDay(city, date, recent),
+            fetchAirDay(city, date).catch(() => null),
+          ]);
+          const full: DayData = { ...day, air };
+          set((s) => ({ days: { ...s.days, [key]: full }, queries: setQuery(s.queries, key, succeed()) }));
+          return full;
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          return null;
+        }
+      },
+      clear: () => { set({ days: {}, queries: {} }); },
+    }),
+    {
+      name: 'wl2-days',
+      version: 1,
+      storage: idbStorage(),
+      skipHydration: true,
+      partialize: (s) => ({ days: s.days }),
+    },
+  ),
+);

@@ -1,68 +1,72 @@
 import { Box, UnstyledButton } from '@mantine/core';
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
+
 import { t } from '../i18n';
+
 import type { SwipeGesture, SwipeRowProps } from '../types';
+import type { PointerEvent, ReactElement } from 'react';
 
 const ACTION_W = 88;
 const REMOVE_MS = 220;
 
-export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps) {
+export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps): ReactElement {
   const [dragX, setDragX] = useState<number | null>(null);
-  const [removing, setRemoving] = useState(false);
+  const [removingWidth, setRemovingWidth] = useState<number | null>(null);
+  const removing = removingWidth !== null;
   const root = useRef<HTMLDivElement>(null);
   const drag = useRef<SwipeGesture | null>(null);
   const swallowClick = useRef(false);
-  const width = root.current?.offsetWidth ?? 420;
-  const offset = removing ? -width : dragX ?? (open ? -ACTION_W : 0);
+  const offset = removingWidth === null ? dragX ?? (open ? -ACTION_W : 0) : -removingWidth;
   const remove = () => {
-    if (removing) return;
+    if (removing) { return; }
     setDragX(null);
-    setRemoving(true);
+    setRemovingWidth(root.current?.offsetWidth ?? 420);
   };
+  const deleteNow = useEffectEvent(() => { onDelete(); });
   useEffect(() => {
-    if (!removing) return;
-    const timer = window.setTimeout(onDelete, REMOVE_MS);
-    return () => window.clearTimeout(timer);
+    if (!removing) { return; }
+    const timer = globalThis.setTimeout(() => { deleteNow(); }, REMOVE_MS);
+    return () => { globalThis.clearTimeout(timer); };
   }, [removing]);
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     swallowClick.current = false;
-    if (disabled || removing || e.button > 0) return;
+    if (disabled === true || removing || e.button > 0) { return; }
     drag.current = { x: e.clientX, y: e.clientY, base: open ? -ACTION_W : 0, dir: null, width: e.currentTarget.offsetWidth };
   };
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
-    if (!d) return;
+    if (!d) { return; }
     const mx = e.clientX - d.x;
     const my = e.clientY - d.y;
-    if (!d.dir) {
-      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+    if (d.dir === null) {
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) { return; }
       d.dir = Math.abs(mx) > Math.abs(my) ? 'h' : 'v';
       if (d.dir === 'h') {
         e.currentTarget.setPointerCapture(e.pointerId);
         swallowClick.current = true;
       }
     }
-    if (d.dir !== 'h') return;
+    if (d.dir !== 'h') { return; }
     const raw = d.base + mx;
     setDragX(Math.min(0, raw < -ACTION_W ? -ACTION_W + (raw + ACTION_W) * 0.9 : raw));
   };
   const onPointerUp = () => {
     const d = drag.current;
     drag.current = null;
-    if (!d || d.dir !== 'h' || dragX == null) { setDragX(null); return; }
+    if (d?.dir !== 'h' || dragX === null) { setDragX(null); return; }
     const x = dragX;
     setDragX(null);
-    if (x < -d.width * 0.6) remove();
-    else onOpenChange(x < -ACTION_W / 2);
+    if (x < -d.width * 0.6) { remove(); }
+    else { onOpenChange(x < -ACTION_W / 2); }
   };
   return (
     <Box ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
-        if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
+        if (swallowClick.current || (open && !(e.target instanceof Element && e.target.closest('[data-swipe-action]') !== null))) {
           e.preventDefault();
           e.stopPropagation();
-          if (!swallowClick.current) onOpenChange(false);
+          if (!swallowClick.current) { onOpenChange(false); }
           swallowClick.current = false;
         }
       }}>
@@ -72,14 +76,14 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
           position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
           border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
-          transition: dragX == null ? `width ${REMOVE_MS}ms ease` : 'none',
+          transition: dragX === null ? `width ${String(REMOVE_MS)}ms ease` : 'none',
         }}>
         {t('history.delete')}
       </UnstyledButton>
       <Box style={{
         position: 'relative', background: 'var(--mantine-color-body)',
-        transform: `translateX(${offset}px)`,
-        transition: dragX == null ? `transform ${REMOVE_MS}ms ease` : 'none',
+        transform: `translateX(${String(offset)}px)`,
+        transition: dragX === null ? `transform ${String(REMOVE_MS)}ms ease` : 'none',
       }}>
         {children}
       </Box>

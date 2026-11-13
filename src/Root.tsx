@@ -1,15 +1,21 @@
-import { useMemo } from 'react';
 import { MantineProvider } from '@mantine/core';
-import { buildTheme } from './theme';
-import { useSettings } from './storesV2';
-import App from './App';
+import { ModalsProvider } from '@mantine/modals';
+import { useMemo } from 'react';
 
-export function Root() {
+import App from './App';
+import { useSettings } from './stores';
+import { buildTheme, CONFIRM_MODAL } from './theme';
+
+import type { ReactElement } from 'react';
+
+export function Root(): ReactElement {
   const { accent, accentColor } = useSettings();
   const theme = useMemo(() => buildTheme(accent, accentColor), [accent, accentColor]);
   return (
     <MantineProvider theme={theme} forceColorScheme="dark">
-      <App />
+      <ModalsProvider modalProps={CONFIRM_MODAL}>
+        <App />
+      </ModalsProvider>
     </MantineProvider>
   );
 }

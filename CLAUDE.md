@@ -10,15 +10,15 @@ The app is about data: historic, present and future.
   SVG inside `components/Icon.tsx` (Mantine ships no icon set).
 - **State and data mutations live in a store.** Components hold local state only for open/closed flags and
   gestures (drag offsets, swipe state). Data, drafts, selections that drive fetches, results and side effects
-  belong in `src/storesV2` (data) or `src/store` (view state).
+  belong in `src/stores` (data stores and the view-state stores `uiStore`, `trendsStore`, `addDatesStore`, `backupStore`).
 - **Types live in types files, never next to implementation.** App types in `src/types/`, data-layer types in
-  the `types.ts` of each `src/storesV2` folder and in `src/storesV2/types/`. Components take a named `Props`
+  the `types.ts` of each `src/stores` folder and in `src/stores/types/`. Components take a named `Props`
   interface, not an inline object type.
 - **No comments in source files.**
 
 ## Data
 
-- `src/storesV2` is the data layer; its `README.md` holds the rules (single source of truth per entity,
+- `src/stores` is the data layer; its `README.md` holds the rules (single source of truth per entity,
   pure `api/`, fold semantics, persistence registered in `hydration.ts`, no app imports).
 - **IndexedDB is the source of truth.** Read from the stores first; download only what is not cached.
 - **Loading uses React Suspense with Mantine `Skeleton` fallbacks**, and only when the data is not cached at
@@ -45,6 +45,7 @@ before implementing or reviewing anything, and follow it. Add to it when a revie
 ## Checks
 
 ```
+npm run lint
 npx tsc -b
 npm run build
 node scripts/i18n-check.mjs

@@ -1,4 +1,4 @@
-import type { Backup, BackupParts, QueryState } from '../storesV2';
+import type { Backup, BackupParts, QueryState } from '../stores';
 import type { Route } from './route';
 
 export interface DateRange {
@@ -14,12 +14,17 @@ export interface UiState {
   chartMetric: string;
   historyRange: number;
   lookupDraft: string;
-  hiddenSeries: Record<string, string[]>;
+  logFilter: string;
+  logLimit: number;
+  hiddenSeries: Partial<Record<string, string[]>>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
   setChartMetric: (m: string) => void;
   setHistoryRange: (d: number) => void;
   setLookupDraft: (date: string) => void;
+  setLogFilter: (q: string) => void;
+  showMoreLog: () => void;
+  resetLogLimit: () => void;
   toggleDay: (cityId: string, date: string) => void;
   toggleSeries: (scope: string, name: string) => void;
   dismissGestureHint: () => void;
@@ -45,7 +50,7 @@ export interface TrendsState {
   setCustom: (range: DateRange | null) => void;
   setBack: (years: number) => void;
   setRangeDraft: (patch: Partial<DateRange>) => void;
-  ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  ensureWindows: (cityId: string, windows: DateRange[]) => PromiseLike<void>;
   retryFailed: (cityId: string, windows: DateRange[]) => Promise<void>;
 }
 

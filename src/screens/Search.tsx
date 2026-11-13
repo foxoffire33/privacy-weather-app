@@ -1,16 +1,19 @@
-import { useEffect } from 'react';
 import { Box, Button, Group, Loader, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { followCity, useCityStore, useSearchStore } from '../storesV2';
-import { useUiStore } from '../store/uiStore';
-import type { GeoResult } from '../storesV2';
-import { ScreenHeader } from '../components/ScreenHeader';
+
 import { Icon } from '../components/Icon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import { followCity, useCityStore, useSearchStore } from '../stores';
+import { useUiStore } from '../stores/uiStore';
 
-export function Search() {
+import type { GeoResult } from '../stores';
+import type { ReactElement } from 'react';
+
+export function Search(): ReactElement {
   const s = useSearchStore(useShallow((st) => ({
     query: st.query,
     results: st.results,
@@ -35,18 +38,18 @@ export function Search() {
       <ScreenHeader />
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('search.title')}</Title>
       <Box px={20}>
-        <TextInput size="lg" placeholder={t('search.placeholder')} autoFocus value={s.query}
+        <TextInput size="lg" placeholder={t('search.placeholder')} value={s.query}
           leftSection={<Icon name="search" size={20} />}
           rightSection={s.searching ? <Loader size="xs" /> : null}
-          onChange={(e) => s.setQuery(e.currentTarget.value)}
+          onChange={(e) => { s.setQuery(e.currentTarget.value); }}
           aria-label={t('search.label')} />
       </Box>
 
       <Box px={20} style={{ flex: 1 }}>
         <Box className="kicker">{t('search.results')}</Box>
-        {s.searchError && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
-        {!s.searchError && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
-        {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && !s.searchError && (
+        {(s.searchError !== null && s.searchError !== '') && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
+        {(s.searchError === null || s.searchError === '') && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
+        {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && (s.searchError === null || s.searchError === '') && (
           <Text py={12} fz={13} c="dimmed">{t('search.noMatch', { query: s.query })}</Text>
         )}
         {s.searching && s.results.length === 0 && Array.from({ length: 4 }, (_, i) => (
@@ -65,7 +68,7 @@ export function Search() {
                   {[r.admin1, r.country].filter(Boolean).join(', ')} · {r.latitude.toFixed(2)}°, {r.longitude.toFixed(2)}°
                 </Text>
               </Box>
-              <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => follow(r)}>
+              <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => { follow(r); }}>
                 {isFollowed ? t('search.following') : t('search.follow')}
               </Button>
             </Group>

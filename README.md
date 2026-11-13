@@ -11,30 +11,29 @@ npm install
 npm run dev
 ```
 
-`preview.html` is a browser-only runner used by the design tool; Vite doesn't use it.
-
 ## Structure
 
 ```
 src/
-  theme.ts              Mantine global theme (colors, font, radius, component defaults)
-  styles/global.css     Layout-only CSS (stage, pager, hero, rules, glass)
-  api/openMeteo.ts      SDK calls: forecast, air quality, archive · JSON geocoding
-  store/
-    index.ts            Bound store: slices + persist → IndexedDB
-    idbStorage.ts       Zustand PersistStorage over idb-keyval (debounced writes)
-    types.ts            Slice interfaces, StoreState, SliceCreator
-    slices/             settings · cities · forecast · history · search · ui
-  screens/              Onboarding · Home (pager) · CityPage · Cities · Search · History · Settings
-  components/           Icon · ScreenHeader
+  main.tsx · Root.tsx · App.tsx   Entry, Mantine providers, screen routing
+  theme.ts                        Mantine theme and component defaults
+  styles/global.css               App-wide layout CSS
+  stores/                         Data layer: entity cache, Zustand stores, IndexedDB persistence, Suspense resources (see stores/README.md)
+    api/                          Pure Open-Meteo calls and variable lists
+  screens/                        Onboarding · Home (pager) · Cities · Search · History · Hourly · DayView · Settings · CityPage
+  components/                     Shared UI: city/ and day/ sections, charts/, history/, skeletons, icons
+  lib/                            Formatting, insights, backup, widgets and other pure helpers
+  i18n/                           t() and the 24 locale files
+  types/                          App types
 ```
 
 ## Data rules
 
-- Views read state only through `useWeatherStore(useShallow(...))` and call store actions. No component fetches data itself.
-- The persisted slices (settings, cities, forecasts, history, normals, archive years) are written to IndexedDB under the key `open-weather-log`. Loading, search and navigation state stay in memory.
+- IndexedDB is the source of truth. Views read from the stores first and download only what is not cached.
+- Loading uses React Suspense with Mantine `Skeleton` fallbacks, and only when nothing is cached. Refreshes run in the background.
+- Data, drafts and side effects live in stores. Components keep only open/closed flags and gesture state.
 - Stored values are metric. Units are applied only when formatting.
-- `cities[0]` is the default city; the home pager always opens on it.
+- The first followed city is the default city; the home pager opens on it.
 
 ## History
 
@@ -48,7 +47,7 @@ src/
 Forecast API: current conditions, 15-minute rain nowcast (next 2 h), 7-day hourly and daily forecast. That covers temperature and feels-like, humidity, dew point, rain, showers, snowfall, snow depth, precipitation probability and hours, cloud cover by layer, visibility, wind and gusts with direction, UV (actual and clear-sky), sunrise, sunset, daylight and sunshine duration, pressure with trend, thunderstorm potential (CAPE), freezing level, solar radiation and evapotranspiration.
 Air Quality API: European and US AQI, PM2.5, PM10, NO₂, O₃, SO₂, CO, dust, aerosol optical depth, and pollen (alder, birch, grass, mugwort, olive, ragweed; Europe only).
 Marine API (coastal cities only): wave height, direction and period, swell, sea temperature.
-All variable lists live in `src/api/variables.ts`.
+All variable lists live in `src/stores/api/variables.ts`.
 
 ## API key
 
