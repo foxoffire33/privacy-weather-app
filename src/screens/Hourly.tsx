@@ -10,7 +10,7 @@ import { t } from '../i18n';
 function Cell({ k, v }: { k: string; v: string }) {
   return (
     <Box py={8} pr={8}>
-      <Text fz={12} tt="uppercase" c="dimmed" style={{ letterSpacing: '.06em' }}>{k}</Text>
+      <Text fz={12} tt="uppercase" c="dimmed" className="ls-6">{k}</Text>
       <Text fz={16} fw={800}>{v}</Text>
     </Box>
   );
@@ -18,7 +18,7 @@ function Cell({ k, v }: { k: string; v: string }) {
 
 function HourBlockSk() {
   return (
-    <Box mt={10} p={14} style={{ border: '2px solid var(--rule)' }}>
+    <Box mt={10} p={14} className="card-rule">
       <Group justify="space-between" align="flex-start"><Box><Sk w={56} h={20} /><Sk w={120} h={14} mt={8} /></Box><Sk w={72} h={44} /></Group>
       <Sk h={96} mt={14} />
     </Box>
@@ -28,16 +28,16 @@ function HourBlockSk() {
 export function Hourly({ cityId }: { cityId: string }) {
   const units = useUnits();
   const s = { city: useCity(cityId), entry: useForecast(cityId), tempUnit: units.temp, windUnit: units.wind };
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
+  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const header = (
     <>
       <ScreenHeader />
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
-      <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('hourly.title')}</Title>
+      <Title className="display display-sm">{t('hourly.title')}</Title>
     </>
   );
   if (!s.entry) {
-    return <div className="screen">{header}<Box px={12} pb={24}><Sk w={180} h={12} mt={20} />{[0, 1, 2].map((i) => <HourBlockSk key={i} />)}</Box></div>;
+    return <Box className="screen">{header}<Box px={12} pb={24}><Sk w={180} h={12} mt={20} />{[0, 1, 2].map((i) => <HourBlockSk key={i} />)}</Box></Box>;
   }
 
   const { data } = s.entry;
@@ -53,26 +53,25 @@ export function Hourly({ cityId }: { cityId: string }) {
   }
 
   return (
-    <div className="screen">
+    <Box className="screen">
       {header}
       <Box px={12} pb={24}>
         {groups.map((g) => (
           <Box key={g.date}>
-            <Box px={8}><div className="kicker">{longDate(g.date)}</div></Box>
+            <Box px={8}><Box className="kicker">{longDate(g.date)}</Box></Box>
             {g.rows.map((i) => {
               const mm = v.precipitation[i] ?? 0;
               const isNow = i === h0;
               return (
-                <Box key={i} mt={10} p={14}
-                  style={{ border: `${isNow ? 2 : 1}px solid ${isNow ? "#fff" : "var(--rule-soft)"}`, background: v.is_day[i] ? '#000' : '#0b0b0b' }}>
+                <Box key={i} mt={10} p={14} className="hour-cell" data-day={v.is_day[i] || undefined} data-now={isNow || undefined}>
                   <Group justify="space-between" align="flex-start" wrap="nowrap">
-                    <Box style={{ minWidth: 0 }}>
+                    <Box miw={0}>
                       <Text fz={20} fw={800}>{isNow ? t('common.now') : hhmm(data.hourly.time[i])}</Text>
                       <Text fz={14} fw={600} truncate>{conditionLabel(v.weather_code[i])}{v.is_day[i] ? '' : ` · ${t('common.night')}`}</Text>
                     </Box>
-                    <Text fz={48} fw={800} lh={0.9} style={{ letterSpacing: '-.04em' }}>{T(v.temperature_2m[i])}°</Text>
+                    <Text fz={48} fw={800} lh={0.9} className="ls-n4">{T(v.temperature_2m[i])}°</Text>
                   </Group>
-                  <Box mt={10} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderTop: '1px solid var(--rule-soft)' }}>
+                  <Box mt={10} className="grid-3">
                     <Cell k={t('hourly.feelsLike')} v={`${T(v.apparent_temperature[i])}°`} />
                     <Cell k={t('hourly.rainChance')} v={`${v.precipitation_probability[i] ?? 0}%`} />
                     <Cell k={t('hourly.rain')} v={`${mm.toFixed(1)} mm`} />
@@ -90,6 +89,6 @@ export function Hourly({ cityId }: { cityId: string }) {
         ))}
         <Text fz={12} c="dimmed" pt={16} px={8}>{t('common.dataBy')}</Text>
       </Box>
-    </div>
+    </Box>
   );
 }

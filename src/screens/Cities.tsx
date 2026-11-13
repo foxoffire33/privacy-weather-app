@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
@@ -67,10 +67,10 @@ export function Cities() {
     return 0;
   };
   return (
-    <div className="screen" style={{ overflow: 'hidden' }}>
-      <div className="cities-scroll" ref={scroller} style={{ overflowY: drag ? 'hidden' : undefined }}>
+    <Box className="screen screen-cities">
+      <Box className="cities-scroll" ref={scroller} data-dragging={drag || undefined}>
         <ScreenHeader />
-        <Title className="display" style={{ whiteSpace: 'pre-line' }}>{t('cities.title', { count: n, word: tl('cities.count')[n] ?? n })}</Title>
+        <Title className="display">{t('cities.title', { count: n, word: tl('cities.count')[n] ?? n })}</Title>
         <Text px={20} pb={16} fz={13} c="dimmed">{t('cities.hint')}</Text>
 
         <Box className="rule-top">
@@ -80,17 +80,14 @@ export function Cities() {
             const dragging = drag?.from === i;
             return (
               <Box key={c.id} ref={i === 0 ? firstRow : undefined} className="city-row" data-dragging={dragging || undefined}
-                style={{
-                  transform: `translateY(${dragging ? drag.dy : shift(i)}px)`,
-                  transition: dragging ? 'none' : 'transform .18s ease',
-                }}>
+                style={{ '--city-y': `${dragging ? drag.dy : shift(i)}px` } as CSSProperties}>
                 <Group gap={0} wrap="nowrap" align="stretch">
-                  <div className="drag-handle" role="button" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
+                  <UnstyledButton className="drag-handle" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
                     onPointerDown={(e) => onDown(e, i)} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                     <Icon name="grip" size={20} />
-                  </div>
-                  <Group justify="space-between" align="center" wrap="nowrap" style={{ flex: 1, minWidth: 0 }} py={16} pr={8}>
-                    <UnstyledButton onClick={() => goHome(i)} style={{ flex: 1, minWidth: 0 }}>
+                  </UnstyledButton>
+                  <Group className="flex-fill" justify="space-between" align="center" wrap="nowrap" py={16} pr={8}>
+                    <UnstyledButton className="flex-fill" onClick={() => goHome(i)}>
                       <Group gap={8} wrap="nowrap">
                         <Text fz={22} fw={800} truncate>{c.name}</Text>
                         {i === 0 && <Badge size="sm">{t('common.default')}</Badge>}
@@ -102,7 +99,7 @@ export function Cities() {
                       ) : <Sk w={150} h={13} mt={4} />}
                     </UnstyledButton>
                     {f ? (
-                      <Text fz={44} fw={800} lh={0.9} style={{ letterSpacing: '-.04em' }}>
+                      <Text fz={44} fw={800} lh={0.9} className="ls-n4">
                         {fmtTemp(f.data.current.v.temperature_2m, tempUnit)}°
                       </Text>
                     ) : <Sk w={56} h={40} />}
@@ -116,11 +113,11 @@ export function Cities() {
             );
           })}
         </Box>
-      </div>
+      </Box>
 
       <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => navigate({ name: 'search' })}>
         {t('cities.followCity')}
       </Button>
-    </div>
+    </Box>
   );
 }

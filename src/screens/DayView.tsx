@@ -30,7 +30,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
   useEffect(() => { void openDay(cityId, date); }, [cityId, date]);
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
+  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const day = s.day;
   const d = day?.daily.v ?? {};
   const h = day?.hourly.v ?? {};
@@ -40,8 +40,8 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
   const aqiMax = max(day?.air?.v.european_aqi);
   const aqiLvl = euAqiLevel(aqiMax);
   return (
-    <div className="screen">
-      <div className="hero" style={{ paddingTop: 8 }}>
+    <Box className="screen">
+      <Box className="hero" pt={8}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>
           <Text fz={15} fw={800}>{s.city.name}</Text>
@@ -56,7 +56,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
           </>
         ) : (
           <>
-            <div className="hero-temp">{T(hi)}°</div>
+            <Box className="hero-temp">{T(hi)}°</Box>
             <Text fz={20} fw={800} mt={8}>{conditionLabel(d.weather_code ?? s.record?.code)}</Text>
             <Text fz={13} fw={600}>
               {t('dayView.lowLine', { lo: T(d.temperature_2m_min ?? s.record?.lo), fhi: T(d.apparent_temperature_max ?? s.record?.feelsHi), flo: T(d.apparent_temperature_min ?? s.record?.feelsLo) })}
@@ -64,7 +64,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
             </Text>
           </>
         )}
-      </div>
+      </Box>
 
       {!day && (
         <Box p={s.query.error ? 20 : 0}>
@@ -93,56 +93,56 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
           </Section>
 
           <Section title={t('dayView.temperature')}>
-            <div className="stat-grid">
+            <Box className="stat-grid">
               <Stat k={t('dayView.highLow')} v={`${T(d.temperature_2m_max)}° / ${T(d.temperature_2m_min)}°`} s={s.normal != null ? t('dayView.normalHigh', { t: T(s.normal) }) : undefined} />
               <Stat k={t('city.day.feelsLike')} v={`${T(d.apparent_temperature_max)}° / ${T(d.apparent_temperature_min)}°`} />
               <Stat k={t('city.feels.humidity')} v={`${f(avg(h.relative_humidity_2m))}%`} s={t('dayView.dailyAverage')} />
               <Stat k={t('city.feels.dewPoint')} v={`${T(avg(h.dew_point_2m))}°`} s={t('dayView.dailyAverage')} />
-            </div>
+            </Box>
           </Section>
 
           <Section title={t('city.precip.title')}>
-            <div className="stat-grid">
+            <Box className="stat-grid">
               <Stat k={t('city.day.precipitation')} v={`${f(d.precipitation_sum, 1)} mm`} s={t('dayView.wet', { h: f(d.precipitation_hours) })} />
               <Stat k={t('history.rain')} v={`${f(d.rain_sum, 1)} mm`} />
               <Stat k={t('city.day.snowfall')} v={`${f(d.snowfall_sum, 1)} cm`} s={(max(h.snow_depth) ?? 0) > 0 ? t('dayView.snowDepth', { cm: Math.round((max(h.snow_depth) ?? 0) * 100) }) : undefined} />
               {d.precipitation_probability_max != null && <Stat k={t('dayView.forecastChance')} v={`${f(d.precipitation_probability_max)}%`} />}
-            </div>
+            </Box>
           </Section>
 
           <Section title={t('city.wind.title')} summary={t('dayView.windSummary', { force: beaufort(d.wind_speed_10m_max ?? null).toLocaleLowerCase(), dir: compass(d.wind_direction_10m_dominant ?? 0) })}>
-            <div className="stat-grid">
+            <Box className="stat-grid">
               <Stat k={t('dayView.maxWind')} v={W(d.wind_speed_10m_max)} />
               <Stat k={t('dayView.maxGusts')} v={W(d.wind_gusts_10m_max)} s={beaufort(d.wind_gusts_10m_max ?? null)} />
-            </div>
+            </Box>
           </Section>
 
           <Section title={t('city.sun.title')}>
-            <div className="stat-grid">
+            <Box className="stat-grid">
               <Stat k={t('city.sun.sunrise')} v={hhmm(day.daily.sunrise)} s={t('city.sun.sunsetAt', { time: hhmm(day.daily.sunset) })} />
               <Stat k={t('dayView.daylight')} v={duration(d.daylight_duration ?? null)} s={t('dayView.sunshine', { d: duration(d.sunshine_duration ?? null) })} />
               {d.uv_index_max != null && <Stat k={t('city.day.uvMax')} v={f(d.uv_index_max)} s={uvAdvice(d.uv_index_max)} />}
               <Stat k={t('city.day.solarEnergy')} v={`${f(d.shortwave_radiation_sum, 1)} MJ/m²`} />
-            </div>
+            </Box>
           </Section>
 
           <Section title={t('dayView.skyAtmosphere')}>
-            <div className="stat-grid">
+            <Box className="stat-grid">
               <Stat k={t('city.sky.cloudCover')} v={`${f(avg(h.cloud_cover))}%`} s={t('dayView.dailyAverage')} />
               <Stat k={t('city.atmosphere.pressure')} v={`${f(min(h.pressure_msl))}–${f(max(h.pressure_msl))}`} s={t('dayView.pressureNote')} />
               <Stat k={t('city.atmosphere.evaporation')} v={`${f(d.et0_fao_evapotranspiration, 1)} mm`} s="ET₀" />
               {h.cape && <Stat k={t('dayView.maxCape')} v={f(max(h.cape))} s={t('dayView.capeNote')} />}
-            </div>
+            </Box>
           </Section>
 
           {day.air && (
             <Section title={t('city.air.title')} summary={t('dayView.airSummary', { v: f(aqiMax), level: aqiLvl != null ? levelName(aqiLvl) : '–' })}>
-              <div className="stat-grid">
+              <Box className="stat-grid">
                 <Stat k={t('dayView.pm25')} v={`${f(avg(day.air.v.pm2_5))} µg/m³`} />
                 <Stat k={t('dayView.pm10')} v={`${f(avg(day.air.v.pm10))} µg/m³`} />
                 <Stat k={t('dayView.no2')} v={`${f(avg(day.air.v.nitrogen_dioxide))} µg/m³`} />
                 <Stat k={t('dayView.ozoneMax')} v={`${f(max(day.air.v.ozone))} µg/m³`} />
-              </div>
+              </Box>
             </Section>
           )}
 
@@ -151,6 +151,6 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
           </Text>
         </>
       )}
-    </div>
+    </Box>
   );
 }

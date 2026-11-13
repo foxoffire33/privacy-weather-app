@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
+import { Box, UnstyledButton } from '@mantine/core';
 import { t } from '../i18n';
 
 const ACTION_W = 88;
@@ -61,7 +62,8 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     else onOpenChange(x < -ACTION_W / 2);
   };
   return (
-    <div ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
+    <Box ref={root} className="swipe-row" data-dragging={dragX != null || undefined}
+      style={{ '--swipe-w': `${Math.max(ACTION_W, -offset)}px`, '--swipe-x': `${offset}px` } as CSSProperties}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
         if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
@@ -71,23 +73,13 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
           swallowClick.current = false;
         }
       }}>
-      <button type="button" data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
-        aria-label={t('history.deleteLabel', { date: label })}
-        style={{
-          position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
-          border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
-          transition: dragX == null ? `width ${REMOVE_MS}ms ease` : 'none',
-        }}>
+      <UnstyledButton data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
+        aria-label={t('history.deleteLabel', { date: label })}>
         {t('history.delete')}
-      </button>
-      <div style={{
-        position: 'relative', background: 'var(--mantine-color-body)',
-        transform: `translateX(${offset}px)`,
-        transition: dragX == null ? `transform ${REMOVE_MS}ms ease` : 'none',
-      }}>
+      </UnstyledButton>
+      <Box className="swipe-content">
         {children}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

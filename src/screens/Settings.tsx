@@ -45,11 +45,11 @@ export function Settings() {
     downloadFile('weather-log.json', JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
   };
   return (
-    <div className="screen">
+    <Box className="screen">
       <ScreenHeader />
       <Title className="display display-sm">{t('settings.title')}</Title>
       <Stack gap={0} px={20} pb={24}>
-        <div className="kicker">{t('settings.language')}</div>
+        <Box className="kicker">{t('settings.language')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
             value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v })}
@@ -59,7 +59,7 @@ export function Settings() {
             ]} />
         </Box>
 
-        <div className="kicker">{t('settings.dataSource')}</div>
+        <Box className="kicker">{t('settings.dataSource')}</Box>
         <Box py={12} className="row">
           <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
             description={t('settings.apiKeyNote')}
@@ -72,23 +72,19 @@ export function Settings() {
         </Box>
         <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
-        <div className="kicker">{t('settings.appearance')}</div>
+        <Box className="kicker">{t('settings.appearance')}</Box>
         <Box py={12} className="row">
           <Text fz={14} fw={600}>{t('settings.accent')}</Text>
           <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
           <Group gap={8}>
             {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
-              <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
-                  border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>
-                <span style={{ width: 16, height: 16, background: a === 'off' ? '#000' : ACCENTS[a].tuple[5], border: '1px solid var(--rule)' }} />
+              <UnstyledButton key={a} className="accent-row" aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}>
+                <Box component="span" className={`swatch swatch-${a}`} />
                 <Text fz={13} fw={800}>{t(ACCENT_KEYS[a])}</Text>
               </UnstyledButton>
             ))}
-            <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
-                border: `2px solid ${s.settings.accent === 'custom' ? '#fff' : 'var(--rule-soft)'}` }}>
-              <span style={{ width: 16, height: 16, background: s.settings.accentColor, border: '1px solid var(--rule)' }} />
+            <UnstyledButton className="accent-row" aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}>
+              <Box component="span" className="swatch swatch-custom" />
               <Text fz={13} fw={800}>{t('settings.custom')}</Text>
             </UnstyledButton>
           </Group>
@@ -103,7 +99,7 @@ export function Settings() {
           )}
         </Box>
 
-        <div className="kicker">{t('settings.units')}</div>
+        <Box className="kicker">{t('settings.units')}</Box>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.temperature')}</Text>
           <SegmentedControl value={s.settings.tempUnit} onChange={(v) => set({ tempUnit: v as TempUnit })}
@@ -115,7 +111,7 @@ export function Settings() {
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
 
-        <div className="kicker">{t('settings.history')}</div>
+        <Box className="kicker">{t('settings.history')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
             description={t('settings.intervalNote')}
@@ -168,12 +164,12 @@ export function Settings() {
           {t('settings.deleteAll')}
         </Button>
 
-        <div className="kicker">{t('settings.about')}</div>
+        <Box className="kicker">{t('settings.about')}</Box>
         <Stack gap={4} py={12}>
           <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
           <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
         </Stack>
       </Stack>
-    </div>
+    </Box>
   );
 }
