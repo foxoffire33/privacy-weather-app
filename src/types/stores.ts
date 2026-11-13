@@ -39,12 +39,14 @@ export interface TrendsState {
   rangeDraft: DateRange;
   download: QueryState;
   attempted: string[];
+  failed: string[];
   togglePicked: (key: string) => void;
   setLen: (len: number) => void;
   setCustom: (range: DateRange | null) => void;
   setBack: (years: number) => void;
   setRangeDraft: (patch: Partial<DateRange>) => void;
   ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  retryFailed: (cityId: string, windows: DateRange[]) => Promise<void>;
 }
 
 export type AddDatesResult =
@@ -54,6 +56,7 @@ export type AddDatesResult =
 export interface AddDatesState {
   draft: DateRange;
   result: AddDatesResult | null;
+  runId: number;
   reset: (maxDate: string) => void;
   setDraft: (patch: Partial<DateRange>) => void;
   run: (cityId: string) => Promise<void>;
@@ -67,6 +70,7 @@ export interface BackupState {
   pending: Backup | null;
   parts: BackupParts;
   result: BackupResult | null;
+  pickId: number;
   pick: (file: File | null) => Promise<void>;
   setPart: (part: keyof BackupParts, on: boolean) => void;
   confirm: () => void;

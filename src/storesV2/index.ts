@@ -15,7 +15,7 @@ export { cityById, citiesByIds, dayRecordAt, dayRecordsFor } from './entities/se
 export * from './stores';
 export * from './selectors';
 export * from './suspense';
-export { lastSettled, once, READY } from './core/inflight';
+export { lastSettled, latest, once, READY } from './core/inflight';
 
 export { alreadyHydrated, hydrateAll } from './hydration';
 export { importLegacyStore } from './migrate-legacy';

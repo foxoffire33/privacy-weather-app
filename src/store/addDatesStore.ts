@@ -7,18 +7,20 @@ export type { AddDatesState } from '../types';
 export const useAddDatesStore = create<AddDatesState>()((set, get) => ({
   draft: { from: '', to: '' },
   result: null,
+  runId: 0,
 
-  reset: (maxDate) => set({ draft: { from: addDays(maxDate, -29), to: maxDate }, result: null }),
+  reset: (maxDate) => set((s) => ({ draft: { from: addDays(maxDate, -29), to: maxDate }, result: null, runId: s.runId + 1 })),
   setDraft: (patch) => set((s) => ({ draft: { ...s.draft, ...patch } })),
 
   run: async (cityId) => {
     const { from, to } = get().draft;
-    set({ result: null });
+    const id = get().runId + 1;
+    set({ result: null, runId: id });
     try {
       const counts = await addDateRange(cityId, from, to);
-      set({ result: { ok: true, ...counts } });
+      if (get().runId === id) set({ result: { ok: true, ...counts } });
     } catch (e) {
-      set({ result: { ok: false, error: errorMessage(e) } });
+      if (get().runId === id) set({ result: { ok: false, error: errorMessage(e) } });
     }
   },
 }));

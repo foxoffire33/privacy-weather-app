@@ -20,3 +20,7 @@ export function once(key: string, run: () => Promise<unknown>): Promise<void> {
 export function lastSettled(key: string): Promise<void> {
   return settled.get(key) ?? READY;
 }
+
+export function latest(key: string): Promise<void> {
+  return running.get(key) ?? settled.get(key) ?? READY;
+}

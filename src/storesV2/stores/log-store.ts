@@ -19,8 +19,6 @@ const FORECAST_PAST_DAYS = 92;
 
 export const NO_ARCHIVE_DATA = 'no-archive-data';
 
-const MERGE_GAP_DAYS = 14;
-
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
   [...new Set([...existing, ...added])].sort();
 
@@ -126,7 +124,7 @@ export const useLogStore = create<LogState>()(
             continue;
           }
           const last = runs[runs.length - 1];
-          if (last !== undefined && daysBetween(last.to, d) <= MERGE_GAP_DAYS) last.to = d;
+          if (last !== undefined && last.to === addDays(d, -1)) last.to = d;
           else runs.push({ from: d, to: d });
         }
         total.added += get().addDates(city.id, cached);
@@ -134,7 +132,6 @@ export const useLogStore = create<LogState>()(
           const counts = await get().addRange(city, run.from, run.to);
           total.added += counts.added;
           total.updated += counts.updated;
-          total.kept -= counts.updated;
         }
         return total;
       },

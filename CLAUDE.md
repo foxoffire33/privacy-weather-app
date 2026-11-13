@@ -23,7 +23,8 @@ The app is about data: historic, present and future.
 - **IndexedDB is the source of truth.** Read from the stores first; download only what is not cached.
 - **Loading uses React Suspense with Mantine `Skeleton` fallbacks**, and only when the data is not cached at
   all. Refreshing cached data happens in the background and never replaces content with a skeleton.
-- Pass `use()` a stable promise: the in-flight one from `once()`, then `lastSettled()` for the same key.
+- Pass `use()` a stable promise: `latest(key)` (running, then settled, then `READY`) when the view may wait,
+  `lastSettled(key)` when it must not. Suspend only when nothing the view shows is cached.
 - When fetching a day, fetch every attribute the log keeps. Trends are built from the log; missing days are
   downloaded into it.
 
@@ -35,6 +36,11 @@ The app is about data: historic, present and future.
   background used for a selected day. Every chart can open full screen.
 - The app is portrait-only; landscape is allowed only while a chart is open full screen.
 - Every user-facing string goes through `t()`, in all 24 locales (`node scripts/i18n-check.mjs`).
+
+## Learned review conventions
+
+Rules distilled from past PR review feedback live in `.claude/skills/review-learnings/SKILL.md`. Read that file
+before implementing or reviewing anything, and follow it. Add to it when a review finds something generalisable.
 
 ## Checks
 

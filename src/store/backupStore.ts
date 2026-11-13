@@ -10,14 +10,19 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
   pending: null,
   parts: { cities: true, history: true, settings: false },
   result: null,
+  pickId: 0,
 
   pick: async (file) => {
-    set({ result: null });
+    const id = get().pickId + 1;
+    set({ result: null, pickId: id });
     if (file === null) return;
+    set({ pending: null });
     try {
       const backup = parseBackup(await file.text());
+      if (get().pickId !== id) return;
       set({ pending: backup, parts: { cities: backup.cities.length > 0, history: countDays(backup) > 0, settings: false } });
     } catch (e) {
+      if (get().pickId !== id) return;
       set({ pending: null, result: { ok: false, error: errorMessage(e) } });
     }
   },

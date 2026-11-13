@@ -1,4 +1,4 @@
-import { Suspense, use, useState } from 'react';
+import { Suspense, use, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
@@ -10,8 +10,8 @@ import type { TempUnit } from '../../storesV2';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
-import { hasGap, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
-import { lastSettled } from '../../storesV2';
+import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
+import { lastSettled, latest, useLogStore } from '../../storesV2';
 import type { ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
@@ -40,15 +40,17 @@ const GROUPS: TrendGroupDef[] = [
   { key: 'uv', title: 'city.day.uvMax' },
 ];
 
+const NO_DATES: string[] = [];
 const COLORS = ['signal.4', 'signal.2', 'dark.2', 'signal.7', 'dark.4', 'dark.1'];
 const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.4'];
 const LENGTHS = [30, 90, 365, 0];
 const BACK_YEARS = [0, 1, 10, 30];
 
 export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps) {
-  const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows } = useTrendsStore(useShallow((st) => ({
+  const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows, retryFailed } = useTrendsStore(useShallow((st) => ({
     picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
     setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
+    retryFailed: st.retryFailed,
   })));
   const [sheet, setSheet] = useState<TrendsSheet>(null);
   const error = download.error;
@@ -115,7 +117,15 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         </>
       )}>
         <TrendsFill cityId={cityId} windows={windows} ensureWindows={ensureWindows}>
-          {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
+          {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
+          {error && (
+            <Box py={8}>
+              <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
+              <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, windows)}>
+                {t('common.tryAgain')}
+              </Button>
+            </Box>
+          )}
           {GROUPS.map((g) => {
             const mine = attrs.filter((a) => a.group === g.key);
             if (!mine.length) return null;
@@ -142,8 +152,14 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
 
 function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProps) {
   const attempted = useTrendsStore((st) => st.attempted);
-  const missing = windows.some((w) => hasGap(cityId, w) && !attempted.includes(windowKey(cityId, w)));
-  use(missing ? ensureWindows(cityId, windows) : lastSettled(trendsKey(cityId, windows)));
+  const logged = useLogStore((st) => st.dates[cityId] ?? NO_DATES);
+  const key = trendsKey(cityId, windows);
+  const missing = windows.some((w) => hasGap(logged, w) && !attempted.includes(windowKey(cityId, w)));
+  const cached = windows.some((w) => hasLogged(logged, w));
+  useEffect(() => {
+    if (cached && missing) void ensureWindows(cityId, windows);
+  }, [cached, missing, key]);
+  use(cached ? lastSettled(key) : missing ? ensureWindows(cityId, windows) : latest(key));
   return <>{children}</>;
 }
 
