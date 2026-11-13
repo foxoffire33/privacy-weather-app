@@ -1,7 +1,10 @@
 import { create } from 'zustand';
-import { errorMessage, exportSnapshot, importBackup } from '.';
+
 import { countDays, parseBackup } from '../lib/backup';
 import { downloadFile } from '../lib/format';
+
+import { errorMessage, exportSnapshot, importBackup } from '.';
+
 import type { BackupState } from '../types';
 
 export type { BackupState } from '../types';
@@ -15,28 +18,28 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
   pick: async (file) => {
     const id = get().pickId + 1;
     set({ result: null, pickId: id });
-    if (file === null) return;
+    if (file === null) { return; }
     set({ pending: null });
     try {
       const backup = parseBackup(await file.text());
-      if (get().pickId !== id) return;
+      if (get().pickId !== id) { return; }
       set({ pending: backup, parts: { cities: backup.cities.length > 0, history: countDays(backup) > 0, settings: false } });
-    } catch (e) {
-      if (get().pickId !== id) return;
-      set({ pending: null, result: { ok: false, error: errorMessage(e) } });
+    } catch (error) {
+      if (get().pickId !== id) { return; }
+      set({ pending: null, result: { ok: false, error: errorMessage(error) } });
     }
   },
 
-  setPart: (part, on) => set((s) => ({ parts: { ...s.parts, [part]: on } })),
+  setPart: (part, on) => { set((s) => ({ parts: { ...s.parts, [part]: on } })); },
 
   confirm: () => {
     const { pending, parts } = get();
-    if (pending === null) return;
+    if (pending === null) { return; }
     const counts = importBackup(pending, parts);
     set({ pending: null, result: { ok: true, ...counts } });
   },
 
-  cancel: () => set({ pending: null }),
+  cancel: () => { set({ pending: null }); },
 
   exportFile: () => {
     const { cities, history, settings } = exportSnapshot();

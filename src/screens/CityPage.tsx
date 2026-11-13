@@ -1,30 +1,30 @@
-import { Fragment, Suspense, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useSeriesToggle } from '../components/charts/SeriesToggle';
-import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../components/charts/FullscreenChart';
+import { CompositeChart } from '@mantine/charts';
 import { ActionIcon, Badge, Box, Button, Collapse, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useTimeout } from '@mantine/hooks';
+import { Fragment, Suspense, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import {
-  openDay, refreshCity, useDayQuery, useDayStore, useForecastData, useForecastQuery, useLogCount, useNormals, useUnits,
-} from '../stores';
-import { useUiStore } from '../stores/uiStore';
-import { conditionLabel } from '../lib/weatherCodes';
-import { ago, compass, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, weekday } from '../lib/format';
+
+import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../components/charts/FullscreenChart';
+import { HourlyExplorer } from '../components/charts/HourlyExplorer';
+import { useSeriesToggle } from '../components/charts/SeriesToggle';
+import { levelColor } from '../components/city/levelColor';
+import { Bar, Section, Stat } from '../components/city/Parts';
+import { Icon } from '../components/Icon';
+import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
+import { useDragScroll } from '../hooks/useDragScroll';
+import { usePullPast } from '../hooks/usePullPast';
+import { t as tx } from '../i18n';
+import { ago, compass, convTemp, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, orDash, weekday } from '../lib/format';
 import {
   levelName, beaufort, capeLabel, dewLabel, duration, euAqiLevel, feelsLabel, nowIndex, pollenLevel,
   pollutantLevel, pressureTrend, rainOutlook, signedMinutes, sunProgress, usAqiLabel, uvAdvice, visibilityLabel,
 } from '../lib/insights';
-import { Icon } from '../components/Icon';
-import { Bar, Section, Stat } from '../components/city/Parts';
-import { levelColor } from '../components/city/levelColor';
-import { HourlyExplorer } from '../components/charts/HourlyExplorer';
-import { CompositeChart } from '@mantine/charts';
-import { convTemp } from '../lib/format';
-import { addDays } from '../stores';
-import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
-import { useDragScroll } from '../hooks/useDragScroll';
-import { usePullPast } from '../hooks/usePullPast';
-import { t as tx, type MessageKey } from '../i18n';
+import { conditionLabel } from '../lib/weatherCodes';
+import { addDays,
+  openDay, refreshCity, useDayQuery, useDayStore, useForecastData, useForecastQuery, useLogCount, useNormals, useUnits } from '../stores';
+import { useUiStore } from '../stores/uiStore';
+
+import type { MessageKey } from '../i18n';
 import type { AqiPeak, ChartHeight, CityPageProps, DeferredProps, StripCell } from '../types';
 
 const weekSeries = () => [
@@ -43,7 +43,7 @@ const POLLUTANTS = [
 ] as const;
 const POLLEN = ['alder_pollen', 'birch_pollen', 'grass_pollen', 'mugwort_pollen', 'olive_pollen', 'ragweed_pollen'] as const;
 
-export const CityPage = memo(function CityPage({ city, isDefault }: CityPageProps) {
+export const CityPage = memo(({ city, isDefault }: CityPageProps) => {
   const busy = useForecastQuery(city.id).status === 'loading';
   return (
     <Box className="page">
@@ -57,7 +57,7 @@ export const CityPage = memo(function CityPage({ city, isDefault }: CityPageProp
 
 function Deferred({ h, children }: DeferredProps) {
   const [ready, setReady] = useState(false);
-  const { start, clear } = useTimeout(() => setReady(true), 250);
+  const { start, clear } = useTimeout(() => { setReady(true); }, 250);
   useEffect(() => { start(); return clear; }, [start, clear]);
   return ready ? <>{children}</> : <ChartSk h={h} />;
 }
@@ -106,16 +106,16 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   const strip = useDragScroll<HTMLDivElement>();
   const [back, setBack] = useState(0);
   const stripToday = s.entry?.data.daily.time[s.entry.pastDays];
-  const loadingPast = useDayQuery(city.id, stripToday ? addDays(stripToday, -(back + 1)) : '').status === 'loading';
+  const loadingPast = useDayQuery(city.id, (stripToday !== undefined && stripToday !== '') ? addDays(stripToday, -(back + 1)) : '').status === 'loading';
   const widthBefore = useRef(0);
   const loadPast = async () => {
     const el = strip.ref.current;
-    if (!el || !stripToday) return;
+    if (!el || (stripToday === undefined || stripToday === '')) { return; }
     const n = back + 1;
     if (n > 1) {
       const date = addDays(stripToday, -n);
       await openDay(city.id, date);
-      if (!useDayStore.getState().days[`${city.id}:${date}`]) return;
+      if (!useDayStore.getState().days[`${city.id}:${date}`]) { return; }
     }
     widthBefore.current = el.scrollWidth;
     setBack(n);
@@ -123,18 +123,18 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   const pastPull = usePullPast(strip.ref, () => void loadPast(), !loadingPast);
   useLayoutEffect(() => {
     const el = strip.ref.current;
-    if (!el || !back) return;
+    if (!el || back === 0) { return; }
     const added = el.scrollWidth - widthBefore.current;
     el.scrollLeft = added;
     el.scrollTo({ left: Math.max(0, added - 3 * 52), behavior: 'smooth' });
   }, [back]);
   useEffect(() => {
     const el = strip.ref.current;
-    const first = s.expanded ? el?.querySelector<HTMLElement>(`[data-date="${s.expanded}"]`) : null;
-    if (el && first) el.scrollTo({ left: (first.previousElementSibling as HTMLElement | null)?.classList.contains('day-divider') ? (first.previousElementSibling as HTMLElement).offsetLeft : first.offsetLeft, behavior: 'smooth' });
+    const first = (s.expanded !== null && s.expanded !== '') ? el?.querySelector<HTMLElement>(`[data-date="${CSS.escape(s.expanded)}"]`) : null;
+    if (el && first) {el.scrollTo({ left: ((first.previousElementSibling as HTMLElement | null)?.classList.contains('day-divider') === true) ? (first.previousElementSibling as HTMLElement).offsetLeft : first.offsetLeft, behavior: 'smooth' });}
   }, [s.expanded]);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
-  const n0 = (v: number | null | undefined, digits = 0) => (v == null ? '–' : v.toFixed(digits));
+  const n0 = (v: number | null | undefined, digits = 0) => ((v === null || v === undefined) ? '–' : v.toFixed(digits));
   const title = <CityTitle city={city} isDefault={isDefault} />;
   if (!s.entry) {
     return (
@@ -155,30 +155,31 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   const today = data.daily.time[t];
   const h0 = nowIndex(data);
   const normal = s.normals?.[today.slice(5)];
-  const delta = normal != null && dv.temperature_2m_max[t] != null ? dv.temperature_2m_max[t]! - normal : null;
+  const hiToday = dv.temperature_2m_max.at(t) ?? null;
+  const delta = normal !== undefined && hiToday !== null ? hiToday - normal : null;
   const precipProb = dv.precipitation_probability_max[t] ?? 0;
   const cells: StripCell[] = [];
   for (let n = back; n >= 2; n--) {
     const day = s.days[`${city.id}:${addDays(today, -n)}`];
-    if (!day) continue;
-    day.hourly.time.forEach((time, k) => cells.push({
+    if (!day) { continue; }
+    for (const [k, time] of day.hourly.time.entries()) {cells.push({
       time, date: time.slice(0, 10), isNow: false, past: true,
       temp: day.hourly.v.temperature_2m?.[k], p: day.hourly.v.precipitation_probability?.[k] ?? null, wind: day.hourly.v.wind_speed_10m?.[k],
-    }));
+    });}
   }
   const from = back >= 1 ? 0 : h0;
-  data.hourly.time.slice(from).forEach((time, k) => {
+  for (const [k, time] of data.hourly.time.slice(from).entries()) {
     const i = from + k;
     cells.push({
       time, date: time.slice(0, 10), isNow: i === h0, past: i < h0,
       temp: i === h0 ? c.temperature_2m : hv.temperature_2m[i], p: hv.precipitation_probability[i] ?? 0, wind: hv.wind_speed_10m[i],
     });
-  });
+  }
   const hours = cells.map((h, k) => {
     const dayStart = hourOf(h.time) === '00' && k > 0;
     return {
       ...h,
-      label: h.isNow ? tx('common.now') : hourOf(h.time) === '00' ? weekday(h.date) : hourOf(h.time),
+      label: h.isNow ? tx('common.now') : (hourOf(h.time) === '00' ? weekday(h.date) : hourOf(h.time)),
       dayBreak: dayStart,
       dayName: dayStart ? weekday(h.date).toLocaleUpperCase() : '',
     };
@@ -186,19 +187,20 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   const mq = data.minutely15;
   const mMax = Math.max(0.5, ...(mq?.precipitation.map((v) => v ?? 0) ?? [0]));
   const days = data.daily.time.slice(t, t + 7).map((date, k) => ({ date, i: t + k, label: k === 0 ? tx('common.today') : weekday(date) }));
-  const daylightChange = dv.daylight_duration[t] != null && dv.daylight_duration[t - 1] != null
-    ? dv.daylight_duration[t]! - dv.daylight_duration[t - 1]! : null;
+  const daylightToday = dv.daylight_duration.at(t) ?? null;
+  const daylightBefore = t > 0 ? dv.daylight_duration[t - 1] ?? null : null;
+  const daylightChange = daylightToday !== null && daylightBefore !== null ? daylightToday - daylightBefore : null;
   const sunPos = sunProgress(data.current.time, data.daily.sunrise[t], data.daily.sunset[t]);
   const aqi = air?.current.european_aqi ?? null;
   const aqiLvl = euAqiLevel(aqi);
   const aqiAhead = air ? air.hourly.time.reduce<AqiPeak | null>((worst, time, i) => {
     const v = air.hourly.aqi[i];
-    if (time < data.hourly.time[h0] || v == null || time > data.hourly.time[h0 + 24]) return worst;
+    if (time < data.hourly.time[h0] || v === null || time > data.hourly.time[h0 + 24]) { return worst; }
     return !worst || v > worst.v ? { v, time } : worst;
   }, null) : null;
-  const pollen = air ? POLLEN.map((k) => ({ name: tx(`city.pollen.${k}`), v: air.current[k], lvl: pollenLevel(air.current[k]) })).filter((p) => p.v != null) : [];
+  const pollen = air ? POLLEN.map((k) => ({ name: tx(`city.pollen.${k}`), v: air.current[k], lvl: pollenLevel(air.current[k]) })).filter((p) => p.v !== null) : [];
   const trend = pressureTrend(data, h0);
-  const windChill = c.apparent_temperature != null && c.temperature_2m != null ? c.apparent_temperature - c.temperature_2m : 0;
+  const windChill = c.apparent_temperature !== null && c.temperature_2m !== null ? c.apparent_temperature - c.temperature_2m : 0;
   const airByTime = air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined;
   const next48 = (height: ChartHeight) => (
     <HourlyExplorer time={data.hourly.time} v={hv} from={h0} to={h0 + 48} aqi={airByTime} height={height} />
@@ -225,7 +227,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <Text fz={20} fw={800} mt={8}>{tx('city.precipChance', { cond: conditionLabel(c.weather_code), p: precipProb })}</Text>
         <Text fz={13} fw={600}>
           {tx('city.heroLine', { feels: T(c.apparent_temperature), hi: T(dv.temperature_2m_max[t]), lo: T(dv.temperature_2m_min[t]) })}
-          {delta != null && ` · ${tx('city.vsAverage', { delta: fmtDelta(delta, s.tempUnit) })}`}
+          {delta !== null && ` · ${tx('city.vsAverage', { delta: fmtDelta(delta, s.tempUnit) })}`}
         </Text>
       </Box>
 
@@ -242,7 +244,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
               <Group justify="space-between" mt={4}>
                 <Text fz={12} c="dimmed">{hhmm(mq.time[0])}</Text>
                 <Text fz={12} c="dimmed">{tx('city.nowcastCaption')}</Text>
-                <Text fz={12} c="dimmed">{hhmm(mq.time[mq.time.length - 1])}</Text>
+                <Text fz={12} c="dimmed">{hhmm(mq.time.at(-1))}</Text>
               </Group>
             </>
           )}
@@ -250,11 +252,11 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
 
         <Box className="hourly-strip" {...strip} {...pastPull.touch}>
           <Box ref={pastPull.indicatorRef} className="pull-past" data-armed={pastPull.armed || undefined}>
-            {loadingPast ? '…' : pastPull.armed ? tx('city.release') : back ? tx('city.earlier') : tx('city.yesterday')}
+            {loadingPast ? '…' : pastPull.armed ? tx('city.release') : back === 0 ? tx('city.yesterday') : tx('city.earlier')}
           </Box>
           {hours.map((h) => (
             <Fragment key={h.time}>
-            {h.dayName && (
+            {h.dayName !== '' && (
               <Box className="day-divider" data-on={h.date === s.expanded || undefined} aria-label={h.dayName}>
                 <Box component="i" />
                 {[...h.dayName].map((ch, n) => <Box component="span" key={n}>{ch}</Box>)}
@@ -264,13 +266,13 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
             <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .82 } : undefined}>
               <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
-              <Text fz={12} fw={600} c="signal.3">{h.p == null ? '–' : `${h.p}%`}</Text>
-              <Text fz={12} c="dimmed">{h.wind == null ? '–' : Math.round(h.wind)}</Text>
+              <Text fz={12} fw={600} c="signal.3">{h.p === null ? '–' : `${h.p}%`}</Text>
+              <Text fz={12} c="dimmed">{(h.wind === null || h.wind === undefined) ? '–' : Math.round(h.wind)}</Text>
             </Box>
             </Fragment>
           ))}
         </Box>
-        <UnstyledButton w="100%" px={12} py={10} onClick={() => s.navigate({ name: 'hourly', cityId: city.id })}
+        <UnstyledButton w="100%" px={12} py={10} onClick={() => { s.navigate({ name: 'hourly', cityId: city.id }); }}
           style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(248,244,244,.2)' }}>
           <Text fz={13} fw={800}>{tx('city.hourlyLink')}</Text>
           <Icon name="arrow" size={16} />
@@ -280,7 +282,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
           const open = s.expanded === date;
           return (
             <Box key={date} className="row" data-on={open || undefined}>
-              <UnstyledButton w="100%" px={12} py={9} onClick={() => s.toggleDay(city.id, date)}
+              <UnstyledButton w="100%" px={12} py={9} onClick={() => { s.toggleDay(city.id, date); }}
                 style={{ display: 'grid', gridTemplateColumns: '52px 1fr 44px 40px 32px', alignItems: 'center', gap: 4 }}>
                 <Text fz={14} fw={800}>{label}</Text>
                 <Text fz={12} c="dimmed" truncate>{conditionLabel(dv.weather_code[i])}</Text>
@@ -315,7 +317,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <FullscreenChart id={`next7:${city.id}`} title={tx('city.next7')} render={next7} />
       </Section>
 
-      <Section title={tx('city.feels.title')} summary={tx(Math.abs(windChill) < 1 ? 'city.feels.close' : windChill < 0 ? 'city.feels.colder' : 'city.feels.warmer', { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>
+      <Section title={tx('city.feels.title')} summary={tx(Math.abs(windChill) < 1 ? 'city.feels.close' : (windChill < 0 ? 'city.feels.colder' : 'city.feels.warmer'), { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>
         <Box className="stat-grid">
           <Stat k={tx('city.feels.title')} v={`${T(c.apparent_temperature)}°`} s={tx('city.feels.air', { t: T(c.temperature_2m) })} />
           <Stat k={tx('city.feels.humidity')} v={`${n0(c.relative_humidity_2m)}%`} s={dewLabel(c.dew_point_2m)} />
@@ -324,16 +326,16 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         </Box>
       </Section>
 
-      <Section title={tx('city.sun.title')} summary={daylightChange != null ? tx('city.sun.summary', { daylight: duration(dv.daylight_duration[t]), change: signedMinutes(daylightChange) }) : undefined}>
+      <Section title={tx('city.sun.title')} summary={daylightChange === null ? undefined : tx('city.sun.summary', { daylight: duration(dv.daylight_duration[t]), change: signedMinutes(daylightChange) })}>
         <Box py={12} className="row">
           <Group justify="space-between" mb={6}>
             <Text fz={20} fw={800}>{hhmm(data.daily.sunrise[t])}</Text>
             <Text fz={20} fw={800}>{hhmm(data.daily.sunset[t])}</Text>
           </Group>
-          <Progress size={6} value={(sunPos ?? (c.is_day ? 1 : 0)) * 100} color="signal.4" />
+          <Progress size={6} value={(sunPos ?? ((c.is_day !== null && c.is_day !== 0) ? 1 : 0)) * 100} color="signal.4" />
           <Group justify="space-between" mt={4}>
             <Text fz={12} c="dimmed">{tx('city.sun.sunrise')}</Text>
-            <Text fz={12} c="dimmed">{sunPos == null ? tx('city.sun.sunDown') : tx('city.sun.passed', { p: Math.round(sunPos * 100) })}</Text>
+            <Text fz={12} c="dimmed">{sunPos === null ? tx('city.sun.sunDown') : tx('city.sun.passed', { p: Math.round(sunPos * 100) })}</Text>
             <Text fz={12} c="dimmed">{tx('city.sun.sunset')}</Text>
           </Group>
         </Box>
@@ -368,11 +370,11 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         </Box>
       </Section>
 
-      <Section title={tx('city.air.title')} summary={air ? tx('city.air.now', { level: aqiLvl != null ? levelName(aqiLvl) : tx('city.air.unknown') }) + (aqiAhead ? tx('city.air.worst', { v: Math.round(aqiAhead.v), time: hhmm(aqiAhead.time) }) : '') : tx('city.air.unavailable')}>
+      <Section title={tx('city.air.title')} summary={air ? tx('city.air.now', { level: aqiLvl === null ? tx('city.air.unknown') : levelName(aqiLvl) }) + (aqiAhead ? tx('city.air.worst', { v: Math.round(aqiAhead.v), time: hhmm(aqiAhead.time) }) : '') : tx('city.air.unavailable')}>
         {air && (
           <>
             <Box className="stat-grid">
-              <Stat k={tx('city.air.euAqi')} v={n0(aqi)} s={aqiLvl != null ? levelName(aqiLvl) : '–'}>
+              <Stat k={tx('city.air.euAqi')} v={n0(aqi)} s={aqiLvl === null ? '–' : levelName(aqiLvl)}>
                 <Bar pct={((aqi ?? 0) / 120) * 100} level={aqiLvl} />
               </Stat>
               <Stat k={tx('city.air.usAqi')} v={n0(air.current.us_aqi)} s={usAqiLabel(air.current.us_aqi)}>
@@ -386,7 +388,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
                 <Box key={p.key} py={8} className="row" style={{ display: 'grid', gridTemplateColumns: '1fr 64px 84px', gap: 8, alignItems: 'center' }}>
                   <Box><Text fz={13} fw={600}>{tx(`city.air.${p.key}` as MessageKey)}</Text><Text fz={12} c="dimmed">{p.unit}</Text></Box>
                   <Text fz={15} fw={800}>{n0(v)}</Text>
-                  <Box><Text fz={12} c="dimmed">{lvl != null ? levelName(lvl) : '—'}</Text>{lvl != null && <Bar pct={((lvl + 1) / 6) * 100} level={lvl} />}</Box>
+                  <Box><Text fz={12} c="dimmed">{lvl === null ? '—' : levelName(lvl)}</Text>{lvl !== null && <Bar pct={((lvl + 1) / 6) * 100} level={lvl} />}</Box>
                 </Box>
               );
             })}
@@ -415,7 +417,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
       <Section title={tx('city.sky.title')}>
         <Box className="stat-grid">
           <Stat k={tx('city.sky.cloudCover')} v={`${n0(c.cloud_cover)}%`}><Bar pct={c.cloud_cover ?? 0} color="var(--mantine-color-dark-1)" /></Stat>
-          <Stat k={tx('city.sky.visibility')} v={c.visibility == null ? '–' : `${(c.visibility / 1000).toFixed(c.visibility < 10000 ? 1 : 0)} km`} s={visibilityLabel(c.visibility)} />
+          <Stat k={tx('city.sky.visibility')} v={c.visibility === null ? '–' : `${(c.visibility / 1000).toFixed(c.visibility < 10_000 ? 1 : 0)} km`} s={visibilityLabel(c.visibility)} />
           <Stat k={tx('city.sky.lowClouds')} v={`${n0(hv.cloud_cover_low[h0])}%`} s={tx('city.sky.below3')}><Bar pct={hv.cloud_cover_low[h0] ?? 0} color="var(--mantine-color-dark-2)" /></Stat>
           <Stat k={tx('city.sky.midHigh')} v={`${n0(hv.cloud_cover_mid[h0])}% / ${n0(hv.cloud_cover_high[h0])}%`} s={tx('city.sky.midHighNote')} />
         </Box>
@@ -425,7 +427,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <Box className="stat-grid">
           <Stat k={tx('city.atmosphere.pressure')} v={`${n0(c.pressure_msl)} hPa`} s={trend ? tx('city.atmosphere.trend', { label: trend.label, delta: `${trend.delta >= 0 ? '+' : '−'}${Math.abs(trend.delta).toFixed(1)}` }) : tx('city.atmosphere.seaLevel')} />
           <Stat k={tx('city.atmosphere.thunder')} v={capeLabel(hv.cape[h0])} s={`CAPE ${n0(hv.cape[h0])} J/kg`} />
-          <Stat k={tx('city.atmosphere.freezing')} v={hv.freezing_level_height[h0] == null ? '–' : `${Math.round(hv.freezing_level_height[h0]!)} m`} s={tx('city.atmosphere.freezingNote')} />
+          <Stat k={tx('city.atmosphere.freezing')} v={orDash(hv.freezing_level_height.at(h0), (n) => `${Math.round(n)} m`)} s={tx('city.atmosphere.freezingNote')} />
           <Stat k={tx('city.atmosphere.evaporation')} v={`${n0(dv.et0_fao_evapotranspiration[t], 1)} mm`} s={tx('city.atmosphere.evaporationNote')} />
         </Box>
       </Section>
@@ -433,8 +435,8 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
       {marine && (
         <Section title={tx('city.sea.title')}>
           <Box className="stat-grid">
-            <Stat k={tx('city.sea.waves')} v={marine.current.wave_height == null ? '–' : `${marine.current.wave_height.toFixed(1)} m`} s={tx('city.sea.wavesNote', { dir: compass(marine.current.wave_direction ?? 0), s: n0(marine.current.wave_period) })} />
-            <Stat k={tx('city.sea.swell')} v={marine.current.swell_wave_height == null ? '–' : `${marine.current.swell_wave_height.toFixed(1)} m`} />
+            <Stat k={tx('city.sea.waves')} v={marine.current.wave_height === null ? '–' : `${marine.current.wave_height.toFixed(1)} m`} s={tx('city.sea.wavesNote', { dir: compass(marine.current.wave_direction ?? 0), s: n0(marine.current.wave_period) })} />
+            <Stat k={tx('city.sea.swell')} v={marine.current.swell_wave_height === null ? '–' : `${marine.current.swell_wave_height.toFixed(1)} m`} />
             <Stat k={tx('city.sea.temperature')} v={`${T(marine.current.sea_surface_temperature)}°`} />
           </Box>
         </Section>
@@ -442,7 +444,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
 
       <Box mx={12} mt={24}>
         <Button className="glass" variant="default" size="lg" fullWidth
-          rightSection={<Icon name="arrow" size={18} />} onClick={() => s.navigate({ name: 'history', cityId: city.id })}>
+          rightSection={<Icon name="arrow" size={18} />} onClick={() => { s.navigate({ name: 'history', cityId: city.id }); }}>
           {tx('city.historyButton', { logged: tx('common.daysLogged', { count: s.logged }) })}
         </Button>
       </Box>

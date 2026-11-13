@@ -5,9 +5,9 @@ const settle = (): void => undefined;
 
 export const READY: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfilled', value: undefined });
 
-export function once(key: string, run: () => Promise<unknown>): Promise<void> {
+export async function once(key: string, run: () => Promise<unknown>): Promise<void> {
   const pending = running.get(key);
-  if (pending !== undefined) return pending;
+  if (pending !== undefined) { return pending; }
   const promise = Promise.resolve().then(run).then(settle, settle);
   running.set(key, promise);
   void promise.then(() => {
@@ -18,10 +18,10 @@ export function once(key: string, run: () => Promise<unknown>): Promise<void> {
   return promise;
 }
 
-export function lastSettled(key: string): Promise<void> {
+export async function lastSettled(key: string): Promise<void> {
   return settled.get(key) ?? READY;
 }
 
-export function latest(key: string): Promise<void> {
+export async function latest(key: string): Promise<void> {
   return running.get(key) ?? settled.get(key) ?? READY;
 }

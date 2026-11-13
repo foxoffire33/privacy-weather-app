@@ -20,4 +20,4 @@ export function resetDataLayerConfig(): void {
   current = createDefaultConfig();
 }
 
-export {type DataLayerConfig} from './types';
+export { type DataLayerConfig } from './types';

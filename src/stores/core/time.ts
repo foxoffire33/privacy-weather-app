@@ -9,5 +9,5 @@ export function addDays(iso: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export const daysBetween = (a: string, b: string) =>
+export const daysBetween = (a: string, b: string): number =>
   Math.round((new Date(`${b  }T12:00Z`).getTime() - new Date(`${a  }T12:00Z`).getTime()) / 86_400_000);

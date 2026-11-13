@@ -1,14 +1,15 @@
-import { waitForHydration } from './core/persistStorage';
-import type { Rehydratable } from './core/types';
-import { importLegacyStore } from './migrateLegacy';
-import { useEntityCache } from './entities/cache';
-import { useSettingsStore } from './settingsStore';
-import { useCityStore } from './cityStore';
-import { useForecastStore } from './forecastStore';
-import { useLogStore } from './logStore';
-import { useDayStore } from './dayStore';
 import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
+import { useCityStore } from './cityStore';
+import { waitForHydration } from './core/persistStorage';
+import { useDayStore } from './dayStore';
+import { useEntityCache } from './entities/cache';
+import { useForecastStore } from './forecastStore';
+import { useLogStore } from './logStore';
+import { importLegacyStore } from './migrateLegacy';
+import { useSettingsStore } from './settingsStore';
+
+import type { Rehydratable } from './core/types';
 
 const PERSISTED: Rehydratable[] = [
   useEntityCache,
@@ -26,7 +27,7 @@ export function alreadyHydrated(): boolean {
 
 let booting: Promise<void> | null = null;
 
-export function hydrateAll(): Promise<void> {
+export async function hydrateAll(): Promise<void> {
   booting ??= (async () => {
     await importLegacyStore().catch(() => false);
     await Promise.all(PERSISTED.map(async (store) => {

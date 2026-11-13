@@ -3,9 +3,9 @@ import { persist } from 'zustand/middleware';
 
 import { idbStorage } from '../core/persistStorage';
 
-import { ENTITY_NAMES, FOLD_RULES   } from './schema';
+import { ENTITY_NAMES, FOLD_RULES } from './schema';
 
-import type {EntityName, EntityTypeMap} from './schema';
+import type { EntityName, EntityTypeMap } from './schema';
 import type { CacheTables, EntityCacheState, PersistedEntities, Table } from './types';
 
 export type { CacheTables, EntityCacheState } from './types';

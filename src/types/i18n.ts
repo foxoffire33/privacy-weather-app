@@ -1,5 +1,5 @@
-import type en from '../i18n/locales/en.json';
 import type { LANGUAGES } from '../i18n';
+import type en from '../i18n/locales/en.json';
 
 export type Messages = typeof en;
 

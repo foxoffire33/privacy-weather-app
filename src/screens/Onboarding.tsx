@@ -1,9 +1,12 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
-import { useUiStore } from '../stores/uiStore';
+
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
+import { useUiStore } from '../stores/uiStore';
 
-export function Onboarding() {
+import type { ReactElement } from 'react';
+
+export function Onboarding(): ReactElement {
   const navigate = useUiStore((s) => s.navigate);
   const STEPS = [
     { t: t('onboarding.step1Title'), d: t('onboarding.step1Text') },
@@ -26,7 +29,7 @@ export function Onboarding() {
         ))}
       </Stack>
       <Button variant="white" color="dark" size="xl" fullWidth rightSection={<Icon name="arrow" />}
-        onClick={() => navigate({ name: 'search' })}>
+        onClick={() => { navigate({ name: 'search' }); }}>
         {t('onboarding.start')}
       </Button>
     </Box>

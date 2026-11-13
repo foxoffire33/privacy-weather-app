@@ -1,12 +1,15 @@
+import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 import {
   ActionIcon, Badge, Button, Drawer, Modal, Paper, Progress, Skeleton, SegmentedControl, Select, Switch, TextInput, PasswordInput,
-  createTheme, type MantineColorsTuple,
+  createTheme 
 } from '@mantine/core';
-import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
+
 
 import { CompactTooltip } from './components/charts/CompactTooltip';
+
 import type { Accent } from './stores';
 import type { AccentDef } from './types';
+import type { MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 
 export const ACCENTS: Record<Exclude<Accent, 'custom'>, AccentDef> = {
   green: { label: 'Green', tuple: ['#ebfaf0', '#cff2dc', '#a3e5bd', '#6fd399', '#40bf77', '#178a4a', '#127a40', '#0e6334', '#0a4c28', '#063019'] },
@@ -58,9 +61,9 @@ const luminance = ([r, g, b]: number[]) => (0.2126 * r + 0.7152 * g + 0.0722 * b
 
 export function customTuple(hex: string): MantineColorsTuple {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
-  let base = m ? [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)) : [23, 138, 74];
-  while (luminance(base) > 0.5) base = mix(base as [number, number, number], [0, 0, 0], 0.1);
-  while (luminance(base) < 0.12) base = mix(base as [number, number, number], [255, 255, 255], 0.1);
+  let base = m ? [0, 2, 4].map((i) => Number.parseInt(m[1].slice(i, i + 2), 16)) : [23, 138, 74];
+  while (luminance(base) > 0.5) { base = mix(base as [number, number, number], [0, 0, 0], 0.1); }
+  while (luminance(base) < 0.12) { base = mix(base as [number, number, number], [255, 255, 255], 0.1); }
   const b = base as [number, number, number];
   const white: [number, number, number] = [255, 255, 255];
   const black: [number, number, number] = [0, 0, 0];
@@ -68,7 +71,7 @@ export function customTuple(hex: string): MantineColorsTuple {
     .concat(toHex(b), [0.15, 0.3, 0.5, 0.7].map((t) => toHex(mix(b, black, t)))) as unknown as MantineColorsTuple;
 }
 
-export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createTheme({
+export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThemeOverride => createTheme({
   primaryColor: 'signal',
   primaryShade: 5,
   autoContrast: true,

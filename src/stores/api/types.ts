@@ -1,5 +1,5 @@
-import type { fetchWeatherApi } from 'openmeteo';
 import type { AIR_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS } from './variables';
+import type { fetchWeatherApi } from 'openmeteo';
 
 export type EndpointKind = 'forecast' | 'archive' | 'air' | 'marine' | 'geo';
 
@@ -16,4 +16,4 @@ export interface TimeRows {
   time: string[];
 }
 
-export type RangeRows = TimeRows & Record<string, (number | null)[]>;
+export type RangeRows = TimeRows & Partial<Record<string, (number | null)[]>>;

@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
 import type { City, DayRecord, TempUnit, WindUnit } from '../stores';
 import type { DateRange } from './stores';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
@@ -66,16 +66,16 @@ export interface BarProps {
 
 export interface SectionProps {
   title: string;
-  summary?: ReactNode;
-  action?: ReactNode;
+  summary?: string | null;
+  action?: ReactElement;
   children?: ReactNode;
 }
 
 export interface StatProps {
   k: string;
   v: ReactNode;
-  s?: ReactNode;
-  children?: ReactNode;
+  s?: string | ReactElement | null;
+  children?: ReactElement;
 }
 
 export interface TrendsProps {

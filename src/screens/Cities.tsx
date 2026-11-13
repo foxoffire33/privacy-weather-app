@@ -1,20 +1,23 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
-import { useUiStore } from '../stores/uiStore';
-import { conditionLabel } from '../lib/weatherCodes';
-import { fmtTemp } from '../lib/format';
-import { ScreenHeader } from '../components/ScreenHeader';
+
 import { Icon } from '../components/Icon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t, tl } from '../i18n';
+import { fmtTemp } from '../lib/format';
+import { conditionLabel } from '../lib/weatherCodes';
+import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
+import { useUiStore } from '../stores/uiStore';
+
 import type { ReorderDrag } from '../types';
+import type { PointerEvent, ReactElement } from 'react';
 
 const EDGE = 70;
 
-export function Cities() {
+export function Cities(): ReactElement {
   const cities = useCities();
   const forecasts = useForecastStore((s) => s.forecasts);
   const logged = useLogStore((s) => s.dates);
@@ -28,7 +31,7 @@ export function Cities() {
   const g = useRef({ startY: 0, startScroll: 0, pointerY: 0, rowH: 1, from: 0, raf: 0 });
   const update = () => {
     const el = scroller.current;
-    if (!el) return;
+    if (!el) { return; }
     const dy = g.current.pointerY - g.current.startY + (el.scrollTop - g.current.startScroll);
     const to = Math.max(0, Math.min(n - 1, g.current.from + Math.round(dy / g.current.rowH)));
     setDrag({ from: g.current.from, to, dy });
@@ -38,32 +41,32 @@ export function Cities() {
     if (el) {
       const r = el.getBoundingClientRect();
       const y = g.current.pointerY;
-      const speed = y < r.top + EDGE ? -(r.top + EDGE - y) / 5 : y > r.bottom - EDGE ? (y - (r.bottom - EDGE)) / 5 : 0;
-      if (speed) { el.scrollTop += speed; update(); }
+      const speed = y < r.top + EDGE ? -(r.top + EDGE - y) / 5 : (y > r.bottom - EDGE ? (y - (r.bottom - EDGE)) / 5 : 0);
+      if (speed !== 0) { el.scrollTop += speed; update(); }
     }
     g.current.raf = requestAnimationFrame(tick);
   };
-  useEffect(() => () => cancelAnimationFrame(g.current.raf), []);
+  useEffect(() => () => { cancelAnimationFrame(g.current.raf); }, []);
   const onDown = (e: PointerEvent<HTMLElement>, i: number) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    g.current = { ...g.current, startY: e.clientY, pointerY: e.clientY, startScroll: scroller.current?.scrollTop ?? 0, rowH: firstRow.current?.offsetHeight || 1, from: i };
+    g.current = { ...g.current, startY: e.clientY, pointerY: e.clientY, startScroll: scroller.current?.scrollTop ?? 0, rowH: Math.max(1, firstRow.current?.offsetHeight ?? 0), from: i };
     setDrag({ from: i, to: i, dy: 0 });
     g.current.raf = requestAnimationFrame(tick);
   };
   const onMove = (e: PointerEvent<HTMLElement>) => {
-    if (!drag) return;
+    if (!drag) { return; }
     g.current.pointerY = e.clientY;
     update();
   };
   const onUp = () => {
     cancelAnimationFrame(g.current.raf);
-    if (drag && drag.from !== drag.to) reorderCities(drag.from, drag.to);
+    if (drag && drag.from !== drag.to) { reorderCities(drag.from, drag.to); }
     setDrag(null);
   };
   const shift = (i: number) => {
-    if (!drag || i === drag.from) return 0;
-    if (drag.from < drag.to && i > drag.from && i <= drag.to) return -g.current.rowH;
-    if (drag.from > drag.to && i < drag.from && i >= drag.to) return g.current.rowH;
+    if (!drag || i === drag.from) { return 0; }
+    if (drag.from < drag.to && i > drag.from && i <= drag.to) { return -g.current.rowH; }
+    if (drag.from > drag.to && i < drag.from && i >= drag.to) { return g.current.rowH; }
     return 0;
   };
   return (
@@ -86,11 +89,11 @@ export function Cities() {
                 }}>
                 <Group gap={0} wrap="nowrap" align="stretch">
                   <Box className="drag-handle" role="button" aria-label={t('cities.reorder', { name: c.name })} tabIndex={0}
-                    onPointerDown={(e) => onDown(e, i)} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+                    onPointerDown={(e) => { onDown(e, i); }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                     <Icon name="grip" size={20} />
                   </Box>
                   <Group justify="space-between" align="center" wrap="nowrap" style={{ flex: 1, minWidth: 0 }} py={16} pr={8}>
-                    <UnstyledButton onClick={() => goHome(i)} style={{ flex: 1, minWidth: 0 }}>
+                    <UnstyledButton onClick={() => { goHome(i); }} style={{ flex: 1, minWidth: 0 }}>
                       <Group gap={8} wrap="nowrap">
                         <Text fz={22} fw={800} truncate>{c.name}</Text>
                         {i === 0 && <Badge size="sm">{t('common.default')}</Badge>}
@@ -123,7 +126,7 @@ export function Cities() {
         </Box>
       </Box>
 
-      <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => navigate({ name: 'search' })}>
+      <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => { navigate({ name: 'search' }); }}>
         {t('cities.followCity')}
       </Button>
     </Box>

@@ -1,15 +1,18 @@
 import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { IDLE_QUERY, type QueryState } from './core/types';
+
+import { useAlmanacStore } from './almanacStore';
+import { useBootStore } from './bootStore';
+import { useCityStore } from './cityStore';
+import { IDLE_QUERY } from './core/types';
+import { useDayStore } from './dayStore';
 import { useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
-import { useCityStore } from './cityStore';
 import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
-import { useDayStore } from './dayStore';
-import { useAlmanacStore } from './almanacStore';
 import { useSettingsStore } from './settingsStore';
-import { useBootStore } from './bootStore';
+
+import type { QueryState } from './core/types';
 import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LookupView, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
@@ -45,7 +48,7 @@ export function useCityLog(cityId: string): Record<string, DayRecord> {
     const out: Record<string, DayRecord> = {};
     for (const date of dates ?? []) {
       const record = table[dayKey(cityId, date)];
-      if (record !== undefined) out[date] = record;
+      if (record !== undefined) { out[date] = record; }
     }
     return out;
   }, [cityId, dates, table]);

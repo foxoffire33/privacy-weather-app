@@ -71,4 +71,4 @@ export function fromDayData(cityId: string, day: DayData): DayRecord {
   };
 }
 
-export const isEmptyRecord = (r: DayRecord): boolean => r.hi == null && r.lo == null && r.mm == null;
+export const isEmptyRecord = (r: DayRecord): boolean => (r.hi === null || r.hi === undefined) && (r.lo === null || r.lo === undefined) && (r.mm === null || r.mm === undefined);

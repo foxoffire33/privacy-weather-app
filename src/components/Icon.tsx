@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import type { IconName, IconProps } from '../types';
+import type { ReactElement, ReactNode } from 'react';
 
 const ICONS: Record<IconName, ReactNode> = {
   list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
@@ -22,7 +22,7 @@ const ICONS: Record<IconName, ReactNode> = {
 
 export type { IconName } from '../types';
 
-export function Icon({ name, size = 22, stroke = 2 }: IconProps) {
+export function Icon({ name, size = 22, stroke = 2 }: IconProps): ReactElement {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

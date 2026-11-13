@@ -6,7 +6,9 @@ import App from './App';
 import { useSettings } from './stores';
 import { buildTheme, CONFIRM_MODAL } from './theme';
 
-export function Root() {
+import type { ReactElement } from 'react';
+
+export function Root(): ReactElement {
   const { accent, accentColor } = useSettings();
   const theme = useMemo(() => buildTheme(accent, accentColor), [accent, accentColor]);
   return (

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import en from './locales/en.json';
+
 import type { I18nState, Language, LocaleModule, MessageKey, Messages, Vars } from '../types';
 
 export type { Language, MessageKey, Messages } from '../types';
@@ -35,10 +36,10 @@ export const LANGUAGES = [
 const loaders = import.meta.glob<LocaleModule>(['./locales/*.json', '!./locales/en.json']);
 
 export function systemLanguage(): Language {
-  const prefs = typeof navigator === 'undefined' ? [] : (navigator.languages?.length ? navigator.languages : [navigator.language]);
+  const prefs = typeof navigator === 'undefined' ? [] : (navigator.languages.length > 0 ? navigator.languages : [navigator.language]);
   for (const tag of prefs) {
-    const base = (tag ?? '').toLowerCase().split('-')[0];
-    if (LANGUAGES.some((l) => l.code === base)) return base as Language;
+    const base = tag.toLowerCase().split('-', 1)[0];
+    if (LANGUAGES.some((l) => l.code === base)) { return base as Language; }
   }
   return 'en';
 }
@@ -51,10 +52,10 @@ const DONE: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfille
 const loading = new Map<Language, Promise<void>>();
 const loaded = new Map<Language, Promise<void>>();
 
-export function ensureLanguage(lang: Language): Promise<void> {
+export async function ensureLanguage(lang: Language): Promise<void> {
   const pending = loading.get(lang);
-  if (pending !== undefined) return pending;
-  const promise = Promise.resolve().then(() => useI18n.getState().setLanguage(lang));
+  if (pending !== undefined) { return pending; }
+  const promise = Promise.resolve().then(async () => useI18n.getState().setLanguage(lang));
   loading.set(lang, promise);
   void promise.then(() => {
     loading.delete(lang);
@@ -63,7 +64,7 @@ export function ensureLanguage(lang: Language): Promise<void> {
   return promise;
 }
 
-export function languageLoaded(lang: Language): Promise<void> {
+export async function languageLoaded(lang: Language): Promise<void> {
   return loaded.get(lang) ?? DONE;
 }
 
@@ -74,7 +75,7 @@ export const useI18n = create<I18nState>((set, get) => ({
   ready: false,
   setLanguage: async (pref) => {
     const lang = resolveLanguage(pref);
-    if (get().ready && get().lang === lang) return;
+    if (get().ready && get().lang === lang) { return; }
     let messages: Messages = en;
     if (lang !== 'en') {
       try {
@@ -92,7 +93,7 @@ export const useI18n = create<I18nState>((set, get) => ({
 function lookup(messages: unknown, key: string): unknown {
   let node = messages;
   for (const part of key.split('.')) {
-    if (node == null || typeof node !== 'object') return undefined;
+    if ((node === null || node === undefined) || typeof node !== 'object') { return undefined; }
     node = (node as Record<string, unknown>)[part];
   }
   return node;
@@ -111,21 +112,21 @@ function pluralCategory(locale: string, n: number) {
 export function t(key: MessageKey, vars?: Vars): string {
   const { messages, locale } = useI18n.getState();
   let value = lookup(messages, key);
-  if (value == null || (typeof value === 'string' && !value)) value = lookup(en, key);
-  if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+  if ((value === null || value === undefined) || (typeof value === 'string' && value === '')) { value = lookup(en, key); }
+  if ((value !== null && value !== undefined) && typeof value === 'object' && !Array.isArray(value)) {
     const forms = value as Record<string, string>;
     const count = typeof vars?.count === 'number' ? vars.count : 0;
     const enForms = lookup(en, key) as Record<string, string>;
     value = forms[pluralCategory(locale, count)] ?? forms.other ?? enForms.other;
   }
-  if (typeof value !== 'string') return key;
-  return vars ? value.replace(/\{(\w+)\}/g, (m, k: string) => (vars[k] == null ? m : String(vars[k]))) : value;
+  if (typeof value !== 'string') { return key; }
+  return vars ? value.replaceAll(/\{(\w+)\}/g, (m, k: string) => ((vars[k] === null || vars[k] === undefined) ? m : String(vars[k]))) : value;
 }
 
 export function tl(key: MessageKey): string[] {
   const value = lookup(useI18n.getState().messages, key);
   const fallback = lookup(en, key) as string[];
-  return Array.isArray(value) ? fallback.map((f, i) => (value[i] as string) || f) : fallback;
+  return Array.isArray(value) ? fallback.map((f, i) => { const v: unknown = value[i]; return typeof v === 'string' && v !== '' ? v : f; }) : fallback;
 }
 
-export const currentLocale = () => useI18n.getState().locale;
+export const currentLocale = (): string => useI18n.getState().locale;

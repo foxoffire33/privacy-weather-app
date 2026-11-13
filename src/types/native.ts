@@ -1,5 +1,5 @@
-import type { MantineColorsTuple } from '@mantine/core';
 import type { Accent, ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../stores';
+import type { MantineColorsTuple } from '@mantine/core';
 
 export interface AppIconOptions {
   accent: Accent;
@@ -7,7 +7,7 @@ export interface AppIconOptions {
 }
 
 export interface AppIconPlugin {
-  setAccent(options: AppIconOptions): Promise<void>;
+  setAccent: (options: AppIconOptions) => Promise<void>;
 }
 
 export interface WidgetsUpdate {
@@ -15,7 +15,7 @@ export interface WidgetsUpdate {
 }
 
 export interface WidgetsPlugin {
-  update(options: WidgetsUpdate): Promise<void>;
+  update: (options: WidgetsUpdate) => Promise<void>;
 }
 
 export interface WidgetDay {
@@ -96,8 +96,8 @@ export interface SnapshotInput {
   city: City | undefined;
   entry: ForecastEntry | undefined;
   tempUnit: TempUnit;
-  normals: Record<string, number>;
-  log: Record<string, DayRecord>;
+  normals: Partial<Record<string, number>>;
+  log: Partial<Record<string, DayRecord>>;
   years: ArchiveYear[];
 }
 

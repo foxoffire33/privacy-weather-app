@@ -1,6 +1,6 @@
-import { IDLE_QUERY    } from '../core/types';
+import { IDLE_QUERY } from '../core/types';
 
-import type {QueryMap, QueryState} from '../core/types';
+import type { QueryMap, QueryState } from '../core/types';
 
 
 
@@ -35,4 +35,4 @@ export function setQuery(map: QueryMap, key: string, q: QueryState): QueryMap {
   return { ...map, [key]: q };
 }
 
-export {initialQueryState, IDLE_QUERY, type QueryMap, type QueryState} from '../core/types';
+export { initialQueryState, IDLE_QUERY, type QueryMap, type QueryState } from '../core/types';

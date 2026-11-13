@@ -1,14 +1,18 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 import { Box, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
+
+import { t, t as tt } from '../../i18n';
+import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
-import { useSeriesToggle } from './SeriesToggle';
-import type { HourlyVar } from '../../stores/api/variables';
-import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
-import { t, t as tt } from '../../i18n';
-import type { HourlyExplorerProps, HourlyMetric, Labelled } from '../../types';
+
 import { INLINE_HEIGHT } from './FullscreenChart';
+import { useSeriesToggle } from './SeriesToggle';
+
+import type { HourlyVar } from '../../stores/api/variables';
+import type { HourlyExplorerProps, HourlyMetric, Labelled } from '../../types';
+import type { ReactElement } from 'react';
 
 const BASE = { h: 180, dataKey: 'label' };
 const LINE = BASE;
@@ -30,13 +34,13 @@ const METRICS: HourlyMetric[] = [
   { value: 'air', label: 'chart.air', needs: 'aqi' },
 ];
 
-export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEIGHT }: HourlyExplorerProps) {
+export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEIGHT }: HourlyExplorerProps): ReactElement {
   const units = useUnits();
   const s = useUiStore(useShallow((st) => ({ metric: st.chartMetric, setMetric: st.setChartMetric })));
   const end = Math.min(to ?? time.length, time.length);
   const has = (k: HourlyVar | 'aqi') => (k === 'aqi'
-    ? Object.values(aqi ?? {}).some((x) => x != null)
-    : (v[k] ?? []).slice(from, end).some((x) => x != null));
+    ? Object.values(aqi ?? {}).some((x) => x !== null)
+    : (v[k] ?? []).slice(from, end).some((x) => x !== null));
   const available = METRICS.filter((m) => has(m.needs));
   const active = available.find((m) => m.value === s.metric)?.value ?? available[0]?.value;
   const at = (k: HourlyVar, i: number) => v[k]?.[i] ?? null;
@@ -70,7 +74,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
       <Box className="metric-tabs" role="tablist">
         {available.map(({ value, label }) => (
           <UnstyledButton key={value} type="button" role="tab" aria-selected={value === active}
-            data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{t(label)}</UnstyledButton>
+            data-active={value === active || undefined} onClick={() => { s.setMetric(value); }}>{t(label)}</UnstyledButton>
         ))}
       </Box>
       {active === 'temp' && (

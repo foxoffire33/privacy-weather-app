@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
 import { idbStorage } from './core/persistStorage';
-import { entityCache } from './entities/cache';
 import { todayISO } from './core/time';
-import type { City } from './types';
+import { entityCache } from './entities/cache';
+
 import type { CityState } from './storeTypes';
+import type { City } from './types';
 
 export type { CityState } from './storeTypes';
 
@@ -16,7 +18,7 @@ export const useCityStore = create<CityState>()(
       follow: (geo) => {
         const id = String(geo.id);
         const existing = get().cityIds.indexOf(id);
-        if (existing >= 0) return { id, index: existing, added: false };
+        if (existing !== -1) {return { id, index: existing, added: false };}
         const city: City = {
           id,
           name: geo.name,
@@ -31,7 +33,7 @@ export const useCityStore = create<CityState>()(
       },
       unfollow: (id) => set((s) => ({ cityIds: s.cityIds.filter((c) => c !== id) })),
       reorder: (from, to) => set((s) => {
-        if (from === to || from < 0 || to < 0 || from >= s.cityIds.length || to >= s.cityIds.length) return s;
+        if (from === to || from < 0 || to < 0 || from >= s.cityIds.length || to >= s.cityIds.length) { return s; }
         const list = [...s.cityIds];
         list.splice(to, 0, list.splice(from, 1)[0]);
         return { cityIds: list };
@@ -42,7 +44,7 @@ export const useCityStore = create<CityState>()(
       addMany: (cities) => {
         const known = new Set(get().cityIds);
         const fresh = cities.filter((c) => !known.has(c.id));
-        if (fresh.length === 0) return [];
+        if (fresh.length === 0) { return []; }
         entityCache.upsertMany('city', fresh);
         set((s) => ({ cityIds: [...s.cityIds, ...fresh.map((c) => c.id)], onboarded: true }));
         return fresh.map((c) => c.id);

@@ -2,18 +2,21 @@ import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, PasswordInput
 import { modals } from '@mantine/modals';
 import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
-import type { Accent, TempUnit, WindUnit } from '../stores';
-import { ACCENTS } from '../theme';
-import { countDays } from '../lib/backup';
-import { useBackupStore } from '../stores/backupStore';
+
+import { version } from '../../package.json';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
-import { version } from '../../package.json';
+import { countDays } from '../lib/backup';
+import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
+import { useBackupStore } from '../stores/backupStore';
+import { ACCENTS } from '../theme';
+
+import type { Accent, TempUnit, WindUnit } from '../stores';
+import type { ReactElement } from 'react';
 
 const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
 
-export function Settings() {
+export function Settings(): ReactElement {
   const settings = useSettings();
   const set = useUpdateSettings();
   const counts = storedCounts();
@@ -28,8 +31,8 @@ export function Settings() {
     resetFile.current?.();
   };
   const importMsg = result === null ? null
-    : result.ok ? { ok: true, text: t('settings.imported', { cities: result.cities, days: result.days }) }
-      : { ok: false, text: result.error };
+    : (result.ok ? { ok: true, text: t('settings.imported', { cities: result.cities, days: result.days }) }
+      : { ok: false, text: result.error });
   return (
     <Box className="screen">
       <ScreenHeader />
@@ -38,7 +41,7 @@ export function Settings() {
         <Box className="kicker">{t('settings.language')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
-            value={s.settings.language ?? 'system'} onChange={(v) => v && set({ language: v })}
+            value={s.settings.language} onChange={(v) => (v !== null && v !== '') && set({ language: v })}
             data={[
               { value: 'system', label: t('settings.languageSystem', { name: LANGUAGES.find((l) => l.code === systemLanguage())?.name }) },
               ...LANGUAGES.map((l) => ({ value: l.code, label: l.name })),
@@ -49,12 +52,12 @@ export function Settings() {
         <Box py={12} className="row">
           <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
             description={t('settings.apiKeyNote')}
-            onChange={(e) => set({ apiKey: e.currentTarget.value.trim() })} />
+            onChange={(e) => { set({ apiKey: e.currentTarget.value.trim() }); }} />
         </Box>
         <Box py={12} className="row">
           <TextInput label={t('settings.server')} placeholder="https://api.open-meteo.com" value={s.settings.server}
             description={t('settings.serverNote')}
-            onChange={(e) => set({ server: e.currentTarget.value.trim() })} />
+            onChange={(e) => { set({ server: e.currentTarget.value.trim() }); }} />
         </Box>
         <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
@@ -64,14 +67,14 @@ export function Settings() {
           <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
           <Group gap={8}>
             {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
-              <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}
+              <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => { set({ accent: a }); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                   border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>
                 <ColorSwatch color={a === 'off' ? '#000' : ACCENTS[a].tuple[5]} size={16} radius={0} withShadow={false} style={{ border: '1px solid var(--rule)' }} />
                 <Text fz={13} fw={800}>{t(ACCENT_KEYS[a])}</Text>
               </UnstyledButton>
             ))}
-            <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}
+            <UnstyledButton aria-pressed={s.settings.accent === 'custom'} onClick={() => { set({ accent: 'custom' }); }}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                 border: `2px solid ${s.settings.accent === 'custom' ? '#fff' : 'var(--rule-soft)'}` }}>
               <ColorSwatch color={s.settings.accentColor} size={16} radius={0} withShadow={false} style={{ border: '1px solid var(--rule)' }} />
@@ -80,10 +83,10 @@ export function Settings() {
           </Group>
           {s.settings.accent === 'custom' && (
             <Box mt={12}>
-              <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => set({ accent: 'custom', accentColor })}
+              <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => { set({ accent: 'custom', accentColor }); }}
                 swatchesPerRow={7} swatches={['#e11d48', '#f97316', '#d97706', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea', '#db2777', '#78716c', '#0f766e', '#b91c1c', '#1d4ed8', '#7e22ce']} />
               <TextInput mt={8} label={t('settings.hex')} value={s.settings.accentColor} maxLength={7}
-                onChange={(e) => set({ accent: 'custom', accentColor: e.currentTarget.value })} />
+                onChange={(e) => { set({ accent: 'custom', accentColor: e.currentTarget.value }); }} />
               <Text fz={12} c="dimmed" mt={4}>{t('settings.hexNote')}</Text>
             </Box>
           )}
@@ -92,12 +95,12 @@ export function Settings() {
         <Box className="kicker">{t('settings.units')}</Box>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.temperature')}</Text>
-          <SegmentedControl value={s.settings.tempUnit} onChange={(v) => set({ tempUnit: v as TempUnit })}
+          <SegmentedControl value={s.settings.tempUnit} onChange={(v) => { set({ tempUnit: v }); }}
             data={[{ label: '°C', value: 'C' }, { label: '°F', value: 'F' }]} />
         </Group>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.wind')}</Text>
-          <SegmentedControl value={s.settings.windUnit} onChange={(v) => set({ windUnit: v as WindUnit })}
+          <SegmentedControl value={s.settings.windUnit} onChange={(v) => { set({ windUnit: v }); }}
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
 
@@ -105,7 +108,7 @@ export function Settings() {
         <Box py={12} className="row">
           <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
             description={t('settings.intervalNote')}
-            onChange={(v) => v && set({ snapshotMinutes: Number(v) })}
+            onChange={(v) => (v !== null && v !== '') && set({ snapshotMinutes: Number(v) })}
             data={[
               { value: '15', label: t('settings.every15') },
               { value: '30', label: t('settings.every30') },
@@ -115,7 +118,7 @@ export function Settings() {
         </Box>
         <Box py={12} className="row">
           <Switch label={t('settings.fillGaps')} description={t('settings.fillGapsNote')}
-            checked={s.settings.backfill} onChange={(e) => set({ backfill: e.currentTarget.checked })} />
+            checked={s.settings.backfill} onChange={(e) => { set({ backfill: e.currentTarget.checked }); }} />
         </Box>
         <Group py={12} className="row" justify="space-between" wrap="nowrap">
           <Box>
@@ -133,15 +136,15 @@ export function Settings() {
           <Box py={12} className="row">
             <Text fz={14} fw={600}>{t('settings.importTitle')}</Text>
             <Text fz={12} c="dimmed" mb={8}>
-              {pending.exportedAt ? t('settings.exported', { date: pending.exportedAt.slice(0, 10) }) : ''}{t('settings.importNote')}
+              {pending.exportedAt === '' ? '' : t('settings.exported', { date: pending.exportedAt.slice(0, 10) })}{t('settings.importNote')}
             </Text>
             <Stack gap={10}>
               <Switch label={t('settings.importCities', { n: pending.cities.length })} description={t('settings.importCitiesNote')}
-                disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setPart('cities', e.currentTarget.checked)} />
+                disabled={pending.cities.length === 0} checked={parts.cities} onChange={(e) => { setPart('cities', e.currentTarget.checked); }} />
               <Switch label={t('settings.importHistory', { n: countDays(pending) })} description={t('settings.importHistoryNote')}
-                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setPart('history', e.currentTarget.checked)} />
+                disabled={countDays(pending) === 0} checked={parts.history} onChange={(e) => { setPart('history', e.currentTarget.checked); }} />
               <Switch label={t('settings.importSettings')} description={t('settings.importSettingsNote')}
-                disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setPart('settings', e.currentTarget.checked)} />
+                disabled={Object.keys(pending.settings).length === 0} checked={parts.settings} onChange={(e) => { setPart('settings', e.currentTarget.checked); }} />
             </Stack>
             <Group mt={12} gap={8}>
               <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={confirm}>{t('settings.importSelected')}</Button>

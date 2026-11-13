@@ -4,8 +4,8 @@ import type { ArchiveYear, City, DayData, ForecastData, ForecastEntry, GeoResult
 export interface ImportCounts { added: number; updated: number; kept: number }
 
 export interface AlmanacState {
-  normals: Record<string, Record<string, number>>;
-  thisDay: Record<string, ArchiveYear[]>;
+  normals: Partial<Record<string, Record<string, number>>>;
+  thisDay: Partial<Record<string, ArchiveYear[]>>;
   queries: QueryMap;
   ensureNormals: (city: City) => Promise<void>;
   ensureThisDay: (city: City, date: string) => Promise<void>;
@@ -23,14 +23,14 @@ export interface CityState {
 }
 
 export interface DayState {
-  days: Record<string, DayData>;
+  days: Partial<Record<string, DayData>>;
   queries: QueryMap;
   load: (city: City, date: string) => Promise<DayData | null>;
   clear: () => void;
 }
 
 export interface ForecastState {
-  forecasts: Record<string, ForecastEntry>;
+  forecasts: Partial<Record<string, ForecastEntry>>;
   queries: QueryMap;
   refresh: (city: City, opts?: { pastDays?: number; maxAgeMs?: number }) => Promise<ForecastEntry | null>;
   drop: (cityId: string) => void;
@@ -38,7 +38,7 @@ export interface ForecastState {
 }
 
 export interface LogState {
-  dates: Record<string, string[]>;
+  dates: Partial<Record<string, string[]>>;
   queries: QueryMap;
   gapDays: (cityId: string) => number;
   recordForecast: (cityId: string, data: ForecastData, pastDays: number, gap: number) => void;

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+
 import type { UiState } from '../types';
 
 export type { UiState } from '../types';
@@ -44,8 +45,8 @@ export const useUiStore = create<UiState>()(
       openChart: (fullscreenChart) => set({ fullscreenChart }),
       closeChart: () => set({ fullscreenChart: null }),
       navigate: (route) => set((s) => ({ stack: [...s.stack, s.route], route })),
-      back: () => set((s) => (s.stack.length
-        ? { route: s.stack[s.stack.length - 1], stack: s.stack.slice(0, -1) }
+      back: () => set((s) => (s.stack.length > 0
+        ? { route: s.stack.at(-1), stack: s.stack.slice(0, -1) }
         : { route: { name: 'home' } })),
       goHome: (pageIndex) => set((s) => ({ route: { name: 'home' }, stack: [], pageIndex: pageIndex ?? s.pageIndex })),
       setPage: (pageIndex) => set({ pageIndex }),

@@ -1,17 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
+import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './api/dayRecord';
+import { fetchDailyRange } from './api/openMeteo';
+import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
 import { idbStorage } from './core/persistStorage';
-import type { QueryState } from './core/types';
+import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { begin, fail, IDLE_QUERY, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
-import { fetchDailyRange } from './api/openMeteo';
-import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './api/dayRecord';
-import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
-import { addDays, daysBetween, todayISO } from './core/time';
-import type { DayRecord } from './types';
+
+import type { QueryState } from './core/types';
 import type { DateSpan, ImportCounts, LogState, SourceSpan } from './storeTypes';
+import type { DayRecord } from './types';
 
 export type { ImportCounts, LogState } from './storeTypes';
 
@@ -25,8 +27,8 @@ const sortedUnion = (existing: readonly string[], added: readonly string[]): str
 function sources(start: string, end: string): SourceSpan[] {
   const horizon = addDays(todayISO(), -FORECAST_PAST_DAYS);
   const parts: SourceSpan[] = [];
-  if (start < horizon) parts.push({ from: start, to: end < horizon ? end : addDays(horizon, -1), recent: false });
-  if (end >= horizon) parts.push({ from: start > horizon ? start : horizon, to: end, recent: true });
+  if (start < horizon) {parts.push({ from: start, to: end < horizon ? end : addDays(horizon, -1), recent: false });}
+  if (end >= horizon) {parts.push({ from: start.localeCompare(horizon) > 0 ? start : horizon, to: end, recent: true });}
   return parts;
 }
 
@@ -38,8 +40,8 @@ export const useLogStore = create<LogState>()(
       gapDays: (cityId) => {
         const logged = get().dates[cityId];
         const city = entityCache.getOne('city', cityId);
-        const from = logged?.length ? logged[logged.length - 1] : city?.followedAt;
-        if (from === undefined) return 0;
+        const from = logged !== undefined && logged.length > 0 ? logged.at(-1) : city?.followedAt;
+        if (from === undefined) { return 0; }
         return Math.min(FORECAST_PAST_DAYS, Math.max(0, daysBetween(from, todayISO())));
       },
       recordForecast: (cityId, data, pastDays, gap) => {
@@ -48,10 +50,12 @@ export const useLogStore = create<LogState>()(
         for (let i = first; i <= pastDays && i < data.daily.time.length; i++) {
           records.push(fromForecastDaily(cityId, data, i, i === pastDays ? 'log' : 'filled'));
         }
-        if (records.length === 0) return;
+        if (records.length === 0) { return; }
         entityCache.upsertMany('dayRecord', records);
-        const today = records[records.length - 1];
-        entityCache.merge('dayRecord', today.id, { snapshots: (entityCache.getOne('dayRecord', today.id)?.snapshots ?? 0) + 1 });
+        const today = records.at(-1);
+        if (today !== undefined) {
+          entityCache.merge('dayRecord', today.id, { snapshots: (entityCache.getOne('dayRecord', today.id)?.snapshots ?? 0) + 1 });
+        }
         set((s) => ({ dates: { ...s.dates, [cityId]: sortedUnion(s.dates[cityId] ?? [], records.map((r) => r.date)) } }));
       },
       logDay: (cityId, day) => {
@@ -60,7 +64,7 @@ export const useLogStore = create<LogState>()(
       },
       lookup: async (city, date) => {
         const key = dayKey(city.id, date);
-        if (isLoading(get().queries[key])) return;
+        if (isLoading(get().queries[key])) { return; }
         if (entityCache.getOne('dayRecord', key) !== undefined) {
           set((s) => ({ queries: setQuery(s.queries, key, succeed()) }));
           return;
@@ -70,11 +74,11 @@ export const useLogStore = create<LogState>()(
           const recent = date >= addDays(todayISO(), -FORECAST_PAST_DAYS);
           const rows = await fetchDailyRange(city, date, date, recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, recent ? 'forecast' : 'archive');
           const record = fromRangeRow(city.id, rows, 0);
-          if (isEmptyRecord(record)) throw new Error(NO_ARCHIVE_DATA);
+          if (isEmptyRecord(record)) { throw new Error(NO_ARCHIVE_DATA); }
           entityCache.upsert('dayRecord', record);
           set((s) => ({ queries: setQuery(s.queries, key, succeed()) }));
-        } catch (e) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(e))) }));
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
         }
       },
       addRange: async (city, start, end) => {
@@ -82,21 +86,21 @@ export const useLogStore = create<LogState>()(
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
         try {
           const parts = sources(start, end);
-          const fetched = await Promise.all(parts.map((p) => fetchDailyRange(
+          const fetched = await Promise.all(parts.map(async (p) => fetchDailyRange(
             city, p.from, p.to, p.recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, p.recent ? 'forecast' : 'archive',
           )));
           const counts: ImportCounts = { added: 0, updated: 0, kept: 0 };
           const records: DayRecord[] = [];
           for (const rows of fetched) {
-            rows.time.forEach((date, i) => {
+            for (const [i, date] of rows.time.entries()) {
               const record = fromRangeRow(city.id, rows, i);
-              if (isEmptyRecord(record)) return;
+              if (isEmptyRecord(record)) { continue; }
               const prev = entityCache.getOne('dayRecord', record.id);
-              if (prev?.source === 'log') counts.kept++;
-              else if (prev) counts.updated++;
-              else counts.added++;
+              if (prev?.source === 'log') { counts.kept++; }
+              else if (prev) { counts.updated++; }
+              else { counts.added++; }
               records.push(record);
-            });
+            }
           }
           entityCache.upsertMany('dayRecord', records);
           set((s) => ({
@@ -104,13 +108,13 @@ export const useLogStore = create<LogState>()(
             queries: setQuery(s.queries, key, succeed()),
           }));
           return counts;
-        } catch (e) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(e))) }));
-          throw e;
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          throw error;
         }
       },
       fillMissing: async (city, start, end) => {
-        const logged = new Set(get().dates[city.id] ?? []);
+        const logged = new Set(get().dates[city.id]);
         const total: ImportCounts = { added: 0, updated: 0, kept: 0 };
         const cached: string[] = [];
         const runs: DateSpan[] = [];
@@ -123,9 +127,9 @@ export const useLogStore = create<LogState>()(
             cached.push(d);
             continue;
           }
-          const last = runs[runs.length - 1];
-          if (last !== undefined && last.to === addDays(d, -1)) last.to = d;
-          else runs.push({ from: d, to: d });
+          const last = runs.at(-1);
+          if (last !== undefined && last.to === addDays(d, -1)) { last.to = d; }
+          else {runs.push({ from: d, to: d });}
         }
         total.added += get().addDates(city.id, cached);
         for (const run of runs) {
@@ -148,7 +152,7 @@ export const useLogStore = create<LogState>()(
       clear: () => {
         const { dates } = get();
         for (const [cityId, days] of Object.entries(dates)) {
-          entityCache.removeMany('dayRecord', days.map((d) => dayKey(cityId, d)));
+          entityCache.removeMany('dayRecord', (days ?? []).map((d) => dayKey(cityId, d)));
         }
         set({ dates: {}, queries: {} });
       },
