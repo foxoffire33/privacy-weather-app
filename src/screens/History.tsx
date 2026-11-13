@@ -50,7 +50,7 @@ export function History({ cityId }: { cityId: string }) {
     const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
     return () => window.clearTimeout(t);
   }, [validDraft, lookedUp, cityId, draft, lookupDate]);
-  if (!s.city) return <div className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></div>;
+  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const loadingLookup = s.lookup.query.status === 'loading';
   const lookupError = s.lookup.query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : s.lookup.query.error;
@@ -64,17 +64,17 @@ export function History({ cityId }: { cityId: string }) {
     downloadFile(`${s.city!.name.toLowerCase().replace(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
   return (
-    <div className="screen">
+    <Box className="screen">
       <ScreenHeader right={
         <ActionIcon aria-label={t('history.export')} disabled={!rows.length} onClick={exportCsv}><Icon name="download" size={20} /></ActionIcon>
       } />
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
-      <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('history.title')}</Title>
+      <Title className="display display-sm">{t('history.title')}</Title>
 
       <Paper className="glass" mx={12}>
-        <div className="archive-grid">
+        <Box className="archive-grid">
           {(s.years ?? [0, 1, 2, 3].map(() => null)).map((y, i) => (
-            <UnstyledButton key={y?.year ?? i} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
+            <UnstyledButton key={y?.year ?? i} py={10} pl={12}
               disabled={!y || y.error} onClick={() => y && open(`${y.year}${today.slice(4)}`)}>
               {y ? (
                 <>
@@ -91,13 +91,13 @@ export function History({ cityId }: { cityId: string }) {
               )}
             </UnstyledButton>
           ))}
-        </div>
-        <Box p={12} style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
+        </Box>
+        <Box p={12} className="border-top-soft">
           <TextInput type="date" label={t('history.lookup')}
             min="1940-01-01" max={maxLookup} value={s.draft}
             onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
           {validDraft && (lookupError !== null && lookupRecord === undefined ? (
-            <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}>
+            <Box mt={12} p={14} className="card-rule">
               <Text fz={13} c="signal.3">{lookupError}</Text>
               {s.lookup.query.error !== NO_ARCHIVE_DATA && (
                 <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void lookupDate(cityId, s.draft)}>
@@ -106,17 +106,16 @@ export function History({ cityId }: { cityId: string }) {
               )}
             </Box>
           ) : (
-            <UnstyledButton mt={12} w="100%" disabled={loadingLookup || lookupRecord === undefined} onClick={() => {
+            <UnstyledButton mt={12} w="100%" className="card-rule" disabled={loadingLookup || lookupRecord === undefined} onClick={() => {
                 void addDateRange(cityId, s.draft, s.draft).catch(() => undefined);
                 open(s.draft);
-              }}
-              style={{ border: '2px solid var(--rule)', display: 'block' }}>
+              }}>
               {loadingLookup || lookupRecord === undefined ? (
                 <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
               ) : (
                 <>
                   <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
-                    <Text fz={12} fw={800} tt="uppercase" style={{ letterSpacing: '.06em' }}>{longDate(s.draft)}</Text>
+                    <Text fz={12} fw={800} tt="uppercase" className="ls-6">{longDate(s.draft)}</Text>
                     <Icon name="arrow" size={16} />
                   </Group>
                   <Box p={14}>
@@ -124,10 +123,10 @@ export function History({ cityId }: { cityId: string }) {
                       <Text fz={16} fw={800}>{conditionLabel(lookupRecord.code)}</Text>
                       <Text fz={40} fw={800} lh={1}>{T(lookupRecord.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(lookupRecord.lo)}°</Text></Text>
                     </Group>
-                    <div className="stat-grid" style={{ marginTop: 12 }}>
+                    <Box className="stat-grid" mt={12}>
                       <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(lookupRecord.mm ?? 0).toFixed(1)} mm</Text></Box>
                       <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(lookupRecord.wind, s.windUnit)}</Text></Box>
-                    </div>
+                    </Box>
                   </Box>
                 </>
               )}
@@ -143,7 +142,7 @@ export function History({ cityId }: { cityId: string }) {
 
       <Box px={20} pb={24}>
         <Group justify="space-between" className="kicker" wrap="nowrap">
-          <span>{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</span>
+          <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
@@ -157,7 +156,7 @@ export function History({ cityId }: { cityId: string }) {
             <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => open(r.date)}>
               <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
               <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi != null ? t('history.rowFeels', { t: T(r.feelsHi) }) : ''}</Text>
-              <span>{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</span>
+              <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</Box>
               <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
               <Text fz={12} ta="right" c={delta?.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
             </UnstyledButton>
@@ -165,7 +164,7 @@ export function History({ cityId }: { cityId: string }) {
           );
         })}
       </Box>
-    </div>
+    </Box>
   );
 }
 
@@ -193,23 +192,23 @@ function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
   };
   if (!show) {
     return (
-      <button type="button" className="tab-button" onClick={() => setShow(true)}>
+      <UnstyledButton className="tab-button" onClick={() => setShow(true)}>
         <Icon name="plus" size={14} />{t('history.addDates')}
-      </button>
+      </UnstyledButton>
     );
   }
   return (
     <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
-      <Paper className="glass" w="100%" maw={420} p={16} style={{ textTransform: 'none', letterSpacing: 0 }}
+      <Paper className="glass" w="100%" maw={420} p={16}
         role="dialog" aria-label={t('history.addTitle')}>
         <Group justify="space-between" mb={8}>
           <Text fz={16} fw={800}>{t('history.addTitle')}</Text>
           <ActionIcon size={44} aria-label={t('common.close')} onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={20} /></ActionIcon>
         </Group>
-        <div className="stat-grid">
+        <Box className="stat-grid">
           <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
           <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
-        </div>
+        </Box>
         <Text fz={12} c="dimmed" mt={8}>
           {t('history.addNote')}
         </Text>

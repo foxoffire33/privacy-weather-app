@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+import { Box } from '@mantine/core';
 import { t } from '../../i18n';
 
 interface Entry { name?: string; value?: number | string; color?: string; stroke?: string; fill?: string; unit?: string; dataKey?: string }
@@ -22,34 +24,28 @@ export function CompactTooltip({ active, label, payload }: { active?: boolean; l
   const title = (rows[0] as { payload?: { when?: string } } | undefined)?.payload?.when ?? label;
   const grid = rows.length > PER_ROW;
   const cell = (e: Entry, i: number) => (
-    <b key={e.dataKey ?? e.name ?? i}
-      style={{ color: e.color ?? e.stroke ?? e.fill, display: 'flex', alignItems: 'baseline', gap: 4, flex: '1 1 auto', minWidth: 0 }}>
-      <span style={{ fontWeight: 400, opacity: .8, overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{e.name}</span>
-      <span style={{ marginLeft: 'auto', flex: 'none', minWidth: `${WIDTH}ch`, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+    <Box key={e.dataKey ?? e.name ?? i} component="b" className="tt-row" style={{ '--tt-c': e.color ?? e.stroke ?? e.fill } as CSSProperties}>
+      <Box component="span" className="tt-row-name">{e.name}</Box>
+      <Box component="span" className="tt-row-val">
         {fit(e.value)}{e.unit ?? ''}
-      </span>
-    </b>
+      </Box>
+    </Box>
   );
   return (
-    <div style={{
-      border: `1px solid ${rows.length ? 'var(--rule)' : 'rgba(255,255,255,.12)'}`, background: rows.length ? '#000' : 'transparent',
-      padding: '3px 8px', minHeight: 24, fontSize: 12, lineHeight: '16px',
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
-      width: '100%', boxSizing: 'border-box', overflow: 'hidden', whiteSpace: 'nowrap',
-    }}>
+    <Box className="tt" data-empty={rows.length ? undefined : true}>
       {rows.length ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-            <b style={{ marginRight: 'auto', fontSize: 13 }}>{title}</b>
+          <Box className="tt-title">
+            <Box component="b" className="tt-name">{title}</Box>
             {!grid && rows.map(cell)}
-          </div>
+          </Box>
           {grid && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${PER_ROW}, minmax(0, 1fr))`, gap: '2px 12px' }}>
+            <Box className="tt-grid">
               {rows.map(cell)}
-            </div>
+            </Box>
           )}
         </>
-      ) : <span style={{ color: 'rgba(255,255,255,.3)' }}>{t('common.touchChart')}</span>}
-    </div>
+      ) : <Box component="span" className="tt-hint">{t('common.touchChart')}</Box>}
+    </Box>
   );
 }

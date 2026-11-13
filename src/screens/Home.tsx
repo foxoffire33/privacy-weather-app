@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
-import { ActionIcon, Group } from '@mantine/core';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
@@ -20,9 +20,9 @@ function GestureHint({ multiple }: { multiple: boolean }) {
   }, [open]);
   if (!open) return null;
   return (
-    <button type="button" className="gesture-hint" onClick={close}>
+    <UnstyledButton className="gesture-hint" onClick={close}>
       {multiple ? t('home.hintSwipe') : ''}{t('home.hint')}
-    </button>
+    </UnstyledButton>
   );
 }
 
@@ -88,35 +88,35 @@ export function Home() {
     if (next !== idx) setPage(next);
   };
   return (
-    <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      <div className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+    <Box className="pager-wrap">
+      <Box className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}
-        style={{ transform: `translateX(${-idx * 100}%)` }}>
+        style={{ '--pager-x': `-${idx * 100}%` } as CSSProperties}>
         {cities.map((c, i) => (Math.abs(i - idx) <= 1
           ? <CityPage key={c.id} city={c} isDefault={i === 0} />
-          : <div key={c.id} className="page" />))}
-      </div>
+          : <Box key={c.id} className="page" />))}
+      </Box>
       <GestureHint multiple={n > 1} />
-      <div className="overlay">
+      <Box className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => navigate({ name: 'cities' })}>
           <Icon name="list" />
         </ActionIcon>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <Group gap={6}>
           {cities.map((c, i) => (
-            <button key={c.id} className="dot" data-active={i === idx || undefined}
+            <UnstyledButton key={c.id} className="dot" data-active={i === idx || undefined}
               aria-label={t('home.show', { name: c.name })} onClick={() => setPage(i)} />
           ))}
-        </div>
+        </Group>
         <Group gap={0} wrap="nowrap">
           <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
             onClick={() => refreshAll({ maxAgeMs: 0 })}>
-            <span className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></span>
+            <Box component="span" className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></Box>
           </ActionIcon>
           <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => navigate({ name: 'settings' })}>
             <Icon name="sliders" />
           </ActionIcon>
         </Group>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

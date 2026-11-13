@@ -71,7 +71,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
   primaryColor: 'signal',
   primaryShade: 5,
   autoContrast: true,
-  colors: { signal: accent === 'custom' ? customTuple(accentColor) : ACCENTS[accent].tuple, dark },
+  colors: { signal: accent === 'custom' ? customTuple(accentColor) : ACCENTS[accent].tuple, green: ACCENTS.green.tuple, red: ACCENTS.red.tuple, blue: ACCENTS.blue.tuple, dark },
   white: '#ffffff',
   black: '#100f0f',
   fontFamily: font,

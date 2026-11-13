@@ -1,5 +1,5 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
-import { Box } from '@mantine/core';
+import { Box, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
@@ -69,12 +69,12 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   const hasChance = has('precipitation_probability');
   return (
     <Box>
-      <div className="metric-tabs" role="tablist">
+      <Box className="metric-tabs" role="tablist">
         {available.map(({ value, label }) => (
-          <button key={value} type="button" role="tab" aria-selected={value === active}
-            data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{t(label)}</button>
+          <UnstyledButton key={value} role="tab" aria-selected={value === active}
+            data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{t(label)}</UnstyledButton>
         ))}
-      </div>
+      </Box>
       {active === 'temp' && (
         <LineChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}
