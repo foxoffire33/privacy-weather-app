@@ -1,7 +1,10 @@
-import type { CSSProperties } from 'react';
 import { Box, Group, Paper, Skeleton } from '@mantine/core';
-import { Section } from './city/parts';
+
 import { t } from '../i18n';
+
+import { Section } from './city/Parts';
+
+import type { CSSProperties } from 'react';
 
 export function Sk({ w = '100%', h = 14, mt = 0, style }: { w?: number | string; h?: number; mt?: number; style?: CSSProperties }) {
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
@@ -47,10 +50,28 @@ export function ChartSk({ h = 180 }: { h?: number }) {
   );
 }
 
+export function BootSkeleton() {
+  return (
+    <Box className="stage">
+      <Box className="device">
+        <Box className="page">
+          <Box className="hero">
+            <Sk w={160} h={20} mt={16} />
+            <Sk w={200} h={143} mt={8} />
+            <Sk w={180} h={22} mt={14} />
+            <Sk w={260} h={14} mt={8} />
+          </Box>
+          <CityBodySk />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 export function CityBodySk() {
   return (
     <>
-      <Paper className="glass" mx={12} mt={-36} pos="relative">
+      <Paper mx={12} mt={-36} pos="relative">
         <Box px={12} pt={12} pb={10} className="border-bottom-soft">
           <Sk w="70%" h={18} />
           <Sk h={36} mt={8} />

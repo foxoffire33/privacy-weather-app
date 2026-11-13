@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Box, Button, Checkbox, Group, Paper, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
+import { Box, Button, Checkbox, Modal, Tabs, Text, TextInput, UnstyledButton } from '@mantine/core';
+import { useEffect, useRef, useState  } from 'react';
 
-import { t, type MessageKey } from '../../i18n';
+
+import { t  } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
-import { addDays, daysBetween } from '../../stores';
-import type { DayRecord, TempUnit, WindUnit } from '../../stores';
+import { addDays, daysBetween, fillRange } from '../../stores';
+import { useSeriesToggle } from '../charts/SeriesToggle';
 import { Icon } from '../Icon';
 import { ChartSk } from '../Skeletons';
-import { useSeriesToggle } from '../charts/SeriesToggle';
-import { fillRange } from '../../stores';
+
+import type {MessageKey} from '../../i18n';
+import type { DayRecord, TempUnit, WindUnit } from '../../stores';
+import type {CSSProperties} from 'react';
 
 type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
 interface Attr {
@@ -21,7 +24,7 @@ interface Attr {
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
-export const ATTRS: Attr[] = [
+const ATTRS: Attr[] = [
   { key: 'hi', label: 'city.high', group: 'temp', value: (r, _n, u) => T(r?.hi, u.temp) },
   { key: 'lo', label: 'city.low', group: 'temp', value: (r, _n, u) => T(r?.lo, u.temp) },
   { key: 'normal', label: 'history.normal', group: 'temp', value: (_r, n, u) => T(n, u.temp) },
@@ -77,12 +80,12 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   useEffect(() => {
     const wanted = windows
       .filter((w) => {
-        if (w.from > w.to) return false;
-        for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!log?.[d]) return true;
+        if (w.from > w.to) {return false;}
+        for (let d = w.from; d <= w.to; d = addDays(d, 1)) {if (!log?.[d]) {return true;}}
         return false;
       })
       .filter((w) => !fetched.current.has(`${cityId}:${w.from}:${w.to}`));
-    if (!wanted.length) return;
+    if (wanted.length === 0) {return;}
     let active = true;
     setBusy(true);
     void (async () => {
@@ -91,17 +94,17 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         fetched.current.add(key);
         try {
           await fillRange(cityId, w.from, w.to);
-        } catch (e) {
-          if (active) setFailed((f) => ({ ...f, [key]: (e as Error).message }));
+        } catch (error) {
+          if (active) {setFailed((f) => ({ ...f, [key]: (error as Error).message }));}
         }
       }
-      if (active) setBusy(false);
+      if (active) {setBusy(false);}
     })();
     return () => { active = false; };
   }, [cityId, from, to, back, retryNonce]);
   const failedKeys = windows.filter((w) => failed[`${cityId}:${w.from}:${w.to}`] !== undefined).map((w) => `${cityId}:${w.from}:${w.to}`);
   const retryFailed = (keys: string[]) => {
-    for (const k of keys) fetched.current.delete(k);
+    for (const k of keys) {fetched.current.delete(k);}
     setFailed((f) => Object.fromEntries(Object.entries(f).filter(([k]) => !keys.includes(k))));
     setRetryNonce((n) => n + 1);
   };
@@ -117,7 +120,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     const dayB = back ? shift(d, back) : '';
     for (const a of attrs) {
       row[nameA(a)] = a.value(log?.[d], normals?.[d.slice(5)] ?? null, units);
-      if (back) row[nameB(a)] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units);
+      if (back) {row[nameB(a)] = a.value(log?.[dayB], normals?.[dayB.slice(5)] ?? null, units);}
     }
     data.push(row);
   }
@@ -131,45 +134,44 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       <Box className="kicker" pb={8}>{t('history.trends')}</Box>
 
       <Box className="tab-row">
-        <UnstyledButton onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</UnstyledButton>
-        <UnstyledButton aria-pressed={!!custom} data-active={custom ? true : undefined}
-          onClick={() => setSheet('range')}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
+        <UnstyledButton onClick={() => { setSheet('attrs'); }}>{t('history.attributes')} · {picked.length}</UnstyledButton>
+        <UnstyledButton aria-pressed={Boolean(custom)} data-active={custom ? true : undefined}
+          onClick={() => { setSheet('range'); }}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
       </Box>
 
-      <Box className="tab-row" role="tablist">
-        {LENGTHS.map((d) => {
-          const on = !custom && d === len;
-          return (
-            <UnstyledButton key={d} role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setCustom(null); setLen(d); }}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</UnstyledButton>
-          );
-        })}
-      </Box>
+      <Tabs value={custom ? '' : String(len)} onChange={(v) => { if (v) { setCustom(null); setLen(Number(v)); } }}>
+        <Tabs.List className="tab-row">
+          {LENGTHS.map((d) => (
+            <Tabs.Tab key={d} value={String(d)}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
 
       <Text fz={12} c="dimmed" pb={4}>{t('history.compare')}</Text>
-      <Box className="tab-row" role="tablist">
-        {BACK_YEARS.map((y) => (
-          <UnstyledButton key={y} role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => setBack(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</UnstyledButton>
-        ))}
-      </Box>
+      <Tabs value={String(back)} onChange={(v) => v && setBack(Number(v))}>
+        <Tabs.List className="tab-row">
+          {BACK_YEARS.map((y) => (
+            <Tabs.Tab key={y} value={String(y)}>{y ? String(+to.slice(0, 4) - y) : t('history.off')}</Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
 
       {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
       {failedKeys.map((key) => (
         <Text key={key} fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error: failed[key] })}</Text>
       ))}
       {failedKeys.length > 0 && (
-        <Button fullWidth mt={8} variant="outline" color="gray" onClick={() => retryFailed(failedKeys)}>
+        <Button fullWidth mt={8} variant="outline" color="gray" onClick={() => { retryFailed(failedKeys); }}>
           {t('common.tryAgain')}
         </Button>
       )}
-      {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
+      {attrs.length === 0 && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
       {busy
         ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
         : GROUPS.map((g) => {
           const mine = attrs.filter((a) => a.group === g.key);
-          if (!mine.length) return null;
+          if (mine.length === 0) {return null;}
           return (
             <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
               series={mine.flatMap((a, i) => [
@@ -180,11 +182,11 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         })}
 
       {sheet === 'attrs' && (
-        <AttrSheet picked={picked} onChange={setPicked} onClose={() => setSheet(null)} />
+        <AttrSheet picked={picked} onChange={setPicked} onClose={() => { setSheet(null); }} />
       )}
       {sheet === 'range' && (
         <RangeSheet from={from} to={to} max={today}
-          onClose={() => setSheet(null)}
+          onClose={() => { setSheet(null); }}
           onApply={(r) => { setCustom(r); setSheet(null); }} />
       )}
     </Box>
@@ -213,29 +215,25 @@ function GroupChart({ group, series, data, base, unit }: {
 }
 
 function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: (keys: string[]) => void; onClose: () => void }) {
-  const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
+  const toggle = (key: string) => { onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]); };
   return (
-    <Box className="sheet" role="dialog" aria-label={t('history.attrTitle')}>
-      <Group justify="space-between" px={14} py={8} wrap="nowrap" className="sheet-head">
-        <Text fz={16} fw={800} pl={6}>{t('history.attrTitle')}</Text>
-        <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={22} /></ActionIcon>
-      </Group>
-      <Box className="sheet-body">
-        {GROUPS.map((g) => {
-          const mine = ATTRS.filter((a) => a.group === g.key);
-          return (
-            <Box key={g.key} px={20}>
-              <Box className="kicker">{t(g.title)}</Box>
-              {mine.map((a) => (
-                <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
-                  checked={picked.includes(a.key)} onChange={() => toggle(a.key)}
-                  label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
-              ))}
-            </Box>
-          );
-        })}
-      </Box>
-    </Box>
+    <Modal fullScreen opened title={t('history.attrTitle')} onClose={onClose}
+      closeOnClickOutside={false} padding={16}
+      styles={{ content: { border: '2px solid var(--rule)' } }}>
+      {GROUPS.map((g) => {
+        const mine = ATTRS.filter((a) => a.group === g.key);
+        return (
+          <Box key={g.key} px={20}>
+            <Box className="kicker">{t(g.title)}</Box>
+            {mine.map((a) => (
+              <Checkbox key={a.key} className="row" py={14} radius={0} size="md"
+                checked={picked.includes(a.key)} onChange={() => { toggle(a.key); }}
+                label={<Text fz={15} fw={600}>{t(a.label)}</Text>} />
+            ))}
+          </Box>
+        );
+      })}
+    </Modal>
   );
 }
 
@@ -249,22 +247,20 @@ function RangeSheet({ from, to, max, onApply, onClose }: {
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(a) && /^\d{4}-\d{2}-\d{2}$/.test(b) && a <= b && a >= '1940-01-01' && b <= max;
   const span = valid ? daysBetween(a, b) + 1 : 0;
   return (
-    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <Paper className="glass" w="100%" maw={420} p={16}
-        role="dialog" aria-label={t('history.custom')}>
-        <Group justify="space-between" mb={8}>
-          <Text fz={16} fw={800}>{t('history.custom')}</Text>
-          <ActionIcon size={44} aria-label={t('common.close')} onClick={onClose}><Icon name="x" size={20} /></ActionIcon>
-        </Group>
-        <Box className="stat-grid">
-          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />
-          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setB(e.currentTarget.value)} />
-        </Box>
-        <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
-        <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>
-          {valid ? t('common.days', { count: span }) : t('history.custom')}
-        </Button>
-      </Paper>
-    </Box>
+    <Modal opened title={t('history.custom')} onClose={onClose} closeOnClickOutside
+      padding={16}
+      styles={{
+        root: { '--modal-inner-align': 'flex-end', '--modal-x-offset': '0', '--modal-y-offset': '0', '--modal-content-flex': '0 0 100%' },
+        content: { border: '2px solid var(--rule)' },
+      }}>
+      <Box className="stat-grid">
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => { setA(e.currentTarget.value); }} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => { setB(e.currentTarget.value); }} />
+      </Box>
+      <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
+      <Button fullWidth mt={12} disabled={!valid} onClick={() => { onApply({ from: a, to: b }); }}>
+        {valid ? t('common.days', { count: span }) : t('history.custom')}
+      </Button>
+    </Modal>
   );
 }

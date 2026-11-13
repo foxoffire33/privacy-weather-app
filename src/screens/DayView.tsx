@@ -1,19 +1,20 @@
-import { useEffect } from 'react';
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
-import { openDay, useCity, useDay, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
-import { conditionLabel } from '../lib/weatherCodes';
-import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
-import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';
-import { ScreenHeader } from '../components/ScreenHeader';
-import { Section, Stat } from '../components/city/parts';
+import { useEffect } from 'react';
+
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
+import { Section, Stat } from '../components/city/Parts';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
+import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';
+import { conditionLabel } from '../lib/weatherCodes';
+import { openDay, useCity, useDay, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
 
 const nums = (a?: (number | null)[]) => (a ?? []).filter((x): x is number => x != null);
-const avg = (a?: (number | null)[]) => { const n = nums(a); return n.length ? n.reduce((x, y) => x + y, 0) / n.length : null; };
-const max = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Math.max(...n) : null; };
-const min = (a?: (number | null)[]) => { const n = nums(a); return n.length ? Math.min(...n) : null; };
+const avg = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? n.reduce((x, y) => x + y, 0) / n.length : null; };
+const max = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? Math.max(...n) : null; };
+const min = (a?: (number | null)[]) => { const n = nums(a); return n.length > 0 ? Math.min(...n) : null; };
 const f = (v: number | null | undefined, d = 0) => (v == null ? '–' : v.toFixed(d));
 
 export function DayView({ cityId, date }: { cityId: string; date: string }) {
@@ -30,7 +31,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
   useEffect(() => { void openDay(cityId, date); }, [cityId, date]);
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
-  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
+  if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
   const day = s.day;
   const d = day?.daily.v ?? {};
   const h = day?.hourly.v ?? {};
@@ -94,7 +95,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
 
           <Section title={t('dayView.temperature')}>
             <Box className="stat-grid">
-              <Stat k={t('dayView.highLow')} v={`${T(d.temperature_2m_max)}° / ${T(d.temperature_2m_min)}°`} s={s.normal != null ? t('dayView.normalHigh', { t: T(s.normal) }) : undefined} />
+              <Stat k={t('dayView.highLow')} v={`${T(d.temperature_2m_max)}° / ${T(d.temperature_2m_min)}°`} s={s.normal == null ? undefined : t('dayView.normalHigh', { t: T(s.normal) })} />
               <Stat k={t('city.day.feelsLike')} v={`${T(d.apparent_temperature_max)}° / ${T(d.apparent_temperature_min)}°`} />
               <Stat k={t('city.feels.humidity')} v={`${f(avg(h.relative_humidity_2m))}%`} s={t('dayView.dailyAverage')} />
               <Stat k={t('city.feels.dewPoint')} v={`${T(avg(h.dew_point_2m))}°`} s={t('dayView.dailyAverage')} />
@@ -136,7 +137,7 @@ export function DayView({ cityId, date }: { cityId: string; date: string }) {
           </Section>
 
           {day.air && (
-            <Section title={t('city.air.title')} summary={t('dayView.airSummary', { v: f(aqiMax), level: aqiLvl != null ? levelName(aqiLvl) : '–' })}>
+            <Section title={t('city.air.title')} summary={t('dayView.airSummary', { v: f(aqiMax), level: aqiLvl == null ? '–' : levelName(aqiLvl) })}>
               <Box className="stat-grid">
                 <Stat k={t('dayView.pm25')} v={`${f(avg(day.air.v.pm2_5))} µg/m³`} />
                 <Stat k={t('dayView.pm10')} v={`${f(avg(day.air.v.pm10))} µg/m³`} />

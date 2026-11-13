@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { IDLE_QUERY, type QueryState } from './core/types';
+
+import { useAlmanacStore } from './almanacStore';
+import { useCityStore } from './cityStore';
+import { IDLE_QUERY  } from './core/types';
+import { useDayStore } from './dayStore';
 import { useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
-import { useCityStore } from './city-store';
-import { useForecastStore } from './forecast-store';
-import { useLogStore } from './log-store';
-import { useDayStore } from './day-store';
-import { useAlmanacStore } from './almanac-store';
-import { useSettingsStore } from './settings-store';
-import { alreadyHydrated, hydrateAll } from './hydration';
+import { useForecastStore } from './forecastStore';
+import { useLogStore } from './logStore';
+import { useSettingsStore } from './settingsStore';
+
+import type {QueryState} from './core/types';
 import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
@@ -45,7 +47,7 @@ export function useCityLog(cityId: string): Record<string, DayRecord> {
     const out: Record<string, DayRecord> = {};
     for (const date of dates ?? []) {
       const record = table[dayKey(cityId, date)];
-      if (record !== undefined) out[date] = record;
+      if (record !== undefined) {out[date] = record;}
     }
     return out;
   }, [cityId, dates, table]);
@@ -77,13 +79,3 @@ export const useNormals = (cityId: string): Record<string, number> | undefined =
 export const useThisDay = (cityId: string, date: string): ArchiveYear[] | undefined =>
   useAlmanacStore((s) => s.thisDay[`${cityId}:${date.slice(5)}`]);
 
-export function useHydrated(): boolean {
-  const [ready, setReady] = useState(alreadyHydrated);
-  useEffect(() => {
-    if (ready) return;
-    let live = true;
-    void hydrateAll().then(() => { if (live) setReady(true); });
-    return () => { live = false; };
-  }, [ready]);
-  return ready;
-}

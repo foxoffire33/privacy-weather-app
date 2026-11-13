@@ -1,14 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { errorMessage } from './core/errors';
-import { idbStorage } from './core/persist-storage';
-import type { QueryMap } from './core/types';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/query-state';
-import { fetchArchive } from './api/open-meteo';
-import type { ArchiveYear, City } from './types';
-import type { AlmanacState } from './store-types';
 
-export type { AlmanacState } from './store-types';
+import { fetchArchive } from './api/openMeteo';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persistStorage';
+import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+
+import type { QueryMap } from './core/types';
+import type { AlmanacState } from './storeTypes';
+import type { ArchiveYear, City } from './types';
+
+export type { AlmanacState } from './storeTypes';
 
 const BACK = [1, 10, 30] as const;
 const FIRST_YEAR = 1940;
@@ -21,29 +23,29 @@ export const useAlmanacStore = create<AlmanacState>()(
       queries: {},
       ensureNormals: async (city) => {
         const key = `normals:${city.id}`;
-        if (get().normals[city.id] !== undefined || isLoading(get().queries[key])) return;
+        if (get().normals[city.id] !== undefined || isLoading(get().queries[key])) {return;}
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
         try {
           const r = await fetchArchive(city, '1991-01-01', '2020-12-31', ['temperature_2m_max']);
           const totals: Record<string, [number, number]> = {};
-          r.time.forEach((day, i) => {
+          for (const [i, day] of r.time.entries()) {
             const value = r.temperature_2m_max[i];
-            if (value == null) return;
+            if (value == null) {continue;}
             const md = day.slice(5);
             totals[md] = totals[md] ?? [0, 0];
             totals[md][0] += value;
             totals[md][1] += 1;
-          });
+          }
           const means: Record<string, number> = {};
-          for (const md in totals) means[md] = +(totals[md][0] / totals[md][1]).toFixed(2);
+          for (const md in totals) {means[md] = +(totals[md][0] / totals[md][1]).toFixed(2);}
           set((s) => ({ normals: { ...s.normals, [city.id]: means }, queries: setQuery(s.queries, key, succeed()) }));
-        } catch (e) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(e))) }));
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
         }
       },
       ensureThisDay: async (city, date) => {
         const key = `${city.id}:${date.slice(5)}`;
-        if (get().thisDay[key] !== undefined || isLoading(get().queries[key])) return;
+        if (get().thisDay[key] !== undefined || isLoading(get().queries[key])) {return;}
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
         const thisYear = +date.slice(0, 4);
         const years = [...BACK.map((n) => thisYear - n), FIRST_YEAR];

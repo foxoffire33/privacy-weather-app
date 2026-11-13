@@ -1,7 +1,9 @@
-import { IDLE_QUERY, initialQueryState, type QueryMap, type QueryState } from '../core/types';
+import { IDLE_QUERY    } from '../core/types';
 
-export { IDLE_QUERY, initialQueryState };
-export type { QueryMap, QueryState };
+import type {QueryMap, QueryState} from '../core/types';
+
+
+
 
 export function begin(q: QueryState): QueryState {
   return { ...q, status: 'loading', error: null };
@@ -32,3 +34,5 @@ export function queryAt(map: QueryMap, key: string): QueryState {
 export function setQuery(map: QueryMap, key: string, q: QueryState): QueryMap {
   return { ...map, [key]: q };
 }
+
+export {initialQueryState, IDLE_QUERY, type QueryMap, type QueryState} from '../core/types';

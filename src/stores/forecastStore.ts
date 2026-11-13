@@ -1,14 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { errorMessage } from './core/errors';
-import { idbStorage } from './core/persist-storage';
-import type { QueryMap } from './core/types';
-import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/query-state';
-import { fetchAirQuality, fetchForecast, fetchMarine } from './api/open-meteo';
-import type { City, ForecastEntry } from './types';
-import type { ForecastState } from './store-types';
 
-export type { ForecastState } from './store-types';
+import { fetchAirQuality, fetchForecast, fetchMarine } from './api/openMeteo';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persistStorage';
+import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+
+import type { QueryMap } from './core/types';
+import type { ForecastState } from './storeTypes';
+import type { City, ForecastEntry } from './types';
+
+export type { ForecastState } from './storeTypes';
 
 export const useForecastStore = create<ForecastState>()(
   persist(
@@ -17,8 +19,8 @@ export const useForecastStore = create<ForecastState>()(
       queries: {},
       refresh: async (city, { pastDays = 1, maxAgeMs } = {}) => {
         const q = queryAt(get().queries, city.id);
-        if (isLoading(q)) return null;
-        if (isFresh(q, maxAgeMs) && get().forecasts[city.id] !== undefined) return null;
+        if (isLoading(q)) {return null;}
+        if (isFresh(q, maxAgeMs) && get().forecasts[city.id] !== undefined) {return null;}
         set((s) => ({ queries: setQuery(s.queries, city.id, begin(q)) }));
         try {
           const [data, air, marine] = await Promise.all([
@@ -32,8 +34,8 @@ export const useForecastStore = create<ForecastState>()(
             queries: setQuery(s.queries, city.id, succeed()),
           }));
           return entry;
-        } catch (e) {
-          set((s) => ({ queries: setQuery(s.queries, city.id, fail(queryAt(s.queries, city.id), errorMessage(e))) }));
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, city.id, fail(queryAt(s.queries, city.id), errorMessage(error))) }));
           return null;
         }
       },

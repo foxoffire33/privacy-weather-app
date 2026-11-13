@@ -13,23 +13,23 @@ function keyToString(key: IDBValidKey): string {
 }
 
 async function openDb(): Promise<IDBDatabase> {
-  if (dbPromise !== null) return await dbPromise;
+  if (dbPromise !== null) {return dbPromise;}
 
   dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+      if (!db.objectStoreNames.contains(STORE_NAME)) {db.createObjectStore(STORE_NAME);}
     };
     request.onsuccess = () => { resolve(request.result); };
     request.onerror = () => { reject(request.error ?? new Error('IndexedDB open failed')); };
   });
 
-  return await dbPromise;
+  return dbPromise;
 }
 
 export async function idbGet<T = unknown>(key: string): Promise<T | null> {
-  if (!hasIndexedDb()) return null;
+  if (!hasIndexedDb()) {return null;}
   try {
     const db = await openDb();
     return await new Promise<T | null>((resolve) => {
@@ -44,7 +44,7 @@ export async function idbGet<T = unknown>(key: string): Promise<T | null> {
 }
 
 export async function idbSet(key: string, value: unknown): Promise<void> {
-  if (!hasIndexedDb()) return;
+  if (!hasIndexedDb()) {return;}
   try {
     const db = await openDb();
     await new Promise<void>((resolve) => {
@@ -53,13 +53,11 @@ export async function idbSet(key: string, value: unknown): Promise<void> {
       tx.oncomplete = () => { resolve(); };
       tx.onerror = () => { resolve(); };
     });
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 export async function idbDel(key: string): Promise<void> {
-  if (!hasIndexedDb()) return;
+  if (!hasIndexedDb()) {return;}
   try {
     const db = await openDb();
     await new Promise<void>((resolve) => {
@@ -68,13 +66,11 @@ export async function idbDel(key: string): Promise<void> {
       tx.oncomplete = () => { resolve(); };
       tx.onerror = () => { resolve(); };
     });
-  } catch {
-    return;
-  }
+  } catch {}
 }
 
 export async function idbKeys(): Promise<string[]> {
-  if (!hasIndexedDb()) return [];
+  if (!hasIndexedDb()) {return [];}
   try {
     const db = await openDb();
     return await new Promise<string[]>((resolve) => {

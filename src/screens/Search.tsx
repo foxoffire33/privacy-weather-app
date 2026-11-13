@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
-import { Box, Button, Group, Loader, Text, TextInput, Title } from '@mantine/core';
+import { Box, Button, Group, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { followCity, useCityStore, useSearchStore } from '../stores';
-import { useUiStore } from '../stores/uiStore';
-import type { GeoResult } from '../stores';
-import { ScreenHeader } from '../components/ScreenHeader';
+
 import { Icon } from '../components/Icon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import { followCity, useCityStore, useSearchStore } from '../stores';
+import { useUiStore } from '../stores/uiStore';
+
+import type { GeoResult } from '../stores';
 
 export function Search() {
   const s = useSearchStore(useShallow((st) => ({
@@ -37,8 +39,7 @@ export function Search() {
       <Box px={20}>
         <TextInput size="lg" placeholder={t('search.placeholder')} autoFocus value={s.query}
           leftSection={<Icon name="search" size={20} />}
-          rightSection={s.searching ? <Loader size="xs" /> : null}
-          onChange={(e) => s.setQuery(e.currentTarget.value)}
+          onChange={(e) => { s.setQuery(e.currentTarget.value); }}
           aria-label={t('search.label')} />
       </Box>
 
@@ -65,7 +66,7 @@ export function Search() {
                   {[r.admin1, r.country].filter(Boolean).join(', ')} · {r.latitude.toFixed(2)}°, {r.longitude.toFixed(2)}°
                 </Text>
               </Box>
-              <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => follow(r)}>
+              <Button variant="outline" color="gray" disabled={isFollowed} miw={104} onClick={() => { follow(r); }}>
                 {isFollowed ? t('search.following') : t('search.follow')}
               </Button>
             </Group>

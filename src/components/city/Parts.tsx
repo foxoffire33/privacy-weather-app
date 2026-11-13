@@ -1,13 +1,8 @@
-import type { ReactNode } from 'react';
 import { Box, Progress, Text } from '@mantine/core';
 
-export function levelColor(level: number | null | undefined) {
-  if (level == null) return 'var(--mantine-color-dark-3)';
-  if (level <= 1) return 'var(--mantine-color-dark-1)';
-  if (level <= 2) return 'var(--mantine-color-signal-2)';
-  if (level <= 3) return 'var(--mantine-color-signal-4)';
-  return 'var(--mantine-color-signal-5)';
-}
+import { levelColor } from './levelColor';
+
+import type { ReactNode } from 'react';
 
 export function Bar({ pct, level, color }: { pct: number; level?: number | null; color?: string }) {
   return (

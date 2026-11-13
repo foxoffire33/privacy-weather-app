@@ -1,22 +1,22 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-import { followedCities, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../stores';
-import { useEntityCache } from '../stores';
-import type { ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../stores';
+import { t as tx, useI18n } from '../i18n';
+import { followedCities, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
+
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
-import { addDays } from '../stores';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
-import { t as tx, useI18n } from '../i18n';
+
+import type { ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../stores';
 
 interface WidgetsPlugin {
-  update(options: { json: string }): Promise<void>;
+  update: (options: { json: string }) => Promise<void>;
 }
 const Widgets = registerPlugin<WidgetsPlugin>('Widgets');
 
-type Day = { label: string; hi: number | null; lo: number | null; normal: number | null; kind: 'past' | 'today' | 'future' };
-type Row = { label: string; v: number | null; text: string; kind: 'today' | 'avg' | 'year' };
-type RainBar = { f: number; wet: boolean };
+interface Day { label: string; hi: number | null; lo: number | null; normal: number | null; kind: 'past' | 'today' | 'future' }
+interface Row { label: string; v: number | null; text: string; kind: 'today' | 'avg' | 'year' }
+interface RainBar { f: number; wet: boolean }
 
 export interface WidgetSnapshot {
   v: 1;
@@ -41,7 +41,7 @@ export interface SnapshotInput {
 
 export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const { city, entry } = input;
-  if (!city || !entry) return null;
+  if (!city || !entry) {return null;}
   const unit = input.tempUnit;
   const T = (c?: number | null) => fmtTemp(c, unit);
   const N = (c?: number | null) => convTemp(c, unit);
@@ -71,19 +71,19 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   }
 
   const rows: Row[] = [{ label: tx('common.today'), v: N(hiToday), text: `${T(hiToday)}°`, kind: 'today' }];
-  if (avgToday != null) rows.push({ label: tx('widgets.average_row'), v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });
+  if (avgToday != null) {rows.push({ label: tx('widgets.average_row'), v: N(avgToday), text: `${T(avgToday)}°`, kind: 'avg' });}
   for (const y of input.years) {
-    if (!y.error && y.hi != null) rows.push({ label: String(y.year), v: N(y.hi), text: `${T(y.hi)}°`, kind: 'year' });
+    if (!y.error && y.hi != null) {rows.push({ label: String(y.year), v: N(y.hi), text: `${T(y.hi)}°`, kind: 'year' });}
   }
 
   const mq = data.minutely15;
   let rain: WidgetSnapshot['rain'];
-  if (mq && mq.precipitation.length) {
+  if (mq && mq.precipitation.length > 0) {
     const max = Math.max(0.5, ...mq.precipitation.map((v) => v ?? 0));
     rain = {
       text: rainOutlook(data, h0),
       bars: mq.precipitation.map((v) => ({ f: (v ?? 0) / max, wet: (v ?? 0) >= 0.1 })),
-      from: hhmm(mq.time[0]), to: hhmm(mq.time[mq.time.length - 1]), caption: tx('widgets.mmPer15'),
+      from: hhmm(mq.time[0]), to: hhmm(mq.time.at(-1)), caption: tx('widgets.mmPer15'),
     };
   } else {
     const end = Math.min(h0 + 12, data.hourly.time.length);
@@ -98,7 +98,7 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const hours = data.hourly.time.slice(h0, h0 + 12).map((time, k) => {
     const i = h0 + k;
     return {
-      label: k === 0 ? tx('common.now') : hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time),
+      label: k === 0 ? tx('common.now') : (hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time)),
       temp: `${T(k === 0 ? c.temperature_2m : hv.temperature_2m[i])}°`,
       p: hv.precipitation_probability[i] ?? 0,
     };
@@ -132,34 +132,33 @@ let last = '';
 let timer: number | undefined;
 
 export function startWidgetSync(): () => void {
-  if (Capacitor.getPlatform() !== 'android') return () => undefined;
+  if (Capacitor.getPlatform() !== 'android') {return () => {};}
   const push = () => {
     const snap = buildSnapshot(readSnapshotInput());
     const json = snap ? JSON.stringify(snap) : '';
-    if (json === last) return;
+    if (json === last) {return;}
     last = json;
-    Widgets.update({ json }).catch(() => {
-    });
+    Widgets.update({ json }).catch(() => {});
   };
   push();
   const later = () => {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(push, 800);
+    globalThis.clearTimeout(timer);
+    timer = globalThis.setTimeout(push, 800);
   };
   const unsubs = [useEntityCache, useForecastStore, useLogStore, useAlmanacStore, useSettingsStore]
     .map((store) => store.subscribe(later));
   unsubs.push(useI18n.subscribe(later));
-  return () => { for (const off of unsubs) off(); window.clearTimeout(timer); };
+  return () => { for (const off of unsubs) {off();} globalThis.clearTimeout(timer); };
 }
 
 function readSnapshotInput(): SnapshotInput {
   const city = followedCities()[0];
   const settings = useSettingsStore.getState().settings;
-  if (city === undefined) return { city: undefined, entry: undefined, tempUnit: settings.tempUnit, normals: {}, log: {}, years: [] };
+  if (city === undefined) {return { city: undefined, entry: undefined, tempUnit: settings.tempUnit, normals: {}, log: {}, years: [] };}
   const entry = useForecastStore.getState().forecasts[city.id];
   const almanac = useAlmanacStore.getState();
   const today = entry ? entry.data.daily.time[entry.pastDays] : undefined;
-  if (today !== undefined) void almanac.ensureThisDay(city, today);
+  if (today !== undefined) {void almanac.ensureThisDay(city, today);}
   const dates = useLogStore.getState().dates[city.id] ?? [];
   const log: Record<string, DayRecord> = {};
   for (const record of useEntityCache.getState().getMany('dayRecord', dates.map((d) => `${city.id}:${d}`))) {

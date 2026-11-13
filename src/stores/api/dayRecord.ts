@@ -1,6 +1,7 @@
 import { dayKey } from '../entities/schema';
-import type { RangeRows } from './types';
+
 import type { DayData, DayRecord, ForecastData } from '../types';
+import type { RangeRows } from './types';
 
 export function fromForecastDaily(cityId: string, data: ForecastData, i: number, source: DayRecord['source']): DayRecord {
   const { time, v } = data.daily;

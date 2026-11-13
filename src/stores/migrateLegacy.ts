@@ -1,5 +1,7 @@
 import { del as legacyDel, get as legacyGet } from 'idb-keyval';
+
 import { idbGet, idbSet } from './core/idb';
+
 import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
 
 const LEGACY_KEY = 'open-weather-log';
@@ -19,7 +21,7 @@ const envelope = <T>(state: T) => ({ state, version: 1 });
 
 export async function importLegacyStore(): Promise<boolean> {
   const stored = await legacyGet<{ state?: LegacyState; version?: number }>(LEGACY_KEY);
-  if (stored?.state === undefined) return false;
+  if (stored?.state === undefined) {return false;}
   if ((await idbGet('wl2-cities')) !== null) {
     await legacyDel(LEGACY_KEY);
     return false;
@@ -29,10 +31,10 @@ export async function importLegacyStore(): Promise<boolean> {
   const old = stored.state;
   const forecasts = version < 2 ? {} : (old.forecasts ?? {});
   const settings = old.settings;
-  if (settings !== undefined && version < 3 && settings.accent === 'red') settings.accent = 'green';
+  if (settings !== undefined && version < 3 && settings.accent === 'red') {settings.accent = 'green';}
   const cities = old.cities ?? [];
   const cityTable: Record<string, City> = {};
-  for (const city of cities) cityTable[city.id] = city;
+  for (const city of cities) {cityTable[city.id] = city;}
   const dayTable: Record<string, DayRecord> = {};
   const dates: Record<string, string[]> = {};
   for (const [cityId, byDate] of Object.entries(old.history ?? {})) {

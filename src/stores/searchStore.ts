@@ -1,12 +1,15 @@
 import { create } from 'zustand';
-import { errorMessage, isAbort } from './core/errors';
-import { initialQueryState, type QueryState } from './core/types';
-import { begin, fail, succeed } from './factory/query-state';
-import { searchCities } from './api/open-meteo';
-import type { GeoResult } from './types';
-import type { SearchState } from './store-types';
 
-export type { SearchState } from './store-types';
+import { searchCities } from './api/openMeteo';
+import { errorMessage, isAbort } from './core/errors';
+import { initialQueryState  } from './core/types';
+import { begin, fail, succeed } from './factory/queryState';
+
+import type {QueryState} from './core/types';
+import type { SearchState } from './storeTypes';
+import type { GeoResult } from './types';
+
+export type { SearchState } from './storeTypes';
 
 const MIN_TERM = 2;
 
@@ -16,7 +19,7 @@ export const useSearchStore = create<SearchState>()((set, get) => ({
   query: '',
   results: [],
   request: initialQueryState(),
-  setQuery: (query) => set({ query }),
+  setQuery: (query) => { set({ query }); },
   run: async (q) => {
     controller?.abort();
     const term = q.trim();
@@ -29,9 +32,9 @@ export const useSearchStore = create<SearchState>()((set, get) => ({
     try {
       const results = await searchCities(term, controller.signal);
       set({ results, request: succeed() });
-    } catch (e) {
-      if (isAbort(e)) return;
-      set((s) => ({ request: fail(s.request, errorMessage(e)) }));
+    } catch (error) {
+      if (isAbort(error)) {return;}
+      set((s) => ({ request: fail(s.request, errorMessage(error)) }));
     }
   },
 }));

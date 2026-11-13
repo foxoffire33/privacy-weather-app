@@ -1,16 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { errorMessage } from './core/errors';
-import { idbStorage } from './core/persist-storage';
-import type { QueryMap } from './core/types';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/query-state';
-import { fetchAirDay, fetchDay } from './api/open-meteo';
-import { dayKey } from './entities/schema';
-import { daysBetween, todayISO } from './core/time';
-import type { City, DayData } from './types';
-import type { DayState } from './store-types';
 
-export type { DayState } from './store-types';
+import { fetchAirDay, fetchDay } from './api/openMeteo';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persistStorage';
+import { daysBetween, todayISO } from './core/time';
+import { dayKey } from './entities/schema';
+import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+
+import type { QueryMap } from './core/types';
+import type { DayState } from './storeTypes';
+import type { City, DayData } from './types';
+
+export type { DayState } from './storeTypes';
 
 export const useDayStore = create<DayState>()(
   persist(
@@ -19,7 +21,7 @@ export const useDayStore = create<DayState>()(
       queries: {},
       load: async (city, date) => {
         const key = dayKey(city.id, date);
-        if (get().days[key] !== undefined || isLoading(get().queries[key])) return null;
+        if (get().days[key] !== undefined || isLoading(get().queries[key])) {return null;}
         set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
         try {
           const recent = daysBetween(date, todayISO()) <= 90;
@@ -30,8 +32,8 @@ export const useDayStore = create<DayState>()(
           const full: DayData = { ...day, air };
           set((s) => ({ days: { ...s.days, [key]: full }, queries: setQuery(s.queries, key, succeed()) }));
           return full;
-        } catch (e) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(e))) }));
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
           return null;
         }
       },

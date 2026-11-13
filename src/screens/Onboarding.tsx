@@ -1,7 +1,8 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
-import { useUiStore } from '../stores/uiStore';
+
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
+import { useUiStore } from '../stores/uiStore';
 
 export function Onboarding() {
   const navigate = useUiStore((s) => s.navigate);
@@ -25,7 +26,7 @@ export function Onboarding() {
         ))}
       </Stack>
       <Button variant="white" color="dark" size="xl" fullWidth rightSection={<Icon name="arrow" />}
-        onClick={() => navigate({ name: 'search' })}>
+        onClick={() => { navigate({ name: 'search' }); }}>
         {t('onboarding.start')}
       </Button>
     </Box>

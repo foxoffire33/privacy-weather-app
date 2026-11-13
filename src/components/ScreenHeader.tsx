@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react';
 import { ActionIcon, Group } from '@mantine/core';
-import { useUiStore } from '../stores/uiStore';
-import { Icon } from './Icon';
+
 import { t } from '../i18n';
+import { useUiStore } from '../stores/uiStore';
+
+import { Icon } from './Icon';
+
+import type { ReactNode } from 'react';
 
 export function ScreenHeader({ right }: { right?: ReactNode }) {
   const back = useUiStore((s) => s.back);
