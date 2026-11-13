@@ -1,5 +1,4 @@
 import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../stores';
-import type { SeriesToggleApi } from './hooks';
 import type { MessageKey } from './i18n';
 import type { DateRange } from './stores';
 import type { TooltipContentProps, TooltipPayloadEntry } from 'recharts';
@@ -91,7 +90,8 @@ export interface MetricChartProps {
   height: number | string;
   windUnit: WindUnit;
   hasChance: boolean;
-  toggle: SeriesToggleApi;
+  scope: string;
+  hidden: readonly string[];
 }
 
 export interface TrendRangeInput {

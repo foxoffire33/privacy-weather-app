@@ -5,11 +5,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { t } from '../../i18n';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
 import { below } from '../../lib/scale';
+import { NO_HIDDEN, visibleSeries } from '../../lib/series';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
 
 import { INLINE_HEIGHT } from './FullscreenChart';
-import { useSeriesToggle } from './SeriesToggle';
+import { SeriesLegend } from './SeriesToggle';
 
 import type { HourlyVar } from '../../stores/api/variables';
 import type { HourlyExplorerProps, HourlyMetric, HourlyRow, HourlyRowInput, Labelled, MetricChartProps } from '../../types';
@@ -65,15 +66,15 @@ function hourlyRows({ time, v, aqi, from, end, tempUnit, windUnit }: HourlyRowIn
 
 const PAD_DOMAIN: [(m: number) => number, (m: number) => number] = [(m) => Math.floor(m - 2), (m) => Math.ceil(m + 2)];
 
-function MetricChart({ metric, data, height, windUnit, hasChance, toggle }: MetricChartProps): ReactElement | null {
+function MetricChart({ metric, data, height, windUnit, hasChance, scope, hidden }: MetricChartProps): ReactElement | null {
   const common = { ...BASE, h: height, data, xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 8) - 1) } };
   switch (metric) {
     case 'temp': {
       return (
         <>
           <LineChart {...common} unit="°" yAxisProps={{ width: 36, domain: PAD_DOMAIN, allowDecimals: false }}
-            withLegend={false} series={toggle.visible(tr(TEMP))} />
-          {toggle.legend(tr(TEMP))}
+            withLegend={false} series={visibleSeries(tr(TEMP), hidden)} />
+          <SeriesLegend scope={scope} series={tr(TEMP)} />
         </>
       );
     }
@@ -84,8 +85,8 @@ function MetricChart({ metric, data, height, windUnit, hasChance, toggle }: Metr
       return (
         <>
           <CompositeChart {...common} withRightYAxis rightYAxisProps={{ domain: [0, 100], width: 36 }}
-            withLegend={false} series={toggle.visible(tr(RAIN))} />
-          {toggle.legend(tr(RAIN))}
+            withLegend={false} series={visibleSeries(tr(RAIN), hidden)} />
+          <SeriesLegend scope={scope} series={tr(RAIN)} />
         </>
       );
     }
@@ -93,8 +94,8 @@ function MetricChart({ metric, data, height, windUnit, hasChance, toggle }: Metr
       return (
         <>
           <LineChart {...common} unit={` ${windUnitLabel(windUnit)}`} yAxisProps={{ width: 44 }}
-            withLegend={false} series={toggle.visible(tr(WIND))} />
-          {toggle.legend(tr(WIND))}
+            withLegend={false} series={visibleSeries(tr(WIND), hidden)} />
+          <SeriesLegend scope={scope} series={tr(WIND)} />
         </>
       );
     }
@@ -108,8 +109,8 @@ function MetricChart({ metric, data, height, windUnit, hasChance, toggle }: Metr
       return (
         <>
           <LineChart {...common} unit="%" yAxisProps={{ width: 36, domain: [0, 100] }}
-            withLegend={false} series={toggle.visible(tr(CLOUDS))} />
-          {toggle.legend(tr(CLOUDS))}
+            withLegend={false} series={visibleSeries(tr(CLOUDS), hidden)} />
+          <SeriesLegend scope={scope} series={tr(CLOUDS)} />
         </>
       );
     }
@@ -151,7 +152,8 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
   const available = METRICS.filter((m) => has(m.needs));
   const active = available.find((m) => m.value === s.metric)?.value ?? available.at(0)?.value;
   const data = hourlyRows({ time, v, aqi, from, end, tempUnit: units.temp, windUnit: units.wind });
-  const toggle = useSeriesToggle(active ?? s.metric);
+  const scope = active ?? s.metric;
+  const hidden = useUiStore((st) => st.hiddenSeries[scope] ?? NO_HIDDEN);
   return (
     <Box>
       <Box className="metric-tabs" role="tablist">
@@ -160,7 +162,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
             data-active={value === active || undefined} onClick={() => { s.setMetric(value); }}>{t(label)}</UnstyledButton>
         ))}
       </Box>
-      <MetricChart metric={active} data={data} height={height} windUnit={units.wind} hasChance={has('precipitation_probability')} toggle={toggle} />
+      <MetricChart metric={active} data={data} height={height} windUnit={units.wind} hasChance={has('precipitation_probability')} scope={scope} hidden={hidden} />
     </Box>
   );
 }

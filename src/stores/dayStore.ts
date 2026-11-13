@@ -11,8 +11,6 @@ import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/qu
 import type { DayState } from './storeTypes';
 import type { DayData } from './types';
 
-export type { DayState } from './storeTypes';
-
 export const useDayStore = create<DayState>()(
   persist(
     (set, get) => ({

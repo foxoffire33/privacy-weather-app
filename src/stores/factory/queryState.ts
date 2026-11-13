@@ -34,5 +34,3 @@ export function queryAt(map: QueryMap, key: string): QueryState {
 export function setQuery(map: QueryMap, key: string, q: QueryState): QueryMap {
   return { ...map, [key]: q };
 }
-
-export { initialQueryState, IDLE_QUERY, type QueryMap, type QueryState } from '../core/types';

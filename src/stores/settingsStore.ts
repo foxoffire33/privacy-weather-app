@@ -7,9 +7,7 @@ import { idbStorage } from './core/persistStorage';
 import type { SettingsState } from './storeTypes';
 import type { Settings } from './types';
 
-export type { SettingsState } from './storeTypes';
-
-export const defaultSettings: Settings = {
+const defaultSettings: Settings = {
   apiKey: '',
   server: '',
   tempUnit: 'C',

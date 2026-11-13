@@ -5,10 +5,12 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
+import { NO_HIDDEN, visibleSeries } from '../../lib/series';
 import { addDays, daysBetween, lastSettled, latest, useLogStore } from '../../stores';
 import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
+import { useUiStore } from '../../stores/uiStore';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
-import { useSeriesToggle } from '../charts/SeriesToggle';
+import { SeriesLegend } from '../charts/SeriesToggle';
 import { ChartSk } from '../Skeletons';
 
 import type { TempUnit } from '../../stores';
@@ -212,8 +214,9 @@ function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProp
 }
 
 function GroupChart({ id, group, series, data, base, unit }: GroupChartProps) {
-  const toggle = useSeriesToggle(`trend:${group.key}`);
-  const shown = toggle.visible(series);
+  const scope = `trend:${group.key}`;
+  const hidden = useUiStore((st) => st.hiddenSeries[scope] ?? NO_HIDDEN);
+  const shown = visibleSeries(series, hidden);
   const chart = (height: ChartHeight) => {
     const common = { ...base, h: height, unit, data, series: shown, withLegend: false };
     return (
@@ -221,7 +224,7 @@ function GroupChart({ id, group, series, data, base, unit }: GroupChartProps) {
         {(group.bars === true)
           ? <BarChart {...common} />
           : <LineChart {...common} withDots={data.length < 15} connectNulls={false} />}
-        {toggle.legend(series)}
+        <SeriesLegend scope={scope} series={series} />
       </>
     );
   };

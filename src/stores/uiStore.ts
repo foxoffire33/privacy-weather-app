@@ -3,8 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { UiState } from '../types';
 
-export type { UiState } from '../types';
-
+const LOG_PAGE = 50;
 const LEGACY_HINT_KEY = 'weather-log-hint-seen';
 
 function legacyHintSeen(): boolean {
@@ -26,13 +25,16 @@ export const useUiStore = create<UiState>()(
       historyRange: 90,
       lookupDraft: '',
       logFilter: '',
+      logLimit: LOG_PAGE,
       hiddenSeries: {},
       gestureHintSeen: legacyHintSeen(),
       fullscreenChart: null,
       setChartMetric: (chartMetric) => set({ chartMetric }),
       setHistoryRange: (historyRange) => set({ historyRange }),
       setLookupDraft: (lookupDraft) => set({ lookupDraft }),
-      setLogFilter: (logFilter) => set({ logFilter }),
+      setLogFilter: (logFilter) => set({ logFilter, logLimit: LOG_PAGE }),
+      showMoreLog: () => set((s) => ({ logLimit: s.logLimit + LOG_PAGE })),
+      resetLogLimit: () => set({ logLimit: LOG_PAGE }),
       toggleDay: (cityId, date) => set((s) => ({
         expandedDay: { ...s.expandedDay, [cityId]: s.expandedDay[cityId] === date ? null : date },
       })),

@@ -8,7 +8,7 @@ import type { ExpandButtonProps, FullscreenChartProps } from '../../types';
 import type { ReactElement } from 'react';
 
 export const INLINE_HEIGHT = 180;
-export const FULL_HEIGHT = 'var(--chart-full-h)';
+const FULL_HEIGHT = 'var(--chart-full-h)';
 
 export function ExpandButton({ id }: ExpandButtonProps): ReactElement {
   const open = useUiStore((s) => s.openChart);

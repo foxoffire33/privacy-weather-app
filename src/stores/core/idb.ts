@@ -8,10 +8,6 @@ function hasIndexedDb(): boolean {
   return typeof indexedDB !== 'undefined';
 }
 
-function keyToString(key: IDBValidKey): string {
-  return typeof key === 'string' ? key : JSON.stringify(key);
-}
-
 async function openDb(): Promise<IDBDatabase> {
   dbPromise ??= new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -64,7 +60,3 @@ export async function idbDel(key: string): Promise<void> {
   await write((store) => { store.delete(key); });
 }
 
-export async function idbKeys(): Promise<string[]> {
-  const keys = await read((store) => store.getAllKeys());
-  return (keys ?? []).map((key) => keyToString(key));
-}

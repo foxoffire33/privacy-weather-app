@@ -7,8 +7,6 @@ import { errorMessage, exportSnapshot, importBackup } from '.';
 
 import type { BackupState } from '../types';
 
-export type { BackupState } from '../types';
-
 export const useBackupStore = create<BackupState>()((set, get) => ({
   pending: null,
   parts: { cities: true, history: true, settings: false },

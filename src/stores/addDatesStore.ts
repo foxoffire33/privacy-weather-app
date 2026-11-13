@@ -4,8 +4,6 @@ import { addDateRange, addDays, errorMessage } from '.';
 
 import type { AddDatesState } from '../types';
 
-export type { AddDatesState } from '../types';
-
 export const useAddDatesStore = create<AddDatesState>()((set, get) => ({
   draft: { from: '', to: '' },
   result: null,

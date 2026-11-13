@@ -1,6 +1,5 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-
 import { t as tx, useI18n } from '../i18n';
 import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
 
@@ -13,8 +12,6 @@ import type { DayRecord, ForecastData, ForecastEntry, TempUnit } from '../stores
 import type { SnapshotInput, WidgetDay, WidgetRow, WidgetSnapshot, WidgetsPlugin } from '../types';
 
 const Widgets = registerPlugin<WidgetsPlugin>('Widgets');
-
-export type { SnapshotInput, WidgetSnapshot } from '../types';
 
 function widgetDays(input: SnapshotInput, entry: ForecastEntry): WidgetDay[] {
   const N = (v?: number | null) => convTemp(v, input.tempUnit);
@@ -77,7 +74,7 @@ function widgetHours(data: ForecastData, h0: number, unit: TempUnit): WidgetSnap
   }));
 }
 
-export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
+function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const { city, entry } = input;
   if (!city || !entry) { return null; }
   const unit = input.tempUnit;

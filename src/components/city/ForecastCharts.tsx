@@ -6,9 +6,11 @@ import { useEffect, useState } from 'react';
 import { t } from '../../i18n';
 import { convTemp, weekday } from '../../lib/format';
 import { nowIndex } from '../../lib/insights';
+import { visibleSeries, NO_HIDDEN } from '../../lib/series';
+import { useUiStore } from '../../stores/uiStore';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { HourlyExplorer } from '../charts/HourlyExplorer';
-import { useSeriesToggle } from '../charts/SeriesToggle';
+import { SeriesLegend } from '../charts/SeriesToggle';
 import { ChartSk } from '../Skeletons';
 
 import { Section } from './Parts';
@@ -45,7 +47,7 @@ export function Next48Section({ city, entry }: CityDataProps): ReactElement {
 }
 
 export function Next7Section({ city, entry, units }: CityDataProps): ReactElement {
-  const weekTg = useSeriesToggle('week');
+  const hidden = useUiStore((st) => st.hiddenSeries.week ?? NO_HIDDEN);
   const d = entry.pastDays;
   const dv = entry.data.daily.v;
   const rows = entry.data.daily.time.slice(d, d + 7).map((date, k) => ({
@@ -58,8 +60,8 @@ export function Next7Section({ city, entry, units }: CityDataProps): ReactElemen
     <>
       <CompositeChart h={height} dataKey="label"
         yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }} withRightYAxis rightYAxisProps={{ width: 32 }}
-        data={rows} withLegend={false} series={weekTg.visible(weekSeries())} />
-      {weekTg.legend(weekSeries())}
+        data={rows} withLegend={false} series={visibleSeries(weekSeries(), hidden)} />
+      <SeriesLegend scope="week" series={weekSeries()} />
     </>
   );
   return (

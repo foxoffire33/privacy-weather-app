@@ -143,12 +143,6 @@ export interface HourGroup {
   rows: number[];
 }
 
-export interface DragScroll {
-  x: number;
-  left: number;
-  moved: boolean;
-}
-
 export interface ReorderDrag {
   from: number;
   to: number;
@@ -302,4 +296,20 @@ export interface DayHeroValues {
 
 export interface DayHourlyProps extends DaySectionProps {
   cityId: string;
+}
+
+export interface HistoryLogProps {
+  cityId: string;
+  rows: DayRecord[];
+  today: string;
+  onOpen: (date: string) => void;
+}
+
+export interface HistoryRowProps {
+  cityId: string;
+  record: DayRecord;
+  today: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOpen: (date: string) => void;
 }

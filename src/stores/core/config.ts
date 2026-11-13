@@ -1,7 +1,5 @@
 import type { DataLayerConfig } from './types';
 
-
-
 function createDefaultConfig(): DataLayerConfig {
   return { apiKey: '', server: '', fetch: null };
 }
@@ -15,9 +13,3 @@ export function configureDataLayer(partial: Partial<DataLayerConfig>): void {
 export function getConfig(): DataLayerConfig {
   return current;
 }
-
-export function resetDataLayerConfig(): void {
-  current = createDefaultConfig();
-}
-
-export { type DataLayerConfig } from './types';

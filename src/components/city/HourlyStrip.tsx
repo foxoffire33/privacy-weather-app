@@ -1,8 +1,7 @@
 import { Box, Group, Text, UnstyledButton } from '@mantine/core';
+import { useDrag, useMergedRef, useScroller } from '@mantine/hooks';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { useDragScroll } from '../../hooks/useDragScroll';
-import { usePullPast } from '../../hooks/usePullPast';
 import { t } from '../../i18n';
 import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../lib/format';
 import { nowIndex } from '../../lib/insights';
@@ -12,7 +11,17 @@ import { Icon } from '../Icon';
 
 import type { DayData, ForecastEntry } from '../../stores';
 import type { DayDividerProps, ExpandableProps, NowcastProps, StripCell, StripLabel } from '../../types';
-import type { ReactElement } from 'react';
+import type { ReactElement, WheelEvent } from 'react';
+
+const PULL_TRIGGER = 64;
+const PULL_MAX = 96;
+
+function wheelAcross(e: WheelEvent<HTMLDivElement>): void {
+  const el = e.currentTarget;
+  if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { return; }
+  const atEnd = (e.deltaY > 0 && el.scrollLeft + el.clientWidth >= el.scrollWidth - 1) || (e.deltaY < 0 && el.scrollLeft <= 0);
+  if (!atEnd) { el.scrollBy({ left: e.deltaY }); }
+}
 
 function pullLabel(loading: boolean, armed: boolean, back: number): string {
   if (loading) { return '…'; }
@@ -86,8 +95,11 @@ export function Nowcast({ entry }: NowcastProps): ReactElement | null {
 export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): ReactElement {
   const days = useDayStore((st) => st.days);
   const navigate = useUiStore((st) => st.navigate);
-  const { ref: stripRef, ...stripHandlers } = useDragScroll<HTMLDivElement>();
+  const stripRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
+  const scroller = useScroller();
   const [back, setBack] = useState(0);
+  const [armed, setArmed] = useState(false);
   const widthBefore = useRef(0);
   const today = entry.data.daily.time[entry.pastDays];
   const loadingPast = useDayQuery(city.id, addDays(today, -(back + 1))).status === 'loading';
@@ -103,7 +115,18 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
     widthBefore.current = el.scrollWidth;
     setBack(n);
   };
-  const { armed, indicatorRef, touch, mouse } = usePullPast(stripRef, () => void loadPast(), !loadingPast);
+  const pull = useDrag<HTMLDivElement>((gesture) => {
+    if (gesture.first && (scroller.canScrollStart || loadingPast)) { gesture.cancel(); return; }
+    const width = gesture.last ? 0 : Math.min(PULL_MAX, Math.max(0, gesture.movement[0] * 0.5));
+    const indicator = indicatorRef.current;
+    if (indicator) {
+      indicator.style.transition = gesture.last ? '' : 'none';
+      indicator.style.width = `${String(width)}px`;
+    }
+    setArmed(width >= PULL_TRIGGER);
+    if (gesture.last && !gesture.canceled && gesture.movement[0] * 0.5 >= PULL_TRIGGER) { void loadPast(); }
+  }, { axis: 'x', threshold: 4 });
+  const ref = useMergedRef(stripRef, scroller.ref, pull.ref);
   useLayoutEffect(() => {
     const el = stripRef.current;
     if (!el || back === 0) { return; }
@@ -129,11 +152,8 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const first = hours.at(0);
   return (
     <>
-      <Box className="hourly-strip" ref={stripRef} {...stripHandlers} {...touch}
-        onPointerDown={(e) => { stripHandlers.onPointerDown(e); mouse.onPointerDown(e); }}
-        onPointerMove={(e) => { stripHandlers.onPointerMove(e); mouse.onPointerMove(e); }}
-        onPointerUp={(e) => { stripHandlers.onPointerUp(); mouse.onPointerUp(e); }}
-        onPointerCancel={(e) => { stripHandlers.onPointerCancel(); mouse.onPointerCancel(e); }}>
+      <Box className="hourly-strip" ref={ref} data-noswipe {...scroller.dragHandlers} onWheel={wheelAcross}
+        style={{ touchAction: scroller.canScrollStart ? 'pan-x pan-y' : 'pan-right pan-y' }}>
         <Box ref={indicatorRef} className="pull-past" data-armed={armed || undefined}>
           {pullLabel(loadingPast, armed, back)}
         </Box>

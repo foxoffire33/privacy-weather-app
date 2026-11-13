@@ -9,8 +9,6 @@ import { FOLD_RULES } from './schema';
 import type { EntityName, EntityTypeMap } from './schema';
 import type { CacheTables, EntityCacheState, PersistedEntities, Table } from './types';
 
-export type { CacheTables, EntityCacheState } from './types';
-
 function emptyTables(): CacheTables {
   return { city: {}, dayRecord: {} };
 }
@@ -33,7 +31,7 @@ function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, ne
   return rule === undefined ? folded : { ...folded, ...rule(prev, next) };
 }
 
-export const ENTITIES_VERSION = 1;
+const ENTITIES_VERSION = 1;
 
 function migrateEntities(persisted: unknown): PersistedEntities {
   return hasTables(persisted) ? persisted : { tables: emptyTables() };
