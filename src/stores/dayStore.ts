@@ -44,7 +44,6 @@ export const useDayStore = create<DayState>()(
       storage: idbStorage(),
       skipHydration: true,
       partialize: (s) => ({ days: s.days }),
-      merge: (persisted, current) => ({ ...current, ...(persisted as Partial<DayState>), queries: {} }),
     },
   ),
 );

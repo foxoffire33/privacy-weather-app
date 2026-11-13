@@ -1,6 +1,7 @@
 import { fetchWeatherApi } from 'openmeteo';
 
 import { getConfig } from '../core/config';
+import { isRecord } from '../core/guards';
 
 import { AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS,  } from './variables';
 
@@ -34,21 +35,25 @@ function times(b: SdkBlock, offset: number) {
   for (let t = Number(b.time()); t < Number(b.timeEnd()); t += b.interval()) { out.push(localIso(t, offset)); }
   return out;
 }
-function series<K extends string>(b: SdkBlock, names: readonly string[], skip: string[] = []) {
-  const out = {} as Record<K, (number | null)[]>;
+function block(b: SdkBlock | null, what: string): SdkBlock {
+  if (b === null) { throw new Error(`Open-Meteo response has no ${what} block`); }
+  return b;
+}
+function series<K extends string>(b: SdkBlock, names: readonly string[], skip: readonly string[] = []): Record<K, (number | null)[]> {
+  const out: Record<string, (number | null)[]> = {};
   for (const [i, name] of names.entries()) {
-    if (skip.includes(name)) { continue; }
-    out[name as K] = Array.from(b.variables(i)?.valuesArray() ?? [], (v) => clean(v));
+    if (!skip.includes(name)) { out[name] = Array.from(b.variables(i)?.valuesArray() ?? [], (v) => clean(v)); }
   }
   return out;
 }
-function point<K extends string>(b: SdkBlock, names: readonly string[]) {
-  const out = {} as Record<K, number | null>;
-  for (const [i, name] of names.entries()) { out[name as K] = clean(b.variables(i)?.value()); }
+function point<K extends string>(b: SdkBlock, names: readonly string[]): Record<K, number | null> {
+  const out: Record<string, number | null> = {};
+  for (const [i, name] of names.entries()) { out[name] = clean(b.variables(i)?.value()); }
   return out;
 }
 function instants(b: SdkBlock, i: number, offset: number) {
-  const v = b.variables(i)!;
+  const v = b.variables(i);
+  if (v === null) { return []; }
   return Array.from({ length: v.valuesInt64Length() }, (_, k) => localIso(Number(v.valuesInt64(k)), offset));
 }
 
@@ -66,9 +71,9 @@ export async function fetchForecast(city: City, pastDays = 1): Promise<ForecastD
     forecast_minutely_15: 8,
   }));
   const off = r.utcOffsetSeconds();
-  const c = r.current()!;
-  const h = r.hourly()!;
-  const d = r.daily()!;
+  const c = block(r.current(), 'current');
+  const h = block(r.hourly(), 'hourly');
+  const d = block(r.daily(), 'daily');
   const m = r.minutely15();
   return {
     elevation: r.elevation(),
@@ -92,9 +97,9 @@ export async function fetchAirQuality(city: City): Promise<AirData> {
     hourly: ['european_aqi'],
   }));
   const off = r.utcOffsetSeconds();
-  const h = r.hourly()!;
+  const h = block(r.hourly(), 'hourly');
   return {
-    current: point<AirVar>(r.current()!, AIR_VARS),
+    current: point<AirVar>(block(r.current(), 'current'), AIR_VARS),
     hourly: { time: times(h, off), aqi: series<'european_aqi'>(h, ['european_aqi']).european_aqi },
   };
 }
@@ -103,7 +108,7 @@ export async function fetchMarine(city: City): Promise<MarineData | null> {
   const [r] = await fetchWeatherApi(endpoint('marine', '/v1/marine'), withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', current: [...MARINE_VARS],
   }));
-  const current = point<MarineVar>(r.current()!, MARINE_VARS);
+  const current = point<MarineVar>(block(r.current(), 'current'), MARINE_VARS);
   return current.wave_height === null && current.sea_surface_temperature === null ? null : { current };
 }
 
@@ -113,8 +118,8 @@ export async function fetchDailyRange(city: City, start: string, end: string,
   const [r] = await fetchWeatherApi(url, withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: start, end_date: end, daily: [...daily],
   }));
-  const d = r.daily()!;
-  return { time: times(d, r.utcOffsetSeconds()).map((t) => t.slice(0, 10)), ...series<string>(d, daily) } as RangeRows;
+  const d = block(r.daily(), 'daily');
+  return { time: times(d, r.utcOffsetSeconds()).map((t) => t.slice(0, 10)), v: series<string>(d, daily) };
 }
 
 export const fetchArchive = async (city: City, start: string, end: string, daily: readonly string[] = ARCHIVE_VARS): Promise<RangeRows> =>
@@ -129,8 +134,8 @@ export async function fetchDay(city: City, date: string, recent: boolean): Promi
     start_date: date, end_date: date, hourly: [...hourly], daily: [...daily],
   }));
   const off = r.utcOffsetSeconds();
-  const h = r.hourly()!;
-  const d = r.daily()!;
+  const h = block(r.hourly(), 'hourly');
+  const d = block(r.daily(), 'daily');
   const dSeries = series<DailyVar>(d, daily, ['sunrise', 'sunset']);
   const dv = Object.fromEntries(Object.entries(dSeries).map(([k, arr]) => [k, (arr)[0] ?? null]));
   return {
@@ -150,16 +155,24 @@ export async function fetchAirDay(city: City, date: string): Promise<DayData['ai
   const [r] = await fetchWeatherApi(endpoint('air', '/v1/air-quality'), withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: date, end_date: date, hourly: [...AIR_VARS],
   }));
-  const h = r.hourly()!;
+  const h = block(r.hourly(), 'hourly');
   const v = series<AirVar>(h, AIR_VARS);
   return v.european_aqi.some((x) => x !== null) ? { time: times(h, r.utcOffsetSeconds()), v } : null;
+}
+
+function isGeoResult(x: unknown): x is GeoResult {
+  return isRecord(x) && (typeof x.id === 'number' || typeof x.id === 'string') && typeof x.name === 'string'
+    && typeof x.latitude === 'number' && typeof x.longitude === 'number';
 }
 
 export async function searchCities(name: string, signal?: AbortSignal): Promise<GeoResult[]> {
   const q = new URLSearchParams(withKey({ name, count: '8', language: 'en', format: 'json' }));
   const doFetch = getConfig().fetch ?? fetch;
   const res = await doFetch(`${endpoint('geo', '/v1/search')}?${q}`, { signal });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.error) {throw new Error(json.reason || `HTTP ${res.status}`);}
-  return json.results ?? [];
+  const json: unknown = await res.json().catch(() => ({}));
+  const body = isRecord(json) ? json : {};
+  if (!res.ok || body.error === true) {
+    throw new Error(typeof body.reason === 'string' && body.reason !== '' ? body.reason : `HTTP ${String(res.status)}`);
+  }
+  return Array.isArray(body.results) ? body.results.filter((g) => isGeoResult(g)) : [];
 }

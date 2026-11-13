@@ -6,10 +6,10 @@ const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFin
 const isStr = (x: unknown): x is string => typeof x === 'string';
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const ACCENT_VALUES: ReadonlySet<Accent> = new Set(['green', 'red', 'blue', 'off', 'custom']);
+const ACCENT_VALUES: ReadonlySet<string> = new Set<Accent>(['green', 'red', 'blue', 'off', 'custom']);
 const DAY_FIELDS = ['hi', 'lo', 'feelsHi', 'feelsLo', 'mm', 'snow', 'wind', 'gust', 'sunshine', 'uv', 'code'] as const;
 
-const isAccent = (x: unknown): x is Accent => ACCENT_VALUES.has(x);
+const isAccent = (x: unknown): x is Accent => typeof x === 'string' && ACCENT_VALUES.has(x);
 const numOrNull = (x: unknown): number | null => (isNum(x) ? x : null);
 
 function toCity(c: unknown): City | null {

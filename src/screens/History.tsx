@@ -18,8 +18,14 @@ import {
 import { useAddDatesStore } from '../stores/addDatesStore';
 import { useUiStore } from '../stores/uiStore';
 
-import type { CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
+import type { AddDatesResult, CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
 import type { ReactElement } from 'react';
+
+function importResultText(result: AddDatesResult | null): string | null {
+  if (result === null) { return null; }
+  if (!result.ok) { return t('history.downloadFailed', { error: result.error }); }
+  return t(result.kept === 0 ? 'history.added' : 'history.addedKept', { count: result.added, updated: result.updated, kept: result.kept });
+}
 
 export function History({ cityId }: CityScreenProps): ReactElement {
   const city = useCity(cityId);
@@ -50,11 +56,14 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const visible = q === '' ? rows : rows.filter((r) =>
     [r.date, longDate(r.date), shortDate(r.date), conditionLabel(r.code), r.source].some((v) => v.toLowerCase().includes(q)));
   const maxLookup = addDays(today, -5);
-  const open = (date: string) => { date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }); };
+  const open = (date: string) => {
+    if (date === today) { s.goHome(s.cityIndex); } else { s.navigate({ name: 'day', cityId, date }); }
+  };
+  const cityName = s.city.name;
   const exportCsv = () => {
     const head = 'date,max_c,min_c,feels_max_c,feels_min_c,precip_mm,snow_cm,wind_max_kmh,gust_max_kmh,sunshine_s,uv_max,weather_code,source';
     const body = rows.map((r) => [r.date, r.hi, r.lo, r.feelsHi, r.feelsLo, r.mm, r.snow, r.wind, r.gust, r.sunshine, r.uv, r.code, r.source].map((x) => x ?? '').join(',')).join('\n');
-    downloadFile(`${s.city!.name.toLowerCase().replaceAll(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
+    downloadFile(`${cityName.toLowerCase().replaceAll(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
   return (
     <Box className="screen">
@@ -141,7 +150,7 @@ function YearsRow({ cityId, today, onOpen }: YearsRowProps) {
     <Box className="archive-grid">
       {years.map((y) => (
         <UnstyledButton key={y.year} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
-          disabled={y.error} onClick={() => { onOpen(`${y.year}${today.slice(4)}`); }}>
+          disabled={y.error} onClick={() => { onOpen(`${String(y.year)}${today.slice(4)}`); }}>
           <Text fz={12} c="dimmed">{y.year}</Text>
           <Text fz={22} fw={800}>{y.error === true ? '–' : `${T(y.hi)}°`}</Text>
           <Text fz={12} c="dimmed">{y.error === true ? t('history.noData') : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
@@ -204,9 +213,7 @@ function ImportRange({ cityId, maxDate }: ImportRangeProps) {
   })));
   const busy = useImportQuery(cityId).status === 'loading';
   useEffect(() => { reset(maxDate); }, [cityId, maxDate, reset]);
-  const msg = result === null ? null
-    : (result.ok ? t(result.kept === 0 ? 'history.added' : 'history.addedKept', { count: result.added, updated: result.updated, kept: result.kept })
-      : t('history.downloadFailed', { error: result.error }));
+  const msg = importResultText(result);
   const days = from !== '' && to !== '' ? daysBetween(from, to) + 1 : 0;
   const tooLong = days > 3660;
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(from) && /^\d{4}-\d{2}-\d{2}$/.test(to)

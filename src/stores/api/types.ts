@@ -12,8 +12,7 @@ export type DailyVar = Exclude<typeof DAILY_VARS[number], 'sunrise' | 'sunset'>;
 export type AirVar = typeof AIR_VARS[number];
 export type MarineVar = typeof MARINE_VARS[number];
 
-export interface TimeRows {
+export interface RangeRows {
   time: string[];
+  v: Partial<Record<string, (number | null)[]>>;
 }
-
-export type RangeRows = TimeRows & Partial<Record<string, (number | null)[]>>;

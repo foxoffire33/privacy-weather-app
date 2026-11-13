@@ -28,7 +28,7 @@ export const useAlmanacStore = create<AlmanacState>()(
           const r = await fetchArchive(city, '1991-01-01', '2020-12-31', ['temperature_2m_max']);
           const totals = new Map<string, { sum: number; n: number }>();
           for (const [i, day] of r.time.entries()) {
-            const value = r.temperature_2m_max?.[i] ?? null;
+            const value = r.v.temperature_2m_max?.[i] ?? null;
             if (value === null) { continue; }
             const md = day.slice(5);
             const total = totals.get(md) ?? { sum: 0, n: 0 };
@@ -48,10 +48,10 @@ export const useAlmanacStore = create<AlmanacState>()(
         const thisYear = +date.slice(0, 4);
         const years = [...BACK.map((n) => thisYear - n), FIRST_YEAR];
         const rows: ArchiveYear[] = await Promise.all(years.map(async (year) => {
-          const day = `${year}${date.slice(4)}`;
+          const day = `${String(year)}${date.slice(4)}`;
           try {
             const r = await fetchArchive(city, day, day);
-            return { year, hi: r.temperature_2m_max?.[0] ?? undefined, lo: r.temperature_2m_min?.[0] ?? undefined, mm: r.precipitation_sum?.[0] ?? undefined };
+            return { year, hi: r.v.temperature_2m_max?.[0] ?? undefined, lo: r.v.temperature_2m_min?.[0] ?? undefined, mm: r.v.precipitation_sum?.[0] ?? undefined };
           } catch {
             return { year, error: true };
           }
@@ -66,7 +66,6 @@ export const useAlmanacStore = create<AlmanacState>()(
       storage: idbStorage(),
       skipHydration: true,
       partialize: (s) => ({ normals: s.normals, thisDay: s.thisDay }),
-      merge: (persisted, current) => ({ ...current, ...(persisted as Partial<AlmanacState>), queries: {} }),
     },
   ),
 );

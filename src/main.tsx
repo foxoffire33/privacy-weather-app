@@ -6,7 +6,10 @@ import '@mantine/charts/styles.css';
 import './styles/global.css';
 import { Root } from './Root';
 
-createRoot(document.querySelector('#root')!).render(
+const container = document.querySelector('#root');
+if (container === null) { throw new Error('Missing #root element'); }
+
+createRoot(container).render(
   <StrictMode>
     <Root />
   </StrictMode>,

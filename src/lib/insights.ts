@@ -1,9 +1,10 @@
 import { t, tl } from '../i18n';
 
 import { hhmm } from './format';
+import { atMost, below } from './scale';
 
 import type { ForecastData } from '../stores';
-import type { PollenLevel, PressureTrend } from '../types';
+import type { MessageKey, PollenLevel, PressureTrend } from '../types';
 
 export const levelName = (i: number): string => tl('levels.aqi')[i];
 
@@ -13,7 +14,7 @@ export function euAqiLevel(a: number | null): number | null { return a === null 
 
 export function usAqiLabel(a: number | null): string {
   if (a === null) {return t('levels.usAqi.unavailable');}
-  return t(a <= 50 ? 'levels.usAqi.good' : a <= 100 ? 'levels.usAqi.moderate' : a <= 150 ? 'levels.usAqi.sensitive' : a <= 200 ? 'levels.usAqi.unhealthy' : a <= 300 ? 'levels.usAqi.veryUnhealthy' : 'levels.usAqi.hazardous');
+  return t(atMost(a, [[50, 'levels.usAqi.good'], [100, 'levels.usAqi.moderate'], [150, 'levels.usAqi.sensitive'], [200, 'levels.usAqi.unhealthy'], [300, 'levels.usAqi.veryUnhealthy']], 'levels.usAqi.hazardous'));
 }
 
 const POLLUTANT_BANDS: Partial<Record<string, number[]>> = {
@@ -41,27 +42,27 @@ export function beaufort(kmh: number | null): string {
 
 export function feelsLabel(c: number | null): string {
   if (c === null) {return '–';}
-  return t(c < -10 ? 'levels.feels.dangerouslyCold' : c < 0 ? 'levels.feels.freezing' : c < 10 ? 'levels.feels.cold' : c < 18 ? 'levels.feels.cool' : c < 24 ? 'levels.feels.comfortable' : c < 29 ? 'levels.feels.warm' : c < 35 ? 'levels.feels.hot' : 'levels.feels.veryHot');
+  return t(below(c, [[-10, 'levels.feels.dangerouslyCold'], [0, 'levels.feels.freezing'], [10, 'levels.feels.cold'], [18, 'levels.feels.cool'], [24, 'levels.feels.comfortable'], [29, 'levels.feels.warm'], [35, 'levels.feels.hot']], 'levels.feels.veryHot'));
 }
 
 export function dewLabel(dp: number | null): string {
   if (dp === null) {return '–';}
-  return t(dp < 10 ? 'levels.dew.dry' : dp < 16 ? 'levels.dew.comfortable' : dp < 21 ? 'levels.dew.humid' : 'levels.dew.oppressive');
+  return t(below(dp, [[10, 'levels.dew.dry'], [16, 'levels.dew.comfortable'], [21, 'levels.dew.humid']], 'levels.dew.oppressive'));
 }
 
 export function uvAdvice(u: number | null): string {
   if (u === null) {return '–';}
-  return t(u < 3 ? 'levels.uv.none' : u < 6 ? 'levels.uv.midday' : u < 8 ? 'levels.uv.shade' : 'levels.uv.avoid');
+  return t(below(u, [[3, 'levels.uv.none'], [6, 'levels.uv.midday'], [8, 'levels.uv.shade']], 'levels.uv.avoid'));
 }
 
 export function capeLabel(j: number | null): string {
   if (j === null) {return '–';}
-  return t(j < 300 ? 'levels.cape.low' : j < 1000 ? 'levels.cape.moderate' : j < 2500 ? 'levels.cape.high' : 'levels.cape.extreme');
+  return t(below(j, [[300, 'levels.cape.low'], [1000, 'levels.cape.moderate'], [2500, 'levels.cape.high']], 'levels.cape.extreme'));
 }
 
 export function visibilityLabel(m: number | null): string {
   if (m === null) {return '–';}
-  return t(m < 1000 ? 'levels.visibility.fog' : m < 4000 ? 'levels.visibility.mist' : m < 10_000 ? 'levels.visibility.moderate' : 'levels.visibility.clear');
+  return t(below(m, [[1000, 'levels.visibility.fog'], [4000, 'levels.visibility.mist'], [10_000, 'levels.visibility.moderate']], 'levels.visibility.clear'));
 }
 
 export function duration(sec: number | null): string {
@@ -100,13 +101,19 @@ export function rainOutlook(data: ForecastData, h0: number): string {
   return t('rain.none');
 }
 
+function pressureKey(d: number): MessageKey {
+  if (d > 1) { return 'levels.pressure.rising'; }
+  if (d < -1) { return 'levels.pressure.falling'; }
+  return 'levels.pressure.steady';
+}
+
 export function pressureTrend(data: ForecastData, h0: number): PressureTrend | null {
   const p = data.hourly.v.pressure_msl;
   const now = p[h0];
   const before = p[Math.max(0, h0 - 3)];
   if (now === null || before === null) {return null;}
   const d = now - before;
-  return { delta: d, label: t(d > 1 ? 'levels.pressure.rising' : (d < -1 ? 'levels.pressure.falling' : 'levels.pressure.steady')) };
+  return { delta: d, label: t(pressureKey(d)) };
 }
 
 export function sunProgress(nowIso: string, sunrise?: string, sunset?: string): number | null {

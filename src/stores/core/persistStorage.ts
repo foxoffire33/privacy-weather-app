@@ -1,11 +1,14 @@
+import { isRecord } from './guards';
 import { idbDel, idbGet, idbSet } from './idb';
 
 import type { HydratablePersist, PendingWrite } from './types';
 import type { PersistStorage, StorageValue } from 'zustand/middleware';
 
-
-
 const WRITE_DEBOUNCE_MS = 250;
+
+function isStorageValue<S>(value: unknown): value is StorageValue<S> {
+  return isRecord(value) && isRecord(value.state);
+}
 
 const pending = new Map<string, PendingWrite>();
 
@@ -27,7 +30,10 @@ if (typeof document !== 'undefined') {
 
 export function idbStorage<S>(): PersistStorage<S> {
   return {
-    getItem: async (name) => idbGet<StorageValue<S>>(name),
+    getItem: async (name) => {
+      const value = await idbGet(name);
+      return isStorageValue<S>(value) ? value : null;
+    },
     setItem: (name, value) => {
       const existing = pending.get(name);
       if (existing) { clearTimeout(existing.timer); }

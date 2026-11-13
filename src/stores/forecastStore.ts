@@ -12,6 +12,14 @@ import type { ForecastEntry } from './types';
 
 export type { ForecastState } from './storeTypes';
 
+function loadedQueries(forecasts: ForecastState['forecasts']): QueryMap {
+  const queries: QueryMap = {};
+  for (const [cityId, entry] of Object.entries(forecasts)) {
+    if (entry !== undefined) { queries[cityId] = { status: 'success', error: null, lastLoadedAt: entry.fetchedAt }; }
+  }
+  return queries;
+}
+
 export const useForecastStore = create<ForecastState>()(
   persist(
     (set, get) => ({
@@ -54,13 +62,8 @@ export const useForecastStore = create<ForecastState>()(
       storage: idbStorage(),
       skipHydration: true,
       partialize: (s) => ({ forecasts: s.forecasts }),
-      merge: (persisted, current) => {
-        const forecasts = (persisted as Partial<ForecastState> | null)?.forecasts ?? {};
-        const queries: QueryMap = {};
-        for (const [cityId, entry] of Object.entries(forecasts)) {
-          if (entry !== undefined) { queries[cityId] = { status: 'success', error: null, lastLoadedAt: entry.fetchedAt }; }
-        }
-        return { ...current, forecasts, queries };
+      onRehydrateStorage: () => (state) => {
+        if (state !== undefined) { useForecastStore.setState({ queries: loadedQueries(state.forecasts) }); }
       },
     },
   ),

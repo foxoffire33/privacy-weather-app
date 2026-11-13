@@ -4,6 +4,8 @@ import { Share } from '@capacitor/share';
 
 import { currentLocale, t } from '../i18n';
 
+import { atMost, below } from './scale';
+
 import type { TempUnit, WindUnit } from '../stores';
 
 export function fmtTemp(c: number | null | undefined, unit: TempUnit): string {
@@ -18,14 +20,16 @@ export function fmtDelta(d: number | null | undefined, unit: TempUnit): string |
 export function fmtWind(kmh: number | null | undefined, unit: WindUnit): string {
   if (kmh === null || kmh === undefined) {return '–';}
   if (unit === 'ms') {return `${(kmh / 3.6).toFixed(1)  } m/s`;}
-  if (unit === 'mph') {return `${Math.round(kmh / 1.609)  } mph`;}
-  return `${Math.round(kmh)  } km/h`;
+  if (unit === 'mph') {return `${String(Math.round(kmh / 1.609))  } mph`;}
+  return `${String(Math.round(kmh))  } km/h`;
 }
 export const hhmm = (iso?: string): string => ((iso !== undefined && iso !== '') ? iso.slice(11, 16) : '–');
 export const hourOf = (iso: string): string => iso.slice(11, 13);
 export const weekday = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { weekday: 'short' });
 export const shortDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
 export const longDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
+const WIND_DIVISOR: Record<WindUnit, number> = { kmh: 1, ms: 3.6, mph: 1.609 };
+const WIND_LABEL: Record<WindUnit, string> = { kmh: 'km/h', ms: 'm/s', mph: 'mph' };
 const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
 export const compass = (deg?: number): string => t(`compass.${POINTS[Math.round((deg ?? 0) / 45) % 8]}`);
 
@@ -40,11 +44,11 @@ export function ago(ts?: number): string {
 
 export function uvLabel(u?: number | null): string {
   if (u === null || u === undefined) {return '–';}
-  return u < 3 ? 'Low' : u < 6 ? 'Moderate' : u < 8 ? 'High' : u < 11 ? 'Very high' : 'Extreme';
+  return below(u, [[3, 'Low'], [6, 'Moderate'], [8, 'High'], [11, 'Very high']], 'Extreme');
 }
 export function aqiLabel(a?: number | null): string {
   if (a === null || a === undefined) {return 'Unavailable';}
-  return a <= 20 ? 'Good' : a <= 40 ? 'Fair' : a <= 60 ? 'Moderate' : a <= 80 ? 'Poor' : a <= 100 ? 'Very poor' : 'Extremely poor';
+  return atMost(a, [[20, 'Good'], [40, 'Fair'], [60, 'Moderate'], [80, 'Poor'], [100, 'Very poor']], 'Extremely poor');
 }
 
 export async function downloadFile(name: string, text: string, type: string): Promise<void> {
@@ -64,10 +68,15 @@ export async function downloadFile(name: string, text: string, type: string): Pr
 export const convTemp = (c: number | null | undefined, unit: TempUnit): number | null =>
   ((c === null || c === undefined) || Number.isNaN(c) ? null : Math.round((unit === 'F' ? c * 9 / 5 + 32 : c) * 10) / 10);
 export const convWind = (kmh: number | null | undefined, unit: WindUnit): number | null =>
-  ((kmh === null || kmh === undefined) ? null : Math.round((unit === 'ms' ? kmh / 3.6 : (unit === 'mph' ? kmh / 1.609 : kmh)) * 10) / 10);
-export const windUnitLabel = (unit: WindUnit): "mph" | "m/s" | "km/h" => (unit === 'ms' ? 'm/s' : (unit === 'mph' ? 'mph' : 'km/h'));
+  ((kmh === null || kmh === undefined) ? null : Math.round(kmh / WIND_DIVISOR[unit] * 10) / 10);
+export const windUnitLabel = (unit: WindUnit): string => WIND_LABEL[unit];
 export const fullDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export function orDash(v: number | null | undefined, show: (n: number) => string): string {
   return v === null || v === undefined ? '–' : show(v);
+}
+
+export function hourLabel(time: string): string {
+  const hour = hourOf(time);
+  return hour === '00' ? weekday(time.slice(0, 10)) : hour;
 }

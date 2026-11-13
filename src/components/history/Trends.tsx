@@ -47,6 +47,16 @@ const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.
 const LENGTHS = [30, 90, 365, 0];
 const BACK_YEARS = [0, 1, 10, 30];
 
+function lenLabel(len: number): string {
+  if (len === 0) { return t('history.all'); }
+  return len === 365 ? '1y' : `${String(len)}d`;
+}
+
+async function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => Promise<unknown>): Promise<unknown> {
+  if (cached) { return lastSettled(key); }
+  return missing ? download() : latest(key);
+}
+
 export function Trends({ cityId, log, normals, today, followedAt, tempUnit, windUnit }: TrendsProps): ReactElement {
   const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows, retryFailed } = useTrendsStore(useShallow((st) => ({
     picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
@@ -58,7 +68,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const days = len === 0 ? Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1)) : len;
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
-  const shift = (date: string, years: number) => (years === 0 ? date : `${+date.slice(0, 4) - years}${date.slice(4)}`);
+  const shift = (date: string, years: number) => (years === 0 ? date : `${String(+date.slice(0, 4) - years)}${date.slice(4)}`);
   const windows = back === 0 ? [{ from, to }] : [{ from, to }, { from: shift(from, back), to: shift(to, back) }];
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
@@ -77,10 +87,9 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     data.push(row);
   }
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
-  const unitOf = (g: TrendGroup) => (g === 'temp' ? '°' : g === 'rain' ? ' mm' : g === 'snow' ? ' cm' : g === 'wind' ? ` ${windUnitLabel(windUnit)}` : g === 'sun' ? ' h' : '');
-  const rangeLabel = custom
-    ? `${shortDate(custom.from)} – ${shortDate(custom.to)}`
-    : len === 0 ? t('history.all') : (len === 365 ? '1y' : `${len}d`);
+  const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
+  const unitOf = (g: TrendGroup) => unitSuffix[g];
+  const rangeLabel = custom ? `${shortDate(custom.from)} – ${shortDate(custom.to)}` : lenLabel(len);
   return (
     <Box px={20}>
       <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
@@ -96,7 +105,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
           const on = !custom && d === len;
           return (
             <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setLen(d); }}>{d === 0 ? t('history.all') : (d === 365 ? '1y' : `${d}d`)}</UnstyledButton>
+              onClick={() => { setLen(d); }}>{lenLabel(d)}</UnstyledButton>
           );
         })}
       </Box>
@@ -160,7 +169,7 @@ function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProp
   useEffect(() => {
     if (cached && missing) { void ensureWindows(cityId, windows); }
   }, [cached, missing, key]);
-  use(cached ? lastSettled(key) : (missing ? ensureWindows(cityId, windows) : latest(key)));
+  use(windowsPromise(cached, missing, key, async () => ensureWindows(cityId, windows)));
   return <>{children}</>;
 }
 

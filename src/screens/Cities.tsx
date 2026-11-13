@@ -17,6 +17,12 @@ import type { PointerEvent, ReactElement } from 'react';
 
 const EDGE = 70;
 
+function edgeSpeed(y: number, r: DOMRect): number {
+  if (y < r.top + EDGE) { return -(r.top + EDGE - y) / 5; }
+  if (y > r.bottom - EDGE) { return (y - (r.bottom - EDGE)) / 5; }
+  return 0;
+}
+
 export function Cities(): ReactElement {
   const cities = useCities();
   const forecasts = useForecastStore((s) => s.forecasts);
@@ -41,7 +47,7 @@ export function Cities(): ReactElement {
     if (el) {
       const r = el.getBoundingClientRect();
       const y = g.current.pointerY;
-      const speed = y < r.top + EDGE ? -(r.top + EDGE - y) / 5 : (y > r.bottom - EDGE ? (y - (r.bottom - EDGE)) / 5 : 0);
+      const speed = edgeSpeed(y, r);
       if (speed !== 0) { el.scrollTop += speed; update(); }
     }
     g.current.raf = requestAnimationFrame(tick);
@@ -84,7 +90,7 @@ export function Cities(): ReactElement {
             return (
               <Box key={c.id} ref={i === 0 ? firstRow : undefined} className="city-row" data-dragging={dragging || undefined}
                 style={{
-                  transform: `translateY(${dragging ? drag.dy : shift(i)}px)`,
+                  transform: `translateY(${String(dragging ? drag.dy : shift(i))}px)`,
                   transition: dragging ? 'none' : 'transform .18s ease',
                 }}>
                 <Group gap={0} wrap="nowrap" align="stretch">

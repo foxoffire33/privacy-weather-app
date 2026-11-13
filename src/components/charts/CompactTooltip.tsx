@@ -1,34 +1,36 @@
 import { Group, SimpleGrid, Stack, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
+import { isRecord } from '../../stores/core/guards';
 
-import type { CompactTooltipProps, TooltipEntry, TooltipRowPayload } from '../../types';
+import type { CompactTooltipProps, TooltipEntry } from '../../types';
 import type { ReactElement } from 'react';
 
 const WIDTH = 4;
 
 const one = (v: number) => String(Math.round(v * 10) / 10);
 
-function fit(value: number | string | undefined): string {
+function fit(value: unknown): string {
   if (typeof value !== 'number' || !Number.isFinite(value)) { return typeof value === 'string' ? value : '–'; }
   const abs = Math.abs(value);
   const tries = [one(value), String(Math.round(value))];
-  if (abs >= 1000) {tries.push(`${one(value / 1e3)}k`, `${Math.round(value / 1e3)}k`);}
-  if (abs >= 1e6) {tries.push(`${one(value / 1e6)}M`, `${Math.round(value / 1e6)}M`);}
+  if (abs >= 1000) {tries.push(`${one(value / 1e3)}k`, `${String(Math.round(value / 1e3))}k`);}
+  if (abs >= 1e6) {tries.push(`${one(value / 1e6)}M`, `${String(Math.round(value / 1e6))}M`);}
   return tries.find((s) => s.length <= WIDTH) ?? tries.at(-1) ?? '–';
 }
 
 const PER_ROW = 3;
 
 export function CompactTooltip({ active, label, payload }: CompactTooltipProps): ReactElement {
-  const rows = (active === true && payload ? payload : []) as TooltipEntry[];
-  const title = (rows[0] as TooltipRowPayload | undefined)?.payload?.when ?? label;
+  const rows: readonly TooltipEntry[] = active && payload !== undefined ? payload : [];
+  const point: unknown = rows.at(0)?.payload;
+  const title = isRecord(point) && typeof point.when === 'string' ? point.when : label;
   const grid = rows.length > PER_ROW;
-  const cell = (e: TooltipEntry, i: number) => (
-    <Group key={e.dataKey ?? e.name ?? i} component="b" gap={4} align="baseline" wrap="nowrap"
+  const cell = (e: TooltipEntry) => (
+    <Group key={e.graphicalItemId} component="b" gap={4} align="baseline" wrap="nowrap"
       style={{ color: e.color ?? e.stroke ?? e.fill, flex: '1 1 auto', minWidth: 0 }}>
       <Text span inherit fw={400} opacity={0.8} truncate="end" miw={0}>{e.name}</Text>
-      <Text span inherit ml="auto" miw={`${WIDTH}ch`} ta="right" style={{ flex: 'none', fontVariantNumeric: 'tabular-nums' }}>
+      <Text span inherit ml="auto" miw={`${String(WIDTH)}ch`} ta="right" style={{ flex: 'none', fontVariantNumeric: 'tabular-nums' }}>
         {fit(e.value)}{e.unit ?? ''}
       </Text>
     </Group>

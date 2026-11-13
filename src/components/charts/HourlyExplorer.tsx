@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { t, t as tt } from '../../i18n';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
+import { below } from '../../lib/scale';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
 
@@ -96,7 +97,7 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
       {active === 'wind' && tg.legend(tr(WIND))}
       {active === 'uv' && (
         <BarChart {...BASE} h={height} xAxisProps={xAxisProps}
-          getBarColor={(val) => (val >= 8 ? 'signal.5' : val >= 6 ? 'signal.4' : val >= 3 ? 'signal.7' : 'dark.4')}
+          getBarColor={(val) => below(val, [[3, 'dark.4'], [6, 'signal.7'], [8, 'signal.4']], 'signal.5')}
           series={[{ name: 'UV', label: t('chart.uv'), color: 'signal.4' }]} data={data} />
       )}
       {active === 'clouds' && (

@@ -17,7 +17,7 @@ export function usePullPast(ref: RefObject<HTMLElement | null>, onLoad: () => vo
     const el = indicator.current;
     if (!el) {return;}
     el.style.transition = start.current === null ? '' : 'none';
-    el.style.width = `${pull.current}px`;
+    el.style.width = `${String(pull.current)}px`;
   };
   const set = (v: number) => {
     pull.current = v;

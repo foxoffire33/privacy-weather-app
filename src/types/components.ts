@@ -215,3 +215,10 @@ export interface FullscreenChartProps {
 export interface ExpandButtonProps {
   id: string;
 }
+
+export interface StatusMessage {
+  ok: boolean;
+  text: string;
+}
+
+export type Rgb = readonly [number, number, number];

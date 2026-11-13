@@ -1,5 +1,7 @@
 import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../stores';
 import type { MessageKey } from './i18n';
+import type { TooltipContentProps, TooltipPayloadEntry, TooltipValueType } from 'recharts';
+import type { NameType } from 'recharts/types/component/DefaultTooltipContent';
 
 export interface ToggleSeries {
   name: string;
@@ -15,25 +17,9 @@ export interface Labelled {
   label: MessageKey;
 }
 
-export interface TooltipEntry {
-  name?: string;
-  value?: number | string;
-  color?: string;
-  stroke?: string;
-  fill?: string;
-  unit?: string;
-  dataKey?: string;
-}
+export type TooltipEntry = TooltipPayloadEntry;
 
-export interface TooltipRowPayload {
-  payload?: { when?: string };
-}
-
-export interface CompactTooltipProps {
-  active?: boolean;
-  label?: string | number;
-  payload?: readonly object[];
-}
+export type CompactTooltipProps = Pick<TooltipContentProps, 'active' | 'label' | 'payload'>;
 
 export type HourlySeries = Partial<Record<HourlyVar, (number | null)[]>>;
 

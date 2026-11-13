@@ -28,7 +28,7 @@ export function fromForecastDaily(cityId: string, data: ForecastData, i: number,
 
 export function fromRangeRow(cityId: string, rows: RangeRows, i: number): DayRecord {
   const date = rows.time[i];
-  const at = (name: string) => rows[name]?.[i];
+  const at = (name: string) => rows.v[name]?.[i];
   return {
     id: dayKey(cityId, date),
     cityId,

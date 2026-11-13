@@ -20,7 +20,7 @@ export function Onboarding(): ReactElement {
         {STEPS.map((s, i) => (
           <Group key={s.t} wrap="nowrap" align="flex-start" py={14}
             style={{ borderBottom: i < STEPS.length - 1 ? '2px solid rgba(255,255,255,.5)' : 0 }}>
-            <Text fw={800} w={36}>{`0${i + 1}`}</Text>
+            <Text fw={800} w={36}>{`0${String(i + 1)}`}</Text>
             <Box style={{ flex: 1 }}>
               <Text fw={800} fz={17}>{s.t}</Text>
               <Text fw={600} fz={14}>{s.d}</Text>

@@ -62,7 +62,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     <Box ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       onClickCapture={(e) => {
-        if (swallowClick.current || (open && !(e.target as HTMLElement).closest('[data-swipe-action]'))) {
+        if (swallowClick.current || (open && !(e.target instanceof Element && e.target.closest('[data-swipe-action]') !== null))) {
           e.preventDefault();
           e.stopPropagation();
           if (!swallowClick.current) { onOpenChange(false); }
@@ -75,14 +75,14 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
           position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
           border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
-          transition: dragX === null ? `width ${REMOVE_MS}ms ease` : 'none',
+          transition: dragX === null ? `width ${String(REMOVE_MS)}ms ease` : 'none',
         }}>
         {t('history.delete')}
       </UnstyledButton>
       <Box style={{
         position: 'relative', background: 'var(--mantine-color-body)',
-        transform: `translateX(${offset}px)`,
-        transition: dragX === null ? `transform ${REMOVE_MS}ms ease` : 'none',
+        transform: `translateX(${String(offset)}px)`,
+        transition: dragX === null ? `transform ${String(REMOVE_MS)}ms ease` : 'none',
       }}>
         {children}
       </Box>

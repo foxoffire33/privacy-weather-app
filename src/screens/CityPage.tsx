@@ -14,7 +14,7 @@ import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';
 import { t as tx } from '../i18n';
-import { ago, compass, convTemp, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, orDash, weekday } from '../lib/format';
+import { ago, compass, convTemp, fmtDelta, fmtTemp, fmtWind, hhmm, hourLabel, hourOf, orDash, weekday } from '../lib/format';
 import {
   levelName, beaufort, capeLabel, dewLabel, duration, euAqiLevel, feelsLabel, nowIndex, pollenLevel,
   pollutantLevel, pressureTrend, rainOutlook, signedMinutes, sunProgress, usAqiLabel, uvAdvice, visibilityLabel,
@@ -60,6 +60,17 @@ function Deferred({ h, children }: DeferredProps) {
   const { start, clear } = useTimeout(() => { setReady(true); }, 250);
   useEffect(() => { start(); return clear; }, [start, clear]);
   return ready ? <>{children}</> : <ChartSk h={h} />;
+}
+
+function pullLabel(loading: boolean, armed: boolean, back: number): string {
+  if (loading) { return '…'; }
+  if (armed) { return tx('city.release'); }
+  return back === 0 ? tx('city.yesterday') : tx('city.earlier');
+}
+
+function feelsKey(windChill: number): MessageKey {
+  if (Math.abs(windChill) < 1) { return 'city.feels.close'; }
+  return windChill < 0 ? 'city.feels.colder' : 'city.feels.warmer';
 }
 
 function CityTitle({ city, isDefault }: CityPageProps) {
@@ -131,7 +142,11 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   useEffect(() => {
     const el = strip.ref.current;
     const first = (s.expanded !== null && s.expanded !== '') ? el?.querySelector<HTMLElement>(`[data-date="${CSS.escape(s.expanded)}"]`) : null;
-    if (el && first) {el.scrollTo({ left: ((first.previousElementSibling as HTMLElement | null)?.classList.contains('day-divider') === true) ? (first.previousElementSibling as HTMLElement).offsetLeft : first.offsetLeft, behavior: 'smooth' });}
+    if (el && first) {
+      const prev = first.previousElementSibling;
+      const anchor = prev instanceof HTMLElement && prev.classList.contains('day-divider') ? prev : first;
+      el.scrollTo({ left: anchor.offsetLeft, behavior: 'smooth' });
+    }
   }, [s.expanded]);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
   const n0 = (v: number | null | undefined, digits = 0) => ((v === null || v === undefined) ? '–' : v.toFixed(digits));
@@ -179,7 +194,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
     const dayStart = hourOf(h.time) === '00' && k > 0;
     return {
       ...h,
-      label: h.isNow ? tx('common.now') : (hourOf(h.time) === '00' ? weekday(h.date) : hourOf(h.time)),
+      label: h.isNow ? tx('common.now') : hourLabel(h.time),
       dayBreak: dayStart,
       dayName: dayStart ? weekday(h.date).toLocaleUpperCase() : '',
     };
@@ -238,7 +253,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
             <>
               <Box className="nowcast" style={{ marginTop: 8 }}>
                 {mq.precipitation.map((v, i) => (
-                  <Box key={mq.time[i]} style={{ height: `${Math.max(6, ((v ?? 0) / mMax) * 100)}%`, background: (v ?? 0) >= 0.1 ? 'var(--mantine-color-signal-4)' : 'rgba(255,255,255,.12)' }} />
+                  <Box key={mq.time[i]} style={{ height: `${String(Math.max(6, ((v ?? 0) / mMax) * 100))}%`, background: (v ?? 0) >= 0.1 ? 'var(--mantine-color-signal-4)' : 'rgba(255,255,255,.12)' }} />
                 ))}
               </Box>
               <Group justify="space-between" mt={4}>
@@ -252,7 +267,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
 
         <Box className="hourly-strip" {...strip} {...pastPull.touch}>
           <Box ref={pastPull.indicatorRef} className="pull-past" data-armed={pastPull.armed || undefined}>
-            {loadingPast ? '…' : pastPull.armed ? tx('city.release') : back === 0 ? tx('city.yesterday') : tx('city.earlier')}
+            {pullLabel(loadingPast, pastPull.armed, back)}
           </Box>
           {hours.map((h) => (
             <Fragment key={h.time}>
@@ -266,7 +281,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
             <Box data-date={h.dayBreak || h.date === hours[0].date && h.time === hours[0].time ? h.date : undefined} data-now={h.isNow || undefined} data-on={h.date === s.expanded || undefined} style={h.past ? { opacity: .82 } : undefined}>
               <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{T(h.temp)}°</Text>
-              <Text fz={12} fw={600} c="signal.3">{h.p === null ? '–' : `${h.p}%`}</Text>
+              <Text fz={12} fw={600} c="signal.3">{h.p === null ? '–' : `${String(h.p)}%`}</Text>
               <Text fz={12} c="dimmed">{(h.wind === null || h.wind === undefined) ? '–' : Math.round(h.wind)}</Text>
             </Box>
             </Fragment>
@@ -317,7 +332,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <FullscreenChart id={`next7:${city.id}`} title={tx('city.next7')} render={next7} />
       </Section>
 
-      <Section title={tx('city.feels.title')} summary={tx(Math.abs(windChill) < 1 ? 'city.feels.close' : (windChill < 0 ? 'city.feels.colder' : 'city.feels.warmer'), { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>
+      <Section title={tx('city.feels.title')} summary={tx(feelsKey(windChill), { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>
         <Box className="stat-grid">
           <Stat k={tx('city.feels.title')} v={`${T(c.apparent_temperature)}°`} s={tx('city.feels.air', { t: T(c.temperature_2m) })} />
           <Stat k={tx('city.feels.humidity')} v={`${n0(c.relative_humidity_2m)}%`} s={dewLabel(c.dew_point_2m)} />
@@ -360,7 +375,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <Box className="stat-grid">
           <Stat k={tx('city.wind.title')} v={W(c.wind_speed_10m)} s={
             <Group gap={4} component="span">
-              <Box component="span" style={{ display: 'inline-flex', transform: `rotate(${(c.wind_direction_10m ?? 0) + 180}deg)` }}><Icon name="arrowUp" size={12} /></Box>
+              <Box component="span" style={{ display: 'inline-flex', transform: `rotate(${String((c.wind_direction_10m ?? 0) + 180)}deg)` }}><Icon name="arrowUp" size={12} /></Box>
               {tx('city.wind.from', { dir: compass(c.wind_direction_10m ?? 0), deg: n0(c.wind_direction_10m) })}
             </Group>
           } />
@@ -427,7 +442,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
         <Box className="stat-grid">
           <Stat k={tx('city.atmosphere.pressure')} v={`${n0(c.pressure_msl)} hPa`} s={trend ? tx('city.atmosphere.trend', { label: trend.label, delta: `${trend.delta >= 0 ? '+' : '−'}${Math.abs(trend.delta).toFixed(1)}` }) : tx('city.atmosphere.seaLevel')} />
           <Stat k={tx('city.atmosphere.thunder')} v={capeLabel(hv.cape[h0])} s={`CAPE ${n0(hv.cape[h0])} J/kg`} />
-          <Stat k={tx('city.atmosphere.freezing')} v={orDash(hv.freezing_level_height.at(h0), (n) => `${Math.round(n)} m`)} s={tx('city.atmosphere.freezingNote')} />
+          <Stat k={tx('city.atmosphere.freezing')} v={orDash(hv.freezing_level_height.at(h0), (n) => `${String(Math.round(n))} m`)} s={tx('city.atmosphere.freezingNote')} />
           <Stat k={tx('city.atmosphere.evaporation')} v={`${n0(dv.et0_fao_evapotranspiration[t], 1)} mm`} s={tx('city.atmosphere.evaporationNote')} />
         </Box>
       </Section>

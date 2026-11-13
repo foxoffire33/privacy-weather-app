@@ -113,7 +113,8 @@ function DayDetails({ cityId, date }: DayViewProps) {
   }
   const d = day.daily.v;
   const h = day.hourly.v;
-  const aqi = day.air ? Object.fromEntries(day.air.time.map((time, i) => [time, day.air!.v.european_aqi?.[i] ?? null])) : undefined;
+  const air = day.air;
+  const aqi = air ? Object.fromEntries(air.time.map((time, i) => [time, air.v.european_aqi?.[i] ?? null])) : undefined;
   const aqiMax = max(day.air?.v.european_aqi);
   const aqiLvl = euAqiLevel(aqiMax);
   return (

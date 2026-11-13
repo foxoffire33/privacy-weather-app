@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { definedOnly, isRecord } from '../core/guards';
 import { idbStorage } from '../core/persistStorage';
 
 import { ENTITY_NAMES, FOLD_RULES } from './schema';
@@ -11,18 +12,16 @@ import type { CacheTables, EntityCacheState, PersistedEntities, Table } from './
 export type { CacheTables, EntityCacheState } from './types';
 
 function emptyTables(): CacheTables {
-  const tables = {} as CacheTables;
-  for (const name of ENTITY_NAMES) {(tables as Record<EntityName, Record<string, unknown>>)[name] = {};}
-  return tables;
+  return { city: {}, dayRecord: {} };
+}
+
+function hasTables(value: unknown): value is PersistedEntities {
+  return isRecord(value) && isRecord(value.tables);
 }
 
 function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, next: EntityTypeMap[N], name: N): EntityTypeMap[N] {
   if (prev === undefined) {return next;}
-  const defined: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(next)) {
-    if (value !== undefined) {defined[key] = value;}
-  }
-  const folded = { ...prev, ...defined } as EntityTypeMap[N];
+  const folded: EntityTypeMap[N] = { ...prev, ...definedOnly(next) };
   const rule = FOLD_RULES[name];
   return rule === undefined ? folded : { ...folded, ...rule(prev, next) };
 }
@@ -30,7 +29,7 @@ function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, ne
 export const ENTITIES_VERSION = 1;
 
 function migrateEntities(persisted: unknown): PersistedEntities {
-  return persisted as PersistedEntities;
+  return hasTables(persisted) ? persisted : { tables: emptyTables() };
 }
 
 export const useEntityCache = create<EntityCacheState>()(
@@ -87,8 +86,8 @@ export const useEntityCache = create<EntityCacheState>()(
       skipHydration: true,
       partialize: (s) => ({ tables: s.tables }),
       merge: (persisted, current) => {
-        if (Object.keys(current.tables.dayRecord).length > 0) {return current;}
-        return { ...current, ...(persisted as Partial<EntityCacheState>) };
+        if (Object.keys(current.tables.dayRecord).length > 0 || !hasTables(persisted)) { return current; }
+        return { ...current, tables: persisted.tables };
       },
     },
   ),

@@ -3,7 +3,7 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 import { t as tx, useI18n } from '../i18n';
 import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
 
-import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
+import { convTemp, fmtDelta, fmtTemp, hhmm, hourLabel, shortDate, weekday } from './format';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
 
@@ -73,7 +73,7 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
   const hours = data.hourly.time.slice(h0, h0 + 12).map((time, k) => {
     const i = h0 + k;
     return {
-      label: k === 0 ? tx('common.now') : (hourOf(time) === '00' ? weekday(time.slice(0, 10)) : hourOf(time)),
+      label: k === 0 ? tx('common.now') : hourLabel(time),
       temp: `${T(k === 0 ? c.temperature_2m : hv.temperature_2m[i])}°`,
       p: hv.precipitation_probability[i] ?? 0,
     };
@@ -88,8 +88,8 @@ export function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
       cond: conditionLabel(c.weather_code),
       hi: `${T(hiToday)}°`,
       lo: `${T(dv.temperature_2m_min[t])}°`,
-      rain: `${dv.precipitation_probability_max[t] ?? 0}%`,
-      rainLabel: tx('widgets.rainShort', { p: `${dv.precipitation_probability_max[t] ?? 0}%` }),
+      rain: `${String(dv.precipitation_probability_max[t] ?? 0)}%`,
+      rainLabel: tx('widgets.rainShort', { p: `${String(dv.precipitation_probability_max[t] ?? 0)}%` }),
       delta: (delta !== null && delta !== '') ? tx('city.vsAverage', { delta }) : null,
     },
     timeline: { days, todayHi: `${T(hiToday)}°` },

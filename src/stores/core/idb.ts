@@ -28,14 +28,14 @@ async function openDb(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-export async function idbGet<T = unknown>(key: string): Promise<T | null> {
+export async function idbGet(key: string): Promise<unknown> {
   if (!hasIndexedDb()) {return null;}
   try {
     const db = await openDb();
-    return await new Promise<T | null>((resolve) => {
+    return await new Promise<unknown>((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const req = tx.objectStore(STORE_NAME).get(key);
-      req.onsuccess = () => { resolve((req.result ?? null) as T | null); };
+      req.onsuccess = () => { resolve(req.result ?? null); };
       req.onerror = () => { resolve(null); };
     });
   } catch {

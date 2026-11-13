@@ -9,12 +9,19 @@ import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { countDays } from '../lib/backup';
 import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
-import { ACCENTS } from '../theme';
+import { ACCENT_NAMES, ACCENTS } from '../theme';
 
 import type { Accent, TempUnit, WindUnit } from '../stores';
+import type { BackupResult, StatusMessage } from '../types';
 import type { ReactElement } from 'react';
 
 const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
+
+function backupResultMessage(result: BackupResult | null): StatusMessage | null {
+  if (result === null) { return null; }
+  if (!result.ok) { return { ok: false, text: result.error }; }
+  return { ok: true, text: t('settings.imported', { cities: result.cities, days: result.days }) };
+}
 
 export function Settings(): ReactElement {
   const settings = useSettings();
@@ -30,9 +37,7 @@ export function Settings(): ReactElement {
     await pick(file);
     resetFile.current?.();
   };
-  const importMsg = result === null ? null
-    : (result.ok ? { ok: true, text: t('settings.imported', { cities: result.cities, days: result.days }) }
-      : { ok: false, text: result.error });
+  const importMsg = backupResultMessage(result);
   return (
     <Box className="screen">
       <ScreenHeader />
@@ -66,7 +71,7 @@ export function Settings(): ReactElement {
           <Text fz={14} fw={600}>{t('settings.accent')}</Text>
           <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
           <Group gap={8}>
-            {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
+            {ACCENT_NAMES.map((a) => (
               <UnstyledButton key={a} aria-pressed={s.settings.accent === a} onClick={() => { set({ accent: a }); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44,
                   border: `2px solid ${s.settings.accent === a ? '#fff' : 'var(--rule-soft)'}` }}>

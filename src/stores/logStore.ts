@@ -163,7 +163,6 @@ export const useLogStore = create<LogState>()(
       storage: idbStorage(),
       skipHydration: true,
       partialize: (s) => ({ dates: s.dates }),
-      merge: (persisted, current) => ({ ...current, ...(persisted as Partial<LogState>), queries: {} }),
     },
   ),
 );

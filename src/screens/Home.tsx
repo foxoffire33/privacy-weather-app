@@ -29,6 +29,12 @@ function GestureHint({ multiple }: GestureHintProps) {
   );
 }
 
+function settlePage(moved: number, idx: number, n: number): number {
+  if (moved < -60 && idx < n - 1) { return idx + 1; }
+  if (moved > 60 && idx > 0) { return idx - 1; }
+  return idx;
+}
+
 export function Home(): ReactElement {
   const cities = useCities();
   const updating = useAnyForecastLoading();
@@ -52,7 +58,7 @@ export function Home(): ReactElement {
     return () => { globalThis.clearTimeout(t); };
   }, [activeId]);
   const onDown = (e: PointerEvent) => {
-    if ((e.target as HTMLElement).closest('[data-noswipe]')) { return; }
+    if (e.target instanceof Element && e.target.closest('[data-noswipe]') !== null) { return; }
     drag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, active: false };
   };
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -72,7 +78,7 @@ export function Home(): ReactElement {
     }
     const atEdge = (idx === 0 && mx > 0) || (idx === n - 1 && mx < 0);
     dx.current = atEdge ? mx / 3 : mx;
-    e.currentTarget.style.transform = `translateX(calc(${-idx * 100}% + ${dx.current}px))`;
+    e.currentTarget.style.transform = `translateX(calc(${String(-idx * 100)}% + ${String(dx.current)}px))`;
   };
   const onUp = () => {
     const d = drag.current;
@@ -81,16 +87,16 @@ export function Home(): ReactElement {
     justDragged.current = true;
     const moved = dx.current;
     dx.current = 0;
-    const next = moved < -60 && idx < n - 1 ? idx + 1 : (moved > 60 && idx > 0 ? idx - 1 : idx);
+    const next = settlePage(moved, idx, n);
     const el = pagerRef.current;
-    if (el) { el.style.transition = ''; el.style.transform = `translateX(${-next * 100}%)`; }
+    if (el) { el.style.transition = ''; el.style.transform = `translateX(${String(-next * 100)}%)`; }
     if (next !== idx) { setPage(next); }
   };
   return (
     <Box style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
       <Box className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}
-        style={{ transform: `translateX(${-idx * 100}%)` }}>
+        style={{ transform: `translateX(${String(-idx * 100)}%)` }}>
         {cities.map((c, i) => (Math.abs(i - idx) <= 1
           ? <CityPage key={c.id} city={c} isDefault={i === 0} />
           : <Box key={c.id} className="page" />))}
