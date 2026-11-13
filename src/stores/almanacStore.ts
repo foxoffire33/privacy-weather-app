@@ -9,8 +9,6 @@ import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/qu
 import type { AlmanacState } from './storeTypes';
 import type { ArchiveYear } from './types';
 
-export type { AlmanacState } from './storeTypes';
-
 const BACK = [1, 10, 30] as const;
 const FIRST_YEAR = 1940;
 

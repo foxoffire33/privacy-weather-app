@@ -1,4 +1,3 @@
-export type EntityId = string;
 
 export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
 

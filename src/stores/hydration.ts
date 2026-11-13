@@ -21,10 +21,6 @@ const PERSISTED: Rehydratable[] = [
   useAlmanacStore,
 ];
 
-export function alreadyHydrated(): boolean {
-  return PERSISTED.every((store) => store.persist.hasHydrated());
-}
-
 let booting: Promise<void> | null = null;
 
 export function hydrateAll(): Pending {

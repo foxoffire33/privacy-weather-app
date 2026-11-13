@@ -7,8 +7,6 @@ import { begin, fail, succeed } from './factory/queryState';
 
 import type { SearchState } from './storeTypes';
 
-export type { SearchState } from './storeTypes';
-
 const MIN_TERM = 2;
 
 let controller: AbortController | null = null;

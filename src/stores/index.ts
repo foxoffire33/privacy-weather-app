@@ -1,16 +1,11 @@
-export { configureDataLayer, getConfig, resetDataLayerConfig } from './core/config';
-export type { DataLayerConfig } from './core/config';
 export { addDays, daysBetween, todayISO } from './core/time';
-export { errorMessage, isAbort } from './core/errors';
-export { IDLE_QUERY, initialQueryState } from './core/types';
-export type { EntityId, QueryMap, QueryState, QueryStatus } from './core/types';
+export { errorMessage } from './core/errors';
+export { IDLE_QUERY } from './core/types';
+export type { QueryState } from './core/types';
 
-export { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+export { begin, fail, succeed } from './factory/queryState';
 
-export { dayKey, ENTITY_NAMES } from './entities/schema';
-export type { EntityName, EntityTypeMap } from './entities/schema';
-export { entityCache, useEntityCache } from './entities/cache';
-export { cityById, citiesByIds, dayRecordAt, dayRecordsFor } from './entities/selectors';
+export { useEntityCache } from './entities/cache';
 
 export * from './settingsStore';
 export * from './cityStore';
@@ -24,10 +19,7 @@ export * from './bootStore';
 export type * from './storeTypes';
 export * from './selectors';
 export * from './suspense';
-export { lastSettled, latest, once, READY } from './core/inflight';
-
-export { alreadyHydrated, hydrateAll } from './hydration';
-export { importLegacyStore } from './migrateLegacy';
+export { lastSettled, latest, once } from './core/inflight';
 
 export type * from './types';
 export type * from './api/types';

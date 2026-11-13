@@ -57,5 +57,3 @@ export async function waitForHydration(store: HydratablePersist): Promise<void> 
     setTimeout(() => { unsub(); resolve(); }, 3000);
   });
 }
-
-export { type HydratablePersist } from './types';

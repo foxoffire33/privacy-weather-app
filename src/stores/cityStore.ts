@@ -8,8 +8,6 @@ import { entityCache } from './entities/cache';
 import type { CityState } from './storeTypes';
 import type { City } from './types';
 
-export type { CityState } from './storeTypes';
-
 export const useCityStore = create<CityState>()(
   persist(
     (set, get) => ({

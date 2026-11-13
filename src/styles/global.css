@@ -49,7 +49,6 @@ body { font-variant-numeric: tabular-nums; }
 .dot { width: 8px; height: 8px; background: rgba(255, 255, 255, .45); transition: width .2s; border: 0; padding: 0; cursor: pointer; }
 .dot[data-active] { width: 22px; background: #fff; }
 .hours { display: grid; grid-template-columns: repeat(8, 1fr); border-bottom: 1px solid rgba(248, 244, 244, .2); }
-.metric-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--rule); }
 .hourly-strip { display: flex; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(248, 244, 244, .2); touch-action: pan-x pan-y; cursor: grab; user-select: none; overscroll-behavior-x: contain; }
 .hourly-strip > * { flex: none; width: 52px; padding: 10px 0 10px 10px; }
 .hourly-strip > .day-divider { width: 18px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800; line-height: 1; color: var(--mantine-color-signal-3); }

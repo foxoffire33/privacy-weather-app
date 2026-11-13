@@ -3,8 +3,6 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { UiState } from '../types';
 
-export type { UiState } from '../types';
-
 const LEGACY_HINT_KEY = 'weather-log-hint-seen';
 
 function legacyHintSeen(): boolean {

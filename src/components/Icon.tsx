@@ -20,8 +20,6 @@ const ICONS: Record<IconName, ReactNode> = {
   lock: <><rect x="4" y="11" width="16" height="10" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
 };
 
-export type { IconName } from '../types';
-
 export function Icon({ name, size = 22, stroke = 2 }: IconProps): ReactElement {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
