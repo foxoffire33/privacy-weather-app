@@ -143,12 +143,6 @@ export interface HourGroup {
   rows: number[];
 }
 
-export interface DragScroll {
-  x: number;
-  left: number;
-  moved: boolean;
-}
-
 export interface ReorderDrag {
   from: number;
   to: number;

@@ -15,7 +15,7 @@ export interface UiState {
   historyRange: number;
   lookupDraft: string;
   logFilter: string;
-  hiddenSeries: Record<string, string[]>;
+  hiddenSeries: Partial<Record<string, string[]>>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
   setChartMetric: (m: string) => void;
