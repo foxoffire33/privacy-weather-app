@@ -1,42 +1,54 @@
 import { create } from 'zustand';
-import type { Route } from '../types';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import type { UiState } from '../types';
 
-export interface UiState {
-  route: Route;
-  stack: Route[];
-  pageIndex: number;
-  expandedDay: Record<string, string | null>;
-  chartMetric: string;
-  historyRange: number;
-  lookupDraft: string;
-  setChartMetric: (m: string) => void;
-  setHistoryRange: (d: number) => void;
-  setLookupDraft: (date: string) => void;
-  toggleDay: (cityId: string, date: string) => void;
-  navigate: (route: Route) => void;
-  back: () => void;
-  goHome: (pageIndex?: number) => void;
-  setPage: (i: number) => void;
+export type { UiState } from '../types';
+
+const LEGACY_HINT_KEY = 'weather-log-hint-seen';
+
+function legacyHintSeen(): boolean {
+  try {
+    return localStorage.getItem(LEGACY_HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
 }
 
-export const useUiStore = create<UiState>()((set) => ({
-  route: { name: 'home' },
-  stack: [],
-  pageIndex: 0,
-  expandedDay: {},
-  chartMetric: 'temp',
-  historyRange: 90,
-  lookupDraft: '',
-  setChartMetric: (chartMetric) => set({ chartMetric }),
-  setHistoryRange: (historyRange) => set({ historyRange }),
-  setLookupDraft: (lookupDraft) => set({ lookupDraft }),
-  toggleDay: (cityId, date) => set((s) => ({
-    expandedDay: { ...s.expandedDay, [cityId]: s.expandedDay[cityId] === date ? null : date },
-  })),
-  navigate: (route) => set((s) => ({ stack: [...s.stack, s.route], route })),
-  back: () => set((s) => (s.stack.length
-    ? { route: s.stack[s.stack.length - 1], stack: s.stack.slice(0, -1) }
-    : { route: { name: 'home' } })),
-  goHome: (pageIndex) => set((s) => ({ route: { name: 'home' }, stack: [], pageIndex: pageIndex ?? s.pageIndex })),
-  setPage: (pageIndex) => set({ pageIndex }),
-}));
+export const useUiStore = create<UiState>()(
+  persist(
+    (set) => ({
+      route: { name: 'home' },
+      stack: [],
+      pageIndex: 0,
+      expandedDay: {},
+      chartMetric: 'temp',
+      historyRange: 90,
+      lookupDraft: '',
+      hiddenSeries: {},
+      gestureHintSeen: legacyHintSeen(),
+      setChartMetric: (chartMetric) => set({ chartMetric }),
+      setHistoryRange: (historyRange) => set({ historyRange }),
+      setLookupDraft: (lookupDraft) => set({ lookupDraft }),
+      toggleDay: (cityId, date) => set((s) => ({
+        expandedDay: { ...s.expandedDay, [cityId]: s.expandedDay[cityId] === date ? null : date },
+      })),
+      toggleSeries: (scope, name) => set((s) => {
+        const hidden = s.hiddenSeries[scope] ?? [];
+        const next = hidden.includes(name) ? hidden.filter((n) => n !== name) : [...hidden, name];
+        return { hiddenSeries: { ...s.hiddenSeries, [scope]: next } };
+      }),
+      dismissGestureHint: () => set({ gestureHintSeen: true }),
+      navigate: (route) => set((s) => ({ stack: [...s.stack, s.route], route })),
+      back: () => set((s) => (s.stack.length
+        ? { route: s.stack[s.stack.length - 1], stack: s.stack.slice(0, -1) }
+        : { route: { name: 'home' } })),
+      goHome: (pageIndex) => set((s) => ({ route: { name: 'home' }, stack: [], pageIndex: pageIndex ?? s.pageIndex })),
+      setPage: (pageIndex) => set({ pageIndex }),
+    }),
+    {
+      name: 'wl2-ui',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ gestureHintSeen: s.gestureHintSeen }),
+    },
+  ),
+);

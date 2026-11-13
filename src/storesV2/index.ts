@@ -1,6 +1,7 @@
 export { configureDataLayer, getConfig, resetDataLayerConfig } from './core/config';
 export type { DataLayerConfig } from './core/config';
 export { addDays, daysBetween, todayISO } from './core/time';
+export { errorMessage, isAbort } from './core/errors';
 export { IDLE_QUERY, initialQueryState } from './core/types';
 export type { EntityId, QueryMap, QueryState, QueryStatus } from './core/types';
 

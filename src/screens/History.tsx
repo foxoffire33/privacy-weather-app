@@ -2,15 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
-  useLookup, useNormals, useThisDay, useUnits,
+  addDateRange, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useAlmanacStore, useCity,
+  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookup, useNormals, useThisDay, useUnits,
 } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
-import { useAlmanacStore } from '../storesV2';
-import { useLogStore } from '../storesV2';
+import { useAddDatesStore } from '../store/addDatesStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
-import { addDays, daysBetween, todayISO } from '../storesV2';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Icon } from '../components/Icon';
 import { Sk } from '../components/Skeletons';
@@ -164,26 +162,18 @@ export function History({ cityId }: { cityId: string }) {
 
 function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
   const [show, setShow] = useState(false);
-  const [from, setFrom] = useState(() => addDays(maxDate, -29));
-  const [to, setTo] = useState(maxDate);
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const { draft: { from, to }, result, reset, setDraft, run } = useAddDatesStore(useShallow((st) => ({
+    draft: st.draft, result: st.result, reset: st.reset, setDraft: st.setDraft, run: st.run,
+  })));
+  const busy = useImportQuery(cityId).status === 'loading';
+  useEffect(() => { reset(maxDate); }, [cityId, maxDate, reset]);
+  const msg = result === null ? null
+    : result.ok ? t(result.kept ? 'history.addedKept' : 'history.added', { count: result.added, updated: result.updated, kept: result.kept })
+      : t('history.downloadFailed', { error: result.error });
   const days = from && to ? daysBetween(from, to) + 1 : 0;
   const tooLong = days > 3660;
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(from) && /^\d{4}-\d{2}-\d{2}$/.test(to)
     && from >= '1940-01-01' && to <= maxDate && days > 0 && !tooLong;
-  const run = async () => {
-    setBusy(true);
-    setMsg(null);
-    try {
-      const c = await addDateRange(cityId, from, to);
-      setMsg(t(c.kept ? 'history.addedKept' : 'history.added', { count: c.added, updated: c.updated, kept: c.kept }));
-    } catch (e) {
-      setMsg(t('history.downloadFailed', { error: (e as Error).message }));
-    } finally {
-      setBusy(false);
-    }
-  };
   if (!show) {
     return (
       <UnstyledButton className="tab-button" onClick={() => setShow(true)}>
@@ -196,14 +186,14 @@ function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
       closeOnClickOutside={!busy} closeOnEscape={!busy}
       closeButtonProps={{ size: 44, iconSize: 20, disabled: busy, 'aria-label': t('common.close') }}>
       <Box className="stat-grid">
-        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
-        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setDraft({ from: e.currentTarget.value })} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setDraft({ to: e.currentTarget.value })} />
       </Box>
       <Text fz={12} c="dimmed" mt={8}>
         {t('history.addNote')}
       </Text>
       {tooLong && <Text fz={12} c="signal.3" mt={6}>{t('history.tooLong')}</Text>}
-      <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run()}>
+      <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run(cityId)}>
         {valid ? t('history.downloadDays', { count: days }) : t('history.download')}
       </Button>
       {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}

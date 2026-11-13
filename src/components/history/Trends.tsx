@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
 
@@ -6,9 +7,10 @@ import { t, type MessageKey } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
 import { addDays, daysBetween } from '../../storesV2';
 import type { DayRecord, TempUnit, WindUnit } from '../../storesV2';
+import type { TrendsSheet } from '../../types';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
-import { fillRange } from '../../storesV2';
+import { useTrendsStore } from '../../store/trendsStore';
 
 type Group = 'temp' | 'rain' | 'snow' | 'wind' | 'sun' | 'uv';
 interface Attr {
@@ -44,7 +46,6 @@ const GROUPS: { key: Group; title: MessageKey; bars?: boolean }[] = [
   { key: 'uv', title: 'city.day.uvMax' },
 ];
 
-const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
 const COLORS = ['signal.4', 'signal.2', 'dark.2', 'signal.7', 'dark.4', 'dark.1'];
 const COMPARE_COLORS = ['dark.2', 'dark.4', 'dark.1', 'dark.3', 'dark.2', 'dark.4'];
 const LENGTHS = [30, 90, 365, 0];
@@ -59,14 +60,13 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   tempUnit: TempUnit;
   windUnit: WindUnit;
 }) {
-  const [picked, setPicked] = useState<string[]>(DEFAULT_ATTRS);
-  const [len, setLen] = useState<number>(30);
-  const [custom, setCustom] = useState<{ from: string; to: string } | null>(null);
-  const [back, setBack] = useState(0);
-  const [sheet, setSheet] = useState<'attrs' | 'range' | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fetched = useRef<Set<string>>(new Set());
+  const { picked, len, custom, back, download, setLen, setCustom, setBack, setRangeDraft, ensureWindows } = useTrendsStore(useShallow((st) => ({
+    picked: st.picked, len: st.len, custom: st.custom, back: st.back, download: st.download,
+    setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
+  })));
+  const [sheet, setSheet] = useState<TrendsSheet>(null);
+  const busy = download.status === 'loading';
+  const error = download.error;
   const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
@@ -74,30 +74,8 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   useEffect(() => {
     const windows = [{ from, to }];
     if (back) windows.push({ from: shift(from, back), to: shift(to, back) });
-    const wanted = windows
-      .filter((w) => {
-        if (w.from > w.to) return false;
-        for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!log?.[d]) return true;
-        return false;
-      })
-      .filter((w) => !fetched.current.has(`${cityId}:${w.from}:${w.to}`));
-    if (!wanted.length) return;
-    let active = true;
-    setBusy(true);
-    setError(null);
-    void (async () => {
-      for (const w of wanted) {
-        fetched.current.add(`${cityId}:${w.from}:${w.to}`);
-        try {
-          await fillRange(cityId, w.from, w.to);
-        } catch (e) {
-          if (active) setError((e as Error).message);
-        }
-      }
-      if (active) setBusy(false);
-    })();
-    return () => { active = false; };
-  }, [cityId, from, to, back]);
+    void ensureWindows(cityId, windows);
+  }, [cityId, from, to, back, ensureWindows]);
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
@@ -126,7 +104,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       <Box className="tab-row">
         <UnstyledButton onClick={() => setSheet('attrs')}>{t('history.attributes')} · {picked.length}</UnstyledButton>
         <UnstyledButton aria-pressed={!!custom} data-active={custom ? true : undefined}
-          onClick={() => setSheet('range')}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
+          onClick={() => { setRangeDraft({ from, to }); setSheet('range'); }}>{custom ? rangeLabel : t('history.custom')}</UnstyledButton>
       </Box>
 
       <Box className="tab-row" role="tablist">
@@ -134,7 +112,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
           const on = !custom && d === len;
           return (
             <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setCustom(null); setLen(d); }}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</UnstyledButton>
+              onClick={() => setLen(d)}>{d ? (d === 365 ? '1y' : `${d}d`) : t('history.all')}</UnstyledButton>
           );
         })}
       </Box>
@@ -165,11 +143,9 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
           );
         })}
 
-      {sheet === 'attrs' && (
-        <AttrSheet picked={picked} onChange={setPicked} onClose={() => setSheet(null)} />
-      )}
+      {sheet === 'attrs' && <AttrSheet onClose={() => setSheet(null)} />}
       {sheet === 'range' && (
-        <RangeSheet from={from} to={to} max={today}
+        <RangeSheet max={today}
           onClose={() => setSheet(null)}
           onApply={(r) => { setCustom(r); setSheet(null); }} />
       )}
@@ -198,8 +174,9 @@ function GroupChart({ group, series, data, base, unit }: {
   );
 }
 
-function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: (keys: string[]) => void; onClose: () => void }) {
-  const toggle = (key: string) => onChange(picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key]);
+function AttrSheet({ onClose }: { onClose: () => void }) {
+  const picked = useTrendsStore((st) => st.picked);
+  const toggle = useTrendsStore((st) => st.togglePicked);
   return (
     <Modal opened onClose={onClose} fullScreen title={t('history.attrTitle')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
       {GROUPS.map((g) => {
@@ -219,20 +196,20 @@ function AttrSheet({ picked, onChange, onClose }: { picked: string[]; onChange: 
   );
 }
 
-function RangeSheet({ from, to, max, onApply, onClose }: {
-  from: string; to: string; max: string;
+function RangeSheet({ max, onApply, onClose }: {
+  max: string;
   onApply: (r: { from: string; to: string }) => void;
   onClose: () => void;
 }) {
-  const [a, setA] = useState(from);
-  const [b, setB] = useState(to);
+  const { from: a, to: b } = useTrendsStore((st) => st.rangeDraft);
+  const setDraft = useTrendsStore((st) => st.setRangeDraft);
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(a) && /^\d{4}-\d{2}-\d{2}$/.test(b) && a <= b && a >= '1940-01-01' && b <= max;
   const span = valid ? daysBetween(a, b) + 1 : 0;
   return (
     <Drawer opened onClose={onClose} title={t('history.custom')} closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
       <Box className="stat-grid">
-        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setA(e.currentTarget.value)} />
-        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setB(e.currentTarget.value)} />
+        <TextInput type="date" label={t('history.from')} min="1940-01-01" max={max} value={a} onChange={(e) => setDraft({ from: e.currentTarget.value })} />
+        <TextInput type="date" label={t('history.to')} min="1940-01-01" max={max} value={b} onChange={(e) => setDraft({ to: e.currentTarget.value })} />
       </Box>
       <Text fz={12} c="dimmed" mt={8}>{t('history.addNote')}</Text>
       <Button fullWidth mt={12} disabled={!valid} onClick={() => onApply({ from: a, to: b })}>

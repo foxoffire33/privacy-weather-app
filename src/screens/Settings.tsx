@@ -1,10 +1,11 @@
 import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
-import { useRef, useState } from 'react';
-import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
+import { useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
 import type { Accent, TempUnit, WindUnit } from '../storesV2';
 import { ACCENTS } from '../theme';
-import { downloadFile } from '../lib/format';
-import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';
+import { countDays } from '../lib/backup';
+import { useBackupStore } from '../store/backupStore';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { version } from '../../package.json';
@@ -17,33 +18,17 @@ export function Settings() {
   const counts = storedCounts();
   const s = { settings };
   const resetFile = useRef<() => void>(null);
-  const [pending, setPending] = useState<Backup | null>(null);
-  const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
-  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const { pending, parts, result, pick, setPart, confirm, cancel, exportFile } = useBackupStore(useShallow((st) => ({
+    pending: st.pending, parts: st.parts, result: st.result,
+    pick: st.pick, setPart: st.setPart, confirm: st.confirm, cancel: st.cancel, exportFile: st.exportFile,
+  })));
   const onFile = async (file: File | null) => {
-    setImportMsg(null);
-    if (!file) return;
-    try {
-      const b = parseBackup(await file.text());
-      setParts({ cities: b.cities.length > 0, history: countDays(b) > 0, settings: false });
-      setPending(b);
-    } catch (e) {
-      setPending(null);
-      setImportMsg({ ok: false, text: (e as Error).message });
-    }
+    await pick(file);
     resetFile.current?.();
   };
-  const doImport = () => {
-    if (!pending) return;
-    const r = importBackup(pending, parts);
-    setImportMsg({ ok: true, text: t('settings.imported', { cities: r.cities, days: r.days }) });
-    setPending(null);
-  };
-  const exportAll = () => {
-    const { cities, history, settings: stored } = exportSnapshot();
-    const { apiKey: _omit, ...safeSettings } = stored;
-    downloadFile('weather-log.json', JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history }, null, 2), 'application/json');
-  };
+  const importMsg = result === null ? null
+    : result.ok ? { ok: true, text: t('settings.imported', { cities: result.cities, days: result.days }) }
+      : { ok: false, text: result.error };
   return (
     <Box className="screen">
       <ScreenHeader />
@@ -137,7 +122,7 @@ export function Settings() {
             <Text fz={12} c="dimmed">{t('settings.storedCount', { cities: counts.cities, days: counts.days })}</Text>
           </Box>
           <Group gap={8} wrap="nowrap">
-            <Button variant="outline" color="gray" onClick={exportAll}>{t('settings.export')}</Button>
+            <Button variant="outline" color="gray" onClick={exportFile}>{t('settings.export')}</Button>
             <FileButton resetRef={resetFile} accept="application/json,.json" onChange={(file) => void onFile(file)}>
               {(props) => <Button {...props} variant="outline" color="gray">{t('settings.import')}</Button>}
             </FileButton>
@@ -151,15 +136,15 @@ export function Settings() {
             </Text>
             <Stack gap={10}>
               <Switch label={t('settings.importCities', { n: pending.cities.length })} description={t('settings.importCitiesNote')}
-                disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setParts({ ...parts, cities: e.currentTarget.checked })} />
+                disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setPart('cities', e.currentTarget.checked)} />
               <Switch label={t('settings.importHistory', { n: countDays(pending) })} description={t('settings.importHistoryNote')}
-                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setParts({ ...parts, history: e.currentTarget.checked })} />
+                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setPart('history', e.currentTarget.checked)} />
               <Switch label={t('settings.importSettings')} description={t('settings.importSettingsNote')}
-                disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setParts({ ...parts, settings: e.currentTarget.checked })} />
+                disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setPart('settings', e.currentTarget.checked)} />
             </Stack>
             <Group mt={12} gap={8}>
-              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={doImport}>{t('settings.importSelected')}</Button>
-              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>{t('common.cancel')}</Button>
+              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={confirm}>{t('settings.importSelected')}</Button>
+              <Button variant="subtle" color="gray" onClick={cancel}>{t('common.cancel')}</Button>
             </Group>
           </Box>
         )}

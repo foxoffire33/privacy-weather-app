@@ -3,7 +3,7 @@ import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  openDay, refreshCity, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
+  openDay, refreshCity, useDayQuery, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
 } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
 import type { City } from '../storesV2';
@@ -79,18 +79,16 @@ function CityPageContent({ city, isDefault }: { city: City; isDefault: boolean }
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const strip = useDragScroll<HTMLDivElement>();
   const [back, setBack] = useState(0);
-  const [loadingPast, setLoadingPast] = useState(false);
+  const stripToday = s.entry?.data.daily.time[s.entry.pastDays];
+  const loadingPast = useDayQuery(city.id, stripToday ? addDays(stripToday, -(back + 1)) : '').status === 'loading';
   const widthBefore = useRef(0);
   const loadPast = async () => {
     const el = strip.ref.current;
-    const today = s.entry?.data.daily.time[s.entry.pastDays];
-    if (!el || !today) return;
+    if (!el || !stripToday) return;
     const n = back + 1;
     if (n > 1) {
-      const date = addDays(today, -n);
-      setLoadingPast(true);
+      const date = addDays(stripToday, -n);
       await openDay(city.id, date);
-      setLoadingPast(false);
       if (!useDayStore.getState().days[`${city.id}:${date}`]) return;
     }
     widthBefore.current = el.scrollWidth;

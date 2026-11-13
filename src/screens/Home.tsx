@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, type PointerEvent } from 'react';
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../storesV2';
@@ -7,18 +7,15 @@ import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';
 
-const HINT_KEY = 'weather-log-hint-seen';
-const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
-
 function GestureHint({ multiple }: { multiple: boolean }) {
-  const [open, setOpen] = useState(() => !hintSeen());
-  const close = () => { setOpen(false); try { localStorage.setItem(HINT_KEY, '1'); } catch {} };
+  const seen = useUiStore((s) => s.gestureHintSeen);
+  const close = useUiStore((s) => s.dismissGestureHint);
   useEffect(() => {
-    if (!open) return;
+    if (seen) return;
     const t = window.setTimeout(close, 12000);
     return () => window.clearTimeout(t);
-  }, [open]);
-  if (!open) return null;
+  }, [seen, close]);
+  if (seen) return null;
   return (
     <UnstyledButton className="gesture-hint" onClick={close}>
       {multiple ? t('home.hintSwipe') : ''}{t('home.hint')}
