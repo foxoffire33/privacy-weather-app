@@ -66,15 +66,15 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const [back, setBack] = useState(0);
   const [sheet, setSheet] = useState<'attrs' | 'range' | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [failed, setFailed] = useState<Record<string, string>>({});
+  const [retryNonce, setRetryNonce] = useState(0);
   const fetched = useRef<Set<string>>(new Set());
   const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
   const shift = (date: string, years: number) => (years ? `${+date.slice(0, 4) - years}${date.slice(4)}` : date);
+  const windows = back ? [{ from, to }, { from: shift(from, back), to: shift(to, back) }] : [{ from, to }];
   useEffect(() => {
-    const windows = [{ from, to }];
-    if (back) windows.push({ from: shift(from, back), to: shift(to, back) });
     const wanted = windows
       .filter((w) => {
         if (w.from > w.to) return false;
@@ -85,20 +85,26 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     if (!wanted.length) return;
     let active = true;
     setBusy(true);
-    setError(null);
     void (async () => {
       for (const w of wanted) {
-        fetched.current.add(`${cityId}:${w.from}:${w.to}`);
+        const key = `${cityId}:${w.from}:${w.to}`;
+        fetched.current.add(key);
         try {
           await fillRange(cityId, w.from, w.to);
         } catch (e) {
-          if (active) setError((e as Error).message);
+          if (active) setFailed((f) => ({ ...f, [key]: (e as Error).message }));
         }
       }
       if (active) setBusy(false);
     })();
     return () => { active = false; };
-  }, [cityId, from, to, back]);
+  }, [cityId, from, to, back, retryNonce]);
+  const failedKeys = windows.filter((w) => failed[`${cityId}:${w.from}:${w.to}`] !== undefined).map((w) => `${cityId}:${w.from}:${w.to}`);
+  const retryFailed = (keys: string[]) => {
+    for (const k of keys) fetched.current.delete(k);
+    setFailed((f) => Object.fromEntries(Object.entries(f).filter(([k]) => !keys.includes(k))));
+    setRetryNonce((n) => n + 1);
+  };
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
@@ -149,7 +155,14 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       </div>
 
       {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-      {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
+      {failedKeys.map((key) => (
+        <Text key={key} fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error: failed[key] })}</Text>
+      ))}
+      {failedKeys.length > 0 && (
+        <Button fullWidth mt={8} variant="outline" color="gray" onClick={() => retryFailed(failedKeys)}>
+          {t('common.tryAgain')}
+        </Button>
+      )}
       {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
       {busy
