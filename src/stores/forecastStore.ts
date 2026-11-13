@@ -11,8 +11,6 @@ import type { QueryMap } from './core/types';
 import type { ForecastState } from './storeTypes';
 import type { ForecastEntry } from './types';
 
-export type { ForecastState } from './storeTypes';
-
 function loadedQueries(forecasts: ForecastState['forecasts']): QueryMap {
   const queries: QueryMap = {};
   for (const [cityId, entry] of Object.entries(forecasts)) {

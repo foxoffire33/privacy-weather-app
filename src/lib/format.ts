@@ -4,7 +4,6 @@ import { Share } from '@capacitor/share';
 
 import { currentLocale, t } from '../i18n';
 
-import { atMost, below } from './scale';
 
 import type { TempUnit, WindUnit } from '../stores';
 
@@ -40,15 +39,6 @@ export function ago(ts?: number): string {
   if (m < 60) {return t('ago.minutes', { n: m });}
   const h = Math.round(m / 60);
   return h < 24 ? t('ago.hours', { n: h }) : t('ago.days', { n: Math.round(h / 24) });
-}
-
-export function uvLabel(u?: number | null): string {
-  if (u === null || u === undefined) {return '–';}
-  return below(u, [[3, 'Low'], [6, 'Moderate'], [8, 'High'], [11, 'Very high']], 'Extreme');
-}
-export function aqiLabel(a?: number | null): string {
-  if (a === null || a === undefined) {return 'Unavailable';}
-  return atMost(a, [[20, 'Good'], [40, 'Fair'], [60, 'Moderate'], [80, 'Poor'], [100, 'Very poor']], 'Extremely poor');
 }
 
 export async function downloadFile(name: string, text: string, type: string): Promise<void> {

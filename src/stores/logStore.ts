@@ -10,13 +10,10 @@ import { idbStorage } from './core/persistStorage';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
-import { begin, fail, IDLE_QUERY, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
-import type { QueryState } from './core/types';
 import type { DateSpan, ImportCounts, LogState, SourceSpan } from './storeTypes';
 import type { DayRecord } from './types';
-
-export type { ImportCounts, LogState } from './storeTypes';
 
 const FORECAST_PAST_DAYS = 92;
 
@@ -167,6 +164,3 @@ export const useLogStore = create<LogState>()(
     },
   ),
 );
-
-export const lookupQuery = (cityId: string, date: string): QueryState =>
-  useLogStore.getState().queries[dayKey(cityId, date)] ?? IDLE_QUERY;

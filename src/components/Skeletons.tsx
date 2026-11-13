@@ -11,7 +11,7 @@ export function Sk({ w = '100%', h = 14, mt = 0, style }: SkProps): ReactElement
   return <Skeleton width={w} height={h} mt={mt} style={style} />;
 }
 
-export function StatSk(): ReactElement {
+function StatSk(): ReactElement {
   return (
     <Box py={10} className="row">
       <Sk w={64} h={10} mt={3} />
@@ -21,7 +21,7 @@ export function StatSk(): ReactElement {
   );
 }
 
-export function StatGridSk({ n = 4 }: StatGridSkProps): ReactElement {
+function StatGridSk({ n = 4 }: StatGridSkProps): ReactElement {
   return <Box className="stat-grid">{Array.from({ length: n }, (_, i) => <StatSk key={i} />)}</Box>;
 }
 
@@ -29,7 +29,7 @@ export function SectionSk({ title, n = 4 }: SectionSkProps): ReactElement {
   return <Section title={title}><StatGridSk n={n} /></Section>;
 }
 
-export function RowsSk({ n, h = 40 }: RowsSkProps): ReactElement {
+function RowsSk({ n, h = 40 }: RowsSkProps): ReactElement {
   return (
     <>
       {Array.from({ length: n }, (_, i) => (

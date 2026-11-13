@@ -29,8 +29,6 @@ export function useCities(): City[] {
 
 export const useCity = (cityId: string): City | undefined => useEntityCache((s) => s.tables.city[cityId]);
 
-export const useOnboarded = (): boolean => useCityStore((s) => s.onboarded);
-
 export const useCityIndex = (cityId: string): number => useCityStore((s) => s.cityIds.indexOf(cityId));
 
 export const useForecast = (cityId: string): ForecastEntry | undefined => useForecastStore((s) => s.forecasts[cityId]);

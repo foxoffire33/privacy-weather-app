@@ -6,9 +6,7 @@ import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, once, succee
 
 import type { DateRange, TrendsState } from '../types';
 
-export type { TrendsState } from '../types';
-
-export const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
+const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
 
 export const windowKey = (cityId: string, w: DateRange): string => `${cityId}:${w.from}:${w.to}`;
 

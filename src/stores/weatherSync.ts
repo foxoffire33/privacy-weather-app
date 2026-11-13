@@ -10,7 +10,7 @@ import { useSettingsStore } from './settingsStore';
 
 import type { Pending } from './core/types';
 import type { ImportCounts } from './storeTypes';
-import type { Backup, BackupDay, BackupParts, City, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Snapshot, StoredCounts,  } from './types';
+import type { Backup, BackupDay, BackupParts, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Snapshot, StoredCounts,  } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 
@@ -145,8 +145,5 @@ export function clearHistory(): void {
   useAlmanacStore.getState().clear();
   useDayStore.getState().clear();
 }
-
-
-export const cityById = (id: string): City | undefined => entityCache.getOne('city', id);
 
 export { followedCities } from './cityStore';

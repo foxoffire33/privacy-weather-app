@@ -6,7 +6,7 @@ import en from './locales/en.json';
 
 import type { I18nState, Language, LocaleModule, MessageKey, Messages, Vars } from '../types';
 
-export type { Language, MessageKey, Messages } from '../types';
+export type { MessageKey } from '../types';
 
 export const LANGUAGES = [
   { code: 'bg', name: 'Български', locale: 'bg-BG' },

@@ -33,7 +33,7 @@ export interface WidgetRow {
   kind: 'today' | 'avg' | 'year';
 }
 
-export interface WidgetRainBar {
+interface WidgetRainBar {
   f: number;
   wet: boolean;
 }

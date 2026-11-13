@@ -9,7 +9,7 @@ function markFulfilled(promise: Promise<void>): void {
   void Object.assign(promise, { status: 'fulfilled', value: undefined });
 }
 
-export const READY: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfilled', value: undefined });
+const READY: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfilled', value: undefined });
 
 export function once(key: string, run: () => Promise<unknown>): Pending {
   const pending = running.get(key);

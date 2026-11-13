@@ -15,6 +15,7 @@ export interface UiState {
   historyRange: number;
   lookupDraft: string;
   logFilter: string;
+  logLimit: number;
   hiddenSeries: Partial<Record<string, string[]>>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
@@ -22,6 +23,8 @@ export interface UiState {
   setHistoryRange: (d: number) => void;
   setLookupDraft: (date: string) => void;
   setLogFilter: (q: string) => void;
+  showMoreLog: () => void;
+  resetLogLimit: () => void;
   toggleDay: (cityId: string, date: string) => void;
   toggleSeries: (scope: string, name: string) => void;
   dismissGestureHint: () => void;

@@ -71,4 +71,3 @@ export function parseBackup(text: string): Backup {
 
 export const countDays = (b: Backup): number => Object.values(b.history).reduce((n, log) => n + Object.keys(log).length, 0);
 
-export { type BackupParts, type Backup } from '../stores';
