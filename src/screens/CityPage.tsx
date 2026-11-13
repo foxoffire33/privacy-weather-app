@@ -4,9 +4,9 @@ import { ActionIcon, Badge, Box, Button, Group, Paper, Text, UnstyledButton, Vis
 import { useShallow } from 'zustand/react/shallow';
 import {
   openDay, refreshCity, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
-} from '../storesV2';
-import { useUiStore } from '../store/uiStore';
-import type { City } from '../storesV2';
+} from '../stores';
+import { useUiStore } from '../stores/uiStore';
+import type { City } from '../stores';
 import { conditionLabel } from '../lib/weatherCodes';
 import { ago, compass, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, weekday } from '../lib/format';
 import {
@@ -18,7 +18,7 @@ import { Bar, Section, Stat, levelColor } from '../components/city/parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { CompositeChart } from '@mantine/charts';
 import { convTemp } from '../lib/format';
-import { addDays } from '../storesV2';
+import { addDays } from '../stores';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';

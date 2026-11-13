@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../storesV2';
-import { useUiStore } from '../store/uiStore';
+import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
+import { useUiStore } from '../stores/uiStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { fmtTemp } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';

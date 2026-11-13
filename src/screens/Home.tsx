@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Group } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../storesV2';
-import { useUiStore } from '../store/uiStore';
+import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
+import { useUiStore } from '../stores/uiStore';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';

@@ -3,12 +3,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { IDLE_QUERY, type QueryState } from './core/types';
 import { useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
-import { useCityStore } from './stores/city-store';
-import { useForecastStore } from './stores/forecast-store';
-import { useLogStore } from './stores/log-store';
-import { useDayStore } from './stores/day-store';
-import { useAlmanacStore } from './stores/almanac-store';
-import { useSettingsStore } from './stores/settings-store';
+import { useCityStore } from './city-store';
+import { useForecastStore } from './forecast-store';
+import { useLogStore } from './log-store';
+import { useDayStore } from './day-store';
+import { useAlmanacStore } from './almanac-store';
+import { useSettingsStore } from './settings-store';
 import { alreadyHydrated, hydrateAll } from './hydration';
 import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, Settings } from './types';
 

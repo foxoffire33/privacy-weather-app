@@ -1,12 +1,12 @@
 import { waitForHydration, type HydratablePersist } from './core/persist-storage';
 import { importLegacyStore } from './migrate-legacy';
 import { useEntityCache } from './entities/cache';
-import { useSettingsStore } from './stores/settings-store';
-import { useCityStore } from './stores/city-store';
-import { useForecastStore } from './stores/forecast-store';
-import { useLogStore } from './stores/log-store';
-import { useDayStore } from './stores/day-store';
-import { useAlmanacStore } from './stores/almanac-store';
+import { useSettingsStore } from './settings-store';
+import { useCityStore } from './city-store';
+import { useForecastStore } from './forecast-store';
+import { useLogStore } from './log-store';
+import { useDayStore } from './day-store';
+import { useAlmanacStore } from './almanac-store';
 
 interface Rehydratable extends HydratablePersist {
   persist: HydratablePersist['persist'] & { rehydrate: () => Promise<void> | void };

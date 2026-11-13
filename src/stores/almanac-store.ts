@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { errorMessage } from '../core/errors';
-import { idbStorage } from '../core/persist-storage';
-import type { QueryMap } from '../core/types';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from '../factory/query-state';
-import { fetchArchive } from '../api/open-meteo';
-import type { ArchiveYear, City } from '../types';
-import type { AlmanacState } from './types';
+import { errorMessage } from './core/errors';
+import { idbStorage } from './core/persist-storage';
+import type { QueryMap } from './core/types';
+import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/query-state';
+import { fetchArchive } from './api/open-meteo';
+import type { ArchiveYear, City } from './types';
+import type { AlmanacState } from './store-types';
 
-export type { AlmanacState } from './types';
+export type { AlmanacState } from './store-types';
 
 const BACK = [1, 10, 30] as const;
 const FIRST_YEAR = 1940;

@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import type { TempUnit, WindUnit } from '../storesV2';
+import type { TempUnit, WindUnit } from '../stores';
 import { currentLocale, t } from '../i18n';
 
 export function fmtTemp(c: number | null | undefined, unit: TempUnit): string {
