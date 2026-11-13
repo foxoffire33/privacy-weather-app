@@ -3,6 +3,7 @@
     "back": "Atrás",
     "close": "Cerrar",
     "cancel": "Cancelar",
+    "delete": "Eliminar",
     "tryAgain": "Reintentar",
     "default": "Predeterminada",
     "now": "Ahora",
@@ -209,6 +210,7 @@
     "reorder": "Mover {name}",
     "unfollow": "Dejar de seguir {name}",
     "confirmUnfollow": "¿Dejar de seguir {name}? Su historial registrado se conserva.",
+    "stopFollowing": "Dejar de seguir",
     "followCity": "Seguir una ciudad"
   },
   "home": {
@@ -442,6 +444,8 @@
     "vsAvg": "vs. media",
     "yourLog": "Tu registro · {days}",
     "empty": "La primera instantánea se guarda cuando se carga la previsión.",
+    "search": "Buscar fecha, condición o fuente",
+    "noMatches": "Ningún día coincide",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · sensación {t}°",
     "filled": "Completado",

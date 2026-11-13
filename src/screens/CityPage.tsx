@@ -1,12 +1,13 @@
 import { Fragment, Suspense, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../components/charts/FullscreenChart';
-import { ActionIcon, Badge, Box, Button, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Collapse, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
+import { useTimeout } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import {
   openDay, refreshCity, useDayQuery, useDayStore, useForecastData, useForecastQuery, useLogCount, useNormals, useUnits,
-} from '../storesV2';
-import { useUiStore } from '../store/uiStore';
+} from '../stores';
+import { useUiStore } from '../stores/uiStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { ago, compass, fmtDelta, fmtTemp, fmtWind, hhmm, hourOf, weekday } from '../lib/format';
 import {
@@ -14,11 +15,12 @@ import {
   pollutantLevel, pressureTrend, rainOutlook, signedMinutes, sunProgress, usAqiLabel, uvAdvice, visibilityLabel,
 } from '../lib/insights';
 import { Icon } from '../components/Icon';
-import { Bar, Section, Stat, levelColor } from '../components/city/parts';
+import { Bar, Section, Stat } from '../components/city/Parts';
+import { levelColor } from '../components/city/levelColor';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { CompositeChart } from '@mantine/charts';
 import { convTemp } from '../lib/format';
-import { addDays } from '../storesV2';
+import { addDays } from '../stores';
 import { ChartSk, CityBodySk, Sk } from '../components/Skeletons';
 import { useDragScroll } from '../hooks/useDragScroll';
 import { usePullPast } from '../hooks/usePullPast';
@@ -55,10 +57,8 @@ export const CityPage = memo(function CityPage({ city, isDefault }: CityPageProp
 
 function Deferred({ h, children }: DeferredProps) {
   const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), 250);
-    return () => window.clearTimeout(t);
-  }, []);
+  const { start, clear } = useTimeout(() => setReady(true), 250);
+  useEffect(() => { start(); return clear; }, [start, clear]);
   return ready ? <>{children}</> : <ChartSk h={h} />;
 }
 
@@ -288,7 +288,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
                 <Text fz={14} fw={800}>{T(dv.temperature_2m_max[i])}°</Text>
                 <Text fz={14} c="dimmed">{T(dv.temperature_2m_min[i])}°</Text>
               </UnstyledButton>
-              {open && (
+              <Collapse expanded={open} keepMounted={false}>
                 <Box className="stat-grid" px={12} pb={8}>
                   <Stat k={tx('city.day.feelsLike')} v={`${T(dv.apparent_temperature_max[i])}° / ${T(dv.apparent_temperature_min[i])}°`} />
                   <Stat k={tx('city.day.precipitation')} v={`${n0(dv.precipitation_sum[i], 1)} mm`} s={tx('city.day.precipDetail', { h: n0(dv.precipitation_hours[i]), rain: n0(dv.rain_sum[i], 1), showers: n0(dv.showers_sum[i], 1) })} />
@@ -299,7 +299,7 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
                   <Stat k={tx('city.day.sunrise')} v={hhmm(data.daily.sunrise[i])} s={tx('city.sun.sunsetAt', { time: hhmm(data.daily.sunset[i]) })} />
                   <Stat k={tx('city.day.solarEnergy')} v={`${n0(dv.shortwave_radiation_sum[i], 1)} MJ/m²`} />
                 </Box>
-              )}
+              </Collapse>
             </Box>
           );
         })}

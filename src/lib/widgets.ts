@@ -1,10 +1,10 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../storesV2';
-import { useEntityCache } from '../storesV2';
-import type { DayRecord } from '../storesV2';
+import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../stores';
+import { useEntityCache } from '../stores';
+import type { DayRecord } from '../stores';
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
-import { addDays } from '../storesV2';
+import { addDays } from '../stores';
 import { nowIndex, rainOutlook } from './insights';
 import { conditionLabel } from './weatherCodes';
 import { t as tx, useI18n } from '../i18n';

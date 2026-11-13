@@ -3,6 +3,7 @@
     "back": "Atgal",
     "close": "Uždaryti",
     "cancel": "Atšaukti",
+    "delete": "Ištrinti",
     "tryAgain": "Bandyti dar kartą",
     "default": "Numatytasis",
     "now": "Dabar",
@@ -212,6 +213,7 @@
     "reorder": "Perkelti: {name}",
     "unfollow": "Nebestebėti: {name}",
     "confirmUnfollow": "Nebestebėti {name}? Užfiksuota istorija išsaugoma.",
+    "stopFollowing": "Nebesekti",
     "followCity": "Stebėti miestą"
   },
   "home": {
@@ -445,6 +447,8 @@
     "vsAvg": "pagal vid.",
     "yourLog": "Jūsų žurnalas · {days}",
     "empty": "Pirmasis įrašas išsaugomas įkėlus prognozę.",
+    "search": "Ieškoti datos, orų ar šaltinio",
+    "noMatches": "Atitinkančių dienų nėra",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · juntama {t}°",
     "filled": "Papildyta",

@@ -3,6 +3,7 @@
     "back": "Atpakaļ",
     "close": "Aizvērt",
     "cancel": "Atcelt",
+    "delete": "Dzēst",
     "tryAgain": "Mēģināt vēlreiz",
     "default": "Noklusējums",
     "now": "Tagad",
@@ -209,6 +210,7 @@
     "reorder": "Pārvietot: {name}",
     "unfollow": "Pārtraukt sekot: {name}",
     "confirmUnfollow": "Pārtraukt sekot {name}? Reģistrētā vēsture tiks saglabāta.",
+    "stopFollowing": "Pārtraukt sekot",
     "followCity": "Sekot pilsētai"
   },
   "home": {
@@ -442,6 +444,8 @@
     "vsAvg": "pret vid.",
     "yourLog": "Jūsu žurnāls · {days}",
     "empty": "Pirmais ieraksts tiek saglabāts pēc prognozes ielādes.",
+    "search": "Meklēt datumu, laikapstākļus vai avotu",
+    "noMatches": "Nav atbilstošu dienu",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · sajūtu {t}°",
     "filled": "Papildināts",

@@ -1,11 +1,12 @@
 import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../storesV2';
-import type { Accent, TempUnit, WindUnit } from '../storesV2';
+import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
+import type { Accent, TempUnit, WindUnit } from '../stores';
 import { ACCENTS } from '../theme';
 import { countDays } from '../lib/backup';
-import { useBackupStore } from '../store/backupStore';
+import { useBackupStore } from '../stores/backupStore';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { version } from '../../package.json';
@@ -150,7 +151,12 @@ export function Settings() {
         )}
         {importMsg && <Text fz={13} py={8} c={importMsg.ok ? undefined : 'signal.3'} role="status">{importMsg.text}</Text>}
         <Button variant="subtle" color="signal" mt={8}
-          onClick={() => { if (window.confirm(t('settings.confirmDeleteAll'))) clearHistory(); }}>
+          onClick={() => modals.openConfirmModal({
+            groupProps: { grow: true, wrap: 'nowrap', mt: 16 },
+            children: t('settings.confirmDeleteAll'),
+            labels: { confirm: t('common.delete'), cancel: t('common.cancel') },
+            onConfirm: clearHistory,
+          })}>
           {t('settings.deleteAll')}
         </Button>
 

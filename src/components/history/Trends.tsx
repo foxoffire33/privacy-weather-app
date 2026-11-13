@@ -5,13 +5,13 @@ import { BarChart, LineChart } from '@mantine/charts';
 
 import { t } from '../../i18n';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../lib/format';
-import { addDays, daysBetween } from '../../storesV2';
-import type { TempUnit } from '../../storesV2';
+import { addDays, daysBetween } from '../../stores';
+import type { TempUnit } from '../../stores';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
-import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
-import { lastSettled, latest, useLogStore } from '../../storesV2';
+import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
+import { lastSettled, latest, useLogStore } from '../../stores';
 import type { ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);

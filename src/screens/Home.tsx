@@ -1,8 +1,9 @@
 import { useEffect, useRef, type PointerEvent } from 'react';
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
+import { useHotkeys } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
-import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../storesV2';
-import { useUiStore } from '../store/uiStore';
+import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
+import { useUiStore } from '../stores/uiStore';
 import { Icon } from '../components/Icon';
 import { CityPage } from './CityPage';
 import { t } from '../i18n';
@@ -36,14 +37,10 @@ export function Home() {
   const dx = useRef(0);
   const drag = useRef<PagerGesture | null>(null);
   const justDragged = useRef(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && idx < n - 1) setPage(idx + 1);
-      if (e.key === 'ArrowLeft' && idx > 0) setPage(idx - 1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [idx, n, setPage]);
+  useHotkeys([
+    ['ArrowRight', () => { if (idx < n - 1) setPage(idx + 1); }],
+    ['ArrowLeft', () => { if (idx > 0) setPage(idx - 1); }],
+  ]);
   const activeId = cities[idx]?.id;
   useEffect(() => {
     if (!activeId) return;

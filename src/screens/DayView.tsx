@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
-import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../storesV2';
+import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtDelta, fmtTemp, fmtWind, fullDate, hhmm } from '../lib/format';
 import { beaufort, duration, levelName, euAqiLevel, uvAdvice } from '../lib/insights';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { Section, Stat } from '../components/city/parts';
+import { Section, Stat } from '../components/city/Parts';
 import { HourlyExplorer } from '../components/charts/HourlyExplorer';
 import { ExpandButton, FullscreenChart } from '../components/charts/FullscreenChart';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';

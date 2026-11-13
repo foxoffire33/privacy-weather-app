@@ -1,4 +1,4 @@
-import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../storesV2';
+import type { DayRecord, HourlyVar, TempUnit, WindUnit } from '../stores';
 import type { MessageKey } from './i18n';
 
 export interface ToggleSeries {

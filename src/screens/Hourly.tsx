@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { Box, Group, SimpleGrid, Text, Title } from '@mantine/core';
-import { useCity, useForecastData, useUnits } from '../storesV2';
+import { useCity, useForecastData, useUnits } from '../stores';
 import { conditionLabel } from '../lib/weatherCodes';
 import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
 import { nowIndex } from '../lib/insights';

@@ -3,6 +3,7 @@
     "back": "Zpět",
     "close": "Zavřít",
     "cancel": "Zrušit",
+    "delete": "Smazat",
     "tryAgain": "Zkusit znovu",
     "default": "Výchozí",
     "now": "Teď",
@@ -212,6 +213,7 @@
     "reorder": "Přesunout {name}",
     "unfollow": "Přestat sledovat {name}",
     "confirmUnfollow": "Přestat sledovat {name}? Zaznamenaná historie zůstane zachována.",
+    "stopFollowing": "Přestat sledovat",
     "followCity": "Sledovat město"
   },
   "home": {
@@ -445,6 +447,8 @@
     "vsAvg": "vs. prům.",
     "yourLog": "Váš deník · {days}",
     "empty": "První záznam se uloží po načtení předpovědi.",
+    "search": "Hledat datum, počasí nebo zdroj",
+    "noMatches": "Žádné odpovídající dny",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · pocitově {t}°",
     "filled": "Doplněno",

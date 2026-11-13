@@ -3,6 +3,7 @@
     "back": "Terug",
     "close": "Sluiten",
     "cancel": "Annuleren",
+    "delete": "Verwijderen",
     "tryAgain": "Opnieuw proberen",
     "default": "Standaard",
     "now": "Nu",
@@ -206,6 +207,7 @@
     "reorder": "{name} verplaatsen",
     "unfollow": "{name} niet meer volgen",
     "confirmUnfollow": "{name} niet meer volgen? De gelogde geschiedenis blijft bewaard.",
+    "stopFollowing": "Niet meer volgen",
     "followCity": "Volg een stad"
   },
   "home": {
@@ -439,6 +441,8 @@
     "vsAvg": "t.o.v. gem.",
     "yourLog": "Je logboek · {days}",
     "empty": "De eerste momentopname wordt bewaard zodra de verwachting is geladen.",
+    "search": "Zoek datum, weer of bron",
+    "noMatches": "Geen dagen gevonden",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · voelt als {t}°",
     "filled": "Aangevuld",

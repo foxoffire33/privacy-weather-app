@@ -1,5 +1,5 @@
 import { Box, Group, Paper, Skeleton } from '@mantine/core';
-import { Section } from './city/parts';
+import { Section } from './city/Parts';
 import { t } from '../i18n';
 import type { ChartSkProps, RowsSkProps, SectionSkProps, SkProps, StatGridSkProps } from '../types';
 

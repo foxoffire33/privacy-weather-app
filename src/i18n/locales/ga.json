@@ -3,6 +3,7 @@
     "back": "Siar",
     "close": "Dún",
     "cancel": "Cealaigh",
+    "delete": "Scrios",
     "tryAgain": "Bain triail eile as",
     "default": "Réamhshocrú",
     "now": "Anois",
@@ -215,6 +216,7 @@
     "reorder": "Bog {name}",
     "unfollow": "Stop ag leanúint {name}",
     "confirmUnfollow": "Stop ag leanúint {name}? Coinnítear an stair thaifeadta.",
+    "stopFollowing": "Stop ag leanúint",
     "followCity": "Lean cathair"
   },
   "home": {
@@ -448,6 +450,8 @@
     "vsAvg": "vs meán",
     "yourLog": "Do loga · {days}",
     "empty": "Sábhálfar an chéad léargas tar éis don réamhaisnéis lódáil.",
+    "search": "Cuardaigh dáta, aimsir nó foinse",
+    "noMatches": "Níl aon lá ag teacht leis",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · mothú {t}°",
     "filled": "Líonta",

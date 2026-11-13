@@ -5,7 +5,7 @@ import {
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 
 import { CompactTooltip } from './components/charts/CompactTooltip';
-import type { Accent } from './storesV2';
+import type { Accent } from './stores';
 import type { AccentDef } from './types';
 
 export const ACCENTS: Record<Exclude<Accent, 'custom'>, AccentDef> = {
@@ -126,3 +126,12 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a') => createThe
     CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),
   },
 });
+
+export const CONFIRM_MODAL = {
+  centered: true,
+  withCloseButton: false,
+  styles: {
+    content: { border: '2px solid var(--rule)', background: '#000' },
+    body: { padding: 16, paddingBottom: 16 },
+  },
+};

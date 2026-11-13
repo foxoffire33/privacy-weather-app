@@ -17,8 +17,7 @@ npm run dev
 
 ```
 src/
-  theme.ts              Mantine global theme (colors, font, radius, component defaults)
-  styles/global.css     Layout-only CSS (stage, pager, hero, rules, glass)
+  theme.ts              Mantine theme (colors, font, radius, component defaults) + design tokens and the app-wide layout CSS (stage, pager, hero, rules) via theme.other
   api/openMeteo.ts      SDK calls: forecast, air quality, archive · JSON geocoding
   store/
     index.ts            Bound store: slices + persist → IndexedDB

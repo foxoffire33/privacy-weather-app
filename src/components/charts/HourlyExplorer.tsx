@@ -1,10 +1,10 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
 import { Box, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
-import { useUnits } from '../../storesV2';
-import { useUiStore } from '../../store/uiStore';
+import { useUnits } from '../../stores';
+import { useUiStore } from '../../stores/uiStore';
 import { useSeriesToggle } from './SeriesToggle';
-import type { HourlyVar } from '../../storesV2/api/variables';
+import type { HourlyVar } from '../../stores/api/variables';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
 import { t, t as tt } from '../../i18n';
 import type { HourlyExplorerProps, HourlyMetric, Labelled } from '../../types';

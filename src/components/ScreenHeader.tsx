@@ -1,5 +1,5 @@
 import { ActionIcon, Group } from '@mantine/core';
-import { useUiStore } from '../store/uiStore';
+import { useUiStore } from '../stores/uiStore';
 import { Icon } from './Icon';
 import { t } from '../i18n';
 import type { ScreenHeaderProps } from '../types';

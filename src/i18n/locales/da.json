@@ -3,6 +3,7 @@
     "back": "Tilbage",
     "close": "Luk",
     "cancel": "Annuller",
+    "delete": "Slet",
     "tryAgain": "Prøv igen",
     "default": "Standard",
     "now": "Nu",
@@ -206,6 +207,7 @@
     "reorder": "Flyt {name}",
     "unfollow": "Stop med at følge {name}",
     "confirmUnfollow": "Stop med at følge {name}? Den loggede historik bevares.",
+    "stopFollowing": "Stop med at følge",
     "followCity": "Følg en by"
   },
   "home": {
@@ -439,6 +441,8 @@
     "vsAvg": "ift. gns.",
     "yourLog": "Din log · {days}",
     "empty": "Det første øjebliksbillede gemmes, når prognosen er indlæst.",
+    "search": "Søg dato, vejr eller kilde",
+    "noMatches": "Ingen dage matcher",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · føles som {t}°",
     "filled": "Udfyldt",

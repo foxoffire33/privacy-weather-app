@@ -3,6 +3,7 @@
     "back": "Tillbaka",
     "close": "Stäng",
     "cancel": "Avbryt",
+    "delete": "Radera",
     "tryAgain": "Försök igen",
     "default": "Standard",
     "now": "Nu",
@@ -206,6 +207,7 @@
     "reorder": "Flytta {name}",
     "unfollow": "Sluta följa {name}",
     "confirmUnfollow": "Sluta följa {name}? Den loggade historiken sparas.",
+    "stopFollowing": "Sluta följa",
     "followCity": "Följ en stad"
   },
   "home": {
@@ -439,6 +441,8 @@
     "vsAvg": "mot medel",
     "yourLog": "Din logg · {days}",
     "empty": "Den första ögonblicksbilden sparas när prognosen har laddats.",
+    "search": "Sök datum, väder eller källa",
+    "noMatches": "Inga dagar matchar",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · känns som {t}°",
     "filled": "Ifylld",

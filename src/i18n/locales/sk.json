@@ -3,6 +3,7 @@
     "back": "Späť",
     "close": "Zavrieť",
     "cancel": "Zrušiť",
+    "delete": "Odstrániť",
     "tryAgain": "Skúsiť znova",
     "default": "Predvolené",
     "now": "Teraz",
@@ -212,6 +213,7 @@
     "reorder": "Presunúť {name}",
     "unfollow": "Prestať sledovať {name}",
     "confirmUnfollow": "Prestať sledovať {name}? Zaznamenaná história zostane zachovaná.",
+    "stopFollowing": "Prestať sledovať",
     "followCity": "Sledovať mesto"
   },
   "home": {
@@ -445,6 +447,8 @@
     "vsAvg": "vs. priem.",
     "yourLog": "Váš denník · {days}",
     "empty": "Prvý záznam sa uloží po načítaní predpovede.",
+    "search": "Hľadať dátum, počasie alebo zdroj",
+    "noMatches": "Žiadne zodpovedajúce dni",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · pocitovo {t}°",
     "filled": "Doplnené",

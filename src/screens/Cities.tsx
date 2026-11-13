@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { useShallow } from 'zustand/react/shallow';
-import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../storesV2';
-import { useUiStore } from '../store/uiStore';
+import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
+import { useUiStore } from '../stores/uiStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { fmtTemp } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -106,7 +107,12 @@ export function Cities() {
                       </Text>
                     ) : <Sk w={56} h={40} />}
                     <ActionIcon size={40} aria-label={t('cities.unfollow', { name: c.name })}
-                      onClick={() => { if (window.confirm(t('cities.confirmUnfollow', { name: c.name }))) unfollowCity(c.id); }}>
+                      onClick={() => modals.openConfirmModal({
+                        groupProps: { grow: true, wrap: 'nowrap', mt: 16 },
+                        children: t('cities.confirmUnfollow', { name: c.name }),
+                        labels: { confirm: t('cities.stopFollowing'), cancel: t('common.cancel') },
+                        onConfirm: () => { unfollowCity(c.id); },
+                      })}>
                       <Icon name="x" size={18} />
                     </ActionIcon>
                   </Group>

@@ -3,6 +3,7 @@
     "back": "Tagasi",
     "close": "Sulge",
     "cancel": "Tühista",
+    "delete": "Kustuta",
     "tryAgain": "Proovi uuesti",
     "default": "Vaikimisi",
     "now": "Praegu",
@@ -206,6 +207,7 @@
     "reorder": "Teisalda {name}",
     "unfollow": "Lõpeta {name} jälgimine",
     "confirmUnfollow": "Lõpetada {name} jälgimine? Logitud ajalugu säilib.",
+    "stopFollowing": "Lõpeta jälgimine",
     "followCity": "Jälgi linna"
   },
   "home": {
@@ -439,6 +441,8 @@
     "vsAvg": "vs kesk.",
     "yourLog": "Sinu logi · {days}",
     "empty": "Esimene hetktõmmis salvestatakse pärast prognoosi laadimist.",
+    "search": "Otsi kuupäeva, ilma või allikat",
+    "noMatches": "Sobivaid päevi pole",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · tajutav {t}°",
     "filled": "Täiendatud",

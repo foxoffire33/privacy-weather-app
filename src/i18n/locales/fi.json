@@ -3,6 +3,7 @@
     "back": "Takaisin",
     "close": "Sulje",
     "cancel": "Peruuta",
+    "delete": "Poista",
     "tryAgain": "Yritä uudelleen",
     "default": "Oletus",
     "now": "Nyt",
@@ -206,6 +207,7 @@
     "reorder": "Siirrä {name}",
     "unfollow": "Lopeta kaupungin {name} seuraaminen",
     "confirmUnfollow": "Lopetetaanko kaupungin {name} seuraaminen? Kirjattu historia säilyy.",
+    "stopFollowing": "Lopeta seuraaminen",
     "followCity": "Seuraa kaupunkia"
   },
   "home": {
@@ -439,6 +441,8 @@
     "vsAvg": "vs. ka.",
     "yourLog": "Lokisi · {days}",
     "empty": "Ensimmäinen tilannekuva tallennetaan, kun ennuste on ladattu.",
+    "search": "Hae päivää, säätä tai lähdettä",
+    "noMatches": "Ei vastaavia päiviä",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · tuntuu {t}°",
     "filled": "Täydennetty",

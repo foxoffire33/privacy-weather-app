@@ -3,11 +3,11 @@ import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, 
 import { useDebouncedValue } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  addDayToLog, addDays, daysBetween, NO_ARCHIVE_DATA, todayISO, useCity,
+  addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
   useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
-} from '../storesV2';
-import { useUiStore } from '../store/uiStore';
-import { useAddDatesStore } from '../store/addDatesStore';
+} from '../stores';
+import { useUiStore } from '../stores/uiStore';
+import { useAddDatesStore } from '../stores/addDatesStore';
 import { conditionLabel } from '../lib/weatherCodes';
 import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -35,7 +35,7 @@ export function History({ cityId }: CityScreenProps) {
     windUnit: units.wind,
     deleteLogDay: useLogStore((st) => st.removeDay),
     cityIndex: useCityIndex(cityId),
-    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
+    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome, logFilter: st.logFilter, setLogFilter: st.setLogFilter }))),
   };
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
@@ -43,6 +43,9 @@ export function History({ cityId }: CityScreenProps) {
   if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const rows = Object.values(s.log ?? {}).sort((a, b) => b.date.localeCompare(a.date));
+  const q = s.logFilter.trim().toLowerCase();
+  const visible = q === '' ? rows : rows.filter((r) =>
+    [r.date, longDate(r.date), shortDate(r.date), conditionLabel(r.code), r.source].some((v) => v.toLowerCase().includes(q)));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => (date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }));
   const exportCsv = () => {
@@ -84,8 +87,14 @@ export function History({ cityId }: CityScreenProps) {
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
+        {rows.length > 0 && (
+          <TextInput mt={14} placeholder={t('history.search')} aria-label={t('history.search')}
+            leftSection={<Icon name="search" size={16} />} value={s.logFilter}
+            onChange={(e) => s.setLogFilter(e.currentTarget.value)} />
+        )}
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
-        {rows.map((r) => {
+        {rows.length > 0 && visible.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.noMatches')}</Text>}
+        {visible.map((r) => {
           const normal = s.normals?.[r.date.slice(5)];
           const delta = normal != null && r.hi != null ? fmtDelta(r.hi - normal, s.tempUnit) : null;
           return (
@@ -153,7 +162,16 @@ function LookupCard({ cityId, date, onOpen }: LookupCardProps) {
   const T = (c?: number | null) => fmtTemp(c, units.temp);
   if (record === undefined) {
     const error = query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : query.error;
-    return <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}><Text fz={13} c="signal.3">{error}</Text></Box>;
+    return (
+      <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}>
+        <Text fz={13} c="signal.3">{error}</Text>
+        {query.error !== NO_ARCHIVE_DATA && (
+          <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void lookupDate(cityId, date)}>
+            {t('common.tryAgain')}
+          </Button>
+        )}
+      </Box>
+    );
   }
   return (
     <UnstyledButton mt={12} w="100%" style={{ border: '2px solid var(--rule)', display: 'block' }}

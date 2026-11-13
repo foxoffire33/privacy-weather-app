@@ -1,4 +1,4 @@
-import type { Backup, BackupParts, QueryState } from '../storesV2';
+import type { Backup, BackupParts, QueryState } from '../stores';
 import type { Route } from './route';
 
 export interface DateRange {
@@ -14,12 +14,14 @@ export interface UiState {
   chartMetric: string;
   historyRange: number;
   lookupDraft: string;
+  logFilter: string;
   hiddenSeries: Record<string, string[]>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
   setChartMetric: (m: string) => void;
   setHistoryRange: (d: number) => void;
   setLookupDraft: (date: string) => void;
+  setLogFilter: (q: string) => void;
   toggleDay: (cityId: string, date: string) => void;
   toggleSeries: (scope: string, name: string) => void;
   dismissGestureHint: () => void;

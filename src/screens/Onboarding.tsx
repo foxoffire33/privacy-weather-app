@@ -1,5 +1,5 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
-import { useUiStore } from '../store/uiStore';
+import { useUiStore } from '../stores/uiStore';
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
 

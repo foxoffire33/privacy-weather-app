@@ -1,5 +1,5 @@
 import type { MantineColorsTuple } from '@mantine/core';
-import type { Accent, ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../storesV2';
+import type { Accent, ArchiveYear, City, DayRecord, ForecastEntry, TempUnit } from '../stores';
 
 export interface AppIconOptions {
   accent: Accent;

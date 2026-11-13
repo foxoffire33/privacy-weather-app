@@ -3,6 +3,7 @@
     "back": "Nazaj",
     "close": "Zapri",
     "cancel": "Prekliči",
+    "delete": "Izbriši",
     "tryAgain": "Poskusi znova",
     "default": "Privzeto",
     "now": "Zdaj",
@@ -212,6 +213,7 @@
     "reorder": "Premakni {name}",
     "unfollow": "Prenehaj spremljati {name}",
     "confirmUnfollow": "Prenehati spremljati {name}? Zabeležena zgodovina ostane.",
+    "stopFollowing": "Prenehaj slediti",
     "followCity": "Spremljaj mesto"
   },
   "home": {
@@ -445,6 +447,8 @@
     "vsAvg": "glede na povp.",
     "yourLog": "Vaš dnevnik · {days}",
     "empty": "Prvi posnetek se shrani, ko se napoved naloži.",
+    "search": "Išči datum, vreme ali vir",
+    "noMatches": "Ni ujemajočih se dni",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · občutek {t}°",
     "filled": "Dopolnjeno",

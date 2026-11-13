@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import type { City, DayRecord, TempUnit, WindUnit } from '../storesV2';
+import type { City, DayRecord, TempUnit, WindUnit } from '../stores';
 import type { DateRange } from './stores';
 
 export type IconName =

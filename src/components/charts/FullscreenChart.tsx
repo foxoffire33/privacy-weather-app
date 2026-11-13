@@ -1,5 +1,5 @@
 import { ActionIcon, Box, Modal } from '@mantine/core';
-import { useUiStore } from '../../store/uiStore';
+import { useUiStore } from '../../stores/uiStore';
 import { Icon } from '../Icon';
 import { t } from '../../i18n';
 import type { ExpandButtonProps, FullscreenChartProps } from '../../types';

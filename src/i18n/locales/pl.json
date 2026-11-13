@@ -3,6 +3,7 @@
     "back": "Wstecz",
     "close": "Zamknij",
     "cancel": "Anuluj",
+    "delete": "Usuń",
     "tryAgain": "Spróbuj ponownie",
     "default": "Domyślne",
     "now": "Teraz",
@@ -212,6 +213,7 @@
     "reorder": "Przenieś {name}",
     "unfollow": "Przestań obserwować {name}",
     "confirmUnfollow": "Przestać obserwować {name}? Zapisana historia zostanie zachowana.",
+    "stopFollowing": "Przestań obserwować",
     "followCity": "Obserwuj miasto"
   },
   "home": {
@@ -445,6 +447,8 @@
     "vsAvg": "wzgl. śr.",
     "yourLog": "Twój dziennik · {days}",
     "empty": "Pierwszy zapis powstaje po wczytaniu prognozy.",
+    "search": "Szukaj daty, pogody lub źródła",
+    "noMatches": "Brak pasujących dni",
     "rowDetail": "{cond}, {mm} mm",
     "rowFeels": " · odczuwalna {t}°",
     "filled": "Uzupełniony",

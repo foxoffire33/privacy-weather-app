@@ -1,7 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { ACCENTS, customTuple } from '../theme';
-import type { Accent } from '../storesV2';
+import type { Accent } from '../stores';
 import type { AppIconPlugin } from '../types';
 
 const AppIcon = registerPlugin<AppIconPlugin>('AppIcon');
