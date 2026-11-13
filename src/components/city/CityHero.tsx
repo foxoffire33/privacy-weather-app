@@ -1,9 +1,9 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
-import { fmtDelta, fmtTemp } from '../../lib/format';
-import { conditionLabel } from '../../lib/weatherCodes';
 import { refreshCity, useNormals } from '../../stores';
+import { fmtDelta, fmtTemp } from '../../utils/format';
+import { conditionLabel } from '../../weather/weatherCodes';
 
 import type { CityErrorProps, CityHeroProps, CityPageProps } from '../../types';
 import type { ReactElement } from 'react';

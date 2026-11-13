@@ -4,10 +4,10 @@ import { useTimeout } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 
 import { t } from '../../i18n';
-import { convTemp, weekday } from '../../lib/format';
-import { nowIndex } from '../../lib/insights';
-import { visibleSeries, NO_HIDDEN } from '../../lib/series';
 import { useUiStore } from '../../stores/uiStore';
+import { convTemp, weekday } from '../../utils/format';
+import { visibleSeries, NO_HIDDEN } from '../../utils/series';
+import { nowIndex } from '../../weather/insights';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { HourlyExplorer } from '../charts/HourlyExplorer';
 import { SeriesLegend } from '../charts/SeriesToggle';

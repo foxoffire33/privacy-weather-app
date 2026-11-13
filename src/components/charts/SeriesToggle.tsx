@@ -1,7 +1,7 @@
 import { Box, UnstyledButton } from '@mantine/core';
 
-import { NO_HIDDEN } from '../../lib/series';
 import { useUiStore } from '../../stores/uiStore';
+import { NO_HIDDEN } from '../../utils/series';
 
 import type { SeriesLegendProps } from '../../types';
 import type { ReactElement } from 'react';

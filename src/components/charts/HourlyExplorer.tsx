@@ -3,11 +3,11 @@ import { Box, UnstyledButton } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
-import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
-import { below } from '../../lib/scale';
-import { NO_HIDDEN, visibleSeries } from '../../lib/series';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
+import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../utils/format';
+import { below } from '../../utils/scale';
+import { NO_HIDDEN, visibleSeries } from '../../utils/series';
 
 import { INLINE_HEIGHT } from './FullscreenChart';
 import { SeriesLegend } from './SeriesToggle';

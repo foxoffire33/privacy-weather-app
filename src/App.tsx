@@ -5,9 +5,9 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { BootSk } from './components/Skeletons';
 import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
-import { syncAppIcon } from './lib/appIcon';
-import { allowLandscape } from './lib/orientation';
-import { startWidgetSync } from './lib/widgets';
+import { syncAppIcon } from './native/appIcon';
+import { allowLandscape } from './native/orientation';
+import { startWidgetSync } from './native/widgets';
 import { Cities } from './screens/Cities';
 import { DayView } from './screens/DayView';
 import { History } from './screens/History';

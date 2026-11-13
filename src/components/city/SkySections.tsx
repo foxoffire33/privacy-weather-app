@@ -1,9 +1,9 @@
 import { ActionIcon, Box, Group, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
-import { ago, compass, fmtTemp, orDash } from '../../lib/format';
-import { capeLabel, nowIndex, pressureTrend, visibilityLabel } from '../../lib/insights';
 import { refreshCity } from '../../stores';
+import { ago, compass, fmtTemp, orDash } from '../../utils/format';
+import { capeLabel, nowIndex, pressureTrend, visibilityLabel } from '../../weather/insights';
 import { Icon } from '../Icon';
 
 import { n0 } from './num';

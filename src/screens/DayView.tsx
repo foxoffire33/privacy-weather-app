@@ -6,9 +6,9 @@ import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { fmtDelta, fmtTemp, fullDate } from '../lib/format';
-import { conditionLabel } from '../lib/weatherCodes';
 import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
+import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
+import { conditionLabel } from '../weather/weatherCodes';
 
 import type { DayData, DayRecord } from '../stores';
 import type { DayBodyProps, DayHeaderProps, DayHeroValues, DayViewProps } from '../types';

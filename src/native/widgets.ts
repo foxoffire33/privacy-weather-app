@@ -2,11 +2,10 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 
 import { t as tx, useI18n } from '../i18n';
 import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
-
-import { fireAndForget } from './fireAndForget';
-import { convTemp, fmtDelta, fmtTemp, hhmm, hourLabel, shortDate, weekday } from './format';
-import { nowIndex, rainOutlook } from './insights';
-import { conditionLabel } from './weatherCodes';
+import { fireAndForget } from '../utils/fireAndForget';
+import { convTemp, fmtDelta, fmtTemp, hhmm, hourLabel, shortDate, weekday } from '../utils/format';
+import { nowIndex, rainOutlook } from '../weather/insights';
+import { conditionLabel } from '../weather/weatherCodes';
 
 import type { DayRecord, ForecastData, ForecastEntry, TempUnit } from '../stores';
 import type { SnapshotInput, WidgetDay, WidgetRow, WidgetSnapshot, WidgetsPlugin } from '../types';
