@@ -297,3 +297,19 @@ export interface DayHeroValues {
 export interface DayHourlyProps extends DaySectionProps {
   cityId: string;
 }
+
+export interface HistoryLogProps {
+  cityId: string;
+  rows: DayRecord[];
+  today: string;
+  onOpen: (date: string) => void;
+}
+
+export interface HistoryRowProps {
+  cityId: string;
+  record: DayRecord;
+  today: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOpen: (date: string) => void;
+}
