@@ -96,16 +96,23 @@ export function History({ cityId }: { cityId: string }) {
           <TextInput type="date" label={t('history.lookup')}
             min="1940-01-01" max={maxLookup} value={s.draft}
             onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
-          {validDraft && (
-            <UnstyledButton mt={12} w="100%" disabled={loadingLookup || lookupError !== null || lookupRecord === undefined} onClick={() => {
+          {validDraft && (lookupError !== null && lookupRecord === undefined ? (
+            <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}>
+              <Text fz={13} c="signal.3">{lookupError}</Text>
+              {s.lookup.query.error !== NO_ARCHIVE_DATA && (
+                <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void lookupDate(cityId, s.draft)}>
+                  {t('common.tryAgain')}
+                </Button>
+              )}
+            </Box>
+          ) : (
+            <UnstyledButton mt={12} w="100%" disabled={loadingLookup || lookupRecord === undefined} onClick={() => {
                 void addDateRange(cityId, s.draft, s.draft).catch(() => undefined);
                 open(s.draft);
               }}
               style={{ border: '2px solid var(--rule)', display: 'block' }}>
               {loadingLookup || lookupRecord === undefined ? (
                 <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
-              ) : lookupError !== null ? (
-                <Box p={14}><Text fz={13} c="signal.3">{lookupError}</Text></Box>
               ) : (
                 <>
                   <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
@@ -125,7 +132,7 @@ export function History({ cityId }: { cityId: string }) {
                 </>
               )}
             </UnstyledButton>
-          )}
+          ))}
         </Box>
       </Paper>
 
