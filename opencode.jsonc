@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Guardrails for agents working in this project.
+  "permissions": [
+    // Deny editing (edit/write/patch) of any ESLint config file.
+    // `*` matches any characters including `/`, so these cover nested
+    // directories as well as the project root.
+    { "action": "edit", "resource": "*.eslintrc*", "effect": "deny" },
+    { "action": "edit", "resource": "*eslint.config.*", "effect": "deny" },
+  ],
+}
