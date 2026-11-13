@@ -45,7 +45,7 @@ export interface LogState {
   logDay: (cityId: string, day: DayData) => void;
   lookup: (city: City, date: string) => Promise<void>;
   addRange: (city: City, start: string, end: string) => Promise<ImportCounts>;
-  fillMissing: (city: City, start: string, end: string) => Promise<ImportCounts | null>;
+  fillMissing: (city: City, start: string, end: string) => Promise<ImportCounts>;
   removeDay: (cityId: string, date: string) => void;
   addDates: (cityId: string, dates: string[]) => number;
   clear: () => void;
@@ -68,4 +68,13 @@ export interface SourceSpan {
   from: string;
   to: string;
   recent: boolean;
+}
+
+export interface DateSpan {
+  from: string;
+  to: string;
+}
+
+export interface BootState {
+  hydrated: boolean;
 }

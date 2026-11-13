@@ -1,14 +1,16 @@
 import { create } from 'zustand';
-import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, succeed, useLogStore } from '../storesV2';
+import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, once, succeed, useLogStore } from '../storesV2';
 import type { DateRange, TrendsState } from '../types';
 
 export type { TrendsState } from '../types';
 
 export const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
 
-const windowKey = (cityId: string, w: DateRange) => `${cityId}:${w.from}:${w.to}`;
+export const windowKey = (cityId: string, w: DateRange) => `${cityId}:${w.from}:${w.to}`;
 
-function hasGap(cityId: string, w: DateRange): boolean {
+export const trendsKey = (cityId: string, windows: DateRange[]) => `trends:${windows.map((w) => windowKey(cityId, w)).join('|')}`;
+
+export function hasGap(cityId: string, w: DateRange): boolean {
   if (w.from > w.to) return false;
   const logged = new Set(useLogStore.getState().dates[cityId] ?? []);
   for (let d = w.from; d <= w.to; d = addDays(d, 1)) if (!logged.has(d)) return true;
@@ -32,7 +34,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
   setBack: (back) => set({ back }),
   setRangeDraft: (patch) => set((s) => ({ rangeDraft: { ...s.rangeDraft, ...patch } })),
 
-  ensureWindows: async (cityId, windows) => {
+  ensureWindows: (cityId, windows) => once(trendsKey(cityId, windows), async () => {
     const tried = new Set(get().attempted);
     const wanted = windows.filter((w) => hasGap(cityId, w) && !tried.has(windowKey(cityId, w)));
     if (wanted.length === 0) return;
@@ -46,5 +48,5 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
       }
     }
     set((s) => ({ download: error === null ? succeed() : fail(s.download, error) }));
-  },
+  }),
 }));

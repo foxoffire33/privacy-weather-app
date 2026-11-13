@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { City, DayRecord, TempUnit, WindUnit } from '../storesV2';
+import type { DateRange } from './stores';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
@@ -166,4 +167,38 @@ export interface StripCell {
 export interface AqiPeak {
   v: number;
   time: string;
+}
+
+export interface FrameProps {
+  children: ReactNode;
+}
+
+export interface DayHeaderProps {
+  cityName: string;
+  date: string;
+}
+
+export interface DayBodyProps {
+  cityId: string;
+  date: string;
+  cityName: string;
+}
+
+export interface YearsRowProps {
+  cityId: string;
+  today: string;
+  onOpen: (date: string) => void;
+}
+
+export interface LookupCardProps {
+  cityId: string;
+  date: string;
+  onOpen: (date: string) => void;
+}
+
+export interface TrendsFillProps {
+  cityId: string;
+  windows: DateRange[];
+  ensureWindows: (cityId: string, windows: DateRange[]) => Promise<void>;
+  children: ReactNode;
 }

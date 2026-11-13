@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { ActionIcon, Badge, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  addDateRange, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useAlmanacStore, useCity,
-  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookup, useNormals, useThisDay, useUnits,
+  addDayToLog, addDays, daysBetween, NO_ARCHIVE_DATA, todayISO, useCity,
+  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
 } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
 import { useAddDatesStore } from '../store/addDatesStore';
@@ -15,7 +16,7 @@ import { Sk } from '../components/Skeletons';
 import { SwipeRow } from '../components/SwipeRow';
 import { Trends } from '../components/history/Trends';
 import { t } from '../i18n';
-import type { CityScreenProps, ImportRangeProps } from '../types';
+import type { CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
 
 export function History({ cityId }: CityScreenProps) {
   const city = useCity(cityId);
@@ -23,37 +24,24 @@ export function History({ cityId }: CityScreenProps) {
   const units = useUnits();
   const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
   const draft = useUiStore((st) => st.lookupDraft);
-  const lookup = useLookup(cityId, draft);
+  const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,
     log: useCityLog(cityId),
     normals: useNormals(cityId),
     today,
-    years: useThisDay(cityId, today),
     draft,
-    lookup,
     tempUnit: units.temp,
     windUnit: units.wind,
     deleteLogDay: useLogStore((st) => st.removeDay),
     cityIndex: useCityIndex(cityId),
     ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
   };
-  const ensureThisDay = useAlmanacStore((st) => st.ensureThisDay);
-  useEffect(() => { if (city) void ensureThisDay(city, today); }, [city, today, ensureThisDay]);
   const maxLookupDate = addDays(today, -5);
-  const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
-  const lookedUp = s.lookup.query.status !== 'idle';
+  const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
   const [swiped, setSwiped] = useState<string | null>(null);
-  useEffect(() => {
-    if (!validDraft || lookedUp) return;
-    const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
-    return () => window.clearTimeout(t);
-  }, [validDraft, lookedUp, cityId, draft, lookupDate]);
   if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
-  const loadingLookup = s.lookup.query.status === 'loading';
-  const lookupError = s.lookup.query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : s.lookup.query.error;
-  const lookupRecord = s.lookup.query.status === 'success' ? s.lookup.record : undefined;
   const rows = Object.values(s.log ?? {}).sort((a, b) => b.date.localeCompare(a.date));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => (date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }));
@@ -71,59 +59,17 @@ export function History({ cityId }: CityScreenProps) {
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('history.title')}</Title>
 
       <Paper className="glass" mx={12}>
-        <Box className="archive-grid">
-          {(s.years ?? [0, 1, 2, 3].map(() => null)).map((y, i) => (
-            <UnstyledButton key={y?.year ?? i} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
-              disabled={!y || y.error} onClick={() => y && open(`${y.year}${today.slice(4)}`)}>
-              {y ? (
-                <>
-                  <Text fz={12} c="dimmed">{y.year}</Text>
-                  <Text fz={22} fw={800}>{y.error ? '–' : `${T(y.hi)}°`}</Text>
-                  <Text fz={12} c="dimmed">{y.error ? t('history.noData') : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
-                </>
-              ) : (
-                <>
-                  <Sk w={30} h={11} mt={3} />
-                  <Sk w={44} h={26} mt={5} />
-                  <Sk w={56} h={11} mt={5} />
-                </>
-              )}
-            </UnstyledButton>
-          ))}
-        </Box>
+        <Suspense fallback={<YearsRowSk />}>
+          <YearsRow cityId={cityId} today={today} onOpen={open} />
+        </Suspense>
         <Box p={12} style={{ borderTop: '1px solid rgba(255,255,255,.12)' }}>
           <TextInput type="date" label={t('history.lookup')}
             min="1940-01-01" max={maxLookup} value={s.draft}
             onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
           {validDraft && (
-            <UnstyledButton mt={12} w="100%" disabled={loadingLookup || lookupError !== null || lookupRecord === undefined} onClick={() => {
-                void addDateRange(cityId, s.draft, s.draft).catch(() => undefined);
-                open(s.draft);
-              }}
-              style={{ border: '2px solid var(--rule)', display: 'block' }}>
-              {loadingLookup || lookupRecord === undefined ? (
-                <Box p={14}><Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} /></Box>
-              ) : lookupError !== null ? (
-                <Box p={14}><Text fz={13} c="signal.3">{lookupError}</Text></Box>
-              ) : (
-                <>
-                  <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
-                    <Text fz={12} fw={800} tt="uppercase" style={{ letterSpacing: '.06em' }}>{longDate(s.draft)}</Text>
-                    <Icon name="arrow" size={16} />
-                  </Group>
-                  <Box p={14}>
-                    <Group justify="space-between" align="flex-end" wrap="nowrap">
-                      <Text fz={16} fw={800}>{conditionLabel(lookupRecord.code)}</Text>
-                      <Text fz={40} fw={800} lh={1}>{T(lookupRecord.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(lookupRecord.lo)}°</Text></Text>
-                    </Group>
-                    <Box className="stat-grid" style={{ marginTop: 12 }}>
-                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(lookupRecord.mm ?? 0).toFixed(1)} mm</Text></Box>
-                      <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(lookupRecord.wind, s.windUnit)}</Text></Box>
-                    </Box>
-                  </Box>
-                </>
-              )}
-            </UnstyledButton>
+            <Suspense fallback={<LookupCardSk />}>
+              <LookupCard cityId={cityId} date={settledDraft} onOpen={open} />
+            </Suspense>
           )}
         </Box>
       </Paper>
@@ -158,6 +104,75 @@ export function History({ cityId }: CityScreenProps) {
         })}
       </Box>
     </Box>
+  );
+}
+
+function YearsRowSk() {
+  return (
+    <Box className="archive-grid">
+      {[0, 1, 2, 3].map((i) => (
+        <Box key={i} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}>
+          <Sk w={30} h={11} mt={3} />
+          <Sk w={44} h={26} mt={5} />
+          <Sk w={56} h={11} mt={5} />
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function YearsRow({ cityId, today, onOpen }: YearsRowProps) {
+  const years = useThisDayData(cityId, today) ?? [];
+  const units = useUnits();
+  const T = (c?: number | null) => fmtTemp(c, units.temp);
+  return (
+    <Box className="archive-grid">
+      {years.map((y) => (
+        <UnstyledButton key={y.year} py={10} pl={12} style={{ borderRight: '1px solid rgba(255,255,255,.1)' }}
+          disabled={y.error} onClick={() => onOpen(`${y.year}${today.slice(4)}`)}>
+          <Text fz={12} c="dimmed">{y.year}</Text>
+          <Text fz={22} fw={800}>{y.error ? '–' : `${T(y.hi)}°`}</Text>
+          <Text fz={12} c="dimmed">{y.error ? t('history.noData') : `${T(y.lo)}° · ${(y.mm ?? 0).toFixed(1)}mm`}</Text>
+        </UnstyledButton>
+      ))}
+    </Box>
+  );
+}
+
+function LookupCardSk() {
+  return (
+    <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}>
+      <Sk w={140} h={12} /><Sk w={120} h={40} mt={10} /><Sk h={14} mt={10} />
+    </Box>
+  );
+}
+
+function LookupCard({ cityId, date, onOpen }: LookupCardProps) {
+  const { record, query } = useLookupData(cityId, date);
+  const units = useUnits();
+  const T = (c?: number | null) => fmtTemp(c, units.temp);
+  if (record === undefined) {
+    const error = query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : query.error;
+    return <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}><Text fz={13} c="signal.3">{error}</Text></Box>;
+  }
+  return (
+    <UnstyledButton mt={12} w="100%" style={{ border: '2px solid var(--rule)', display: 'block' }}
+      onClick={() => { void addDayToLog(cityId, date).catch(() => undefined); onOpen(date); }}>
+      <Group className="accent-field" justify="space-between" px={14} py={8} wrap="nowrap">
+        <Text fz={12} fw={800} tt="uppercase" style={{ letterSpacing: '.06em' }}>{longDate(date)}</Text>
+        <Icon name="arrow" size={16} />
+      </Group>
+      <Box p={14}>
+        <Group justify="space-between" align="flex-end" wrap="nowrap">
+          <Text fz={16} fw={800}>{conditionLabel(record.code)}</Text>
+          <Text fz={40} fw={800} lh={1}>{T(record.hi)}°<Text span fz={20} c="dimmed" fw={600}> / {T(record.lo)}°</Text></Text>
+        </Group>
+        <Box className="stat-grid" style={{ marginTop: 12 }}>
+          <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.rain')}</Text><Text fz={16} fw={800}>{(record.mm ?? 0).toFixed(1)} mm</Text></Box>
+          <Box><Text fz={12} tt="uppercase" c="dimmed">{t('history.maxWind')}</Text><Text fz={16} fw={800}>{fmtWind(record.wind, units.wind)}</Text></Box>
+        </Box>
+      </Box>
+    </UnstyledButton>
   );
 }
 

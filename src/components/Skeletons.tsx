@@ -71,3 +71,16 @@ export function CityBodySk() {
     </>
   );
 }
+
+export function BootSk() {
+  return (
+    <Box className="page">
+      <Box className="hero">
+        <Sk w={140} h={18} />
+        <Sk w={220} h={140} mt={16} />
+        <Sk w={180} h={22} mt={16} />
+      </Box>
+      <CityBodySk />
+    </Box>
+  );
+}

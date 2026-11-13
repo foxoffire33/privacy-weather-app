@@ -8,6 +8,7 @@ import { useForecastStore } from './stores/forecast-store';
 import { useLogStore } from './stores/log-store';
 import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
+import { useBootStore } from './stores/boot-store';
 
 const PERSISTED: Rehydratable[] = [
   useEntityCache,
@@ -25,13 +26,14 @@ export function alreadyHydrated(): boolean {
 
 let booting: Promise<void> | null = null;
 
-export async function hydrateAll(): Promise<void> {
+export function hydrateAll(): Promise<void> {
   booting ??= (async () => {
     await importLegacyStore().catch(() => false);
     await Promise.all(PERSISTED.map(async (store) => {
       await store.persist.rehydrate();
       await waitForHydration(store);
     }));
+    useBootStore.setState({ hydrated: true });
   })();
-  await booting;
+  return booting;
 }

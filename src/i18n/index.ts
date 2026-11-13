@@ -43,14 +43,37 @@ export function systemLanguage(): Language {
   return 'en';
 }
 
+export function resolveLanguage(pref: string | undefined): Language {
+  return LANGUAGES.some((l) => l.code === pref) ? pref as Language : systemLanguage();
+}
+
+const DONE: Promise<void> = Object.assign(Promise.resolve(), { status: 'fulfilled', value: undefined });
+const loading = new Map<Language, Promise<void>>();
+const loaded = new Map<Language, Promise<void>>();
+
+export function ensureLanguage(lang: Language): Promise<void> {
+  const pending = loading.get(lang);
+  if (pending !== undefined) return pending;
+  const promise = Promise.resolve().then(() => useI18n.getState().setLanguage(lang));
+  loading.set(lang, promise);
+  void promise.then(() => {
+    loading.delete(lang);
+    loaded.set(lang, promise);
+  });
+  return promise;
+}
+
+export function languageLoaded(lang: Language): Promise<void> {
+  return loaded.get(lang) ?? DONE;
+}
+
 export const useI18n = create<I18nState>((set, get) => ({
   lang: 'en',
   locale: 'en-GB',
   messages: en,
   ready: false,
   setLanguage: async (pref) => {
-    const known = LANGUAGES.some((l) => l.code === pref);
-    const lang: Language = known ? pref as Language : systemLanguage();
+    const lang = resolveLanguage(pref);
     if (get().ready && get().lang === lang) return;
     let messages: Messages = en;
     if (lang !== 'en') {

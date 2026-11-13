@@ -1,9 +1,9 @@
-import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, Suspense, memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useSeriesToggle } from '../components/charts/SeriesToggle';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Progress, Text, UnstyledButton, VisuallyHidden } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  openDay, refreshCity, useDayQuery, useDayStore, useForecast, useForecastQuery, useLogCount, useNormals, useUnits,
+  openDay, refreshCity, useDayQuery, useDayStore, useForecastData, useForecastQuery, useLogCount, useNormals, useUnits,
 } from '../storesV2';
 import { useUiStore } from '../store/uiStore';
 import { conditionLabel } from '../lib/weatherCodes';
@@ -44,7 +44,9 @@ export const CityPage = memo(function CityPage({ city, isDefault }: CityPageProp
   const busy = useForecastQuery(city.id).status === 'loading';
   return (
     <Box className="page">
-      <CityPageContent city={city} isDefault={isDefault} />
+      <Suspense fallback={<CityPageSk city={city} isDefault={isDefault} />}>
+        <CityPageContent city={city} isDefault={isDefault} />
+      </Suspense>
       {busy && <VisuallyHidden role="status">{tx('city.updatingCity', { name: city.name })}</VisuallyHidden>}
     </Box>
   );
@@ -59,9 +61,32 @@ function Deferred({ h, children }: DeferredProps) {
   return ready ? <>{children}</> : <ChartSk h={h} />;
 }
 
+function CityTitle({ city, isDefault }: CityPageProps) {
+  return (
+    <Group gap={8}>
+      <Text fz={15} fw={800}>{city.name}</Text>
+      {isDefault && <Badge variant="white" color="dark" size="sm">{tx('common.default')}</Badge>}
+    </Group>
+  );
+}
+
+function CityPageSk({ city, isDefault }: CityPageProps) {
+  return (
+    <>
+      <Box className="hero">
+        <CityTitle city={city} isDefault={isDefault} />
+        <Sk w={200} h={143} mt={8} />
+        <Sk w={180} h={22} mt={14} />
+        <Sk w={260} h={14} mt={8} />
+      </Box>
+      <CityBodySk />
+    </>
+  );
+}
+
 function CityPageContent({ city, isDefault }: CityPageProps) {
   const weekTg = useSeriesToggle('week');
-  const entry = useForecast(city.id);
+  const entry = useForecastData(city.id);
   const query = useForecastQuery(city.id);
   const units = useUnits();
   const s = {
@@ -109,34 +134,16 @@ function CityPageContent({ city, isDefault }: CityPageProps) {
   }, [s.expanded]);
   const W = (k?: number | null) => fmtWind(k, s.windUnit);
   const n0 = (v: number | null | undefined, digits = 0) => (v == null ? '–' : v.toFixed(digits));
-  const title = (
-    <Group gap={8}>
-      <Text fz={15} fw={800}>{city.name}</Text>
-      {isDefault && <Badge variant="white" color="dark" size="sm">{tx('common.default')}</Badge>}
-    </Group>
-  );
+  const title = <CityTitle city={city} isDefault={isDefault} />;
   if (!s.entry) {
     return (
-      <>
-        <Box className="hero">
-          {title}
-          {s.error ? (
-            <>
-              <Box className="hero-temp">–°</Box>
-              <Text fz={18} fw={800} mt={12}>{tx('city.couldNotLoad')}</Text>
-              <Text fz={13} fw={600}>{s.error}</Text>
-              <Button mt={16} onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>{tx('common.tryAgain')}</Button>
-            </>
-          ) : (
-            <>
-              <Sk w={200} h={143} mt={8} />
-              <Sk w={180} h={22} mt={14} />
-              <Sk w={260} h={14} mt={8} />
-            </>
-          )}
-        </Box>
-        {!s.error && <CityBodySk />}
-      </>
+      <Box className="hero">
+        {title}
+        <Box className="hero-temp">–°</Box>
+        <Text fz={18} fw={800} mt={12}>{tx('city.couldNotLoad')}</Text>
+        <Text fz={13} fw={600}>{s.error}</Text>
+        <Button mt={16} onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>{tx('common.tryAgain')}</Button>
+      </Box>
     );
   }
 

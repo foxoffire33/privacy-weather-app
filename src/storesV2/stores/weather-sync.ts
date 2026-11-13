@@ -1,3 +1,4 @@
+import { once } from '../core/inflight';
 import { entityCache } from '../entities/cache';
 import { followedCities, useCityStore } from './city-store';
 import { useForecastStore } from './forecast-store';
@@ -13,7 +14,18 @@ import type { ImportCounts } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 
-export async function refreshCity(cityId: string, opts: RefreshOptions = {}): Promise<void> {
+export const resourceKey = {
+  forecast: (cityId: string) => `forecast:${cityId}`,
+  day: (cityId: string, date: string) => `day:${cityId}:${date}`,
+  lookup: (cityId: string, date: string) => `lookup:${cityId}:${date}`,
+  thisDay: (cityId: string, date: string) => `thisDay:${cityId}:${date.slice(5)}`,
+};
+
+export function refreshCity(cityId: string, opts: RefreshOptions = {}): Promise<void> {
+  return once(resourceKey.forecast(cityId), async () => { await runRefresh(cityId, opts); });
+}
+
+async function runRefresh(cityId: string, opts: RefreshOptions): Promise<void> {
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) return;
   const log = useLogStore.getState();
@@ -40,23 +52,43 @@ export function unfollowCity(cityId: string): void {
   useForecastStore.getState().drop(cityId);
 }
 
-export async function openDay(cityId: string, date: string): Promise<void> {
-  const city = entityCache.getOne('city', cityId);
-  if (city === undefined) return;
-  const day = await useDayStore.getState().load(city, date);
-  if (day !== null) useLogStore.getState().logDay(cityId, day);
+export function openDay(cityId: string, date: string): Promise<void> {
+  return once(resourceKey.day(cityId, date), async () => {
+    const city = entityCache.getOne('city', cityId);
+    if (city === undefined) return;
+    const day = await useDayStore.getState().load(city, date);
+    if (day !== null) useLogStore.getState().logDay(cityId, day);
+  });
 }
 
-export async function lookupDate(cityId: string, date: string): Promise<void> {
-  const city = entityCache.getOne('city', cityId);
-  if (city === undefined || date === '') return;
-  await useLogStore.getState().lookup(city, date);
+export function lookupDate(cityId: string, date: string): Promise<void> {
+  return once(resourceKey.lookup(cityId, date), async () => {
+    const city = entityCache.getOne('city', cityId);
+    if (city === undefined || date === '') return;
+    await useLogStore.getState().lookup(city, date);
+  });
+}
+
+export function loadThisDay(cityId: string, date: string): Promise<void> {
+  return once(resourceKey.thisDay(cityId, date), async () => {
+    const city = entityCache.getOne('city', cityId);
+    if (city === undefined) return;
+    await useAlmanacStore.getState().ensureThisDay(city, date);
+  });
 }
 
 export async function addDateRange(cityId: string, start: string, end: string): Promise<ImportCounts> {
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) throw new Error('city-not-followed');
-  return await useLogStore.getState().addRange(city, start, end);
+  return await useLogStore.getState().fillMissing(city, start, end);
+}
+
+export async function addDayToLog(cityId: string, date: string): Promise<void> {
+  if (entityCache.getOne('dayRecord', dayKey(cityId, date)) !== undefined) {
+    useLogStore.getState().addDates(cityId, [date]);
+    return;
+  }
+  await addDateRange(cityId, date, date);
 }
 
 export async function fillRange(cityId: string, start: string, end: string): Promise<void> {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, use, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Box, Button, Checkbox, Drawer, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { BarChart, LineChart } from '@mantine/charts';
@@ -9,8 +9,9 @@ import { addDays, daysBetween } from '../../storesV2';
 import type { TempUnit } from '../../storesV2';
 import { ChartSk } from '../Skeletons';
 import { useSeriesToggle } from '../charts/SeriesToggle';
-import { useTrendsStore } from '../../store/trendsStore';
-import type { GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsProps, TrendsSheet } from '../../types';
+import { hasGap, trendsKey, useTrendsStore, windowKey } from '../../store/trendsStore';
+import { lastSettled } from '../../storesV2';
+import type { GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendGroup, TrendGroupDef, TrendsFillProps, TrendsProps, TrendsSheet } from '../../types';
 
 const T = (c: number | null | undefined, unit: TempUnit) => convTemp(c, unit);
 
@@ -49,17 +50,12 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     setLen: st.setLen, setCustom: st.setCustom, setBack: st.setBack, setRangeDraft: st.setRangeDraft, ensureWindows: st.ensureWindows,
   })));
   const [sheet, setSheet] = useState<TrendsSheet>(null);
-  const busy = download.status === 'loading';
   const error = download.error;
   const days = len || Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1));
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
   const shift = (date: string, years: number) => (years ? `${+date.slice(0, 4) - years}${date.slice(4)}` : date);
-  useEffect(() => {
-    const windows = [{ from, to }];
-    if (back) windows.push({ from: shift(from, back), to: shift(to, back) });
-    void ensureWindows(cityId, windows);
-  }, [cityId, from, to, back, ensureWindows]);
+  const windows = back ? [{ from, to }, { from: shift(from, back), to: shift(to, back) }] : [{ from, to }];
   const units = { temp: tempUnit, wind: windUnit };
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const yearA = to.slice(0, 4);
@@ -109,23 +105,29 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         ))}
       </Box>
 
-      {busy && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-      {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
       {!attrs.length && <Text fz={13} c="dimmed" py={12}>{t('history.attrNone')}</Text>}
 
-      {busy
-        ? GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)
-        : GROUPS.map((g) => {
-          const mine = attrs.filter((a) => a.group === g.key);
-          if (!mine.length) return null;
-          return (
-            <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
-              series={mine.flatMap((a, i) => [
-                { name: nameA(a), color: COLORS[i % COLORS.length] },
-                ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
-              ])} />
-          );
-        })}
+      <Suspense fallback={(
+        <>
+          <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>
+          {GROUPS.filter((g) => attrs.some((a) => a.group === g.key)).map((g) => <ChartSk key={g.key} />)}
+        </>
+      )}>
+        <TrendsFill cityId={cityId} windows={windows} ensureWindows={ensureWindows}>
+          {error && <Text fz={12} c="signal.3" py={8} role="status">{t('history.downloadFailed', { error })}</Text>}
+          {GROUPS.map((g) => {
+            const mine = attrs.filter((a) => a.group === g.key);
+            if (!mine.length) return null;
+            return (
+              <GroupChart key={g.key} group={g} data={data} base={base} unit={unitOf(g.key)}
+                series={mine.flatMap((a, i) => [
+                  { name: nameA(a), color: COLORS[i % COLORS.length] },
+                  ...(back ? [{ name: nameB(a), color: COMPARE_COLORS[i % COMPARE_COLORS.length] }] : []),
+                ])} />
+            );
+          })}
+        </TrendsFill>
+      </Suspense>
 
       {sheet === 'attrs' && <AttrSheet onClose={() => setSheet(null)} />}
       {sheet === 'range' && (
@@ -135,6 +137,13 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
       )}
     </Box>
   );
+}
+
+function TrendsFill({ cityId, windows, ensureWindows, children }: TrendsFillProps) {
+  const attempted = useTrendsStore((st) => st.attempted);
+  const missing = windows.some((w) => hasGap(cityId, w) && !attempted.includes(windowKey(cityId, w)));
+  use(missing ? ensureWindows(cityId, windows) : lastSettled(trendsKey(cityId, windows)));
+  return <>{children}</>;
 }
 
 function GroupChart({ group, series, data, base, unit }: GroupChartProps) {

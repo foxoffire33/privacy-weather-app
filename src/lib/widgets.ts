@@ -1,6 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-import { followedCities, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../storesV2';
+import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore } from '../storesV2';
 import { useEntityCache } from '../storesV2';
 import type { DayRecord } from '../storesV2';
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourOf, shortDate, weekday } from './format';
@@ -134,7 +134,7 @@ function readSnapshotInput(): SnapshotInput {
   const entry = useForecastStore.getState().forecasts[city.id];
   const almanac = useAlmanacStore.getState();
   const today = entry ? entry.data.daily.time[entry.pastDays] : undefined;
-  if (today !== undefined) void almanac.ensureThisDay(city, today);
+  if (today !== undefined) void loadThisDay(city.id, today);
   const dates = useLogStore.getState().dates[city.id] ?? [];
   const log: Record<string, DayRecord> = {};
   for (const record of useEntityCache.getState().getMany('dayRecord', dates.map((d) => `${city.id}:${d}`))) {

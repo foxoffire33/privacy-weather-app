@@ -6,4 +6,5 @@ export * from './day-store';
 export * from './almanac-store';
 export * from './search-store';
 export * from './weather-sync';
+export * from './boot-store';
 export type * from './types';

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { IDLE_QUERY, type QueryState } from './core/types';
 import { useEntityCache } from './entities/cache';
@@ -9,7 +9,7 @@ import { useLogStore } from './stores/log-store';
 import { useDayStore } from './stores/day-store';
 import { useAlmanacStore } from './stores/almanac-store';
 import { useSettingsStore } from './stores/settings-store';
-import { alreadyHydrated, hydrateAll } from './hydration';
+import { useBootStore } from './stores/boot-store';
 import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LookupView, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
@@ -77,13 +77,4 @@ export const useNormals = (cityId: string): Record<string, number> | undefined =
 export const useThisDay = (cityId: string, date: string): ArchiveYear[] | undefined =>
   useAlmanacStore((s) => s.thisDay[`${cityId}:${date.slice(5)}`]);
 
-export function useHydrated(): boolean {
-  const [ready, setReady] = useState(alreadyHydrated);
-  useEffect(() => {
-    if (ready) return;
-    let live = true;
-    void hydrateAll().then(() => { if (live) setReady(true); });
-    return () => { live = false; };
-  }, [ready]);
-  return ready;
-}
+export const useIsHydrated = (): boolean => useBootStore((s) => s.hydrated);
