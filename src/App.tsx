@@ -1,65 +1,91 @@
 import { App as CapApp } from '@capacitor/app';
-import { Fragment, useEffect } from 'react';
-import { Box, Center, Loader } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { useDocumentVisibility, useInterval, usePrevious } from '@mantine/hooks';
-import { useShallow } from 'zustand/react/shallow';
-import { refreshAll, useCityStore, useHydrated, useSettings } from './stores';
-import { useUiStore } from './stores/uiStore';
-import { Onboarding } from './screens/Onboarding';
-import { Home } from './screens/Home';
-import { Cities } from './screens/Cities';
-import { Search } from './screens/Search';
-import { History } from './screens/History';
-import { Hourly } from './screens/Hourly';
-import { DayView } from './screens/DayView';
-import { Settings } from './screens/Settings';
+import { Fragment, Suspense, useEffect, use } from 'react';
+
+import { BootSkeleton } from './components/Skeletons';
+import { useI18n } from './i18n';
 import { syncAppIcon } from './lib/appIcon';
 import { startWidgetSync } from './lib/widgets';
-import { useI18n } from './i18n';
+import { Cities } from './screens/Cities';
+import { DayView } from './screens/DayView';
+import { History } from './screens/History';
+import { Home } from './screens/Home';
+import { Hourly } from './screens/Hourly';
+import { Onboarding } from './screens/Onboarding';
+import { Search } from './screens/Search';
+import { Settings } from './screens/Settings';
+import { refreshAll, useCityStore, useSettings, hydrateAll } from './stores';
+import { useUiStore } from './stores/uiStore';
 
-export default function App() {
-  const hydrated = useHydrated();
-  const { snapshotMinutes, accent, accentColor, language } = useSettings();
+function AppInner() {
+  // Suspend on the boot skeleton until IndexedDB and the locale are ready — no spinner.
+  use(hydrateAll());
+  const { snapshotMinutes, accent, accentColor } = useSettings();
   const route = useUiStore((s) => s.route);
   const hasCities = useCityStore((s) => s.cityIds.length > 0);
-  const { lang, i18nReady, setLanguage } = useI18n(useShallow((s) => ({ lang: s.lang, i18nReady: s.ready, setLanguage: s.setLanguage })));
+  const lang = useI18n((s) => s.lang);
+  useEffect(() => { void refreshAll({ maxAgeMs: 0 }); }, []);
+  const { start: startRefresh, stop: stopRefresh } = useInterval(() => { void refreshAll({ maxAgeMs: 0 }); }, snapshotMinutes * 60_000);
   useEffect(() => {
-    if (hydrated) void setLanguage(language);
-  }, [hydrated, language, setLanguage]);
-  const refresh = () => void refreshAll({ maxAgeMs: 0 });
-  useEffect(() => { if (hydrated) refresh(); }, [hydrated]);
-  const { start: startRefresh, stop: stopRefresh } = useInterval(refresh, snapshotMinutes * 60_000);
-  useEffect(() => {
-    if (hydrated) startRefresh();
-    else stopRefresh();
-  }, [hydrated, startRefresh, stopRefresh]);
+    startRefresh();
+    return stopRefresh;
+  }, [startRefresh, stopRefresh]);
   const visibility = useDocumentVisibility();
   const wasVisible = usePrevious(visibility);
   useEffect(() => {
-    if (hydrated && visibility === 'visible' && wasVisible != null && wasVisible !== 'visible') refresh();
+    if (visibility === 'visible' && wasVisible != null && wasVisible !== 'visible') {void refreshAll({ maxAgeMs: 0 });}
   }, [visibility]);
-  useEffect(() => {
-    if (hydrated) syncAppIcon(accent, accentColor);
-  }, [hydrated, accent, accentColor]);
-  useEffect(() => (hydrated ? startWidgetSync() : undefined), [hydrated]);
+  useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
+  useEffect(() => startWidgetSync(), []);
   useEffect(() => {
     const sub = CapApp.addListener('backButton', () => {
       const { route: r, stack, back } = useUiStore.getState();
-      if (r.name === 'home' && !stack.length) void CapApp.exitApp();
-      else back();
+      if (r.name === 'home' && stack.length === 0) {void CapApp.exitApp();}
+      else {back();}
     });
-    return () => { void sub.then((h) => h.remove()); };
+    return () => { void sub.then(async (h) => h.remove()); };
   }, []);
   let screen;
-  if (!hydrated || !i18nReady) screen = <Center flex={1}><Loader /></Center>;
-  else if (!hasCities && route.name !== 'search' && route.name !== 'settings') screen = <Onboarding />;
-  else if (route.name === 'cities') screen = <Cities />;
-  else if (route.name === 'search') screen = <Search />;
-  else if (route.name === 'settings') screen = <Settings />;
-  else if (route.name === 'history') screen = <History cityId={route.cityId} />;
-  else if (route.name === 'hourly') screen = <Hourly cityId={route.cityId} />;
-  else if (route.name === 'day') screen = <DayView cityId={route.cityId} date={route.date} />;
-  else screen = <Home />;
-  const topAccent = hydrated && (route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings'));
-  return <Box className="stage"><Box className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}><Fragment key={lang}>{screen}</Fragment></Box></Box>;
+  if (!hasCities && route.name !== 'search' && route.name !== 'settings') {screen = <Onboarding />;}
+  else {switch (route.name) {
+ case 'cities': {
+ screen = <Cities />;
+ break;
+ }
+ case 'search': {
+ screen = <Search />;
+ break;
+ }
+ case 'settings': {
+ screen = <Settings />;
+ break;
+ }
+ case 'history': {
+ screen = <History cityId={route.cityId} />;
+ break;
+ }
+ case 'hourly': {
+ screen = <Hourly cityId={route.cityId} />;
+ break;
+ }
+ case 'day': {
+ screen = <DayView cityId={route.cityId} date={route.date} />;
+ break;
+ }
+ default: { screen = <Home />;
+ }
+ }}
+  const topAccent = route.name === 'home' || (!hasCities && route.name !== 'search' && route.name !== 'settings');
+  // Key the screen by route so React remounts it on navigation: each screen starts at
+  // scroll position 0 instead of inheriting the previous screen's scrollTop.
+  return <Box className="stage"><Box className="device" data-accent={accent} data-top={topAccent ? 'accent' : undefined}><Fragment key={`${lang}:${JSON.stringify(route)}`}>{screen}</Fragment></Box></Box>;
+}
+
+export default function App() {
+  return (
+    <Suspense fallback={<BootSkeleton />}>
+      <AppInner />
+    </Suspense>
+  );
 }

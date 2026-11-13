@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import en from './locales/en.json';
 
 export type Messages = typeof en;
-type Plural = { one: string; other: string };
+interface Plural { one: string; other: string }
 type Leaves<T, P extends string = ''> = {
   [K in keyof T & string]: T[K] extends string | Plural | readonly string[] ? `${P}${K}` : Leaves<T[K], `${P}${K}.`>;
 }[keyof T & string];
@@ -43,8 +43,8 @@ const loaders = import.meta.glob<{ default: Messages }>(['./locales/*.json', '!.
 export function systemLanguage(): Language {
   const prefs = typeof navigator === 'undefined' ? [] : (navigator.languages?.length ? navigator.languages : [navigator.language]);
   for (const tag of prefs) {
-    const base = (tag ?? '').toLowerCase().split('-')[0];
-    if (LANGUAGES.some((l) => l.code === base)) return base as Language;
+    const base = (tag ?? '').toLowerCase().split('-', 1)[0];
+    if (LANGUAGES.some((l) => l.code === base)) {return base as Language;}
   }
   return 'en';
 }
@@ -65,7 +65,7 @@ export const useI18n = create<I18nState>((set, get) => ({
   setLanguage: async (pref) => {
     const known = LANGUAGES.some((l) => l.code === pref);
     const lang: Language = known ? pref as Language : systemLanguage();
-    if (get().ready && get().lang === lang) return;
+    if (get().ready && get().lang === lang) {return;}
     let messages: Messages = en;
     if (lang !== 'en') {
       try {
@@ -83,7 +83,7 @@ export const useI18n = create<I18nState>((set, get) => ({
 function lookup(messages: unknown, key: string): unknown {
   let node = messages;
   for (const part of key.split('.')) {
-    if (node == null || typeof node !== 'object') return undefined;
+    if (node == null || typeof node !== 'object') {return undefined;}
     node = (node as Record<string, unknown>)[part];
   }
   return node;
@@ -104,15 +104,15 @@ type Vars = Record<string, string | number | null | undefined>;
 export function t(key: MessageKey, vars?: Vars): string {
   const { messages, locale } = useI18n.getState();
   let value = lookup(messages, key);
-  if (value == null || (typeof value === 'string' && !value)) value = lookup(en, key);
+  if (value == null || (typeof value === 'string' && !value)) {value = lookup(en, key);}
   if (value != null && typeof value === 'object' && !Array.isArray(value)) {
     const forms = value as Record<string, string>;
     const count = typeof vars?.count === 'number' ? vars.count : 0;
     const enForms = lookup(en, key) as Record<string, string>;
     value = forms[pluralCategory(locale, count)] ?? forms.other ?? enForms.other;
   }
-  if (typeof value !== 'string') return key;
-  return vars ? value.replace(/\{(\w+)\}/g, (m, k: string) => (vars[k] == null ? m : String(vars[k]))) : value;
+  if (typeof value !== 'string') {return key;}
+  return vars ? value.replaceAll(/\{(\w+)\}/g, (m, k: string) => (vars[k] == null ? m : String(vars[k]))) : value;
 }
 
 export function tl(key: MessageKey): string[] {

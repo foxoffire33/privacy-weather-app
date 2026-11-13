@@ -1,5 +1,5 @@
 import type { City, Settings } from './common';
-import type { DayRecord } from './day-record';
+import type { DayRecord } from './dayRecord';
 
 export type BackupDay = Omit<DayRecord, 'id' | 'cityId'>;
 

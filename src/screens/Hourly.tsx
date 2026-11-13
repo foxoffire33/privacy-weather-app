@@ -1,11 +1,12 @@
 import { Box, Group, Text, Title } from '@mantine/core';
-import { useCity, useForecast, useUnits } from '../stores';
-import { conditionLabel } from '../lib/weatherCodes';
-import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
-import { nowIndex } from '../lib/insights';
+
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
+import { compass, fmtTemp, fmtWind, hhmm, longDate } from '../lib/format';
+import { nowIndex } from '../lib/insights';
+import { conditionLabel } from '../lib/weatherCodes';
+import { useCity, useForecast, useUnits } from '../stores';
 
 function Cell({ k, v }: { k: string; v: string }) {
   return (
@@ -28,7 +29,7 @@ function HourBlockSk() {
 export function Hourly({ cityId }: { cityId: string }) {
   const units = useUnits();
   const s = { city: useCity(cityId), entry: useForecast(cityId), tempUnit: units.temp, windUnit: units.wind };
-  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
+  if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
   const header = (
     <>
       <ScreenHeader />
@@ -48,8 +49,8 @@ export function Hourly({ cityId }: { cityId: string }) {
   const groups: { date: string; rows: number[] }[] = [];
   for (let i = h0; i < data.hourly.time.length; i++) {
     const date = data.hourly.time[i].slice(0, 10);
-    if (!groups.length || groups[groups.length - 1].date !== date) groups.push({ date, rows: [] });
-    groups[groups.length - 1].rows.push(i);
+    if (groups.length === 0 || groups.at(-1).date !== date) {groups.push({ date, rows: [] });}
+    groups.at(-1).rows.push(i);
   }
 
   return (
@@ -77,10 +78,10 @@ export function Hourly({ cityId }: { cityId: string }) {
                     <Cell k={t('hourly.rain')} v={`${mm.toFixed(1)} mm`} />
                     <Cell k={t('hourly.wind', { dir: compass(v.wind_direction_10m[i] ?? 0) })} v={W(v.wind_speed_10m[i])} />
                     <Cell k={t('hourly.gusts')} v={W(v.wind_gusts_10m[i])} />
-                    <Cell k={t('hourly.uv')} v={v.uv_index[i] == null ? '–' : String(Math.round(v.uv_index[i]!))} />
+                    <Cell k={t('hourly.uv')} v={v.uv_index[i] == null ? '–' : String(Math.round(v.uv_index[i]))} />
                     <Cell k={t('hourly.clouds')} v={`${v.cloud_cover[i] ?? '–'}%`} />
                     <Cell k={t('hourly.humidity')} v={`${v.relative_humidity_2m[i] ?? '–'}%`} />
-                    <Cell k={t('hourly.visibility')} v={v.visibility[i] == null ? '–' : `${Math.round(v.visibility[i]! / 1000)} km`} />
+                    <Cell k={t('hourly.visibility')} v={v.visibility[i] == null ? '–' : `${Math.round(v.visibility[i] / 1000)} km`} />
                   </Box>
                 </Box>
               );

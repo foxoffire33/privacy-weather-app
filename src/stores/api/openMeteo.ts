@@ -1,10 +1,14 @@
 import { fetchWeatherApi } from 'openmeteo';
+
 import { getConfig } from '../core/config';
-import type { AirData, City, DayData, ForecastData, GeoResult, MarineData } from '../types';
+
 import {
-  AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS,
-  type AirVar, type CurrentVar, type DailyVar, type HourlyVar, type MarineVar,
+  AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS
+      
 } from './variables';
+
+import type { AirData, City, DayData, ForecastData, GeoResult, MarineData } from '../types';
+import type {AirVar, CurrentVar, DailyVar, HourlyVar, MarineVar} from './variables';
 
 type Kind = 'forecast' | 'archive' | 'air' | 'marine' | 'geo';
 const HOSTS: Record<Kind, [string, string]> = {
@@ -18,7 +22,7 @@ const HOSTS: Record<Kind, [string, string]> = {
 function endpoint(kind: Kind, path: string) {
   const { apiKey, server } = getConfig();
   let base = HOSTS[kind][apiKey ? 1 : 0];
-  if (kind === 'forecast' && server) base = server.replace(/\/$/, '');
+  if (kind === 'forecast' && server) {base = server.replace(/\/$/, '');}
   return base + path;
 }
 const withKey = <T extends object>(params: T) => {
@@ -34,20 +38,20 @@ const clean = (v: number | undefined) => (v == null || Number.isNaN(v) ? null : 
 
 function times(b: Block, offset: number) {
   const out: string[] = [];
-  for (let t = Number(b.time()); t < Number(b.timeEnd()); t += b.interval()) out.push(localIso(t, offset));
+  for (let t = Number(b.time()); t < Number(b.timeEnd()); t += b.interval()) {out.push(localIso(t, offset));}
   return out;
 }
 function series<K extends string>(b: Block, names: readonly string[], skip: string[] = []) {
   const out = {} as Record<K, (number | null)[]>;
-  names.forEach((name, i) => {
-    if (skip.includes(name)) return;
+  for (const [i, name] of names.entries()) {
+    if (skip.includes(name)) {continue;}
     out[name as K] = Array.from(b.variables(i)?.valuesArray() ?? [], (v) => clean(v));
-  });
+  }
   return out;
 }
 function point<K extends string>(b: Block, names: readonly string[]) {
   const out = {} as Record<K, number | null>;
-  names.forEach((name, i) => { out[name as K] = clean(b.variables(i)?.value()); });
+  for (const [i, name] of names.entries()) { out[name as K] = clean(b.variables(i)?.value()); }
   return out;
 }
 function instants(b: Block, i: number, offset: number) {
@@ -121,7 +125,7 @@ export async function fetchDailyRange(city: City, start: string, end: string,
     { time: string[] } & Record<string, (number | null)[]>;
 }
 
-export const fetchArchive = (city: City, start: string, end: string, daily: readonly string[] = ARCHIVE_VARS) =>
+export const fetchArchive = async (city: City, start: string, end: string, daily: readonly string[] = ARCHIVE_VARS) =>
   fetchDailyRange(city, start, end, daily, 'archive');
 
 export async function fetchDay(city: City, date: string, recent: boolean): Promise<DayData> {
@@ -136,7 +140,7 @@ export async function fetchDay(city: City, date: string, recent: boolean): Promi
   const h = r.hourly()!;
   const d = r.daily()!;
   const dSeries = series<DailyVar>(d, daily, ['sunrise', 'sunset']);
-  const dv = Object.fromEntries(Object.entries(dSeries).map(([k, arr]) => [k, (arr as (number | null)[])[0] ?? null]));
+  const dv = Object.fromEntries(Object.entries(dSeries).map(([k, arr]) => [k, (arr)[0] ?? null]));
   return {
     date,
     source: recent ? 'forecast' : 'archive',
@@ -160,10 +164,10 @@ export async function fetchAirDay(city: City, date: string): Promise<DayData['ai
 }
 
 export async function searchCities(name: string, signal?: AbortSignal): Promise<GeoResult[]> {
-  const q = new URLSearchParams(withKey({ name, count: '8', language: 'en', format: 'json' }) as Record<string, string>);
+  const q = new URLSearchParams(withKey({ name, count: '8', language: 'en', format: 'json' }));
   const doFetch = getConfig().fetch ?? fetch;
   const res = await doFetch(`${endpoint('geo', '/v1/search')}?${q}`, { signal });
   const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.error) throw new Error(json.reason || `HTTP ${res.status}`);
+  if (!res.ok || json.error) {throw new Error(json.reason || `HTTP ${res.status}`);}
   return json.results ?? [];
 }

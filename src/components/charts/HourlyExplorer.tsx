@@ -1,12 +1,16 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
-import { Box, UnstyledButton } from '@mantine/core';
+import { Box, Tabs } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
+
+import { t, t as tt  } from '../../i18n';
+import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
 import { useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
+
 import { useSeriesToggle } from './SeriesToggle';
+
+import type {MessageKey} from '../../i18n';
 import type { HourlyVar } from '../../stores/api/variables';
-import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../lib/format';
-import { t, t as tt, type MessageKey } from '../../i18n';
 
 type Series = Partial<Record<HourlyVar, (number | null)[]>>;
 
@@ -69,12 +73,13 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to }: {
   const hasChance = has('precipitation_probability');
   return (
     <Box>
-      <Box className="metric-tabs" role="tablist">
-        {available.map(({ value, label }) => (
-          <UnstyledButton key={value} role="tab" aria-selected={value === active}
-            data-active={value === active || undefined} onClick={() => s.setMetric(value)}>{t(label)}</UnstyledButton>
-        ))}
-      </Box>
+      <Tabs value={active} onChange={(v) => v && s.setMetric(v)}>
+        <Tabs.List className="metric-tabs">
+          {available.map(({ value, label }) => (
+            <Tabs.Tab key={value} value={value}>{t(label)}</Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
       {active === 'temp' && (
         <LineChart {...LINE} xAxisProps={xAxisProps} unit="°"
           yAxisProps={{ width: 36, domain: [(m: number) => Math.floor(m - 2), (m: number) => Math.ceil(m + 2)], allowDecimals: false }}

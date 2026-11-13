@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { configureDataLayer } from './core/config';
-import { idbStorage } from './core/persist-storage';
-import type { Settings } from './types';
-import type { SettingsState } from './store-types';
 
-export type { SettingsState } from './store-types';
+import { configureDataLayer } from './core/config';
+import { idbStorage } from './core/persistStorage';
+
+import type { SettingsState } from './storeTypes';
+import type { Settings } from './types';
+
+export type { SettingsState } from './storeTypes';
 
 export const defaultSettings: Settings = {
   apiKey: '',
@@ -32,7 +34,7 @@ export const useSettingsStore = create<SettingsState>()(
       skipHydration: true,
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>;
-        return { ...current, settings: { ...current.settings, ...(p.settings ?? {}) } };
+        return { ...current, settings: { ...current.settings, ...p.settings } };
       },
     },
   ),
@@ -48,7 +50,7 @@ let lastKey = '';
 useSettingsStore.subscribe((state) => {
   const { apiKey, server } = state.settings;
   const key = `${apiKey}\u0000${server}`;
-  if (key === lastKey) return;
+  if (key === lastKey) {return;}
   lastKey = key;
   publishApiConfig(state.settings);
 });

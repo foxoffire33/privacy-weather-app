@@ -1,12 +1,16 @@
-import { waitForHydration, type HydratablePersist } from './core/persist-storage';
-import { importLegacyStore } from './migrate-legacy';
+import { useI18n } from '../i18n';
+
+import { useAlmanacStore } from './almanacStore';
+import { useCityStore } from './cityStore';
+import { waitForHydration  } from './core/persistStorage';
+import { useDayStore } from './dayStore';
 import { useEntityCache } from './entities/cache';
-import { useSettingsStore } from './settings-store';
-import { useCityStore } from './city-store';
-import { useForecastStore } from './forecast-store';
-import { useLogStore } from './log-store';
-import { useDayStore } from './day-store';
-import { useAlmanacStore } from './almanac-store';
+import { useForecastStore } from './forecastStore';
+import { useLogStore } from './logStore';
+import { importLegacyStore } from './migrateLegacy';
+import { useSettingsStore } from './settingsStore';
+
+import type {HydratablePersist} from './core/persistStorage';
 
 interface Rehydratable extends HydratablePersist {
   persist: HydratablePersist['persist'] & { rehydrate: () => Promise<void> | void };
@@ -22,12 +26,10 @@ const PERSISTED: Rehydratable[] = [
   useAlmanacStore,
 ];
 
-export function alreadyHydrated(): boolean {
-  return PERSISTED.every((store) => store.persist.hasHydrated());
-}
-
 let booting: Promise<void> | null = null;
 
+// Returns the same promise object on every call so it can be used with React's
+// use() (which requires a stable promise) and awaited anywhere else.
 export async function hydrateAll(): Promise<void> {
   booting ??= (async () => {
     await importLegacyStore().catch(() => false);
@@ -35,6 +37,8 @@ export async function hydrateAll(): Promise<void> {
       await store.persist.rehydrate();
       await waitForHydration(store);
     }));
+    // Load the configured locale so the first committed render is already translated.
+    await useI18n.getState().setLanguage(useSettingsStore.getState().settings.language);
   })();
-  await booting;
+  return booting;
 }

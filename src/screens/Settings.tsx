@@ -1,14 +1,18 @@
 import { Box, Button, ColorPicker, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useFileDialog } from '@mantine/hooks';
+import { useModals } from '@mantine/modals';
 import { useState } from 'react';
-import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
-import type { Accent, TempUnit, WindUnit } from '../stores';
-import { ACCENTS } from '../theme';
-import { downloadFile } from '../lib/format';
-import { countDays, parseBackup, type Backup, type BackupParts } from '../lib/backup';
+
+import { version } from '../../package.json';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
-import { version } from '../../package.json';
+import { countDays, parseBackup   } from '../lib/backup';
+import { downloadFile } from '../lib/format';
+import { clearHistory, exportSnapshot, importBackup, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
+import { ACCENTS } from '../theme';
+
+import type {Backup, BackupParts} from '../lib/backup';
+import type { Accent, TempUnit, WindUnit } from '../stores';
 
 const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
 
@@ -16,20 +20,21 @@ export function Settings() {
   const settings = useSettings();
   const set = useUpdateSettings();
   const counts = storedCounts();
+  const { openConfirmModal } = useModals();
   const s = { settings };
   const [pending, setPending] = useState<Backup | null>(null);
   const [parts, setParts] = useState<BackupParts>({ cities: true, history: true, settings: false });
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const onFile = async (file?: File) => {
     setImportMsg(null);
-    if (!file) return;
+    if (!file) {return;}
     try {
       const b = parseBackup(await file.text());
       setParts({ cities: b.cities.length > 0, history: countDays(b) > 0, settings: false });
       setPending(b);
-    } catch (e) {
+    } catch (error) {
       setPending(null);
-      setImportMsg({ ok: false, text: (e as Error).message });
+      setImportMsg({ ok: false, text: (error as Error).message });
     }
   };
   const { open: openImportPicker } = useFileDialog({
@@ -38,7 +43,7 @@ export function Settings() {
     onChange: (files) => void onFile(files?.[0]),
   });
   const doImport = () => {
-    if (!pending) return;
+    if (!pending) {return;}
     const r = importBackup(pending, parts);
     setImportMsg({ ok: true, text: t('settings.imported', { cities: r.cities, days: r.days }) });
     setPending(null);
@@ -67,12 +72,12 @@ export function Settings() {
         <Box py={12} className="row">
           <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
             description={t('settings.apiKeyNote')}
-            onChange={(e) => set({ apiKey: e.currentTarget.value.trim() })} />
+            onChange={(e) => { set({ apiKey: e.currentTarget.value.trim() }); }} />
         </Box>
         <Box py={12} className="row">
           <TextInput label={t('settings.server')} placeholder="https://api.open-meteo.com" value={s.settings.server}
             description={t('settings.serverNote')}
-            onChange={(e) => set({ server: e.currentTarget.value.trim() })} />
+            onChange={(e) => { set({ server: e.currentTarget.value.trim() }); }} />
         </Box>
         <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
 
@@ -82,22 +87,22 @@ export function Settings() {
           <Text fz={12} c="dimmed" mb={10}>{t('settings.accentNote')}</Text>
           <Group gap={8}>
             {(Object.keys(ACCENTS) as Exclude<Accent, 'custom'>[]).map((a) => (
-              <UnstyledButton key={a} className="accent-row" aria-pressed={s.settings.accent === a} onClick={() => set({ accent: a })}>
+              <UnstyledButton key={a} className="accent-row" aria-pressed={s.settings.accent === a} onClick={() => { set({ accent: a }); }}>
                 <Box component="span" className={`swatch swatch-${a}`} />
                 <Text fz={13} fw={800}>{t(ACCENT_KEYS[a])}</Text>
               </UnstyledButton>
             ))}
-            <UnstyledButton className="accent-row" aria-pressed={s.settings.accent === 'custom'} onClick={() => set({ accent: 'custom' })}>
+            <UnstyledButton className="accent-row" aria-pressed={s.settings.accent === 'custom'} onClick={() => { set({ accent: 'custom' }); }}>
               <Box component="span" className="swatch swatch-custom" />
               <Text fz={13} fw={800}>{t('settings.custom')}</Text>
             </UnstyledButton>
           </Group>
           {s.settings.accent === 'custom' && (
             <Box mt={12}>
-              <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => set({ accent: 'custom', accentColor })}
+              <ColorPicker fullWidth format="hex" value={s.settings.accentColor} onChange={(accentColor) => { set({ accent: 'custom', accentColor }); }}
                 swatchesPerRow={7} swatches={['#e11d48', '#f97316', '#d97706', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea', '#db2777', '#78716c', '#0f766e', '#b91c1c', '#1d4ed8', '#7e22ce']} />
               <TextInput mt={8} label={t('settings.hex')} value={s.settings.accentColor} maxLength={7}
-                onChange={(e) => set({ accent: 'custom', accentColor: e.currentTarget.value })} />
+                onChange={(e) => { set({ accent: 'custom', accentColor: e.currentTarget.value }); }} />
               <Text fz={12} c="dimmed" mt={4}>{t('settings.hexNote')}</Text>
             </Box>
           )}
@@ -106,12 +111,12 @@ export function Settings() {
         <Box className="kicker">{t('settings.units')}</Box>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.temperature')}</Text>
-          <SegmentedControl value={s.settings.tempUnit} onChange={(v) => set({ tempUnit: v as TempUnit })}
+          <SegmentedControl value={s.settings.tempUnit} onChange={(v) => { set({ tempUnit: v }); }}
             data={[{ label: '°C', value: 'C' }, { label: '°F', value: 'F' }]} />
         </Group>
         <Group py={12} className="row" justify="space-between">
           <Text fz={14} fw={600}>{t('settings.wind')}</Text>
-          <SegmentedControl value={s.settings.windUnit} onChange={(v) => set({ windUnit: v as WindUnit })}
+          <SegmentedControl value={s.settings.windUnit} onChange={(v) => { set({ windUnit: v }); }}
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
 
@@ -129,7 +134,7 @@ export function Settings() {
         </Box>
         <Box py={12} className="row">
           <Switch label={t('settings.fillGaps')} description={t('settings.fillGapsNote')}
-            checked={s.settings.backfill} onChange={(e) => set({ backfill: e.currentTarget.checked })} />
+            checked={s.settings.backfill} onChange={(e) => { set({ backfill: e.currentTarget.checked }); }} />
         </Box>
         <Group py={12} className="row" justify="space-between" wrap="nowrap">
           <Box>
@@ -149,21 +154,26 @@ export function Settings() {
             </Text>
             <Stack gap={10}>
               <Switch label={t('settings.importCities', { n: pending.cities.length })} description={t('settings.importCitiesNote')}
-                disabled={!pending.cities.length} checked={parts.cities} onChange={(e) => setParts({ ...parts, cities: e.currentTarget.checked })} />
+                disabled={pending.cities.length === 0} checked={parts.cities} onChange={(e) => { setParts({ ...parts, cities: e.currentTarget.checked }); }} />
               <Switch label={t('settings.importHistory', { n: countDays(pending) })} description={t('settings.importHistoryNote')}
-                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => setParts({ ...parts, history: e.currentTarget.checked })} />
+                disabled={!countDays(pending)} checked={parts.history} onChange={(e) => { setParts({ ...parts, history: e.currentTarget.checked }); }} />
               <Switch label={t('settings.importSettings')} description={t('settings.importSettingsNote')}
-                disabled={!Object.keys(pending.settings).length} checked={parts.settings} onChange={(e) => setParts({ ...parts, settings: e.currentTarget.checked })} />
+                disabled={Object.keys(pending.settings).length === 0} checked={parts.settings} onChange={(e) => { setParts({ ...parts, settings: e.currentTarget.checked }); }} />
             </Stack>
             <Group mt={12} gap={8}>
               <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={doImport}>{t('settings.importSelected')}</Button>
-              <Button variant="subtle" color="gray" onClick={() => setPending(null)}>{t('common.cancel')}</Button>
+              <Button variant="subtle" color="gray" onClick={() => { setPending(null); }}>{t('common.cancel')}</Button>
             </Group>
           </Box>
         )}
         {importMsg && <Text fz={13} py={8} c={importMsg.ok ? undefined : 'signal.3'} role="status">{importMsg.text}</Text>}
         <Button variant="subtle" color="signal" mt={8}
-          onClick={() => { if (window.confirm(t('settings.confirmDeleteAll'))) clearHistory(); }}>
+          onClick={() => openConfirmModal({
+            title: t('settings.deleteAll'),
+            children: t('settings.confirmDeleteAll'),
+            labels: { confirm: t('common.delete'), cancel: t('common.cancel') },
+            onConfirm: clearHistory,
+          })}>
           {t('settings.deleteAll')}
         </Button>
 

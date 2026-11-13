@@ -1,23 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Badge, Box, Button, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Group, Modal, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useEffect, useRef, useState  } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import {
-  addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
-  useLookup, useNormals, useThisDay, useUnits,
-} from '../stores';
-import { useUiStore } from '../stores/uiStore';
-import { useAlmanacStore } from '../stores';
-import { useLogStore } from '../stores';
-import { conditionLabel } from '../lib/weatherCodes';
-import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
-import { addDays, daysBetween, todayISO } from '../stores';
-import { ScreenHeader } from '../components/ScreenHeader';
+
+import { Trends } from '../components/history/Trends';
 import { Icon } from '../components/Icon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { SwipeRow } from '../components/SwipeRow';
-import { Trends } from '../components/history/Trends';
 import { t } from '../i18n';
+import { downloadFile, fmtDelta, fmtTemp, fmtWind, longDate, shortDate } from '../lib/format';
+import { conditionLabel } from '../lib/weatherCodes';
+import {
+  addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
+  useLookup, useNormals, useThisDay, useUnits, useAlmanacStore, useLogStore, addDays, daysBetween, todayISO
+} from '../stores';
+import { useUiStore } from '../stores/uiStore';
+
+import type {CSSProperties} from 'react';
 
 export function History({ cityId }: { cityId: string }) {
   const city = useCity(cityId);
@@ -41,33 +41,37 @@ export function History({ cityId }: { cityId: string }) {
     ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
   };
   const ensureThisDay = useAlmanacStore((st) => st.ensureThisDay);
-  useEffect(() => { if (city) void ensureThisDay(city, today); }, [city, today, ensureThisDay]);
+  useEffect(() => { if (city) {void ensureThisDay(city, today);} }, [city, today, ensureThisDay]);
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
   const lookedUp = s.lookup.query.status !== 'idle';
   const [swiped, setSwiped] = useState<string | null>(null);
+  const [filter, setFilter] = useState('');
   const [debouncedDraft] = useDebouncedValue(draft, 350);
   useEffect(() => {
-    if (!validDraft || lookedUp) return;
+    if (!validDraft || lookedUp) {return;}
     void lookupDate(cityId, debouncedDraft);
   }, [validDraft, lookedUp, cityId, debouncedDraft, lookupDate]);
-  if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
+  if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const loadingLookup = s.lookup.query.status === 'loading';
   const lookupError = s.lookup.query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : s.lookup.query.error;
   const lookupRecord = s.lookup.query.status === 'success' ? s.lookup.record : undefined;
   const rows = Object.values(s.log ?? {}).sort((a, b) => b.date.localeCompare(a.date));
+  const q = filter.trim().toLowerCase();
+  const visible = q === '' ? rows : rows.filter((r) =>
+    r.date.includes(q) || conditionLabel(r.code).toLowerCase().includes(q) || r.source.includes(q));
   const maxLookup = addDays(today, -5);
-  const open = (date: string) => (date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }));
+  const open = (date: string) => { date === today ? s.goHome(s.cityIndex) : s.navigate({ name: 'day', cityId, date }); };
   const exportCsv = () => {
     const head = 'date,max_c,min_c,feels_max_c,feels_min_c,precip_mm,snow_cm,wind_max_kmh,gust_max_kmh,sunshine_s,uv_max,weather_code,source';
     const body = rows.map((r) => [r.date, r.hi, r.lo, r.feelsHi, r.feelsLo, r.mm, r.snow, r.wind, r.gust, r.sunshine, r.uv, r.code, r.source].map((x) => x ?? '').join(',')).join('\n');
-    downloadFile(`${s.city!.name.toLowerCase().replace(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
+    downloadFile(`${s.city!.name.toLowerCase().replaceAll(/\s+/g, '-')}-history.csv`, `${head}\n${body}`, 'text/csv');
   };
   return (
     <Box className="screen">
       <ScreenHeader right={
-        <ActionIcon aria-label={t('history.export')} disabled={!rows.length} onClick={exportCsv}><Icon name="download" size={20} /></ActionIcon>
+        <ActionIcon aria-label={t('history.export')} disabled={rows.length === 0} onClick={exportCsv}><Icon name="download" size={20} /></ActionIcon>
       } />
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
       <Title className="display display-sm">{t('history.title')}</Title>
@@ -96,7 +100,7 @@ export function History({ cityId }: { cityId: string }) {
         <Box p={12} className="border-top-soft">
           <TextInput type="date" label={t('history.lookup')}
             min="1940-01-01" max={maxLookup} value={s.draft}
-            onChange={(e) => s.setLookupDraft(e.currentTarget.value)} />
+            onChange={(e) => { s.setLookupDraft(e.currentTarget.value); }} />
           {validDraft && (lookupError !== null && lookupRecord === undefined ? (
             <Box mt={12} p={14} className="card-rule">
               <Text fz={13} c="signal.3">{lookupError}</Text>
@@ -108,7 +112,7 @@ export function History({ cityId }: { cityId: string }) {
             </Box>
           ) : (
             <UnstyledButton mt={12} w="100%" className="card-rule" disabled={loadingLookup || lookupRecord === undefined} onClick={() => {
-                void addDateRange(cityId, s.draft, s.draft).catch(() => undefined);
+                void addDateRange(cityId, s.draft, s.draft).catch(() => {});
                 open(s.draft);
               }}>
               {loadingLookup || lookupRecord === undefined ? (
@@ -146,17 +150,23 @@ export function History({ cityId }: { cityId: string }) {
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
+        {rows.length > 0 && (
+          <TextInput mt={14} placeholder={t('history.search')} aria-label={t('history.search')}
+            leftSection={<Icon name="search" size={16} />} value={filter}
+            onChange={(e) => { setFilter(e.currentTarget.value); }} />
+        )}
         {rows.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.empty')}</Text>}
-        {rows.map((r) => {
+        {rows.length > 0 && visible.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.noMatches')}</Text>}
+        {visible.map((r) => {
           const normal = s.normals?.[r.date.slice(5)];
           const delta = normal != null && r.hi != null ? fmtDelta(r.hi - normal, s.tempUnit) : null;
           return (
             <SwipeRow key={r.date} label={longDate(r.date)} disabled={r.date === today}
-              open={swiped === r.date} onOpenChange={(o) => setSwiped(o ? r.date : null)}
+              open={swiped === r.date} onOpenChange={(o) => { setSwiped(o ? r.date : null); }}
               onDelete={() => { s.deleteLogDay(cityId, r.date); setSwiped(null); }}>
-            <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => open(r.date)}>
+            <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => { open(r.date); }}>
               <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
-              <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi != null ? t('history.rowFeels', { t: T(r.feelsHi) }) : ''}</Text>
+              <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm || 0).toFixed(1) })}{r.feelsHi == null ? '' : t('history.rowFeels', { t: T(r.feelsHi) })}</Text>
               <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</Box>
               <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
               <Text fz={12} ta="right" c={delta?.startsWith('+') ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
@@ -185,40 +195,40 @@ function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
     try {
       const c = await addDateRange(cityId, from, to);
       setMsg(t(c.kept ? 'history.addedKept' : 'history.added', { count: c.added, updated: c.updated, kept: c.kept }));
-    } catch (e) {
-      setMsg(t('history.downloadFailed', { error: (e as Error).message }));
+    } catch (error) {
+      setMsg(t('history.downloadFailed', { error: (error as Error).message }));
     } finally {
       setBusy(false);
     }
   };
-  if (!show) {
-    return (
-      <UnstyledButton className="tab-button" onClick={() => setShow(true)}>
+  return (
+    <>
+      <UnstyledButton className="tab-button" onClick={() => { setShow(true); }}>
         <Icon name="plus" size={14} />{t('history.addDates')}
       </UnstyledButton>
-    );
-  }
-  return (
-    <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
-      <Paper w="100%" maw={420} p={16}
-        role="dialog" aria-label={t('history.addTitle')}>
-        <Group justify="space-between" mb={8}>
-          <Text fz={16} fw={800}>{t('history.addTitle')}</Text>
-          <ActionIcon size={44} aria-label={t('common.close')} onClick={() => setShow(false)} disabled={busy}><Icon name="x" size={20} /></ActionIcon>
-        </Group>
+      <Modal opened={show}
+        title={t('history.addTitle')}
+        onClose={() => { if (!busy) {setShow(false);} }}
+        closeOnClickOutside={!busy} closeOnEscape={!busy}
+        closeButtonProps={{ disabled: busy }}
+        padding={16}
+        styles={{
+          root: { '--modal-inner-align': 'flex-end', '--modal-x-offset': '0', '--modal-y-offset': '0', '--modal-content-flex': '0 0 100%' },
+          content: { border: '2px solid var(--rule)' },
+        }}>
         <Box className="stat-grid">
-          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => setFrom(e.currentTarget.value)} />
-          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
+          <TextInput type="date" label={t('history.from')} min="1940-01-01" max={maxDate} value={from} onChange={(e) => { setFrom(e.currentTarget.value); }} />
+          <TextInput type="date" label={t('history.to')} min="1940-01-01" max={maxDate} value={to} onChange={(e) => { setTo(e.currentTarget.value); }} />
         </Box>
         <Text fz={12} c="dimmed" mt={8}>
           {t('history.addNote')}
         </Text>
         {tooLong && <Text fz={12} c="signal.3" mt={6}>{t('history.tooLong')}</Text>}
-        <Button fullWidth mt={12} loading={busy} disabled={!valid} onClick={() => void run()}>
+        <Button fullWidth mt={12} disabled={!valid || busy} onClick={() => void run()}>
           {valid ? t('history.downloadDays', { count: days }) : t('history.download')}
         </Button>
         {msg && <Text fz={13} mt={10} role="status">{msg}</Text>}
-      </Paper>
-    </Box>
+      </Modal>
+    </>
   );
 }
