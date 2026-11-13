@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, Badge, Box, Button, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import {
   addDateRange, lookupDate, NO_ARCHIVE_DATA, useCity, useCityIndex, useCityLog, useForecast,
@@ -45,11 +46,11 @@ export function History({ cityId }: { cityId: string }) {
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(draft) && draft >= '1940-01-01' && draft <= maxLookupDate;
   const lookedUp = s.lookup.query.status !== 'idle';
   const [swiped, setSwiped] = useState<string | null>(null);
+  const [debouncedDraft] = useDebouncedValue(draft, 350);
   useEffect(() => {
     if (!validDraft || lookedUp) return;
-    const t = window.setTimeout(() => void lookupDate(cityId, draft), 350);
-    return () => window.clearTimeout(t);
-  }, [validDraft, lookedUp, cityId, draft, lookupDate]);
+    void lookupDate(cityId, debouncedDraft);
+  }, [validDraft, lookedUp, cityId, debouncedDraft, lookupDate]);
   if (!s.city) return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;
   const T = (c?: number | null) => fmtTemp(c, s.tempUnit);
   const loadingLookup = s.lookup.query.status === 'loading';
@@ -71,7 +72,7 @@ export function History({ cityId }: { cityId: string }) {
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
       <Title className="display display-sm">{t('history.title')}</Title>
 
-      <Paper className="glass" mx={12}>
+      <Paper mx={12}>
         <Box className="archive-grid">
           {(s.years ?? [0, 1, 2, 3].map(() => null)).map((y, i) => (
             <UnstyledButton key={y?.year ?? i} py={10} pl={12}
@@ -199,7 +200,7 @@ function ImportRange({ cityId, maxDate }: { cityId: string; maxDate: string }) {
   }
   return (
     <Box className="sheet-overlay" onClick={(e) => { if (e.target === e.currentTarget && !busy) setShow(false); }}>
-      <Paper className="glass" w="100%" maw={420} p={16}
+      <Paper w="100%" maw={420} p={16}
         role="dialog" aria-label={t('history.addTitle')}>
         <Group justify="space-between" mb={8}>
           <Text fz={16} fw={800}>{t('history.addTitle')}</Text>

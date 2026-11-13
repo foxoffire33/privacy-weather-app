@@ -1,6 +1,7 @@
 import { App as CapApp } from '@capacitor/app';
 import { Fragment, useEffect } from 'react';
 import { Box, Center, Loader } from '@mantine/core';
+import { useDocumentVisibility, useInterval, usePrevious } from '@mantine/hooks';
 import { useShallow } from 'zustand/react/shallow';
 import { refreshAll, useCityStore, useHydrated, useSettings } from './stores';
 import { useUiStore } from './stores/uiStore';
@@ -25,14 +26,18 @@ export default function App() {
   useEffect(() => {
     if (hydrated) void setLanguage(language);
   }, [hydrated, language, setLanguage]);
+  const refresh = () => void refreshAll({ maxAgeMs: 0 });
+  useEffect(() => { if (hydrated) refresh(); }, [hydrated]);
+  const { start: startRefresh, stop: stopRefresh } = useInterval(refresh, snapshotMinutes * 60_000);
   useEffect(() => {
-    if (!hydrated) return;
-    void refreshAll({ maxAgeMs: 0 });
-    const timer = window.setInterval(() => void refreshAll({ maxAgeMs: 0 }), snapshotMinutes * 60_000);
-    const onVisible = () => { if (document.visibilityState === 'visible') void refreshAll({ maxAgeMs: 0 }); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', onVisible); };
-  }, [hydrated, snapshotMinutes]);
+    if (hydrated) startRefresh();
+    else stopRefresh();
+  }, [hydrated, startRefresh, stopRefresh]);
+  const visibility = useDocumentVisibility();
+  const wasVisible = usePrevious(visibility);
+  useEffect(() => {
+    if (hydrated && visibility === 'visible' && wasVisible != null && wasVisible !== 'visible') refresh();
+  }, [visibility]);
   useEffect(() => {
     if (hydrated) syncAppIcon(accent, accentColor);
   }, [hydrated, accent, accentColor]);
