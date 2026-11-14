@@ -7,6 +7,7 @@ import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
 import { inSequence } from './core/guards';
 import { idbStorage } from './core/persistStorage';
+import { sortedCopy } from './core/sort';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
@@ -20,7 +21,7 @@ const FORECAST_PAST_DAYS = 92;
 export const NO_ARCHIVE_DATA = 'no-archive-data';
 
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
-  [...new Set([...existing, ...added])].toSorted((a, b) => a.localeCompare(b));
+  sortedCopy(new Set([...existing, ...added]), (a, b) => a.localeCompare(b));
 
 function sources(start: string, end: string): SourceSpan[] {
   const horizon = addDays(todayISO(), -FORECAST_PAST_DAYS);

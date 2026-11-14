@@ -1,5 +1,6 @@
 import { App as CapApp } from '@capacitor/app';
 import { Box } from '@mantine/core';
+import { modals, useModals } from '@mantine/modals';
 import { Fragment, Suspense, use, useEffect, useEffectEvent } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
@@ -46,7 +47,9 @@ function Frame({ children }: FrameProps) {
   const { pathname, key } = useLocation();
   const navigate = useNavigate();
   const hasCities = useCityStore((s) => s.cityIds.length > 0);
+  const openModals = useModals().modals.length;
   const onBack = useEffectEvent(() => {
+    if (openModals > 0) { modals.closeAll(); return; }
     const { fullscreenChart, closeChart } = useUiStore.getState();
     if (fullscreenChart !== null) { closeChart(); return; }
     if (pathname === paths.home) { void CapApp.exitApp(); return; }

@@ -9,14 +9,16 @@ import type { PointerEvent, ReactElement } from 'react';
 const ACTION_W = 88;
 const REMOVE_MS = 220;
 
-export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, children }: SwipeRowProps): ReactElement {
+export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label, children }: SwipeRowProps): ReactElement {
   const [dragX, setDragX] = useState<number | null>(null);
   const [removingWidth, setRemovingWidth] = useState<number | null>(null);
   const removing = removingWidth !== null;
   const root = useRef<HTMLDivElement>(null);
   const drag = useRef<SwipeGesture | null>(null);
   const swallowClick = useRef(false);
-  const offset = removingWidth === null ? dragX ?? (open ? -ACTION_W : 0) : -removingWidth;
+  const actionsW = onEdit === undefined ? ACTION_W : ACTION_W * 2;
+  const offset = removingWidth === null ? dragX ?? (open ? -actionsW : 0) : -removingWidth;
+  const deleteW = Math.max(ACTION_W, -offset - (onEdit === undefined || removing ? 0 : ACTION_W));
   const remove = () => {
     if (removing) { return; }
     setDragX(null);
@@ -25,13 +27,22 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
   const deleteNow = useEffectEvent(() => { onDelete(); });
   useEffect(() => {
     if (!removing) { return; }
-    const timer = globalThis.setTimeout(() => { deleteNow(); }, REMOVE_MS);
-    return () => { globalThis.clearTimeout(timer); };
+    let done = false;
+    const finish = () => {
+      if (done) { return; }
+      done = true;
+      deleteNow();
+    };
+    const timer = globalThis.setTimeout(finish, REMOVE_MS);
+    return () => {
+      globalThis.clearTimeout(timer);
+      finish();
+    };
   }, [removing]);
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     swallowClick.current = false;
     if (disabled === true || removing || e.button > 0) { return; }
-    drag.current = { x: e.clientX, y: e.clientY, base: open ? -ACTION_W : 0, dir: null, width: e.currentTarget.offsetWidth };
+    drag.current = { x: e.clientX, y: e.clientY, base: open ? -actionsW : 0, dir: null, width: e.currentTarget.offsetWidth };
   };
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
@@ -48,7 +59,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     }
     if (d.dir !== 'h') { return; }
     const raw = d.base + mx;
-    setDragX(Math.min(0, raw < -ACTION_W ? -ACTION_W + (raw + ACTION_W) * 0.9 : raw));
+    setDragX(Math.min(0, raw < -actionsW ? -actionsW + (raw + actionsW) * 0.9 : raw));
   };
   const onPointerUp = () => {
     const d = drag.current;
@@ -57,7 +68,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
     const x = dragX;
     setDragX(null);
     if (x < -d.width * 0.6) { remove(); }
-    else { onOpenChange(x < -ACTION_W / 2); }
+    else { onOpenChange(x < -actionsW / 2); }
   };
   return (
     <Box ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
@@ -73,13 +84,25 @@ export function SwipeRow({ open, onOpenChange, onDelete, disabled, label, childr
       <UnstyledButton data-swipe-action onClick={remove} tabIndex={open ? 0 : -1} aria-hidden={!open}
         aria-label={t('history.deleteLabel', { date: label })}
         style={{
-          position: 'absolute', top: 0, bottom: 0, right: 0, width: Math.max(ACTION_W, -offset),
+          position: 'absolute', top: 0, bottom: 0, right: 0, width: deleteW,
           border: 0, background: '#ff3b30', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
           display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 18, cursor: 'pointer',
           transition: dragX === null ? `width ${String(REMOVE_MS)}ms ease` : 'none',
         }}>
         {t('history.delete')}
       </UnstyledButton>
+      {onEdit !== undefined && !removing && (
+        <UnstyledButton data-swipe-action onClick={() => { onOpenChange(false); onEdit(); }} tabIndex={open ? 0 : -1} aria-hidden={!open}
+          aria-label={t('history.editLabel', { date: label })}
+          style={{
+            position: 'absolute', top: 0, bottom: 0, right: deleteW, width: ACTION_W,
+            border: 0, background: '#8e8e93', color: '#fff', font: 'inherit', fontSize: 15, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            transition: dragX === null ? `right ${String(REMOVE_MS)}ms ease` : 'none',
+          }}>
+          {t('dayView.edit')}
+        </UnstyledButton>
+      )}
       <Box style={{
         position: 'relative', background: 'var(--mantine-color-body)',
         transform: `translateX(${String(offset)}px)`,

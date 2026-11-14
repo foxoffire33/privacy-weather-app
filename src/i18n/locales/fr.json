@@ -476,7 +476,10 @@
     },
     "downloadFailed": "Échec du téléchargement : {error}",
     "edited": "Modifié",
-    "addManual": "Ajouter un jour à la main"
+    "addManual": "Ajouter un jour à la main",
+    "lenDays": "{n} j",
+    "lenYear": "1 an",
+    "editLabel": "Modifier {date}"
   },
   "settings": {
     "title": "Réglages.",

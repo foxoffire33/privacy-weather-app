@@ -1,6 +1,7 @@
 import { del as legacyDel, get as legacyGet } from 'idb-keyval';
 
 import { idbGet, idbSet } from './core/idb';
+import { sortedCopy } from './core/sort';
 
 import type { City, DayRecord, LegacyEnvelope, LegacyLog, LegacyState } from './types';
 
@@ -18,7 +19,7 @@ function legacyHistory(history: LegacyState['history']): LegacyLog {
       dayTable[id] = { ...rec, id, cityId, date };
       logged.push(date);
     }
-    dates[cityId] = logged.toSorted((a, b) => a.localeCompare(b));
+    dates[cityId] = sortedCopy(logged, (a, b) => a.localeCompare(b));
   }
   return { dayTable, dates };
 }
@@ -32,13 +33,13 @@ async function writeStores(old: LegacyState, version: number): Promise<void> {
   const { dayTable, dates } = legacyHistory(old.history);
   await Promise.all([
     settings === undefined ? Promise.resolve() : idbSet('wl2-settings', envelope({ settings })),
-    idbSet('wl2-cities', envelope({ cityIds: cities.map((c) => c.id), onboarded: old.onboarded ?? cities.length > 0 })),
     idbSet('wl2-entities', envelope({ tables: { city: cityTable, dayRecord: dayTable } })),
     idbSet('wl2-log', envelope({ dates })),
     idbSet('wl2-forecasts', envelope({ forecasts: version < 2 ? {} : (old.forecasts ?? {}) })),
     idbSet('wl2-days', envelope({ days: old.days ?? {} })),
     idbSet('wl2-almanac', envelope({ normals: old.normals ?? {}, thisDay: old.thisDay ?? {} })),
   ]);
+  await idbSet('wl2-cities', envelope({ cityIds: cities.map((c) => c.id), onboarded: old.onboarded ?? cities.length > 0 }));
 }
 
 export async function importLegacyStore(): Promise<boolean> {

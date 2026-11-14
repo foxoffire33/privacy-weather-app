@@ -488,7 +488,10 @@
     },
     "downloadFailed": "It-tniżżil falla: {error}",
     "edited": "Editjat",
-    "addManual": "Żid ġurnata bl-idejn"
+    "addManual": "Żid ġurnata bl-idejn",
+    "lenDays": "{n} j",
+    "lenYear": "1 s",
+    "editLabel": "Editja {date}"
   },
   "settings": {
     "title": "Settings.",

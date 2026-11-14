@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Download mislykkedes: {error}",
     "edited": "Redigeret",
-    "addManual": "Tilføj en dag manuelt"
+    "addManual": "Tilføj en dag manuelt",
+    "lenDays": "{n} d",
+    "lenYear": "1 år",
+    "editLabel": "Rediger {date}"
   },
   "settings": {
     "title": "Indstillinger.",

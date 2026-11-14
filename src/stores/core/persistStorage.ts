@@ -16,7 +16,7 @@ function flush(name: string): void {
   const write = pending.get(name);
   if (!write) { return; }
   pending.delete(name);
-  void idbSet(name, write.value);
+  void idbSet(name, write.value).catch(() => null);
 }
 
 function flushAll(): void {

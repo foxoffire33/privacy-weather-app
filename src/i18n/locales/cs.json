@@ -482,7 +482,10 @@
     },
     "downloadFailed": "Stažení se nezdařilo: {error}",
     "edited": "Upraveno",
-    "addManual": "Přidat den ručně"
+    "addManual": "Přidat den ručně",
+    "lenDays": "{n} d",
+    "lenYear": "1 r",
+    "editLabel": "Upravit {date}"
   },
   "settings": {
     "title": "Nastavení.",

@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Could not download: {error}",
     "edited": "Edited",
-    "addManual": "Add a day by hand"
+    "addManual": "Add a day by hand",
+    "lenDays": "{n}d",
+    "lenYear": "1y",
+    "editLabel": "Edit {date}"
   },
   "settings": {
     "title": "Settings.",

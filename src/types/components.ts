@@ -46,6 +46,7 @@ export interface SwipeRowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete: () => void;
+  onEdit?: () => void;
   disabled?: boolean;
   label: string;
   children: ReactNode;
@@ -104,10 +105,6 @@ export interface CityPageProps {
   isDefault: boolean;
 }
 
-export interface DeferredProps {
-  h: number;
-  children: ReactNode;
-}
 
 export interface CityScreenProps {
   cityId: string;
@@ -313,6 +310,7 @@ export interface HistoryRowProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpen: (date: string) => void;
+  onEdit: (date: string) => void;
 }
 
 export interface ScreenMotion {

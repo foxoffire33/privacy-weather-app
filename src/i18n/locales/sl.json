@@ -403,8 +403,8 @@
     "snowDepth": "Snežna odeja do {cm} cm",
     "forecastChance": "Napovedana verjetnost",
     "windSummary": "Do {force}, večinoma iz smeri {dir}.",
-    "maxWind": "Najm. veter",
-    "maxGusts": "Najm. sunki",
+    "maxWind": "Najv. veter",
+    "maxGusts": "Najv. sunki",
     "daylight": "Dnevna svetloba",
     "sunshine": "Sončno obsevanje {d}",
     "skyAtmosphere": "Nebo in ozračje",
@@ -432,7 +432,7 @@
     "lookup": "Poiščite datum od leta 1940",
     "noArchive": "Za ta datum še ni arhivskih podatkov",
     "rain": "Dež",
-    "maxWind": "Najm. veter",
+    "maxWind": "Najv. veter",
     "trends": "Trendi",
     "attributes": "Količine",
     "attrTitle": "Prikaži v grafih",
@@ -482,7 +482,10 @@
     },
     "downloadFailed": "Prenos ni uspel: {error}",
     "edited": "Urejeno",
-    "addManual": "Dodaj dan ročno"
+    "addManual": "Dodaj dan ročno",
+    "lenDays": "{n} d",
+    "lenYear": "1 l",
+    "editLabel": "Uredi {date}"
   },
   "settings": {
     "title": "Nastavitve.",

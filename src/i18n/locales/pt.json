@@ -476,7 +476,10 @@
     },
     "downloadFailed": "Não foi possível transferir: {error}",
     "edited": "Editado",
-    "addManual": "Adicionar dia manualmente"
+    "addManual": "Adicionar dia manualmente",
+    "lenDays": "{n} d",
+    "lenYear": "1 a",
+    "editLabel": "Editar {date}"
   },
   "settings": {
     "title": "Definições.",

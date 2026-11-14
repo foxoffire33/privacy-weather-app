@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Allalaadimine ebaõnnestus: {error}",
     "edited": "Muudetud",
-    "addManual": "Lisa päev käsitsi"
+    "addManual": "Lisa päev käsitsi",
+    "lenDays": "{n} p",
+    "lenYear": "1 a",
+    "editLabel": "Muuda {date}"
   },
   "settings": {
     "title": "Seaded.",

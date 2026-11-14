@@ -23,9 +23,10 @@ for (const file of readdirSync(dir).filter((f) => f.endsWith('.json') && f !== '
       if (typeof b !== 'string' || !b.trim()) return errs.push(`empty or wrong type: ${path}`);
       if (vars(a) !== vars(b)) errs.push(`placeholders differ at ${path}: {${vars(a)}} vs {${vars(b)}}`);
     } else if (Array.isArray(a)) {
-      if (!Array.isArray(b) || b.length !== a.length) errs.push(`list length differs at ${path}`);
+      if (!Array.isArray(b) || b.length !== a.length) return errs.push(`list length differs at ${path}`);
+      a.forEach((item, i) => walk(item, b[i], `${path}[${i}]`));
     } else if (isPlural(a)) {
-      for (const cat of needed) if (typeof b[cat] !== 'string') errs.push(`plural "${cat}" missing at ${path}`);
+      for (const cat of needed) if (typeof b[cat] !== 'string' || !b[cat].trim()) errs.push(`plural "${cat}" missing or empty at ${path}`);
       for (const [cat, v] of Object.entries(b)) if (vars(v).replace('count,', '').replace('count', '') !== vars(a.other).replace('count,', '').replace('count', '')) errs.push(`placeholders differ at ${path}.${cat}`);
     } else {
       for (const k of Object.keys(a)) walk(a[k], b?.[k], path ? `${path}.${k}` : k);

@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Herunterladen fehlgeschlagen: {error}",
     "edited": "Bearbeitet",
-    "addManual": "Tag manuell hinzufügen"
+    "addManual": "Tag manuell hinzufügen",
+    "lenDays": "{n} T",
+    "lenYear": "1 J",
+    "editLabel": "{date} bearbeiten"
   },
   "settings": {
     "title": "Einstellungen.",

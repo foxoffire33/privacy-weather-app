@@ -476,7 +476,10 @@
     },
     "downloadFailed": "No se pudo descargar: {error}",
     "edited": "Editado",
-    "addManual": "Añadir un día a mano"
+    "addManual": "Añadir un día a mano",
+    "lenDays": "{n} d",
+    "lenYear": "1 a",
+    "editLabel": "Editar {date}"
   },
   "settings": {
     "title": "Ajustes.",

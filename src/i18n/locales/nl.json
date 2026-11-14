@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Downloaden mislukt: {error}",
     "edited": "Bewerkt",
-    "addManual": "Dag handmatig toevoegen"
+    "addManual": "Dag handmatig toevoegen",
+    "lenDays": "{n}d",
+    "lenYear": "1j",
+    "editLabel": "{date} bewerken"
   },
   "settings": {
     "title": "Instellingen.",

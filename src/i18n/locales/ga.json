@@ -488,7 +488,10 @@
     },
     "downloadFailed": "Theip ar an íoslódáil: {error}",
     "edited": "Curtha in eagar",
-    "addManual": "Cuir lá leis de láimh"
+    "addManual": "Cuir lá leis de láimh",
+    "lenDays": "{n} l",
+    "lenYear": "1 bl",
+    "editLabel": "Cuir {date} in eagar"
   },
   "settings": {
     "title": "Socruithe.",

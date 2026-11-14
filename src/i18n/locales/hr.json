@@ -476,7 +476,10 @@
     },
     "downloadFailed": "Preuzimanje nije uspjelo: {error}",
     "edited": "Uređeno",
-    "addManual": "Dodaj dan ručno"
+    "addManual": "Dodaj dan ručno",
+    "lenDays": "{n} d",
+    "lenYear": "1 g",
+    "editLabel": "Uredi {date}"
   },
   "settings": {
     "title": "Postavke.",

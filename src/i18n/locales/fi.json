@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Lataus epäonnistui: {error}",
     "edited": "Muokattu",
-    "addManual": "Lisää päivä käsin"
+    "addManual": "Lisää päivä käsin",
+    "lenDays": "{n} pv",
+    "lenYear": "1 v",
+    "editLabel": "Muokkaa: {date}"
   },
   "settings": {
     "title": "Asetukset.",

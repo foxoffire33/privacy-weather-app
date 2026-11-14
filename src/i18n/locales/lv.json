@@ -264,7 +264,7 @@
     },
     "precip": {
       "title": "Lietus un sniegs",
-      "nowDetail": "Lietus {rain} · gāzes {showers} · sniegs {snow} cm",
+      "nowDetail": "Lietus {rain} · lietusgāzes {showers} · sniegs {snow} cm",
       "todayDetail": "{h} h nokrišņu · iespēja {p} %",
       "snowfallToday": "Snigšana šodien",
       "snowOnGround": "Sniegs uz zemes {cm} cm",
@@ -339,7 +339,7 @@
     "day": {
       "feelsLike": "Sajūtu",
       "precipitation": "Nokrišņi",
-      "precipDetail": "{h} h · lietus {rain} · gāzes {showers}",
+      "precipDetail": "{h} h · lietus {rain} · lietusgāzes {showers}",
       "snowfall": "Snigšana",
       "wind": "Vējš",
       "windDetail": "Brāzmas {gusts} · virziens {dir}",
@@ -476,7 +476,10 @@
     },
     "downloadFailed": "Lejupielāde neizdevās: {error}",
     "edited": "Rediģēts",
-    "addManual": "Pievienot dienu manuāli"
+    "addManual": "Pievienot dienu manuāli",
+    "lenDays": "{n} d",
+    "lenYear": "1 g",
+    "editLabel": "Rediģēt {date}"
   },
   "settings": {
     "title": "Iestatījumi.",

@@ -470,7 +470,10 @@
     },
     "downloadFailed": "A letöltés sikertelen: {error}",
     "edited": "Szerkesztve",
-    "addManual": "Nap kézi hozzáadása"
+    "addManual": "Nap kézi hozzáadása",
+    "lenDays": "{n} n",
+    "lenYear": "1 é",
+    "editLabel": "{date} szerkesztése"
   },
   "settings": {
     "title": "Beállítások.",

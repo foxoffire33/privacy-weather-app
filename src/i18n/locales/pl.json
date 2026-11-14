@@ -482,7 +482,10 @@
     },
     "downloadFailed": "Nie udało się pobrać: {error}",
     "edited": "Edytowano",
-    "addManual": "Dodaj dzień ręcznie"
+    "addManual": "Dodaj dzień ręcznie",
+    "lenDays": "{n} dni",
+    "lenYear": "1 r",
+    "editLabel": "Edytuj {date}"
   },
   "settings": {
     "title": "Ustawienia.",

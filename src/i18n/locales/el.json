@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Η λήψη απέτυχε: {error}",
     "edited": "Επεξεργασμένο",
-    "addManual": "Χειροκίνητη προσθήκη ημέρας"
+    "addManual": "Χειροκίνητη προσθήκη ημέρας",
+    "lenDays": "{n} ημ",
+    "lenYear": "1 έτ",
+    "editLabel": "Επεξεργασία {date}"
   },
   "settings": {
     "title": "Ρυθμίσεις.",

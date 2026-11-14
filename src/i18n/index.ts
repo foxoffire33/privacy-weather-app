@@ -75,6 +75,8 @@ export function languageLoaded(lang: Language): PromiseLike<void> {
   return loaded.get(lang) ?? DONE;
 }
 
+let languageRequest = 0;
+
 export const useI18n = create<I18nState>((set, get) => ({
   lang: 'en',
   locale: 'en-GB',
@@ -82,6 +84,8 @@ export const useI18n = create<I18nState>((set, get) => ({
   ready: false,
   setLanguage: async (pref) => {
     const lang = resolveLanguage(pref);
+    languageRequest += 1;
+    const request = languageRequest;
     if (get().ready && get().lang === lang) { return; }
     let messages: Messages = en;
     if (lang !== 'en') {
@@ -92,6 +96,7 @@ export const useI18n = create<I18nState>((set, get) => ({
         messages = en;
       }
     }
+    if (request !== languageRequest) { return; }
     const locale = LANGUAGES.find((l) => l.code === lang)?.locale ?? 'en-GB';
     document.documentElement.lang = lang;
     set({ lang, locale, messages, ready: true });

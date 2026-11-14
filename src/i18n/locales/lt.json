@@ -482,7 +482,10 @@
     },
     "downloadFailed": "Atsisiųsti nepavyko: {error}",
     "edited": "Redaguota",
-    "addManual": "Pridėti dieną rankiniu būdu"
+    "addManual": "Pridėti dieną rankiniu būdu",
+    "lenDays": "{n} d",
+    "lenYear": "1 m",
+    "editLabel": "Redaguoti {date}"
   },
   "settings": {
     "title": "Nustatymai.",

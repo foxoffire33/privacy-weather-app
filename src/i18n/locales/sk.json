@@ -482,7 +482,10 @@
     },
     "downloadFailed": "Stiahnutie zlyhalo: {error}",
     "edited": "Upravené",
-    "addManual": "Pridať deň ručne"
+    "addManual": "Pridať deň ručne",
+    "lenDays": "{n} d",
+    "lenYear": "1 r",
+    "editLabel": "Upraviť {date}"
   },
   "settings": {
     "title": "Nastavenia.",

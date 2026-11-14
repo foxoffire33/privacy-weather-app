@@ -476,7 +476,10 @@
     },
     "downloadFailed": "Descărcarea a eșuat: {error}",
     "edited": "Editat",
-    "addManual": "Adaugă o zi manual"
+    "addManual": "Adaugă o zi manual",
+    "lenDays": "{n} z",
+    "lenYear": "1 an",
+    "editLabel": "Editează {date}"
   },
   "settings": {
     "title": "Setări.",

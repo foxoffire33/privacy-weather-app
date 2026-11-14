@@ -54,7 +54,7 @@ const BACK_YEARS = [0, 1, 10, 30];
 
 function lenLabel(len: number): string {
   if (len === 0) { return t('history.all'); }
-  return len === 365 ? '1y' : `${String(len)}d`;
+  return len === 365 ? t('history.lenYear') : t('history.lenDays', { n: len });
 }
 
 function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => PromiseLike<void>): PromiseLike<void> {
@@ -64,8 +64,9 @@ function windowsPromise(cached: boolean, missing: boolean, key: string, download
 
 const shiftYears = (date: string, years: number) => (years === 0 ? date : `${String(Number(date.slice(0, 4)) - years)}${date.slice(4)}`);
 
-function trendWindow({ len, custom, back, today, followedAt }: TrendRangeInput): TrendWindow {
-  const days = len === 0 ? Math.max(1, Math.min(3650, daysBetween(followedAt, today) + 1)) : len;
+function trendWindow({ len, custom, back, today, followedAt, earliest }: TrendRangeInput): TrendWindow {
+  const origin = earliest !== undefined && earliest < followedAt ? earliest : followedAt;
+  const days = len === 0 ? Math.max(1, Math.min(3650, daysBetween(origin, today) + 1)) : len;
   const from = custom ? custom.from : addDays(today, -(days - 1));
   const to = custom ? custom.to : today;
   const windows = back === 0 ? [{ from, to }] : [{ from, to }, { from: shiftYears(from, back), to: shiftYears(to, back) }];
@@ -132,8 +133,11 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
 }
 
 function TrendCharts({ cityId, range, attrs, names, data, windUnit }: TrendChartsProps): ReactElement {
-  const { back, download, retryFailed } = useTrendsStore(useShallow((st) => ({ back: st.back, download: st.download, retryFailed: st.retryFailed })));
-  const error = download.error;
+  const { back, download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
+    back: st.back, download: st.download, failed: st.failed, retryFailed: st.retryFailed,
+  })));
+  const failedHere = range.windows.some((w) => failed.includes(windowKey(cityId, w)));
+  const error = failedHere ? download.error : null;
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
   const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
   return (
@@ -167,7 +171,8 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
     picked: st.picked, len: st.len, custom: st.custom, back: st.back, setCustom: st.setCustom, ensureWindows: st.ensureWindows,
   })));
   const [sheet, setSheet] = useState<TrendsSheet>(null);
-  const range = trendWindow({ len, custom, back, today, followedAt });
+  const earliest = useLogStore((st) => st.dates[cityId]?.[0]);
+  const range = trendWindow({ len, custom, back, today, followedAt, earliest });
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const names = trendNames(back, range.to);
   const data = trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } });

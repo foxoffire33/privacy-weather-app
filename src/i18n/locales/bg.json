@@ -470,7 +470,10 @@
     },
     "downloadFailed": "Изтеглянето не бе успешно: {error}",
     "edited": "Редактирано",
-    "addManual": "Добави ден ръчно"
+    "addManual": "Добави ден ръчно",
+    "lenDays": "{n} д",
+    "lenYear": "1 г",
+    "editLabel": "Редактирай {date}"
   },
   "settings": {
     "title": "Настройки.",

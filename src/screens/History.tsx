@@ -16,6 +16,7 @@ import {
   useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
+import { sortedCopy } from '../stores/core/sort';
 import { useUiStore } from '../stores/uiStore';
 import { fireAndForget } from '../utils/fireAndForget';
 import { downloadFile, fmtTemp, fmtWind, longDate } from '../utils/format';
@@ -55,7 +56,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
   if (!s.city || s.cityIndex < 0) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
-  const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
+  const rows = sortedCopy(Object.values(s.log), (a, b) => b.date.localeCompare(a.date));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => {
     if (date === today) {
