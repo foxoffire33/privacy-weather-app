@@ -174,7 +174,7 @@
   "onboarding": {
     "title": "An aimsir,\ncoinnithe.",
     "step1Title": "Gan chuntas, gan rianú",
-    "step1Text": "Tagann na réamhaisnéisí ó Open-Meteo. Saor in aisce d'úsáid phearsanta, gan eochair.",
+    "step1Text": "Tagann na réamhaisnéisí ó Open-Meteo, API aimsire neamhspleách foinse oscailte nach bhfuil á reáchtáil ag an aip seo. Saor in aisce le haghaidh úsáid phearsanta, gan eochair.",
     "step2Title": "Gan rochtain ar shuíomh",
     "step2Text": "Cuireann tú cathracha leis de réir ainm. Ní iarrann an aip GPS riamh.",
     "step3Title": "Stair iomlán, ar an ngléas seo",
@@ -555,7 +555,9 @@
     "developer": "Forbróir",
     "sourceCode": "Cód foinseach",
     "donate": "Tabhair síntiús trí GitHub Sponsors",
-    "donateNote": "Tá Weather Log saor in aisce agus gan fógraí. Cabhraíonn síntiús é a choinneáil mar sin."
+    "donateNote": "Tá Weather Log saor in aisce agus gan fógraí. Cabhraíonn síntiús é a choinneáil mar sin.",
+    "openMeteoThirdParty": "Seirbhís neamhspleách tríú páirtí é Open-Meteo, nach bhfuil á reáchtáil ag forbróir Weather Log. Is foinse oscailte (AGPL-3.0) a fhreastalaí agus is féidir é a óstáil tú féin.",
+    "openMeteoSource": "Cód foinse Open-Meteo"
   },
   "backup": {
     "notJson": "Ní JSON bailí an comhad seo.",

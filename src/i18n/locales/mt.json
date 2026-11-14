@@ -174,7 +174,7 @@
   "onboarding": {
     "title": "It-temp,\nmerfugħ.",
     "step1Title": "Bla kont, bla traċċar",
-    "step1Text": "It-tbassir jiġi minn Open-Meteo. B'xejn għal użu personali, bla ċavetta.",
+    "step1Text": "It-tbassir ġej minn Open-Meteo, API tat-temp indipendenti u b’kodiċi miftuħ li mhux immexxi minn din l-app. B’xejn għal użu personali, mingħajr ċavetta.",
     "step2Title": "Bla aċċess għall-post",
     "step2Text": "Iżżid il-bliet b'isimhom. L-app qatt ma titlob il-GPS.",
     "step3Title": "Storja sħiħa, fuq dan l-apparat",
@@ -555,7 +555,9 @@
     "developer": "Żviluppatur",
     "sourceCode": "Kodiċi sors",
     "donate": "Agħti donazzjoni permezz ta' GitHub Sponsors",
-    "donateNote": "Weather Log huwa b'xejn u mingħajr reklami. Donazzjoni tgħin biex jibqa' hekk."
+    "donateNote": "Weather Log huwa b'xejn u mingħajr reklami. Donazzjoni tgħin biex jibqa' hekk.",
+    "openMeteoThirdParty": "Open-Meteo huwa servizz indipendenti ta’ parti terza, mhux immexxi mill-iżviluppatur ta’ Weather Log. Is-server tiegħu huwa b’kodiċi miftuħ (AGPL-3.0) u tista’ tospitah int stess.",
+    "openMeteoSource": "Il-kodiċi sors ta’ Open-Meteo"
   },
   "backup": {
     "notJson": "Dan il-fajl mhux JSON validu.",

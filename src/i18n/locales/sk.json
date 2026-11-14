@@ -172,7 +172,7 @@
   "onboarding": {
     "title": "Počasie,\nuchované.",
     "step1Title": "Bez účtu, bez sledovania",
-    "step1Text": "Predpovede pochádzajú z Open-Meteo. Zadarmo na osobné použitie, bez kľúča.",
+    "step1Text": "Predpovede pochádzajú z Open-Meteo, nezávislého open-source meteorologického API, ktoré táto aplikácia neprevádzkuje. Zadarmo na osobné použitie, bez kľúča.",
     "step2Title": "Bez prístupu k polohe",
     "step2Text": "Mestá pridávate podľa názvu. Aplikácia nikdy nežiada GPS.",
     "step3Title": "Úplná história v tomto zariadení",
@@ -549,7 +549,9 @@
     "developer": "Vývojár",
     "sourceCode": "Zdrojový kód",
     "donate": "Prispieť cez GitHub Sponsors",
-    "donateNote": "Weather Log je zadarmo a bez reklám. Dar pomáha, aby to tak zostalo."
+    "donateNote": "Weather Log je zadarmo a bez reklám. Dar pomáha, aby to tak zostalo.",
+    "openMeteoThirdParty": "Open-Meteo je nezávislá služba tretej strany, ktorú neprevádzkuje vývojár Weather Log. Jej server je open source (AGPL-3.0) a dá sa hostovať samostatne.",
+    "openMeteoSource": "Zdrojový kód Open-Meteo"
   },
   "backup": {
     "notJson": "Tento súbor nie je platný JSON.",
