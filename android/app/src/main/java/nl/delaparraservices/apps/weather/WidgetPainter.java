@@ -32,6 +32,8 @@ final class WidgetPainter {
     /** Accent for marks on black: the accent, or white when the accent is off. */
     final int accentMark;
     final boolean accentOff;
+    /** The user's font size setting, capped so the layouts below still fit. */
+    final float fontScale;
 
     final Typeface regular = Typeface.create("sans-serif", Typeface.NORMAL);
     final Typeface bold = Typeface.create("sans-serif", Typeface.BOLD);
@@ -55,6 +57,7 @@ final class WidgetPainter {
         accentField = accentOff ? BLACK : accent;
         accentMark = accentOff ? WHITE : accent;
         fill.setStyle(Paint.Style.FILL);
+        fontScale = Math.max(1f, Math.min(1.3f, context.getResources().getConfiguration().fontScale));
     }
 
     void rect(Canvas c, float l, float t, float r, float b, int color) {
@@ -75,7 +78,7 @@ final class WidgetPainter {
     }
 
     TextPaint style(float size, Typeface tf, int color, Paint.Align align) {
-        text.setTextSize(size);
+        text.setTextSize(size * fontScale);
         text.setTypeface(tf);
         text.setColor(color);
         text.setTextAlign(align);
@@ -99,6 +102,30 @@ final class WidgetPainter {
         CharSequence fit = TextUtils.ellipsize(s.toUpperCase(), p, maxWidth, TextUtils.TruncateAt.END);
         c.drawText(fit, 0, fit.length(), x, baseline, p);
         p.setLetterSpacing(0);
+    }
+
+    /** Wraps text over at most maxLines lines; the last one is shortened with "…". Returns the lines drawn. */
+    int lines(Canvas c, String s, float x, float baseline, float size, Typeface tf, int color, float maxWidth, int maxLines, float lineHeight) {
+        if (s == null || s.isEmpty() || maxWidth <= 4 || maxLines < 1) return 0;
+        TextPaint p = style(size, tf, color, Paint.Align.LEFT);
+        String rest = s.trim();
+        int drawn = 0;
+        while (!rest.isEmpty() && drawn < maxLines) {
+            int n = p.breakText(rest, true, maxWidth, null);
+            String line;
+            if (drawn == maxLines - 1 || n >= rest.length()) {
+                line = TextUtils.ellipsize(rest, p, maxWidth, TextUtils.TruncateAt.END).toString();
+                rest = "";
+            } else {
+                int cut = rest.lastIndexOf(' ', n);
+                if (cut <= 0) cut = n;
+                line = rest.substring(0, cut);
+                rest = rest.substring(cut).trim();
+            }
+            c.drawText(line, x, baseline + drawn * lineHeight, p);
+            drawn++;
+        }
+        return drawn;
     }
 
     float measure(String s, float size, Typeface tf) {
