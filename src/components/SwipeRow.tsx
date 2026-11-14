@@ -26,8 +26,9 @@ export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label
   const editShare = useMotionValue(onEdit === undefined ? 0 : ACTION_W);
   const deleteW = useTransform(() => Math.max(ACTION_W, -x.get() - editShare.get()));
   useEffect(() => {
-    if (removing) { return; }
-    const controls = animate(x, open ? -actionsW : 0, quick);
+    const target = open ? -actionsW : 0;
+    if (removing || x.get() === target) { return; }
+    const controls = animate(x, target, quick);
     return () => { controls.stop(); };
   }, [open, actionsW, removing, x, quick]);
   const deleteNow = useEffectEvent(() => { onDelete(); });

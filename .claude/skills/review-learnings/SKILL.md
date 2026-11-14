@@ -60,3 +60,14 @@ same class of mistake is not made again. Add to this list when a review finds so
 9. **Never trust a `Record<string, T>` index to be defined.** Lookups by id or date return `undefined` at
    runtime; type such maps as `Partial<Record<string, T>>` so the compiler and `strict-boolean-expressions`
    see the missing case, rather than rewriting `if (!x)` as a check the type claims is impossible.
+
+## Performance
+
+10. **Load-more must fire once per new intersection.** An effect that calls `showMore()` must not depend on the
+    list length: the observer entry stays `isIntersecting` until its next callback, so each render loads
+    another page and the whole list renders in one cascade. Memoize long-list rows and keep their callbacks
+    stable. *From the history log freeze: 1,200 logged days rendered in one 23-second burst.*
+
+11. **Never mount heavy views while a swipe animates.** Animate screens with `transform`/`opacity` (compositor),
+    defer chart-heavy sections (`useDeferredValue`) and mount pager neighbours after the animation completes.
+    *From day and city swipes stuttering on Android.*

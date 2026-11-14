@@ -170,7 +170,7 @@
   "onboarding": {
     "title": "Laikapstākļi,\nsaglabāti.",
     "step1Title": "Bez konta, bez izsekošanas",
-    "step1Text": "Prognozes nāk no Open-Meteo. Personiskai lietošanai bez maksas, atslēga nav vajadzīga.",
+    "step1Text": "Prognozes nāk no Open-Meteo – neatkarīgas atvērtā koda laikapstākļu API, ko nepārvalda šī lietotne. Bez maksas personiskai lietošanai, atslēga nav vajadzīga.",
     "step2Title": "Bez piekļuves atrašanās vietai",
     "step2Text": "Pilsētas pievienojat pēc nosaukuma. Lietotne nekad neprasa GPS.",
     "step3Title": "Pilna vēsture šajā ierīcē",
@@ -543,7 +543,9 @@
     "developer": "Izstrādātājs",
     "sourceCode": "Pirmkods",
     "donate": "Ziedot ar GitHub Sponsors",
-    "donateNote": "Weather Log ir bezmaksas un bez reklāmām. Ziedojums palīdz, lai tā paliktu."
+    "donateNote": "Weather Log ir bezmaksas un bez reklāmām. Ziedojums palīdz, lai tā paliktu.",
+    "openMeteoThirdParty": "Open-Meteo ir neatkarīgs trešās puses pakalpojums, ko nepārvalda Weather Log izstrādātājs. Tā serveris ir atvērtā koda (AGPL-3.0), un to var mitināt pats.",
+    "openMeteoSource": "Open-Meteo pirmkods"
   },
   "backup": {
     "notJson": "Šis fails nav derīgs JSON.",

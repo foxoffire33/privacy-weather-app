@@ -1,6 +1,6 @@
 # Weather Log
 
-Open-source, privacy-first weather app built on [Open-Meteo](https://open-meteo.com). It keeps a full history of every city you follow, on the device, and works fully offline.
+Open-source, privacy-first weather app that uses [Open-Meteo](https://open-meteo.com), an independent third-party weather API. Open-Meteo is not run by the developer of this app; it is itself open source ([AGPL-3.0](https://github.com/open-meteo/open-meteo)) and can be self-hosted. It keeps a full history of every city you follow, on the device, and works fully offline.
 
 - **No location access, no account, no trackers, no Google services.** Everything stays on the device. See [PRIVACY.md](PRIVACY.md).
 - **Online mode (default):** forecasts, air quality, pollen, marine data and the historical archive from Open-Meteo, logged day by day.

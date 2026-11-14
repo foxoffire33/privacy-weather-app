@@ -168,7 +168,7 @@
   "onboarding": {
     "title": "Sää,\ntallessa.",
     "step1Title": "Ei tiliä, ei seurantaa",
-    "step1Text": "Ennusteet tulevat Open-Meteolta. Ilmainen henkilökohtaiseen käyttöön, avainta ei tarvita.",
+    "step1Text": "Ennusteet tulevat Open-Meteosta, riippumattomasta avoimen lähdekoodin sää-API:sta, jota tämä sovellus ei ylläpidä. Maksuton henkilökohtaiseen käyttöön, avainta ei tarvita.",
     "step2Title": "Ei sijaintilupaa",
     "step2Text": "Lisäät kaupungit nimellä. Sovellus ei koskaan pyydä GPS:ää.",
     "step3Title": "Koko historia tässä laitteessa",
@@ -537,7 +537,9 @@
     "developer": "Kehittäjä",
     "sourceCode": "Lähdekoodi",
     "donate": "Lahjoita GitHub Sponsorsin kautta",
-    "donateNote": "Weather Log on ilmainen ja mainokseton. Lahjoitus auttaa pitämään sen sellaisena."
+    "donateNote": "Weather Log on ilmainen ja mainokseton. Lahjoitus auttaa pitämään sen sellaisena.",
+    "openMeteoThirdParty": "Open-Meteo on riippumaton kolmannen osapuolen palvelu, jota Weather Login kehittäjä ei ylläpidä. Sen palvelin on avointa lähdekoodia (AGPL-3.0), ja sen voi ajaa itse.",
+    "openMeteoSource": "Open-Meteon lähdekoodi"
   },
   "backup": {
     "notJson": "Tiedosto ei ole kelvollista JSONia.",

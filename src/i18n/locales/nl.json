@@ -168,7 +168,7 @@
   "onboarding": {
     "title": "Weer,\nbewaard.",
     "step1Title": "Geen account, geen tracking",
-    "step1Text": "Verwachtingen komen van Open-Meteo. Gratis voor persoonlijk gebruik, geen sleutel nodig.",
+    "step1Text": "Verwachtingen komen van Open-Meteo, een onafhankelijke opensource-weer-API die niet door deze app wordt beheerd. Gratis voor persoonlijk gebruik, geen sleutel nodig.",
     "step2Title": "Geen locatietoegang",
     "step2Text": "Je voegt steden toe op naam. De app vraagt nooit om GPS.",
     "step3Title": "Een volledige geschiedenis, op dit apparaat",
@@ -537,7 +537,9 @@
     "developer": "Ontwikkelaar",
     "sourceCode": "Broncode",
     "donate": "Doneer via GitHub Sponsors",
-    "donateNote": "Weather Log is gratis en zonder advertenties. Een donatie helpt dat zo te houden."
+    "donateNote": "Weather Log is gratis en zonder advertenties. Een donatie helpt dat zo te houden.",
+    "openMeteoThirdParty": "Open-Meteo is een onafhankelijke dienst van derden en wordt niet beheerd door de ontwikkelaar van Weather Log. De server is open source (AGPL-3.0) en kun je zelf hosten.",
+    "openMeteoSource": "Broncode van Open-Meteo"
   },
   "backup": {
     "notJson": "Dit bestand is geen geldige JSON.",

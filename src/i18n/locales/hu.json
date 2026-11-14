@@ -168,7 +168,7 @@
   "onboarding": {
     "title": "Időjárás,\nmegőrizve.",
     "step1Title": "Nincs fiók, nincs követés",
-    "step1Text": "Az előrejelzés az Open-Meteótól jön. Magáncélra ingyenes, kulcs nem kell.",
+    "step1Text": "Az előrejelzések az Open-Meteótól származnak, egy független, nyílt forráskódú időjárási API-tól, amelyet nem ez az alkalmazás üzemeltet. Személyes használatra ingyenes, kulcs nélkül.",
     "step2Title": "Nincs helyhozzáférés",
     "step2Text": "A városokat név szerint adod hozzá. Az app sosem kér GPS-t.",
     "step3Title": "Teljes előzmény ezen az eszközön",
@@ -537,7 +537,9 @@
     "developer": "Fejlesztő",
     "sourceCode": "Forráskód",
     "donate": "Támogatás a GitHub Sponsors oldalon",
-    "donateNote": "A Weather Log ingyenes és reklámmentes. Egy adomány segít, hogy így maradjon."
+    "donateNote": "A Weather Log ingyenes és reklámmentes. Egy adomány segít, hogy így maradjon.",
+    "openMeteoThirdParty": "Az Open-Meteo független, harmadik féltől származó szolgáltatás, amelyet nem a Weather Log fejlesztője üzemeltet. A szervere nyílt forráskódú (AGPL-3.0), és saját magad is üzemeltetheted.",
+    "openMeteoSource": "Az Open-Meteo forráskódja"
   },
   "backup": {
     "notJson": "Ez a fájl nem érvényes JSON.",

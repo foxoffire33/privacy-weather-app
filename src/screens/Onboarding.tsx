@@ -33,9 +33,18 @@ export function Onboarding(): ReactElement {
           </Group>
         ))}
       </Stack>
-      <Checkbox mx={20} my={16} color="dark" iconColor="white" label={t('offline.label')} description={t('offline.onboarding')}
-        checked={offline} onChange={(e) => { updateSettings({ offline: e.currentTarget.checked }); }}
-        styles={{ label: { color: '#fff', fontWeight: 800 }, description: { color: '#fff' } }} />
+      <Checkbox.Card mx={20} my={16} p={14} radius={0} checked={offline}
+        onClick={() => { updateSettings({ offline: !offline }); }}
+        style={{ width: 'auto', background: offline ? 'rgba(0, 0, 0, .22)' : 'transparent', border: '2px solid #fff', color: '#fff' }}>
+        <Group wrap="nowrap" align="center" gap={14}>
+          <Checkbox.Indicator size="md" radius={0} color="white" iconColor="dark" variant="outline"
+            styles={{ indicator: { borderColor: '#fff', borderWidth: 2, background: offline ? '#fff' : 'transparent' } }} />
+          <Box style={{ flex: 1 }}>
+            <Text fw={800} fz={16}>{t('offline.label')}</Text>
+            <Text fw={600} fz={13}>{t('offline.onboarding')}</Text>
+          </Box>
+        </Group>
+      </Checkbox.Card>
       {!offline && (
         <Anchor mx={20} mb={16} c="white" fz={13} fw={700} underline="always" href={LINKS.openMeteoTerms} target="_blank" rel="noopener noreferrer">
           {t('onboarding.privacyLink')}

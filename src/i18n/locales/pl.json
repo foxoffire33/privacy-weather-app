@@ -172,7 +172,7 @@
   "onboarding": {
     "title": "Pogoda,\nzapisana.",
     "step1Title": "Bez konta, bez śledzenia",
-    "step1Text": "Prognozy pochodzą z Open-Meteo. Bezpłatnie do użytku osobistego, bez klucza.",
+    "step1Text": "Prognozy pochodzą z Open-Meteo, niezależnego API pogodowego o otwartym kodzie, którego nie prowadzi ta aplikacja. Bezpłatne do użytku osobistego, bez klucza.",
     "step2Title": "Bez dostępu do lokalizacji",
     "step2Text": "Miasta dodajesz po nazwie. Aplikacja nigdy nie prosi o GPS.",
     "step3Title": "Pełna historia na tym urządzeniu",
@@ -549,7 +549,9 @@
     "developer": "Twórca",
     "sourceCode": "Kod źródłowy",
     "donate": "Wesprzyj przez GitHub Sponsors",
-    "donateNote": "Weather Log jest darmowy i bez reklam. Darowizna pomaga, by tak zostało."
+    "donateNote": "Weather Log jest darmowy i bez reklam. Darowizna pomaga, by tak zostało.",
+    "openMeteoThirdParty": "Open-Meteo to niezależna usługa zewnętrzna, której nie prowadzi twórca Weather Log. Jej serwer ma otwarty kod (AGPL-3.0) i można go hostować samodzielnie.",
+    "openMeteoSource": "Kod źródłowy Open-Meteo"
   },
   "backup": {
     "notJson": "Ten plik nie jest poprawnym JSON-em.",

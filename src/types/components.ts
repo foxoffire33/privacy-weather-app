@@ -287,14 +287,17 @@ export interface HistoryRowProps {
   record: DayRecord;
   today: string;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onSwipe: (date: string | null) => void;
   onOpen: (date: string) => void;
   onEdit: (date: string) => void;
 }
 
+export type DateStyle = 'weekday' | 'short' | 'long' | 'full';
+
 export type ScreenDirection = 'forward' | 'back' | 'swipeNext' | 'swipePrev';
 
 export interface ScreenMotion {
+  center: TargetAndTransition;
   enter: Record<ScreenDirection, TargetAndTransition>;
   exit: Record<ScreenDirection, TargetAndTransition>;
 }
@@ -329,6 +332,12 @@ export interface ScreenBoundaryState {
 
 export interface SpinProps {
   active: boolean;
+  children: ReactNode;
+}
+
+export interface ScreenFrameProps {
+  direction: ScreenDirection;
+  ref?: Ref<HTMLDivElement>;
   children: ReactNode;
 }
 
