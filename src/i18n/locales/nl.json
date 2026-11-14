@@ -22,7 +22,8 @@
       "one": "{count} dag gelogd",
       "other": "{count} dagen gelogd"
     },
-    "touchChart": "Raak de grafiek aan voor details"
+    "touchChart": "Raak de grafiek aan voor details",
+    "screenFailed": "Dit scherm kon niet worden geladen."
   },
   "ago": {
     "never": "nooit",

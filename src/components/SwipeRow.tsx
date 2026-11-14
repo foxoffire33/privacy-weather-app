@@ -5,7 +5,7 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { t } from '../i18n';
 import { MOTION } from '../theme';
 
-import { MotionBox, MotionButton } from './motionComponents';
+import { MotionBox, MotionButton, useMotionPreset } from './motionComponents';
 
 import type { SwipeRowProps } from '../types';
 import type { PanInfo } from 'motion/react';
@@ -14,20 +14,22 @@ import type { ReactElement } from 'react';
 const ACTION_W = 88;
 const OVERDRAG = 0.9;
 const DELETE_AT = 0.6;
+const DELETE_OVERDRAG = 48;
 
 export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label, children }: SwipeRowProps): ReactElement {
   const [removing, setRemoving] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const swallowClick = useRef(false);
   const actionsW = onEdit === undefined ? ACTION_W : ACTION_W * 2;
+  const quick = useMotionPreset(MOTION.quick);
   const x = useMotionValue(0);
   const editShare = useMotionValue(onEdit === undefined ? 0 : ACTION_W);
   const deleteW = useTransform(() => Math.max(ACTION_W, -x.get() - editShare.get()));
   useEffect(() => {
     if (removing) { return; }
-    const controls = animate(x, open ? -actionsW : 0, MOTION.quick);
+    const controls = animate(x, open ? -actionsW : 0, quick);
     return () => { controls.stop(); };
-  }, [open, actionsW, removing, x]);
+  }, [open, actionsW, removing, x, quick]);
   const deleteNow = useEffectEvent(() => { onDelete(); });
   useEffect(() => {
     if (!removing) { return; }
@@ -37,24 +39,24 @@ export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label
       done = true;
       deleteNow();
     };
-    const controls = animate(x, -(root.current?.offsetWidth ?? 420), MOTION.quick);
+    const controls = animate(x, -(root.current?.offsetWidth ?? 420), quick);
     void controls.then(finish);
     return () => {
       controls.stop();
       finish();
     };
-  }, [removing, x]);
+  }, [removing, x, quick]);
   const remove = () => {
     if (removing) { return; }
     editShare.set(0);
     setRemoving(true);
   };
-  const onDragEnd = (_: PointerEvent, info: PanInfo) => {
+  const onDragEnd = (event: PointerEvent, info: PanInfo) => {
     const width = root.current?.offsetWidth ?? 420;
     const at = x.get() + info.velocity.x * 0.1;
-    if (at < -width * DELETE_AT) { remove(); return; }
+    if (event.type !== 'pointercancel' && at < -actionsW - DELETE_OVERDRAG && at < -width * DELETE_AT) { remove(); return; }
     const shouldOpen = at < -actionsW / 2;
-    if (shouldOpen === open) { animate(x, open ? -actionsW : 0, MOTION.quick); }
+    if (shouldOpen === open) { animate(x, open ? -actionsW : 0, quick); }
     onOpenChange(shouldOpen);
   };
   return (

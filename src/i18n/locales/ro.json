@@ -24,7 +24,8 @@
       "few": "{count} zile înregistrate",
       "other": "{count} de zile înregistrate"
     },
-    "touchChart": "Atingeți graficul pentru detalii"
+    "touchChart": "Atingeți graficul pentru detalii",
+    "screenFailed": "Acest ecran nu a putut fi încărcat."
   },
   "ago": {
     "never": "niciodată",

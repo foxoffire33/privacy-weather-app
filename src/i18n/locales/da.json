@@ -22,7 +22,8 @@
       "one": "{count} dag logget",
       "other": "{count} dage logget"
     },
-    "touchChart": "Tryk på grafen for detaljer"
+    "touchChart": "Tryk på grafen for detaljer",
+    "screenFailed": "Denne skærm kunne ikke indlæses."
   },
   "ago": {
     "never": "aldrig",

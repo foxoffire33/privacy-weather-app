@@ -6,6 +6,7 @@ import { isRecord } from '../stores/core/guards';
 import { MOTION, SCREEN_MOTION } from '../theme';
 
 import { MotionBox } from './motionComponents';
+import { ScreenBoundary } from './ScreenBoundary';
 import { ScreenSk } from './Skeletons';
 
 import type { ScreenDirection, ScreenTransitionProps } from '../types';
@@ -31,7 +32,9 @@ export function ScreenTransition({ children }: ScreenTransitionProps): ReactElem
     <AnimatePresence mode="popLayout" initial={false} custom={direction}>
       <MotionBox key={location.pathname} className="screen-motion" custom={direction} variants={VARIANTS}
         initial="enter" animate="center" exit="exit" transition={MOTION.screen}>
-        <Suspense fallback={<ScreenSk />}>{children}</Suspense>
+        <ScreenBoundary>
+          <Suspense fallback={<ScreenSk />}>{children}</Suspense>
+        </ScreenBoundary>
       </MotionBox>
     </AnimatePresence>
   );

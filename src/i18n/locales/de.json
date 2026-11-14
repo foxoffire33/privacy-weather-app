@@ -22,7 +22,8 @@
       "one": "{count} Tag erfasst",
       "other": "{count} Tage erfasst"
     },
-    "touchChart": "Diagramm berühren für Details"
+    "touchChart": "Diagramm berühren für Details",
+    "screenFailed": "Dieser Bildschirm konnte nicht geladen werden."
   },
   "ago": {
     "never": "nie",

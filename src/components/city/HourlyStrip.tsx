@@ -11,7 +11,7 @@ import { convWind, fmtTemp, hhmm, hourLabel, hourOf, orDash, weekday } from '../
 import { nowIndex } from '../../utils/insights';
 import { paths } from '../../utils/paths';
 import { Icon } from '../Icon';
-import { MotionBox } from '../motionComponents';
+import { MotionBox, useMotionPreset } from '../motionComponents';
 
 import type { DayData, ForecastEntry } from '../../stores';
 import type { DayDividerProps, ExpandableProps, NowcastProps, StripCell, StripLabel } from '../../types';
@@ -106,6 +106,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const days = useDayStore((st) => st.days);
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
+  const quick = useMotionPreset(MOTION.quick);
   const pullW = useMotionValue(0);
   const pulling = useRef(false);
   const scroller = useScroller();
@@ -136,7 +137,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const onPanEnd = (_: PointerEvent, info: PanInfo) => {
     if (!pulling.current) { return; }
     pulling.current = false;
-    void animate(pullW, 0, MOTION.quick);
+    void animate(pullW, 0, quick);
     setArmed(false);
     if (pullWidth(info) >= PULL_TRIGGER) { void loadPast(); }
   };

@@ -26,7 +26,8 @@
       "few": "{count} zabeleženi dnevi",
       "other": "{count} zabeleženih dni"
     },
-    "touchChart": "Dotaknite se grafa za podrobnosti"
+    "touchChart": "Dotaknite se grafa za podrobnosti",
+    "screenFailed": "Tega zaslona ni bilo mogoče naložiti."
   },
   "ago": {
     "never": "nikoli",

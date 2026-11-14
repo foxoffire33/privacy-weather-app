@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 import { useDragControls } from 'motion/react';
-import { Suspense } from 'react';
+import { Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
@@ -101,7 +101,11 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const { prev, next } = useLogNeighbours(cityId, date);
   const navigate = useNavigate();
   const controls = useDragControls();
-  const onDragEnd = (_: PointerEvent, info: PanInfo) => {
+  const axis = useRef<'x' | 'y' | null>(null);
+  const onDragEnd = (event: PointerEvent, info: PanInfo) => {
+    const locked = axis.current;
+    axis.current = null;
+    if (event.type === 'pointercancel' || locked !== 'x') { return; }
     const swipe = info.offset.x + info.velocity.x * SWIPE_VELOCITY;
     const target = swipe < 0 ? next : prev;
     if (target === undefined || Math.abs(swipe) < SWIPE_DISTANCE) { return; }
@@ -110,7 +114,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   return (
     <MotionBox drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin dragMomentum={false}
       dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: next === undefined ? EDGE_ELASTIC : 1, right: prev === undefined ? EDGE_ELASTIC : 1 }}
-      dragTransition={MOTION.settle} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' }}>
+      dragTransition={MOTION.settle} onDirectionLock={(a) => { axis.current = a; }} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' }}>
       <Box className="hero" onPointerDown={(e) => { controls.start(e); }} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>

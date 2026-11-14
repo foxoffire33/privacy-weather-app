@@ -61,6 +61,7 @@ export function Home(): ReactElement {
   const idx = Math.min(pageIndex, n - 1);
   const controls = useDragControls();
   const justDragged = useRef(false);
+  const axis = useRef<'x' | 'y' | null>(null);
   useHotkeys([
     ['ArrowRight', () => { if (idx < n - 1) { setPage(idx + 1); } }],
     ['ArrowLeft', () => { if (idx > 0) { setPage(idx - 1); } }],
@@ -76,7 +77,10 @@ export function Home(): ReactElement {
     if (e.target instanceof Element && e.target.closest('[data-noswipe]') !== null) { return; }
     controls.start(e);
   };
-  const onDragEnd = (_: globalThis.PointerEvent, info: PanInfo) => {
+  const onDragEnd = (event: globalThis.PointerEvent, info: PanInfo) => {
+    const locked = axis.current;
+    axis.current = null;
+    if (event.type === 'pointercancel' || locked !== 'x') { return; }
     const next = settlePage(info.offset.x + info.velocity.x * PAGE_VELOCITY, idx, n);
     if (next !== idx) { setPage(next); }
   };
@@ -86,7 +90,7 @@ export function Home(): ReactElement {
         <MotionBox className="pager-track" drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin
           dragMomentum={false} dragConstraints={{ left: 0, right: 0 }} dragTransition={MOTION.settle}
           dragElastic={{ left: idx < n - 1 ? 1 : EDGE_ELASTIC, right: idx > 0 ? 1 : EDGE_ELASTIC }}
-          onPointerDown={onDown} onDragStart={() => { justDragged.current = true; }} onDragEnd={onDragEnd}
+          onPointerDown={onDown} onDirectionLock={(a) => { axis.current = a; }} onDragStart={() => { justDragged.current = true; }} onDragEnd={onDragEnd}
           onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}>
           {cities.map((c, i) => (Math.abs(i - idx) <= 1
             ? <CityPage key={c.id} city={c} isDefault={i === 0} />

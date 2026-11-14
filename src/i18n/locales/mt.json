@@ -28,7 +28,8 @@
       "many": "{count}-il jum irreġistrat",
       "other": "{count} jum irreġistrat"
     },
-    "touchChart": "Misś il-graff għad-dettalji"
+    "touchChart": "Misś il-graff għad-dettalji",
+    "screenFailed": "Dan l-iskrin ma setax jitgħabba."
   },
   "ago": {
     "never": "qatt",

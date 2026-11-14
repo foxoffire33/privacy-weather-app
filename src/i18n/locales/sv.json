@@ -22,7 +22,8 @@
       "one": "{count} dag loggad",
       "other": "{count} dagar loggade"
     },
-    "touchChart": "Tryck på diagrammet för detaljer"
+    "touchChart": "Tryck på diagrammet för detaljer",
+    "screenFailed": "Den här skärmen kunde inte laddas."
   },
   "ago": {
     "never": "aldrig",

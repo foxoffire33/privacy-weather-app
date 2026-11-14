@@ -26,7 +26,8 @@
       "many": "{count} zaznamenaného dňa",
       "other": "{count} zaznamenaných dní"
     },
-    "touchChart": "Ťuknite na graf pre podrobnosti"
+    "touchChart": "Ťuknite na graf pre podrobnosti",
+    "screenFailed": "Túto obrazovku sa nepodarilo načítať."
   },
   "ago": {
     "never": "nikdy",

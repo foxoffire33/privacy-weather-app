@@ -22,7 +22,8 @@
       "one": "{count} päivä kirjattu",
       "other": "{count} päivää kirjattu"
     },
-    "touchChart": "Kosketa kaaviota nähdäksesi tiedot"
+    "touchChart": "Kosketa kaaviota nähdäksesi tiedot",
+    "screenFailed": "Tätä näkymää ei voitu ladata."
   },
   "ago": {
     "never": "ei koskaan",

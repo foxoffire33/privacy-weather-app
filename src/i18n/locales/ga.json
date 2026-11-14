@@ -28,7 +28,8 @@
       "many": "{count} lá taifeadta",
       "other": "{count} lá taifeadta"
     },
-    "touchChart": "Tadhaill den chairt le haghaidh sonraí"
+    "touchChart": "Tadhaill den chairt le haghaidh sonraí",
+    "screenFailed": "Níorbh fhéidir an scáileán seo a lódáil."
   },
   "ago": {
     "never": "riamh",

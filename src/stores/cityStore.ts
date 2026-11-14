@@ -30,11 +30,10 @@ export const useCityStore = create<CityState>()(
         return { id, index: get().cityIds.length - 1, added: true };
       },
       unfollow: (id) => set((s) => ({ cityIds: s.cityIds.filter((c) => c !== id) })),
-      reorder: (from, to) => set((s) => {
-        if (from === to || from < 0 || to < 0 || from >= s.cityIds.length || to >= s.cityIds.length) { return s; }
-        const list = [...s.cityIds];
-        list.splice(to, 0, list.splice(from, 1)[0]);
-        return { cityIds: list };
+      arrange: (ids) => set((s) => {
+        const same = ids.length === s.cityIds.length && s.cityIds.every((id) => ids.includes(id));
+        const changed = ids.some((id, i) => id !== s.cityIds[i]);
+        return same && changed ? { cityIds: [...ids] } : s;
       }),
       makeDefault: (id) => set((s) => (s.cityIds.includes(id)
         ? { cityIds: [id, ...s.cityIds.filter((c) => c !== id)] }

@@ -52,16 +52,21 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
     set((s) => ({ download: begin(s.download), attempted: [...s.attempted, ...wanted.map((w) => windowKey(cityId, w))] }));
     let error: string | null = null;
     const failed: string[] = [];
+    const skipped = new Set<string>();
     await inSequence(wanted, async (w) => {
+      const key = windowKey(cityId, w);
+      if (isOffline()) { skipped.add(key); return; }
       try {
         await fillRange(cityId, w.from, w.to);
       } catch (error_) {
+        if (isOffline()) { skipped.add(key); return; }
         error = errorMessage(error_);
-        failed.push(windowKey(cityId, w));
+        failed.push(key);
       }
     });
     set((s) => ({
       download: error === null ? succeed() : fail(s.download, error),
+      attempted: s.attempted.filter((k) => !skipped.has(k)),
       failed: [...s.failed.filter((k) => !wanted.some((w) => windowKey(cityId, w) === k)), ...failed],
     }));
   })),

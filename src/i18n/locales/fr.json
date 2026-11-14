@@ -24,7 +24,8 @@
       "many": "{count} jours enregistrés",
       "other": "{count} jours enregistrés"
     },
-    "touchChart": "Touchez le graphique pour les détails"
+    "touchChart": "Touchez le graphique pour les détails",
+    "screenFailed": "Impossible de charger cet écran."
   },
   "ago": {
     "never": "jamais",

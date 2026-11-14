@@ -22,7 +22,8 @@
       "one": "{count} rögzített nap",
       "other": "{count} rögzített nap"
     },
-    "touchChart": "A részletekért érintsd meg a diagramot"
+    "touchChart": "A részletekért érintsd meg a diagramot",
+    "screenFailed": "Ezt a képernyőt nem sikerült betölteni."
   },
   "ago": {
     "never": "soha",

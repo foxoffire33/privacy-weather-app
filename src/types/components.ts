@@ -304,6 +304,7 @@ export interface MotionPresets {
   quick: Transition;
   settle: Transition;
   spin: Transition;
+  instant: Transition;
 }
 
 export type MotionBoxBase = BoxProps & ElementProps<'div'> & { component?: 'span'; ref?: Ref<HTMLDivElement> };
@@ -313,8 +314,17 @@ export type MotionButtonBase = UnstyledButtonProps & ElementProps<'button'> & { 
 export interface CityRowProps {
   value: string;
   label: string;
-  onDrop: (value: string) => void;
+  onGrab: () => void;
+  onDrop: () => void;
   children: ReactNode;
+}
+
+export interface ScreenBoundaryProps {
+  children: ReactNode;
+}
+
+export interface ScreenBoundaryState {
+  failed: boolean;
 }
 
 export interface SpinProps {

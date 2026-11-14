@@ -24,7 +24,8 @@
       "one": "{count} reģistrēta diena",
       "other": "{count} reģistrētas dienas"
     },
-    "touchChart": "Pieskarieties grafikam, lai redzētu detaļas"
+    "touchChart": "Pieskarieties grafikam, lai redzētu detaļas",
+    "screenFailed": "Šo ekrānu neizdevās ielādēt."
   },
   "ago": {
     "never": "nekad",

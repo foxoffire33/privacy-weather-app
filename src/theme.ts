@@ -85,6 +85,7 @@ export const MOTION: MotionPresets = {
   quick: { duration: 0.2, ease: MOTION_EASE },
   settle: { type: 'spring', stiffness: 420, damping: 42 },
   spin: { duration: 1, ease: 'linear', repeat: Infinity },
+  instant: { duration: 0 },
 };
 
 export const SCREEN_MOTION: ScreenMotion = {
