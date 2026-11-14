@@ -13,7 +13,7 @@ import { CityBodySk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { useForecastData, useForecastQuery, useLogCount, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
-import { rainOutlook, nowIndex } from '../weather/insights';
+import { rainOutlook, nowIndex } from '../utils/insights';
 
 import type { CityPageProps } from '../types';
 import type { ReactElement } from 'react';

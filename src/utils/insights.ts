@@ -1,6 +1,8 @@
 import { t, tl } from '../i18n';
-import { hhmm } from '../utils/format';
-import { atMost, below } from '../utils/scale';
+
+import { hhmm } from './format';
+import { atMost, below } from "./scale";
+
 
 import type { ForecastData } from '../stores';
 import type { MessageKey, PollenLevel, PressureTrend } from '../types';

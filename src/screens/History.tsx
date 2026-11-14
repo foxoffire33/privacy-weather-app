@@ -17,7 +17,7 @@ import { useAddDatesStore } from '../stores/addDatesStore';
 import { useUiStore } from '../stores/uiStore';
 import { fireAndForget } from '../utils/fireAndForget';
 import { downloadFile, fmtTemp, fmtWind, longDate } from '../utils/format';
-import { conditionLabel } from '../weather/weatherCodes';
+import { conditionLabel } from '../utils/weatherCodes';
 
 import type { AddDatesResult, CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
 import type { ReactElement } from 'react';

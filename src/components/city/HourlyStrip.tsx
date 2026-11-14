@@ -6,7 +6,7 @@ import { t } from '../../i18n';
 import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
 import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../utils/format';
-import { nowIndex } from '../../weather/insights';
+import { nowIndex } from '../../utils/insights';
 import { Icon } from '../Icon';
 
 import type { DayData, ForecastEntry } from '../../stores';

@@ -10,7 +10,7 @@ import { t, tl } from '../i18n';
 import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { fmtTemp } from '../utils/format';
-import { conditionLabel } from '../weather/weatherCodes';
+import { conditionLabel } from '../utils/weatherCodes';
 
 import type { ReorderDrag } from '../types';
 import type { PointerEvent, ReactElement } from 'react';

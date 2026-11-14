@@ -8,7 +8,7 @@ import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
-import { conditionLabel } from '../weather/weatherCodes';
+import { conditionLabel } from '../utils/weatherCodes';
 
 import type { DayData, DayRecord } from '../stores';
 import type { DayBodyProps, DayHeaderProps, DayHeroValues, DayViewProps } from '../types';

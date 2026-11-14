@@ -4,8 +4,8 @@ import { t as tx, useI18n } from '../i18n';
 import { followedCities, loadThisDay, useAlmanacStore, useForecastStore, useLogStore, useSettingsStore, useEntityCache, addDays } from '../stores';
 import { fireAndForget } from '../utils/fireAndForget';
 import { convTemp, fmtDelta, fmtTemp, hhmm, hourLabel, shortDate, weekday } from '../utils/format';
-import { nowIndex, rainOutlook } from '../weather/insights';
-import { conditionLabel } from '../weather/weatherCodes';
+import { nowIndex, rainOutlook } from '../utils/insights';
+import { conditionLabel } from '../utils/weatherCodes';
 
 import type { DayRecord, ForecastData, ForecastEntry, TempUnit } from '../stores';
 import type { SnapshotInput, WidgetDay, WidgetRow, WidgetSnapshot, WidgetsPlugin } from '../types';

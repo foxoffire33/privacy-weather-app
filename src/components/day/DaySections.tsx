@@ -2,8 +2,8 @@ import { Box, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
 import { compass, fmtTemp, fmtWind, hhmm } from '../../utils/format';
+import { beaufort, duration, euAqiLevel, levelName, uvAdvice } from '../../utils/insights';
 import { avg, fixed as f, max, min } from '../../utils/stats';
-import { beaufort, duration, euAqiLevel, levelName, uvAdvice } from '../../weather/insights';
 import { ExpandButton, FullscreenChart } from '../charts/FullscreenChart';
 import { HourlyExplorer } from '../charts/HourlyExplorer';
 import { Section, Stat } from '../city/Parts';
