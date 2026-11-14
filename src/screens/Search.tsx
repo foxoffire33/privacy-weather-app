@@ -4,11 +4,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
+import { ManualCityForm } from '../components/city/ManualCityForm';
 import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { followCity, useCityStore, useSearchStore } from '../stores';
+import { followCity, useCityStore, useSearchStore, useSettings } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { BACK_STATE, paths } from '../utils/paths';
 
@@ -31,12 +32,25 @@ export function Search(): ReactElement {
   const { runSearch } = s;
   useEffect(() => { void runSearch(debounced); }, [debounced, runSearch]);
   const followed = new Set(followedIds.split('|'));
-  const follow = (r: GeoResult) => {
-    const i = followCity(r);
+  const offline = useSettings().offline;
+  const goTo = (i: number) => {
     s.setQuery('');
     setPage(i);
     void navigate(paths.home, { state: BACK_STATE });
   };
+  const follow = (r: GeoResult) => { goTo(followCity(r)); };
+  if (offline) {
+    return (
+      <Box className="screen">
+        <ScreenHeader />
+        <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('search.title')}</Title>
+        <Box px={20} pb={24}>
+          <Text fz={13} c="dimmed" mb="md">{t('offline.cityNote')}</Text>
+          <ManualCityForm onAdded={goTo} />
+        </Box>
+      </Box>
+    );
+  }
   return (
     <Box className="screen">
       <ScreenHeader />
@@ -51,7 +65,13 @@ export function Search(): ReactElement {
 
       <Box px={20} style={{ flex: 1 }}>
         <Box className="kicker">{t('search.results')}</Box>
-        {(s.searchError !== null && s.searchError !== '') && <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>}
+        {(s.searchError !== null && s.searchError !== '') && (
+          <>
+            <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>
+            <Text fz={13} c="dimmed" mb="md">{t('offline.manualCity')}</Text>
+            <ManualCityForm onAdded={goTo} />
+          </>
+        )}
         {(s.searchError === null || s.searchError === '') && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
         {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && (s.searchError === null || s.searchError === '') && (
           <Text py={12} fz={13} c="dimmed">{t('search.noMatch', { query: s.query })}</Text>

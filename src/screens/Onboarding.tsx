@@ -1,14 +1,18 @@
-import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
+import { Anchor, Box, Button, Checkbox, Group, Stack, Text, Title } from '@mantine/core';
 import { useNavigate } from 'react-router';
 
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
+import { useSettings, useSettingsStore } from '../stores';
+import { LINKS } from '../utils/links';
 import { paths } from '../utils/paths';
 
 import type { ReactElement } from 'react';
 
 export function Onboarding(): ReactElement {
   const navigate = useNavigate();
+  const offline = useSettings().offline;
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
   const STEPS = [
     { t: t('onboarding.step1Title'), d: t('onboarding.step1Text') },
     { t: t('onboarding.step2Title'), d: t('onboarding.step2Text') },
@@ -29,6 +33,14 @@ export function Onboarding(): ReactElement {
           </Group>
         ))}
       </Stack>
+      <Checkbox mx={20} my={16} color="dark" iconColor="white" label={t('offline.label')} description={t('offline.onboarding')}
+        checked={offline} onChange={(e) => { updateSettings({ offline: e.currentTarget.checked }); }}
+        styles={{ label: { color: '#fff', fontWeight: 800 }, description: { color: '#fff' } }} />
+      {!offline && (
+        <Anchor mx={20} mb={16} c="white" fz={13} fw={700} underline="always" href={LINKS.openMeteoTerms} target="_blank" rel="noopener noreferrer">
+          {t('onboarding.privacyLink')}
+        </Anchor>
+      )}
       <Button variant="white" color="dark" size="xl" fullWidth rightSection={<Icon name="arrow" />}
         onClick={() => { void navigate(paths.search); }}>
         {t('onboarding.start')}

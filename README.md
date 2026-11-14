@@ -1,15 +1,26 @@
 # Weather Log
 
-Open-source weather app built on [Open-Meteo](https://open-meteo.com). It keeps a full history of every city you follow, on the device.
+Open-source, privacy-first weather app built on [Open-Meteo](https://open-meteo.com). It keeps a full history of every city you follow, on the device, and works fully offline.
+
+- **No location access, no account, no trackers, no Google services.** Everything stays on the device. See [PRIVACY.md](PRIVACY.md).
+- **Online mode (default):** forecasts, air quality, pollen, marine data and the historical archive from Open-Meteo, logged day by day.
+- **Offline mode:** a switch on the setup screen and in Settings. The app makes no network requests; you add cities by name and coordinates and log the weather yourself. In online mode without a connection the same manual entry is offered.
+- 24 languages, backup and restore, charts that open full screen.
+
+Get it on [F-Droid](https://f-droid.org/packages/nl.delaparraservices.apps.weather/) (once published) or from the [GitHub releases](https://github.com/foxoffire33/privacy-weather-app/releases).
 
 Stack: React 19 · Vite · TypeScript · Mantine 9 · Zustand 5 (slices, `useShallow`) · IndexedDB (`idb-keyval`) · official `openmeteo` SDK. Packaged for Android with Capacitor 7.
 
 ## Run
 
+Requires Node 20.19 or newer.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
+
+Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Structure
 
@@ -72,11 +83,26 @@ Privacy: the app never requests location; don't add the geolocation plugin. For 
 
 ## F-Droid
 
-Releases are picked up by F-Droid from `vX.Y.Z` tags. Release with `npm version patch|minor|major` and `git push --follow-tags`; see [`fdroid/README.md`](fdroid/README.md).
+The build recipe is [`fdroid/nl.delaparraservices.apps.weather.yml`](fdroid/nl.delaparraservices.apps.weather.yml), store texts, screenshots and changelogs are in [`fastlane/metadata/android/`](fastlane/metadata/android). The Android build has no Google Play Services, Firebase or other proprietary dependencies, and dependency metadata is left out of the APK as F-Droid requires.
+
+Releases are picked up by F-Droid from `vX.Y.Z` tags. Release with `npm version patch|minor|major` and `git push --follow-tags`; see [`fdroid/README.md`](fdroid/README.md) for the one-time submission.
+
+### Build a release APK from source
+
+```bash
+npm ci
+npm run cap:sync
+cd android && ./gradlew assembleRelease
+```
+
+## Support
+
+Weather Log is free and has no ads. If you find it useful you can [sponsor the developer on GitHub](https://github.com/sponsors/foxoffire33).
+
+Developer: [delaparra-services.nl](https://delaparra-services.nl) · info@delaparra-services.nl · [github.com/foxoffire33](https://github.com/foxoffire33)
 
 ## License
 
 GPL-3.0-or-later, see [LICENSE](LICENSE). If you distribute a modified version, you must publish its source under the same license.
 
 Weather data by Open-Meteo.com (CC BY 4.0).
-# privacy-weather-app

@@ -174,7 +174,8 @@
     "step2Text": "Vous ajoutez les villes par leur nom. L’app ne demande jamais le GPS.",
     "step3Title": "Un historique complet, sur cet appareil",
     "step3Text": "Chaque ville suivie est enregistrée localement. Rien n’est envoyé.",
-    "start": "Choisir votre première ville"
+    "start": "Choisir votre première ville",
+    "privacyLink": "Politique de confidentialité d'Open-Meteo"
   },
   "search": {
     "title": "Suivre\nune ville.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Supprimer tout l’historique enregistré ? Action irréversible.",
     "about": "À propos",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Données météo d’Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Données météo d’Open-Meteo.com (CC BY 4.0)",
+    "services": "Services utilisés",
+    "openMeteoUse": "Prévisions, météo historique, qualité de l'air, données marines et recherche de villes.",
+    "openMeteoPrivacy": "Conditions et confidentialité d'Open-Meteo",
+    "developer": "Développeur",
+    "sourceCode": "Code source",
+    "donate": "Faire un don via GitHub Sponsors",
+    "donateNote": "Weather Log est gratuit et sans publicité. Un don aide à le garder ainsi."
   },
   "backup": {
     "notJson": "Ce fichier n’est pas un JSON valide.",
@@ -586,5 +594,33 @@
       "lowAboveHigh": "Le min ne peut pas dépasser le max",
       "gustBelowWind": "Les rafales ne peuvent pas être inférieures au vent"
     }
+  },
+  "cityForm": {
+    "name": "Nom de la ville",
+    "region": "Région (facultatif)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "add": "Ajouter la ville",
+    "errors": {
+      "required": "Obligatoire"
+    }
+  },
+  "offline": {
+    "label": "Mode hors ligne",
+    "note": "Ne jamais se connecter à Internet. Vous saisissez toute la météo vous-même.",
+    "onboarding": "Utiliser sans Internet : saisir la météo soi-même",
+    "cityNote": "Mode hors ligne : saisissez la ville et ses coordonnées.",
+    "dayNote": "Mode hors ligne : le détail horaire n'est pas téléchargé.",
+    "noToday": "Rien d'enregistré aujourd'hui",
+    "heroNote": "Saisissez la météo du jour pour commencer votre journal.",
+    "enterToday": "Saisir la météo du jour",
+    "editToday": "Modifier la météo du jour",
+    "footer": "Le mode hors ligne est activé. Désactivez-le dans les réglages pour télécharger les prévisions.",
+    "manualCity": "Pas de connexion ? Saisissez vous-même la ville et ses coordonnées.",
+    "footerOnline": "Aucune prévision n’a pu être téléchargée. Vous pouvez toujours noter la météo vous-même."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Chargement"
   }
 }

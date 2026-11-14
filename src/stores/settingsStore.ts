@@ -17,6 +17,7 @@ const defaultSettings: Settings = {
   accent: 'green',
   accentColor: '#178a4a',
   language: 'system',
+  offline: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -39,15 +40,15 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 function publishApiConfig(s: Settings): void {
-  configureDataLayer({ apiKey: s.apiKey, server: s.server });
+  configureDataLayer({ apiKey: s.apiKey, server: s.server, offline: s.offline });
 }
 
 publishApiConfig(useSettingsStore.getState().settings);
 
 let lastKey = '';
 useSettingsStore.subscribe((state) => {
-  const { apiKey, server } = state.settings;
-  const key = `${apiKey}\u0000${server}`;
+  const { apiKey, server, offline } = state.settings;
+  const key = `${apiKey}\u0000${server}\u0000${String(offline)}`;
   if (key === lastKey) {return;}
   lastKey = key;
   publishApiConfig(state.settings);

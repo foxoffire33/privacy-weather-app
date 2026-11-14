@@ -31,4 +31,5 @@ export interface Settings {
   accent: Accent;
   accentColor: string;
   language: string;
+  offline: boolean;
 }

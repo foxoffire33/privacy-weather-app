@@ -172,7 +172,8 @@
     "step2Text": "Lisäät kaupungit nimellä. Sovellus ei koskaan pyydä GPS:ää.",
     "step3Title": "Koko historia tässä laitteessa",
     "step3Text": "Jokainen seuraamasi kaupunki kirjataan paikallisesti. Mitään ei lähetetä.",
-    "start": "Valitse ensimmäinen kaupunki"
+    "start": "Valitse ensimmäinen kaupunki",
+    "privacyLink": "Open-Meteon tietosuojakäytäntö"
   },
   "search": {
     "title": "Seuraa\nkaupunkia.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Poistetaanko koko kirjattu historia? Tätä ei voi kumota.",
     "about": "Tietoja",
     "license": "Avoin lähdekoodi · GPL-3.0 · v{version}",
-    "attribution": "Säätiedot: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Säätiedot: Open-Meteo.com (CC BY 4.0)",
+    "services": "Käytetyt palvelut",
+    "openMeteoUse": "Ennusteet, historiallinen sää, ilmanlaatu, meritiedot ja paikkahaku.",
+    "openMeteoPrivacy": "Open-Meteon ehdot ja tietosuoja",
+    "developer": "Kehittäjä",
+    "sourceCode": "Lähdekoodi",
+    "donate": "Lahjoita GitHub Sponsorsin kautta",
+    "donateNote": "Weather Log on ilmainen ja mainokseton. Lahjoitus auttaa pitämään sen sellaisena."
   },
   "backup": {
     "notJson": "Tiedosto ei ole kelvollista JSONia.",
@@ -580,5 +588,33 @@
       "lowAboveHigh": "Alin ei voi olla ylintä suurempi",
       "gustBelowWind": "Puuskat eivät voi olla tuulta heikompia"
     }
+  },
+  "cityForm": {
+    "name": "Paikan nimi",
+    "region": "Alue (valinnainen)",
+    "latitude": "Leveysaste",
+    "longitude": "Pituusaste",
+    "add": "Lisää paikka",
+    "errors": {
+      "required": "Pakollinen"
+    }
+  },
+  "offline": {
+    "label": "Offline-tila",
+    "note": "Älä koskaan yhdistä internetiin. Syötät kaiken sään itse.",
+    "onboarding": "Käytä ilman internetiä: syötä sää itse",
+    "cityNote": "Offline-tila: syötä paikka ja koordinaatit itse.",
+    "dayNote": "Offline-tila: tuntitietoja ei ladata.",
+    "noToday": "Tänään ei vielä kirjauksia",
+    "heroNote": "Syötä tämän päivän sää aloittaaksesi lokin.",
+    "enterToday": "Syötä tämän päivän sää",
+    "editToday": "Muokkaa tämän päivän säätä",
+    "footer": "Offline-tila on päällä. Poista se asetuksista ladataksesi ennusteita.",
+    "manualCity": "Ei yhteyttä? Syötä kaupunki ja sen koordinaatit itse.",
+    "footerOnline": "Ennustetta ei voitu ladata. Voit silti kirjata sään itse."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Ladataan"
   }
 }

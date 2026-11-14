@@ -13,7 +13,7 @@ import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import {
   addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
-  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
+  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useSettings, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
 import { sortedCopy } from '../stores/core/sort';
@@ -40,6 +40,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const draft = useUiStore((st) => st.lookupDraft);
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
+  const offline = useSettings().offline;
   const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,
@@ -80,6 +81,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
       <Text px={20} fz={13} c="dimmed">{s.city.name}</Text>
       <Title className="display display-sm" style={{ whiteSpace: 'pre-line' }}>{t('history.title')}</Title>
 
+      {!offline && (
       <Paper className="glass" mx={12}>
         <Suspense fallback={<YearsRowSk />}>
           <YearsRow cityId={cityId} today={today} onOpen={open} />
@@ -95,6 +97,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
           )}
         </Box>
       </Paper>
+      )}
 
       {rows.length > 1 && (
         <Trends cityId={cityId} log={s.log} normals={s.normals} today={today} followedAt={s.city.followedAt}
@@ -104,7 +107,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
       <Box px={20} pb={24}>
         <Group justify="space-between" className="kicker" wrap="nowrap">
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
-          <ImportRange cityId={cityId} maxDate={maxLookup} />
+          {!offline && <ImportRange cityId={cityId} maxDate={maxLookup} />}
         </Group>
         <Button fullWidth mt={12} variant="outline" color="gray" onClick={() => { setAdding(true); }}>{t('history.addManual')}</Button>
         <HistoryLog cityId={cityId} rows={rows} today={today} onOpen={open} />

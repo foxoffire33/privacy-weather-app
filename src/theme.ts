@@ -92,6 +92,16 @@ export const SCREEN_MOTION: ScreenMotion = {
     out: { opacity: 0, transform: `translateX(${String(-MOTION_SHIFT)}px)` },
     transitionProperty: 'opacity, transform',
   },
+  swipeNext: {
+    in: { transform: 'none' },
+    out: { transform: 'translateX(100%)' },
+    transitionProperty: 'transform',
+  },
+  swipePrev: {
+    in: { transform: 'none' },
+    out: { transform: 'translateX(-100%)' },
+    transitionProperty: 'transform',
+  },
 };
 
 const SHEET_TRANSITION = { duration: SCREEN_MOTION.duration, timingFunction: MOTION_EASING };

@@ -176,7 +176,8 @@
     "step2Text": "Mestá pridávate podľa názvu. Aplikácia nikdy nežiada GPS.",
     "step3Title": "Úplná história v tomto zariadení",
     "step3Text": "Každé sledované mesto sa zaznamenáva lokálne. Nič sa neodosiela.",
-    "start": "Vyberte prvé mesto"
+    "start": "Vyberte prvé mesto",
+    "privacyLink": "Zásady ochrany súkromia Open-Meteo"
   },
   "search": {
     "title": "Sledujte\nmesto.",
@@ -540,7 +541,14 @@
     "confirmDeleteAll": "Odstrániť celú zaznamenanú históriu? Túto akciu nemožno vrátiť.",
     "about": "O aplikácii",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Údaje o počasí: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Údaje o počasí: Open-Meteo.com (CC BY 4.0)",
+    "services": "Použité služby",
+    "openMeteoUse": "Predpovede, historické počasie, kvalita ovzdušia, morské údaje a vyhľadávanie miest.",
+    "openMeteoPrivacy": "Podmienky a súkromie Open-Meteo",
+    "developer": "Vývojár",
+    "sourceCode": "Zdrojový kód",
+    "donate": "Prispieť cez GitHub Sponsors",
+    "donateNote": "Weather Log je zadarmo a bez reklám. Dar pomáha, aby to tak zostalo."
   },
   "backup": {
     "notJson": "Tento súbor nie je platný JSON.",
@@ -592,5 +600,33 @@
       "lowAboveHigh": "Min. nemôže byť vyššie ako max.",
       "gustBelowWind": "Nárazy nemôžu byť slabšie ako vietor"
     }
+  },
+  "cityForm": {
+    "name": "Názov miesta",
+    "region": "Oblasť (nepovinné)",
+    "latitude": "Zemepisná šírka",
+    "longitude": "Zemepisná dĺžka",
+    "add": "Pridať miesto",
+    "errors": {
+      "required": "Povinné"
+    }
+  },
+  "offline": {
+    "label": "Režim offline",
+    "note": "Nikdy sa nepripájať na internet. Všetko počasie zadávate sami.",
+    "onboarding": "Používať bez internetu: zadávať počasie ručne",
+    "cityNote": "Režim offline: zadajte miesto a jeho súradnice.",
+    "dayNote": "Režim offline: hodinové údaje sa nesťahujú.",
+    "noToday": "Dnes nič nezaznamenané",
+    "heroNote": "Zadajte dnešné počasie a začnite svoj záznam.",
+    "enterToday": "Zadať dnešné počasie",
+    "editToday": "Upraviť dnešné počasie",
+    "footer": "Režim offline je zapnutý. Vypnite ho v Nastaveniach na sťahovanie predpovedí.",
+    "manualCity": "Žiadne pripojenie? Zadajte mesto a jeho súradnice sami.",
+    "footerOnline": "Predpoveď sa nepodarilo stiahnuť. Počasie môžete stále zapisovať sami."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Načítava sa"
   }
 }

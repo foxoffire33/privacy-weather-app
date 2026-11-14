@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { version } from '../../package.json';
 import { countDays } from '../backup/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { SettingsAbout } from '../components/SettingsAbout';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
@@ -110,6 +111,10 @@ export function Settings(): ReactElement {
 
         <Box className="kicker">{t('settings.history')}</Box>
         <Box py={12} className="row">
+          <Switch label={t('offline.label')} description={t('offline.note')}
+            checked={s.settings.offline} onChange={(e) => { set({ offline: e.currentTarget.checked }); }} />
+        </Box>
+        <Box py={12} className="row">
           <Select label={t('settings.interval')} value={String(s.settings.snapshotMinutes)} allowDeselect={false}
             description={t('settings.intervalNote')}
             onChange={(v) => { if (v !== null && v !== '') { set({ snapshotMinutes: Number(v) }); } }}
@@ -167,11 +172,7 @@ export function Settings(): ReactElement {
           {t('settings.deleteAll')}
         </Button>
 
-        <Box className="kicker">{t('settings.about')}</Box>
-        <Stack gap={4} py={12}>
-          <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
-          <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
-        </Stack>
+        <SettingsAbout version={version} />
       </Stack>
     </Box>
   );

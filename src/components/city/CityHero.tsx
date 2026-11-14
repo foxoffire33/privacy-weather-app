@@ -1,11 +1,11 @@
-import { Badge, Box, Button, Group, Text } from '@mantine/core';
+import { Badge, Box, Group, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
-import { refreshCity, useNormals } from '../../stores';
+import { useNormals } from '../../stores';
 import { fmtDelta, fmtTemp } from '../../utils/format';
 import { conditionLabel } from '../../utils/weatherCodes';
 
-import type { CityErrorProps, CityHeroProps, CityPageProps } from '../../types';
+import type { CityHeroProps, CityPageProps } from '../../types';
 import type { ReactElement } from 'react';
 
 export function CityTitle({ city, isDefault }: CityPageProps): ReactElement {
@@ -14,18 +14,6 @@ export function CityTitle({ city, isDefault }: CityPageProps): ReactElement {
       <Text fz={15} fw={800}>{city.name}</Text>
       {isDefault && <Badge variant="white" color="dark" size="sm">{t('common.default')}</Badge>}
     </Group>
-  );
-}
-
-export function CityLoadError({ city, isDefault, error }: CityErrorProps): ReactElement {
-  return (
-    <Box className="hero">
-      <CityTitle city={city} isDefault={isDefault} />
-      <Box className="hero-temp">–°</Box>
-      <Text fz={18} fw={800} mt={12}>{t('city.couldNotLoad')}</Text>
-      <Text fz={13} fw={600}>{error}</Text>
-      <Button mt={16} onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>{t('common.tryAgain')}</Button>
-    </Box>
   );
 }
 

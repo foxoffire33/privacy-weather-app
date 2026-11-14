@@ -174,7 +174,8 @@
     "step2Text": "Gradove dodajete po imenu. Aplikacija nikad ne traži GPS.",
     "step3Title": "Potpuna povijest na ovom uređaju",
     "step3Text": "Svaki praćeni grad bilježi se lokalno. Ništa se ne prenosi.",
-    "start": "Odaberite prvi grad"
+    "start": "Odaberite prvi grad",
+    "privacyLink": "Pravila privatnosti Open-Meteo"
   },
   "search": {
     "title": "Pratite\ngrad.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Izbrisati svu zabilježenu povijest? To se ne može poništiti.",
     "about": "O aplikaciji",
     "license": "Otvoreni kod · GPL-3.0 · v{version}",
-    "attribution": "Vremenski podaci: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Vremenski podaci: Open-Meteo.com (CC BY 4.0)",
+    "services": "Korištene usluge",
+    "openMeteoUse": "Prognoze, povijesno vrijeme, kvaliteta zraka, morski podaci i pretraga mjesta.",
+    "openMeteoPrivacy": "Uvjeti i privatnost Open-Meteo",
+    "developer": "Razvojni programer",
+    "sourceCode": "Izvorni kod",
+    "donate": "Doniraj putem GitHub Sponsors",
+    "donateNote": "Weather Log je besplatan i bez oglasa. Donacija pomaže da tako i ostane."
   },
   "backup": {
     "notJson": "Ova datoteka nije valjan JSON.",
@@ -586,5 +594,33 @@
       "lowAboveHigh": "Najniža ne može biti iznad najviše",
       "gustBelowWind": "Udari ne mogu biti slabiji od vjetra"
     }
+  },
+  "cityForm": {
+    "name": "Naziv mjesta",
+    "region": "Regija (neobavezno)",
+    "latitude": "Geografska širina",
+    "longitude": "Geografska dužina",
+    "add": "Dodaj mjesto",
+    "errors": {
+      "required": "Obavezno"
+    }
+  },
+  "offline": {
+    "label": "Izvanmrežni način",
+    "note": "Nikad se ne spajaj na internet. Sve vrijeme unosite sami.",
+    "onboarding": "Koristi bez interneta: vrijeme unosite sami",
+    "cityNote": "Izvanmrežni način: unesite mjesto i njegove koordinate.",
+    "dayNote": "Izvanmrežni način: podaci po satu se ne preuzimaju.",
+    "noToday": "Danas još ništa zabilježeno",
+    "heroNote": "Unesite današnje vrijeme da započnete dnevnik.",
+    "enterToday": "Unesi današnje vrijeme",
+    "editToday": "Uredi današnje vrijeme",
+    "footer": "Izvanmrežni način je uključen. Isključite ga u Postavkama za preuzimanje prognoza.",
+    "manualCity": "Nema veze? Sami unesite grad i njegove koordinate.",
+    "footerOnline": "Prognozu nije bilo moguće preuzeti. Vrijeme i dalje možete bilježiti sami."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Učitavanje"
   }
 }

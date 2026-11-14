@@ -6,7 +6,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 're
 import { useShallow } from 'zustand/react/shallow';
 
 import { ScreenTransition } from './components/ScreenTransition';
-import { BootSk } from './components/Skeletons';
+import { Splash } from './components/Splash';
 import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
 import { syncAppIcon } from './native/appIcon';
 import { allowLandscape } from './native/orientation';
@@ -29,7 +29,7 @@ import type { ReactElement } from 'react';
 export default function App(): ReactElement {
   return (
     <Frame>
-      <Suspense fallback={<BootSk />}>
+      <Suspense fallback={<Splash />}>
         <Screens />
       </Suspense>
     </Frame>

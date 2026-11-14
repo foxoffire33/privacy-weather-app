@@ -1,6 +1,7 @@
 import { useAlmanacStore } from './almanacStore';
 import { followedCities, useCityStore } from './cityStore';
-import { once } from './core/inflight';
+import { isOffline } from './core/config';
+import { once, READY } from './core/inflight';
 import { useDayStore } from './dayStore';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
@@ -22,6 +23,7 @@ export const resourceKey = {
 };
 
 export function refreshCity(cityId: string, opts: RefreshOptions = {}): Pending {
+  if (isOffline()) { return READY; }
   return once(resourceKey.forecast(cityId), async () => { await runRefresh(cityId, opts); });
 }
 
@@ -53,6 +55,7 @@ export function unfollowCity(cityId: string): void {
 }
 
 export function openDay(cityId: string, date: string): Pending {
+  if (isOffline()) { return READY; }
   return once(resourceKey.day(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined) { return; }
@@ -62,6 +65,7 @@ export function openDay(cityId: string, date: string): Pending {
 }
 
 export function lookupDate(cityId: string, date: string): Pending {
+  if (isOffline()) { return READY; }
   return once(resourceKey.lookup(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined || date === '') { return; }
@@ -70,6 +74,7 @@ export function lookupDate(cityId: string, date: string): Pending {
 }
 
 export function loadThisDay(cityId: string, date: string): Pending {
+  if (isOffline()) { return READY; }
   return once(resourceKey.thisDay(cityId, date), async () => {
     const city = entityCache.getOne('city', cityId);
     if (city === undefined) { return; }
@@ -92,12 +97,14 @@ export async function addDayToLog(cityId: string, date: string): Promise<void> {
 }
 
 export async function restoreDay(cityId: string, date: string): Promise<void> {
+  if (isOffline()) { return; }
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) { return; }
   await useLogStore.getState().restoreDay(city, date);
 }
 
 export async function fillRange(cityId: string, start: string, end: string): Promise<void> {
+  if (isOffline()) { return; }
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) { return; }
   await useLogStore.getState().fillMissing(city, start, end);

@@ -1,6 +1,6 @@
 import { fetchWeatherApi } from 'openmeteo';
 
-import { getConfig } from '../core/config';
+import { assertOnline, getConfig } from '../core/config';
 import { isRecord } from '../core/guards';
 
 import { AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS,  } from './variables';
@@ -59,6 +59,7 @@ function instants(b: SdkBlock, i: number, offset: number) {
 }
 
 export async function fetchForecast(city: City, pastDays = 1): Promise<ForecastData> {
+  assertOnline();
   const [r] = await fetchWeatherApi(endpoint('forecast', '/v1/forecast'), withKey({
     latitude: city.lat,
     longitude: city.lon,
@@ -92,6 +93,7 @@ export async function fetchForecast(city: City, pastDays = 1): Promise<ForecastD
 }
 
 export async function fetchAirQuality(city: City): Promise<AirData> {
+  assertOnline();
   const [r] = await fetchWeatherApi(endpoint('air', '/v1/air-quality'), withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', forecast_days: 2,
     current: [...AIR_VARS],
@@ -106,6 +108,7 @@ export async function fetchAirQuality(city: City): Promise<AirData> {
 }
 
 export async function fetchMarine(city: City): Promise<MarineData | null> {
+  assertOnline();
   const [r] = await fetchWeatherApi(endpoint('marine', '/v1/marine'), withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', current: [...MARINE_VARS],
   }));
@@ -115,6 +118,7 @@ export async function fetchMarine(city: City): Promise<MarineData | null> {
 
 export async function fetchDailyRange(city: City, span: DateSpan, daily: readonly string[],
   source: 'archive' | 'forecast' = 'archive'): Promise<RangeRows> {
+  assertOnline();
   const { from: start, to: end } = span;
   const url = source === 'archive' ? endpoint('archive', '/v1/archive') : endpoint('forecast', '/v1/forecast');
   const [r] = await fetchWeatherApi(url, withKey({
@@ -128,6 +132,7 @@ export const fetchArchive = async (city: City, start: string, end: string, daily
   fetchDailyRange(city, { from: start, to: end }, daily, 'archive');
 
 export async function fetchDay(city: City, date: string, recent: boolean): Promise<DayData> {
+  assertOnline();
   const hourly: readonly string[] = recent ? HOURLY_VARS : ARCHIVE_HOURLY_VARS;
   const daily: readonly string[] = recent ? DAILY_VARS : ARCHIVE_DAY_DAILY_VARS;
   const url = recent ? endpoint('forecast', '/v1/forecast') : endpoint('archive', '/v1/archive');
@@ -154,6 +159,7 @@ export async function fetchDay(city: City, date: string, recent: boolean): Promi
 }
 
 export async function fetchAirDay(city: City, date: string): Promise<DayData['air']> {
+  assertOnline();
   const [r] = await fetchWeatherApi(endpoint('air', '/v1/air-quality'), withKey({
     latitude: city.lat, longitude: city.lon, timezone: 'auto', start_date: date, end_date: date, hourly: [...AIR_VARS],
   }));
@@ -168,6 +174,7 @@ function isGeoResult(x: unknown): x is GeoResult {
 }
 
 export async function searchCities(name: string, signal?: AbortSignal): Promise<GeoResult[]> {
+  assertOnline();
   const q = new URLSearchParams(withKey({ name, count: '8', language: 'en', format: 'json' }));
   const doFetch = getConfig().fetch ?? fetch;
   const res = await doFetch(`${endpoint('geo', '/v1/search')}?${q}`, { signal });

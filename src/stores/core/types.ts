@@ -26,6 +26,7 @@ export interface DataLayerConfig {
   apiKey: string;
   server: string;
   fetch: typeof fetch | null;
+  offline: boolean;
 }
 
 export interface PendingWrite {

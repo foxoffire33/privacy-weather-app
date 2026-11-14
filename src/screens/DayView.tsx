@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 import { useDrag } from '@mantine/hooks';
-import { Suspense } from 'react';
+import { Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
@@ -9,9 +9,9 @@ import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useUnits } from '../stores';
+import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
-import { BACK_STATE, paths } from '../utils/paths';
+import { paths, SWIPE_NEXT_STATE, SWIPE_PREV_STATE } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
 import type { DayData, DayRecord } from '../stores';
@@ -95,14 +95,23 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
   const { prev, next } = useLogNeighbours(cityId, date);
   const navigate = useNavigate();
+  const pageRef = useRef<HTMLDivElement>(null);
   const { ref: swipeRef } = useDrag<HTMLDivElement>((gesture) => {
-    if (!gesture.last || gesture.canceled || Math.abs(gesture.movement[0]) < SWIPE_DISTANCE) { return; }
-    const target = gesture.movement[0] < 0 ? next : prev;
-    if (target === undefined) { return; }
-    void navigate(paths.day(cityId, target), { replace: true, state: target < date ? BACK_STATE : undefined });
+    const dx = gesture.movement[0];
+    const target = dx < 0 ? next : prev;
+    const page = pageRef.current;
+    if (!gesture.last) {
+      if (page) { page.style.transition = 'none'; page.style.transform = `translateX(${String(target === undefined ? dx / 4 : dx)}px)`; }
+      return;
+    }
+    if (!gesture.canceled && target !== undefined && Math.abs(dx) >= SWIPE_DISTANCE) {
+      void navigate(paths.day(cityId, target), { replace: true, state: dx < 0 ? SWIPE_NEXT_STATE : SWIPE_PREV_STATE });
+      return;
+    }
+    if (page) { page.style.transition = 'transform 200ms ease'; page.style.transform = 'none'; }
   }, { axis: 'x', threshold: 10 });
   return (
-    <>
+    <Box ref={pageRef}>
       <Box className="hero" ref={swipeRef} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>
@@ -123,7 +132,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
       <Suspense fallback={<DayDetailsSk />}>
         <DayDetails cityId={cityId} date={date} />
       </Suspense>
-    </>
+    </Box>
   );
 }
 
@@ -132,7 +141,9 @@ function DayDetails({ cityId, date }: DayViewProps): ReactElement {
   const day = useDayData(cityId, date);
   const query = useDayQuery(cityId, date);
   const normal = useNormals(cityId)?.[date.slice(5)];
+  const offline = useSettings().offline;
   if (!day) {
+    if (offline) { return <Text px={20} py={20} fz={13} c="dimmed">{t('offline.dayNote')}</Text>; }
     return (
       <Box p={20}>
         <Text fw={800}>{t('dayView.couldNotLoad')}</Text>

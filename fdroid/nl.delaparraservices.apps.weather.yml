@@ -7,9 +7,13 @@ Categories:
   - Weather
 License: GPL-3.0-or-later
 AuthorName: foxoffire33
+AuthorEmail: info@delaparra-services.nl
+AuthorWebSite: https://delaparra-services.nl
+WebSite: https://github.com/foxoffire33/privacy-weather-app
 SourceCode: https://github.com/foxoffire33/privacy-weather-app
 IssueTracker: https://github.com/foxoffire33/privacy-weather-app/issues
 Changelog: https://github.com/foxoffire33/privacy-weather-app/releases
+Donate: https://github.com/sponsors/foxoffire33
 
 AutoName: Weather Log
 
@@ -17,29 +21,38 @@ RepoType: git
 Repo: https://github.com/foxoffire33/privacy-weather-app.git
 
 Builds:
-  - versionName: 0.1.6
-    versionCode: 106
-    commit: v0.1.6
+  - versionName: 0.3.0
+    versionCode: 300
+    commit: v0.3.0
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y npm
+      - apt-get install -y xz-utils
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v22.21.1/node-v22.21.1-linux-x64.tar.xz
+      - echo "680d3f30b24a7ff24b98db5e96f294c0070f8f9078df658da1bce1b9c9873c88  node.tar.xz"
+        | sha256sum -c -
+      - tar xJf node.tar.xz --strip-components=1 -C /usr/local
     init: cd ../.. && npm ci
     gradle:
       - yes
     prebuild: cd ../.. && npm run build && npx cap sync android
     scandelete:
       - node_modules/@esbuild
-      - node_modules/@rollup
       - node_modules/esbuild
+      - node_modules/@rollup
+      - node_modules/@unrs
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
-CurrentVersion: 0.1.6
-CurrentVersionCode: 106
+CurrentVersion: 0.3.0
+CurrentVersionCode: 300
 
 MaintainerNotes: |-
-  Capacitor app: the web app is built with Vite (needs Node 20.19+) and copied into
-  android/ by `cap sync`; the Capacitor Android library comes from node_modules.
+  Capacitor app: the web app is built with Vite (needs Node 20.19+, Node 22 LTS is
+  downloaded and checksum-verified above) and copied into android/ by `cap sync`;
+  the Capacitor Android library is built from source in node_modules/@capacitor.
+  No Google Play Services, Firebase or other proprietary libraries.
+  Network: only Open-Meteo (open source, self-hostable), and none at all in the
+  app's offline mode.
   versionCode = MAJOR*10000 + MINOR*100 + PATCH, kept in build.gradle by
   scripts/android-version.mjs and checked on every GitHub release.

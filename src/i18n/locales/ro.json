@@ -174,7 +174,8 @@
     "step2Text": "Adăugați orașe după nume. Aplicația nu cere niciodată GPS.",
     "step3Title": "Un istoric complet, pe acest dispozitiv",
     "step3Text": "Fiecare oraș urmărit e înregistrat local. Nimic nu este încărcat.",
-    "start": "Alegeți primul oraș"
+    "start": "Alegeți primul oraș",
+    "privacyLink": "Politica de confidențialitate Open-Meteo"
   },
   "search": {
     "title": "Urmăriți\nun oraș.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Ștergeți tot istoricul înregistrat? Acțiunea nu poate fi anulată.",
     "about": "Despre",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Date meteo de la Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Date meteo de la Open-Meteo.com (CC BY 4.0)",
+    "services": "Servicii folosite",
+    "openMeteoUse": "Prognoze, vreme istorică, calitatea aerului, date marine și căutarea localităților.",
+    "openMeteoPrivacy": "Termenii și confidențialitatea Open-Meteo",
+    "developer": "Dezvoltator",
+    "sourceCode": "Cod sursă",
+    "donate": "Donează prin GitHub Sponsors",
+    "donateNote": "Weather Log este gratuit și fără reclame. O donație ajută să rămână așa."
   },
   "backup": {
     "notJson": "Acest fișier nu este JSON valid.",
@@ -586,5 +594,33 @@
       "lowAboveHigh": "Minima nu poate depăși maxima",
       "gustBelowWind": "Rafalele nu pot fi sub vânt"
     }
+  },
+  "cityForm": {
+    "name": "Numele localității",
+    "region": "Regiune (opțional)",
+    "latitude": "Latitudine",
+    "longitude": "Longitudine",
+    "add": "Adaugă localitatea",
+    "errors": {
+      "required": "Obligatoriu"
+    }
+  },
+  "offline": {
+    "label": "Mod offline",
+    "note": "Nu te conecta niciodată la internet. Introduci singur toată vremea.",
+    "onboarding": "Folosește fără internet: introdu singur vremea",
+    "cityNote": "Mod offline: introdu localitatea și coordonatele ei.",
+    "dayNote": "Mod offline: detaliile orare nu se descarcă.",
+    "noToday": "Nimic înregistrat azi",
+    "heroNote": "Introdu vremea de azi pentru a începe jurnalul.",
+    "enterToday": "Introdu vremea de azi",
+    "editToday": "Editează vremea de azi",
+    "footer": "Modul offline este activ. Dezactivează-l din Setări pentru a descărca prognoze.",
+    "manualCity": "Fără conexiune? Introdu singur orașul și coordonatele lui.",
+    "footerOnline": "Nu s-a putut descărca nicio prognoză. Poți înregistra totuși vremea singur."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Se încarcă"
   }
 }

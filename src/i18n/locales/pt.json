@@ -174,7 +174,8 @@
     "step2Text": "Adiciona cidades pelo nome. A app nunca pede o GPS.",
     "step3Title": "Um histórico completo, neste dispositivo",
     "step3Text": "Cada cidade que segue é registada localmente. Nada é enviado.",
-    "start": "Escolha a primeira cidade"
+    "start": "Escolha a primeira cidade",
+    "privacyLink": "Política de privacidade da Open-Meteo"
   },
   "search": {
     "title": "Siga\numa cidade.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Eliminar todo o histórico registado? Não é possível anular.",
     "about": "Sobre",
     "license": "Código aberto · GPL-3.0 · v{version}",
-    "attribution": "Dados meteorológicos de Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Dados meteorológicos de Open-Meteo.com (CC BY 4.0)",
+    "services": "Serviços utilizados",
+    "openMeteoUse": "Previsões, tempo histórico, qualidade do ar, dados marítimos e pesquisa de cidades.",
+    "openMeteoPrivacy": "Termos e privacidade da Open-Meteo",
+    "developer": "Programador",
+    "sourceCode": "Código-fonte",
+    "donate": "Doar via GitHub Sponsors",
+    "donateNote": "O Weather Log é gratuito e sem anúncios. Um donativo ajuda a mantê-lo assim."
   },
   "backup": {
     "notJson": "Este ficheiro não é um JSON válido.",
@@ -586,5 +594,33 @@
       "lowAboveHigh": "A mínima não pode ser superior à máxima",
       "gustBelowWind": "As rajadas não podem ser inferiores ao vento"
     }
+  },
+  "cityForm": {
+    "name": "Nome da cidade",
+    "region": "Região (opcional)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "add": "Adicionar cidade",
+    "errors": {
+      "required": "Obrigatório"
+    }
+  },
+  "offline": {
+    "label": "Modo offline",
+    "note": "Nunca ligar à internet. Introduz todo o tempo manualmente.",
+    "onboarding": "Usar sem internet: introduz o tempo manualmente",
+    "cityNote": "Modo offline: introduz a cidade e as coordenadas.",
+    "dayNote": "Modo offline: o detalhe horário não é transferido.",
+    "noToday": "Nada registado hoje",
+    "heroNote": "Introduz o tempo de hoje para começar o registo.",
+    "enterToday": "Introduzir o tempo de hoje",
+    "editToday": "Editar o tempo de hoje",
+    "footer": "O modo offline está ativo. Desativa-o nas Definições para transferir previsões.",
+    "manualCity": "Sem ligação? Introduza a cidade e as coordenadas manualmente.",
+    "footerOnline": "Não foi possível transferir a previsão. Pode continuar a registar o tempo manualmente."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "A carregar"
   }
 }
