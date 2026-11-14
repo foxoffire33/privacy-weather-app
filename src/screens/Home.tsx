@@ -1,19 +1,32 @@
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
+import { useDragControls } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Icon } from '../components/Icon';
+import { MotionBox, MotionButton } from '../components/motionComponents';
+import { Spin } from '../components/Spin';
 import { t } from '../i18n';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
+import { MOTION } from '../theme';
 import { paths } from '../utils/paths';
 
 import { CityPage } from './CityPage';
 
-import type { GestureHintProps, PagerGesture } from '../types';
+import type { GestureHintProps } from '../types';
+import type { PanInfo } from 'motion/react';
 import type { PointerEvent, ReactElement } from 'react';
+
+const PAGE_SWIPE = 60;
+const PAGE_VELOCITY = 0.2;
+const EDGE_ELASTIC = 0.33;
+const DOT = 8;
+const DOT_ACTIVE = 22;
+const DOT_ON = 'rgba(255, 255, 255, 1)';
+const DOT_OFF = 'rgba(255, 255, 255, 0.45)';
 
 function GestureHint({ multiple }: GestureHintProps) {
   const seen = useUiStore((s) => s.gestureHintSeen);
@@ -32,8 +45,8 @@ function GestureHint({ multiple }: GestureHintProps) {
 }
 
 function settlePage(moved: number, idx: number, n: number): number {
-  if (moved < -60 && idx < n - 1) { return idx + 1; }
-  if (moved > 60 && idx > 0) { return idx - 1; }
+  if (moved < -PAGE_SWIPE && idx < n - 1) { return idx + 1; }
+  if (moved > PAGE_SWIPE && idx > 0) { return idx - 1; }
   return idx;
 }
 
@@ -46,9 +59,7 @@ export function Home(): ReactElement {
   })));
   const n = cities.length;
   const idx = Math.min(pageIndex, n - 1);
-  const pagerRef = useRef<HTMLDivElement>(null);
-  const dx = useRef(0);
-  const drag = useRef<PagerGesture | null>(null);
+  const controls = useDragControls();
   const justDragged = useRef(false);
   useHotkeys([
     ['ArrowRight', () => { if (idx < n - 1) { setPage(idx + 1); } }],
@@ -61,49 +72,27 @@ export function Home(): ReactElement {
     return () => { globalThis.clearTimeout(timer); };
   }, [activeId]);
   const onDown = (e: PointerEvent) => {
+    justDragged.current = false;
     if (e.target instanceof Element && e.target.closest('[data-noswipe]') !== null) { return; }
-    drag.current = { x: e.clientX, y: e.clientY, id: e.pointerId, active: false };
+    controls.start(e);
   };
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d) { return; }
-    const mx = e.clientX - d.x;
-    const my = e.clientY - d.y;
-    if (!d.active) {
-      if (Math.abs(mx) > 8 && Math.abs(mx) > Math.abs(my)) {
-        d.active = true;
-        e.currentTarget.setPointerCapture(d.id);
-        if (pagerRef.current) { pagerRef.current.style.transition = 'none'; }
-      } else if (Math.abs(my) > 8) {
-        drag.current = null;
-        return;
-      } else { return; }
-    }
-    const atEdge = (idx === 0 && mx > 0) || (idx === n - 1 && mx < 0);
-    dx.current = atEdge ? mx / 3 : mx;
-    if (pagerRef.current) { pagerRef.current.style.transform = `translateX(calc(${String(-idx * 100)}% + ${String(dx.current)}px))`; }
-  };
-  const onUp = () => {
-    const d = drag.current;
-    drag.current = null;
-    if (d?.active !== true) { return; }
-    justDragged.current = true;
-    const moved = dx.current;
-    dx.current = 0;
-    const next = settlePage(moved, idx, n);
-    const el = pagerRef.current;
-    if (el) { el.style.transition = ''; el.style.transform = `translateX(${String(-next * 100)}%)`; }
+  const onDragEnd = (_: globalThis.PointerEvent, info: PanInfo) => {
+    const next = settlePage(info.offset.x + info.velocity.x * PAGE_VELOCITY, idx, n);
     if (next !== idx) { setPage(next); }
   };
   return (
     <Box style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      <Box className="pager" ref={pagerRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-        onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}
-        style={{ transform: `translateX(${String(-idx * 100)}%)` }}>
-        {cities.map((c, i) => (Math.abs(i - idx) <= 1
-          ? <CityPage key={c.id} city={c} isDefault={i === 0} />
-          : <Box key={c.id} className="page" />))}
-      </Box>
+      <MotionBox className="pager" animate={{ x: `${String(-idx * 100)}%` }} transition={MOTION.settle} initial={false}>
+        <MotionBox className="pager-track" drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin
+          dragMomentum={false} dragConstraints={{ left: 0, right: 0 }} dragTransition={MOTION.settle}
+          dragElastic={{ left: idx < n - 1 ? 1 : EDGE_ELASTIC, right: idx > 0 ? 1 : EDGE_ELASTIC }}
+          onPointerDown={onDown} onDragStart={() => { justDragged.current = true; }} onDragEnd={onDragEnd}
+          onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}>
+          {cities.map((c, i) => (Math.abs(i - idx) <= 1
+            ? <CityPage key={c.id} city={c} isDefault={i === 0} />
+            : <Box key={c.id} className="page" />))}
+        </MotionBox>
+      </MotionBox>
       <GestureHint multiple={n > 1} />
       <Box className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => { void navigate(paths.cities); }}>
@@ -111,14 +100,15 @@ export function Home(): ReactElement {
         </ActionIcon>
         <Group gap={6} wrap="nowrap">
           {cities.map((c, i) => (
-            <UnstyledButton key={c.id} className="dot" data-active={i === idx || undefined}
+            <MotionButton key={c.id} className="dot" data-active={i === idx || undefined} initial={false} transition={MOTION.quick}
+              animate={{ width: i === idx ? DOT_ACTIVE : DOT, backgroundColor: i === idx ? DOT_ON : DOT_OFF }}
               aria-label={t('home.show', { name: c.name })} onClick={() => { setPage(i); }} />
           ))}
         </Group>
         <Group gap={0} wrap="nowrap">
           <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
             onClick={() => { void refreshAll({ maxAgeMs: 0 }); }}>
-            <Box component="span" className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></Box>
+            <Spin active={updating}><Icon name="refresh" size={20} /></Spin>
           </ActionIcon>
           <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => { void navigate(paths.settings); }}>
             <Icon name="sliders" />

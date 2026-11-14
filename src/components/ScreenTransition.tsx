@@ -1,27 +1,38 @@
-import { Box, Transition } from '@mantine/core';
-import { useMounted } from '@mantine/hooks';
+import { AnimatePresence } from 'motion/react';
+import { Suspense } from 'react';
 import { NavigationType, useLocation, useNavigationType } from 'react-router';
 
 import { isRecord } from '../stores/core/guards';
-import { SCREEN_MOTION } from '../theme';
+import { MOTION, SCREEN_MOTION } from '../theme';
 
-import type { ScreenMotion, ScreenTransitionProps } from '../types';
+import { MotionBox } from './motionComponents';
+import { ScreenSk } from './Skeletons';
+
+import type { ScreenDirection, ScreenTransitionProps } from '../types';
 import type { ReactElement } from 'react';
 
-function motionFor(popped: boolean, state: Record<string, unknown>): keyof Omit<ScreenMotion, 'duration' | 'easing'> {
+function directionFor(popped: boolean, state: Record<string, unknown>): ScreenDirection {
   if (state.swipe === 'next') { return 'swipeNext'; }
   if (state.swipe === 'prev') { return 'swipePrev'; }
   return popped || state.back === true ? 'back' : 'forward';
 }
 
+const VARIANTS = {
+  enter: (d: ScreenDirection) => SCREEN_MOTION.enter[d],
+  center: { opacity: 1, x: 0 },
+  exit: (d: ScreenDirection) => SCREEN_MOTION.exit[d],
+};
+
 export function ScreenTransition({ children }: ScreenTransitionProps): ReactElement {
-  const state: unknown = useLocation().state;
-  const popped = useNavigationType() === NavigationType.Pop;
-  const direction = motionFor(popped, isRecord(state) ? state : {});
-  const mounted = useMounted();
+  const location = useLocation();
+  const state: unknown = location.state;
+  const direction = directionFor(useNavigationType() === NavigationType.Pop, isRecord(state) ? state : {});
   return (
-    <Transition mounted={mounted} transition={SCREEN_MOTION[direction]} duration={SCREEN_MOTION.duration} timingFunction={SCREEN_MOTION.easing}>
-      {(styles) => <Box className="screen-motion" style={styles}>{children}</Box>}
-    </Transition>
+    <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+      <MotionBox key={location.pathname} className="screen-motion" custom={direction} variants={VARIANTS}
+        initial="enter" animate="center" exit="exit" transition={MOTION.screen}>
+        <Suspense fallback={<ScreenSk />}>{children}</Suspense>
+      </MotionBox>
+    </AnimatePresence>
   );
 }

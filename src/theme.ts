@@ -8,7 +8,7 @@ import {
 import { CompactTooltip } from './components/charts/CompactTooltip';
 
 import type { Accent } from './stores';
-import type { AccentDef, Rgb, ScreenMotion } from './types';
+import type { AccentDef, MotionPresets, Rgb, ScreenMotion } from './types';
 import type { MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 
 export const ACCENT_NAMES: readonly Exclude<Accent, 'custom'>[] = ['green', 'red', 'blue', 'off'];
@@ -76,35 +76,33 @@ export function customTuple(hex: string): MantineColorsTuple {
   return [light(0.92), light(0.82), light(0.65), light(0.45), light(0.25), toHex(b), shade(0.15), shade(0.3), shade(0.5), shade(0.7)];
 }
 
-const MOTION_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
+const MOTION_EASE: [number, number, number, number] = [0.2, 0, 0, 1];
 const MOTION_SHIFT = 30;
+const SHEET_MS = 300;
+
+export const MOTION: MotionPresets = {
+  screen: { duration: SHEET_MS / 1000, ease: MOTION_EASE },
+  quick: { duration: 0.2, ease: MOTION_EASE },
+  settle: { type: 'spring', stiffness: 420, damping: 42 },
+  spin: { duration: 1, ease: 'linear', repeat: Infinity },
+};
 
 export const SCREEN_MOTION: ScreenMotion = {
-  duration: 300,
-  easing: MOTION_EASING,
-  forward: {
-    in: { opacity: 1, transform: 'none' },
-    out: { opacity: 0, transform: `translateX(${String(MOTION_SHIFT)}px)` },
-    transitionProperty: 'opacity, transform',
+  enter: {
+    forward: { opacity: 0, x: MOTION_SHIFT },
+    back: { opacity: 0, x: -MOTION_SHIFT },
+    swipeNext: { x: '100%' },
+    swipePrev: { x: '-100%' },
   },
-  back: {
-    in: { opacity: 1, transform: 'none' },
-    out: { opacity: 0, transform: `translateX(${String(-MOTION_SHIFT)}px)` },
-    transitionProperty: 'opacity, transform',
-  },
-  swipeNext: {
-    in: { transform: 'none' },
-    out: { transform: 'translateX(100%)' },
-    transitionProperty: 'transform',
-  },
-  swipePrev: {
-    in: { transform: 'none' },
-    out: { transform: 'translateX(-100%)' },
-    transitionProperty: 'transform',
+  exit: {
+    forward: { opacity: 0, x: -MOTION_SHIFT },
+    back: { opacity: 0, x: MOTION_SHIFT },
+    swipeNext: { x: '-100%' },
+    swipePrev: { x: '100%' },
   },
 };
 
-const SHEET_TRANSITION = { duration: SCREEN_MOTION.duration, timingFunction: MOTION_EASING };
+const SHEET_TRANSITION = { duration: SHEET_MS, timingFunction: `cubic-bezier(${MOTION_EASE.join(', ')})` };
 
 export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThemeOverride => createTheme({
   primaryColor: 'signal',

@@ -16,6 +16,9 @@ The app is about data: historic, present and future.
   interface, not an inline object type.
 - **Navigation uses react-router** (`HashRouter` in `main.tsx`, routes in `App.tsx`). Build URLs with `paths` from
   `src/utils/paths.ts`; pass `BACK_STATE` when a jump should animate as going back. No route state in stores.
+- **Animation and gestures use Motion** (`motion/react`). Wrap Mantine components with `MotionBox` /
+  `MotionButton` from `components/motionComponents.ts`; timings live in `MOTION` and `SCREEN_MOTION` in `theme.ts`.
+  No CSS transitions or keyframes, no hand-written drag handlers. Mantine's own Modal/Drawer transitions stay.
 - **No comments in source files.**
 
 ## Data

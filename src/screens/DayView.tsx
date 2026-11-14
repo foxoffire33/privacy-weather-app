@@ -1,24 +1,29 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
-import { useDrag } from '@mantine/hooks';
-import { Suspense, useRef } from 'react';
+import { useDragControls } from 'motion/react';
+import { Suspense } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
 import { DayActions } from '../components/day/DayActions';
 import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature, DayWind } from '../components/day/DaySections';
+import { MotionBox } from '../components/motionComponents';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
+import { MOTION } from '../theme';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
 import { paths, SWIPE_NEXT_STATE, SWIPE_PREV_STATE } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
 import type { DayData, DayRecord } from '../stores';
 import type { DayBodyProps, DayHeaderProps, DayHeroValues, DayViewProps } from '../types';
+import type { PanInfo } from 'motion/react';
 import type { ReactElement } from 'react';
 
 const SWIPE_DISTANCE = 80;
+const SWIPE_VELOCITY = 0.2;
+const EDGE_ELASTIC = 0.25;
 
 
 export function DayView({ cityId, date }: DayViewProps): ReactElement {
@@ -95,24 +100,18 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
   const { prev, next } = useLogNeighbours(cityId, date);
   const navigate = useNavigate();
-  const pageRef = useRef<HTMLDivElement>(null);
-  const { ref: swipeRef } = useDrag<HTMLDivElement>((gesture) => {
-    const dx = gesture.movement[0];
-    const target = dx < 0 ? next : prev;
-    const page = pageRef.current;
-    if (!gesture.last) {
-      if (page) { page.style.transition = 'none'; page.style.transform = `translateX(${String(target === undefined ? dx / 4 : dx)}px)`; }
-      return;
-    }
-    if (!gesture.canceled && target !== undefined && Math.abs(dx) >= SWIPE_DISTANCE) {
-      void navigate(paths.day(cityId, target), { replace: true, state: dx < 0 ? SWIPE_NEXT_STATE : SWIPE_PREV_STATE });
-      return;
-    }
-    if (page) { page.style.transition = 'transform 200ms ease'; page.style.transform = 'none'; }
-  }, { axis: 'x', threshold: 10 });
+  const controls = useDragControls();
+  const onDragEnd = (_: PointerEvent, info: PanInfo) => {
+    const swipe = info.offset.x + info.velocity.x * SWIPE_VELOCITY;
+    const target = swipe < 0 ? next : prev;
+    if (target === undefined || Math.abs(swipe) < SWIPE_DISTANCE) { return; }
+    void navigate(paths.day(cityId, target), { replace: true, state: swipe < 0 ? SWIPE_NEXT_STATE : SWIPE_PREV_STATE });
+  };
   return (
-    <Box ref={pageRef}>
-      <Box className="hero" ref={swipeRef} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
+    <MotionBox drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin dragMomentum={false}
+      dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: next === undefined ? EDGE_ELASTIC : 1, right: prev === undefined ? EDGE_ELASTIC : 1 }}
+      dragTransition={MOTION.settle} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' }}>
+      <Box className="hero" onPointerDown={(e) => { controls.start(e); }} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>
           <Text fz={15} fw={800}>{cityName}</Text>
@@ -132,7 +131,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
       <Suspense fallback={<DayDetailsSk />}>
         <DayDetails cityId={cityId} date={date} />
       </Suspense>
-    </Box>
+    </MotionBox>
   );
 }
 

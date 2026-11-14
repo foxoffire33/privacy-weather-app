@@ -1,6 +1,7 @@
 import { App as CapApp } from '@capacitor/app';
 import { Box } from '@mantine/core';
 import { modals, useModals } from '@mantine/modals';
+import { MotionConfig } from 'motion/react';
 import { Fragment, Suspense, use, useEffect, useEffectEvent } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
@@ -11,14 +12,7 @@ import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n
 import { syncAppIcon } from './native/appIcon';
 import { allowLandscape } from './native/orientation';
 import { startWidgetSync } from './native/widgets';
-import { Cities } from './screens/Cities';
-import { DayView } from './screens/DayView';
-import { History } from './screens/History';
-import { Home } from './screens/Home';
-import { Hourly } from './screens/Hourly';
-import { Onboarding } from './screens/Onboarding';
-import { Search } from './screens/Search';
-import { Settings } from './screens/Settings';
+import { Cities, DayView, History, Home, Hourly, Onboarding, preloadScreens, Search, Settings } from './screens/lazy';
 import { refreshAll, useCityStore, useHydration, useIsHydrated, useSettings } from './stores';
 import { useUiStore } from './stores/uiStore';
 import { BACK_STATE, paths } from './utils/paths';
@@ -26,13 +20,17 @@ import { BACK_STATE, paths } from './utils/paths';
 import type { CityRouteProps, FrameProps } from './types';
 import type { ReactElement } from 'react';
 
+const PRELOAD_DELAY = 1500;
+
 export default function App(): ReactElement {
   return (
-    <Frame>
-      <Suspense fallback={<Splash />}>
-        <Screens />
-      </Suspense>
-    </Frame>
+    <MotionConfig reducedMotion="user">
+      <Frame>
+        <Suspense fallback={<Splash />}>
+          <Screens />
+        </Suspense>
+      </Frame>
+    </MotionConfig>
   );
 }
 
@@ -94,11 +92,12 @@ function Screens() {
   useEffect(() => { allowLandscape(chartOpen); }, [chartOpen]);
   useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
   useEffect(() => startWidgetSync(), []);
+  useEffect(() => { globalThis.setTimeout(preloadScreens, PRELOAD_DELAY); }, []);
   const onboarding = !hasCities && location.pathname !== paths.search && location.pathname !== paths.settings;
   return (
     <Fragment key={lang}>
       {onboarding ? <Onboarding /> : (
-        <ScreenTransition key={location.pathname}>
+        <ScreenTransition>
           <Routes location={location}>
             <Route path={paths.home} element={<Home />} />
             <Route path={paths.cities} element={<Cities />} />
