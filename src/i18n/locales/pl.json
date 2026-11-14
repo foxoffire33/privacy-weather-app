@@ -417,7 +417,13 @@
     "no2": "NO₂ śr.",
     "ozoneMax": "Ozon maks.",
     "sourceForecast": "Modele prognoz Open-Meteo (dane przeszłe)",
-    "sourceArchive": "Historyczna pogoda Open-Meteo (reanaliza ERA5)"
+    "sourceArchive": "Historyczna pogoda Open-Meteo (reanaliza ERA5)",
+    "edited": "Edytowano",
+    "edit": "Edytuj",
+    "addToLog": "Dodaj do dziennika",
+    "restore": "Przywróć",
+    "restoreConfirm": "Zastąpić ten dzień danymi z archiwum? Twoje zmiany zostaną utracone.",
+    "restoreFailed": "Przywracanie nie powiodło się: {error}"
   },
   "history": {
     "title": "Ten dzień,\ninne lata.",
@@ -474,7 +480,9 @@
       "many": "Dodano {count} dni, zaktualizowano {updated}, zachowano {kept} zapisanych przez aplikację.",
       "other": "Dodano {count} dnia, zaktualizowano {updated}, zachowano {kept} zapisanych przez aplikację."
     },
-    "downloadFailed": "Nie udało się pobrać: {error}"
+    "downloadFailed": "Nie udało się pobrać: {error}",
+    "edited": "Edytowano",
+    "addManual": "Dodaj dzień ręcznie"
   },
   "settings": {
     "title": "Ustawienia.",
@@ -557,6 +565,29 @@
       "rainDescription": "Prognoza opadów w słupkach 15-minutowych",
       "hourly": "Godzinowo",
       "hourlyDescription": "Temperatura i szansa opadów na kolejne godziny"
+    }
+  },
+  "dayForm": {
+    "date": "Data",
+    "high": "Maks.",
+    "low": "Min.",
+    "feelsHigh": "Odczuwalna maks.",
+    "feelsLow": "Odczuwalna min.",
+    "rain": "Opady",
+    "snow": "Śnieg",
+    "wind": "Maks. wiatr",
+    "gusts": "Maks. porywy",
+    "sunshine": "Słońce",
+    "uv": "Indeks UV",
+    "condition": "Pogoda",
+    "save": "Zapisz",
+    "createTitle": "Dodaj dzień",
+    "editTitle": "Edytuj dzień",
+    "errors": {
+      "range": "Musi być między {min} a {max}",
+      "date": "Wybierz datę, która nie jest w przyszłości",
+      "lowAboveHigh": "Min. nie może być wyższe niż maks.",
+      "gustBelowWind": "Porywy nie mogą być słabsze niż wiatr"
     }
   }
 }

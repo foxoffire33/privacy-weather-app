@@ -59,6 +59,8 @@ export const convTemp = (c: number | null | undefined, unit: TempUnit): number |
   ((c === null || c === undefined) || Number.isNaN(c) ? null : Math.round((unit === 'F' ? c * 9 / 5 + 32 : c) * 10) / 10);
 export const convWind = (kmh: number | null | undefined, unit: WindUnit): number | null =>
   ((kmh === null || kmh === undefined) ? null : Math.round(kmh / WIND_DIVISOR[unit] * 10) / 10);
+export const tempToCelsius = (v: number, unit: TempUnit): number => (unit === 'F' ? (v - 32) * 5 / 9 : v);
+export const windToKmh = (v: number, unit: WindUnit): number => v * WIND_DIVISOR[unit];
 export const windUnitLabel = (unit: WindUnit): string => WIND_LABEL[unit];
 export const fullDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 

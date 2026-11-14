@@ -414,7 +414,13 @@
     "no2": "NO₂ medie",
     "ozoneMax": "Ozon max",
     "sourceForecast": "Modele de prognoză Open-Meteo (date trecute)",
-    "sourceArchive": "Vreme istorică Open-Meteo (reanaliză ERA5)"
+    "sourceArchive": "Vreme istorică Open-Meteo (reanaliză ERA5)",
+    "edited": "Editat",
+    "edit": "Editează",
+    "addToLog": "Adaugă în jurnal",
+    "restore": "Restaurează",
+    "restoreConfirm": "Înlocuiești această zi cu date din arhivă? Modificările tale se vor pierde.",
+    "restoreFailed": "Restaurarea a eșuat: {error}"
   },
   "history": {
     "title": "Această zi,\nalți ani.",
@@ -468,7 +474,9 @@
       "few": "{count} zile adăugate, {updated} actualizate, {kept} înregistrate de aplicație păstrate.",
       "other": "{count} de zile adăugate, {updated} actualizate, {kept} înregistrate de aplicație păstrate."
     },
-    "downloadFailed": "Descărcarea a eșuat: {error}"
+    "downloadFailed": "Descărcarea a eșuat: {error}",
+    "edited": "Editat",
+    "addManual": "Adaugă o zi manual"
   },
   "settings": {
     "title": "Setări.",
@@ -551,6 +559,29 @@
       "rainDescription": "Prognoza ploii cu bare de 15 minute",
       "hourly": "Oră cu oră",
       "hourlyDescription": "Temperatura și probabilitatea de ploaie pentru orele următoare"
+    }
+  },
+  "dayForm": {
+    "date": "Data",
+    "high": "Maximă",
+    "low": "Minimă",
+    "feelsHigh": "Resimțită max.",
+    "feelsLow": "Resimțită min.",
+    "rain": "Precipitații",
+    "snow": "Zăpadă",
+    "wind": "Vânt max.",
+    "gusts": "Rafale max.",
+    "sunshine": "Soare",
+    "uv": "Indice UV",
+    "condition": "Vreme",
+    "save": "Salvează",
+    "createTitle": "Adaugă o zi",
+    "editTitle": "Editează ziua",
+    "errors": {
+      "range": "Trebuie să fie între {min} și {max}",
+      "date": "Alege o dată care nu este în viitor",
+      "lowAboveHigh": "Minima nu poate depăși maxima",
+      "gustBelowWind": "Rafalele nu pot fi sub vânt"
     }
   }
 }

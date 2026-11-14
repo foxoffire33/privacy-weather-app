@@ -420,7 +420,13 @@
     "no2": "NO₂ meán",
     "ozoneMax": "Ózón uas",
     "sourceForecast": "Samhlacha réamhaisnéise Open-Meteo (sonraí san am atá thart)",
-    "sourceArchive": "Aimsir stairiúil Open-Meteo (athanailís ERA5)"
+    "sourceArchive": "Aimsir stairiúil Open-Meteo (athanailís ERA5)",
+    "edited": "Curtha in eagar",
+    "edit": "Cuir in eagar",
+    "addToLog": "Cuir leis an loga",
+    "restore": "Athchóirigh",
+    "restoreConfirm": "An lá seo a athsholáthar le sonraí cartlainne? Caillfear d'athruithe.",
+    "restoreFailed": "Theip ar athchóiriú: {error}"
   },
   "history": {
     "title": "An lá seo,\nblianta eile.",
@@ -480,7 +486,9 @@
       "many": "Cuireadh {count} lá leis, nuashonraíodh {updated}, coinníodh {kept} a thaifead an aip.",
       "other": "Cuireadh {count} lá leis, nuashonraíodh {updated}, coinníodh {kept} a thaifead an aip."
     },
-    "downloadFailed": "Theip ar an íoslódáil: {error}"
+    "downloadFailed": "Theip ar an íoslódáil: {error}",
+    "edited": "Curtha in eagar",
+    "addManual": "Cuir lá leis de láimh"
   },
   "settings": {
     "title": "Socruithe.",
@@ -563,6 +571,29 @@
       "rainDescription": "Réamhaisnéis báistí le barraí 15 nóiméad",
       "hourly": "In aghaidh na huaire",
       "hourlyDescription": "Teocht agus seans báistí do na huaireanta romhainn"
+    }
+  },
+  "dayForm": {
+    "date": "Dáta",
+    "high": "Uasmhéid",
+    "low": "Íosmhéid",
+    "feelsHigh": "Mothaítear uas.",
+    "feelsLow": "Mothaítear íos.",
+    "rain": "Deascadh",
+    "snow": "Sneachta",
+    "wind": "Gaoth uas.",
+    "gusts": "Séideáin uas.",
+    "sunshine": "Grian",
+    "uv": "Innéacs UV",
+    "condition": "Aimsir",
+    "save": "Sábháil",
+    "createTitle": "Cuir lá leis",
+    "editTitle": "Cuir lá in eagar",
+    "errors": {
+      "range": "Caithfidh sé a bheith idir {min} agus {max}",
+      "date": "Roghnaigh dáta nach bhfuil sa todhchaí",
+      "lowAboveHigh": "Ní féidir an t-íosmhéid a bheith os cionn an uasmhéid",
+      "gustBelowWind": "Ní féidir séideáin a bheith níos lú ná an ghaoth"
     }
   }
 }

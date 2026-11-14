@@ -411,7 +411,13 @@
     "no2": "NO₂ gem.",
     "ozoneMax": "Ozon max",
     "sourceForecast": "Open-Meteo-verwachtingsmodellen (eerdere gegevens)",
-    "sourceArchive": "Open-Meteo historisch weer (ERA5-heranalyse)"
+    "sourceArchive": "Open-Meteo historisch weer (ERA5-heranalyse)",
+    "edited": "Bewerkt",
+    "edit": "Bewerken",
+    "addToLog": "Aan log toevoegen",
+    "restore": "Herstellen",
+    "restoreConfirm": "Deze dag vervangen door archiefdata? Je wijzigingen gaan verloren.",
+    "restoreFailed": "Herstellen mislukt: {error}"
   },
   "history": {
     "title": "Deze dag,\nandere jaren.",
@@ -462,7 +468,9 @@
       "one": "{count} dag toegevoegd, {updated} bijgewerkt, {kept} door de app zelf gelogd bewaard.",
       "other": "{count} dagen toegevoegd, {updated} bijgewerkt, {kept} door de app zelf gelogd bewaard."
     },
-    "downloadFailed": "Downloaden mislukt: {error}"
+    "downloadFailed": "Downloaden mislukt: {error}",
+    "edited": "Bewerkt",
+    "addManual": "Dag handmatig toevoegen"
   },
   "settings": {
     "title": "Instellingen.",
@@ -545,6 +553,29 @@
       "rainDescription": "Regenverwachting met balken per 15 minuten",
       "hourly": "Per uur",
       "hourlyDescription": "Temperatuur en regenkans voor de komende uren"
+    }
+  },
+  "dayForm": {
+    "date": "Datum",
+    "high": "Max",
+    "low": "Min",
+    "feelsHigh": "Gevoelsmax",
+    "feelsLow": "Gevoelsmin",
+    "rain": "Neerslag",
+    "snow": "Sneeuw",
+    "wind": "Max wind",
+    "gusts": "Max windstoten",
+    "sunshine": "Zon",
+    "uv": "UV-index",
+    "condition": "Weer",
+    "save": "Opslaan",
+    "createTitle": "Dag toevoegen",
+    "editTitle": "Dag bewerken",
+    "errors": {
+      "range": "Moet tussen {min} en {max} liggen",
+      "date": "Kies een datum die niet in de toekomst ligt",
+      "lowAboveHigh": "Min kan niet boven max liggen",
+      "gustBelowWind": "Windstoten kunnen niet lager zijn dan wind"
     }
   }
 }

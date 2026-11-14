@@ -414,7 +414,13 @@
     "no2": "NO₂ moy.",
     "ozoneMax": "Ozone max",
     "sourceForecast": "Modèles de prévision Open-Meteo (données passées)",
-    "sourceArchive": "Météo historique Open-Meteo (réanalyse ERA5)"
+    "sourceArchive": "Météo historique Open-Meteo (réanalyse ERA5)",
+    "edited": "Modifié",
+    "edit": "Modifier",
+    "addToLog": "Ajouter au journal",
+    "restore": "Restaurer",
+    "restoreConfirm": "Remplacer ce jour par les données d'archive ? Vos modifications seront perdues.",
+    "restoreFailed": "Échec de la restauration : {error}"
   },
   "history": {
     "title": "Ce jour,\nd’autres années.",
@@ -468,7 +474,9 @@
       "many": "{count} jours ajoutés, {updated} mis à jour, {kept} enregistrés par l’app conservés.",
       "other": "{count} jours ajoutés, {updated} mis à jour, {kept} enregistrés par l’app conservés."
     },
-    "downloadFailed": "Échec du téléchargement : {error}"
+    "downloadFailed": "Échec du téléchargement : {error}",
+    "edited": "Modifié",
+    "addManual": "Ajouter un jour à la main"
   },
   "settings": {
     "title": "Réglages.",
@@ -551,6 +559,29 @@
       "rainDescription": "Prévision de pluie par barres de 15 minutes",
       "hourly": "Heure par heure",
       "hourlyDescription": "Température et risque de pluie pour les prochaines heures"
+    }
+  },
+  "dayForm": {
+    "date": "Date",
+    "high": "Max",
+    "low": "Min",
+    "feelsHigh": "Ressenti max",
+    "feelsLow": "Ressenti min",
+    "rain": "Précipitations",
+    "snow": "Neige",
+    "wind": "Vent max",
+    "gusts": "Rafales max",
+    "sunshine": "Ensoleillement",
+    "uv": "Indice UV",
+    "condition": "Conditions",
+    "save": "Enregistrer",
+    "createTitle": "Ajouter un jour",
+    "editTitle": "Modifier le jour",
+    "errors": {
+      "range": "Doit être entre {min} et {max}",
+      "date": "Choisissez une date qui n'est pas dans le futur",
+      "lowAboveHigh": "Le min ne peut pas dépasser le max",
+      "gustBelowWind": "Les rafales ne peuvent pas être inférieures au vent"
     }
   }
 }

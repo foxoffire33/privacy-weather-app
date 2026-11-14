@@ -417,7 +417,13 @@
     "no2": "NO₂ povp.",
     "ozoneMax": "Ozon najv.",
     "sourceForecast": "Napovedni modeli Open-Meteo (pretekli podatki)",
-    "sourceArchive": "Zgodovinsko vreme Open-Meteo (reanaliza ERA5)"
+    "sourceArchive": "Zgodovinsko vreme Open-Meteo (reanaliza ERA5)",
+    "edited": "Urejeno",
+    "edit": "Uredi",
+    "addToLog": "Dodaj v dnevnik",
+    "restore": "Obnovi",
+    "restoreConfirm": "Nadomestim ta dan s podatki iz arhiva? Vaše spremembe bodo izgubljene.",
+    "restoreFailed": "Obnova ni uspela: {error}"
   },
   "history": {
     "title": "Ta dan,\ndrugo leto.",
@@ -474,7 +480,9 @@
       "few": "Dodani {count} dnevi, posodobljenih {updated}, ohranjenih {kept}, ki jih je zabeležila aplikacija.",
       "other": "Dodanih {count} dni, posodobljenih {updated}, ohranjenih {kept}, ki jih je zabeležila aplikacija."
     },
-    "downloadFailed": "Prenos ni uspel: {error}"
+    "downloadFailed": "Prenos ni uspel: {error}",
+    "edited": "Urejeno",
+    "addManual": "Dodaj dan ročno"
   },
   "settings": {
     "title": "Nastavitve.",
@@ -557,6 +565,29 @@
       "rainDescription": "Napoved dežja s 15-minutnimi stolpci",
       "hourly": "Po urah",
       "hourlyDescription": "Temperatura in verjetnost dežja za prihodnje ure"
+    }
+  },
+  "dayForm": {
+    "date": "Datum",
+    "high": "Najvišja",
+    "low": "Najnižja",
+    "feelsHigh": "Občutek najv.",
+    "feelsLow": "Občutek najn.",
+    "rain": "Padavine",
+    "snow": "Sneg",
+    "wind": "Najmočnejši veter",
+    "gusts": "Najmočnejši sunki",
+    "sunshine": "Sonce",
+    "uv": "UV-indeks",
+    "condition": "Vreme",
+    "save": "Shrani",
+    "createTitle": "Dodaj dan",
+    "editTitle": "Uredi dan",
+    "errors": {
+      "range": "Mora biti med {min} in {max}",
+      "date": "Izberite datum, ki ni v prihodnosti",
+      "lowAboveHigh": "Najnižja ne more biti nad najvišjo",
+      "gustBelowWind": "Sunki ne morejo biti šibkejši od vetra"
     }
   }
 }

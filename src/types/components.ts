@@ -329,3 +329,35 @@ export interface ScreenTransitionProps {
 export interface CityRouteProps {
   screen: 'history' | 'hourly' | 'day';
 }
+
+export type FormNumber = number | '';
+
+export interface DayFormValues {
+  date: string;
+  hi: FormNumber;
+  lo: FormNumber;
+  feelsHi: FormNumber;
+  feelsLo: FormNumber;
+  mm: FormNumber;
+  snow: FormNumber;
+  wind: FormNumber;
+  gust: FormNumber;
+  sunshine: FormNumber;
+  uv: FormNumber;
+  code: string;
+}
+
+export interface DayEntryFormProps {
+  cityId: string;
+  date?: string;
+  opened: boolean;
+  onClose: () => void;
+}
+
+export interface DayActionsProps {
+  cityId: string;
+  date: string;
+  record: DayRecord | undefined;
+}
+
+export type DayEntryFieldsProps = Omit<DayEntryFormProps, 'opened'>;

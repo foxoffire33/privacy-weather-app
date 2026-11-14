@@ -411,7 +411,13 @@
     "no2": "NO₂ Mittel",
     "ozoneMax": "Ozon max.",
     "sourceForecast": "Open-Meteo-Vorhersagemodelle (vergangene Daten)",
-    "sourceArchive": "Open-Meteo historisches Wetter (ERA5-Reanalyse)"
+    "sourceArchive": "Open-Meteo historisches Wetter (ERA5-Reanalyse)",
+    "edited": "Bearbeitet",
+    "edit": "Bearbeiten",
+    "addToLog": "Zum Log hinzufügen",
+    "restore": "Wiederherstellen",
+    "restoreConfirm": "Diesen Tag durch Archivdaten ersetzen? Deine Änderungen gehen verloren.",
+    "restoreFailed": "Wiederherstellen fehlgeschlagen: {error}"
   },
   "history": {
     "title": "Dieser Tag,\nandere Jahre.",
@@ -462,7 +468,9 @@
       "one": "{count} Tag hinzugefügt, {updated} aktualisiert, {kept} von der App erfasste behalten.",
       "other": "{count} Tage hinzugefügt, {updated} aktualisiert, {kept} von der App erfasste behalten."
     },
-    "downloadFailed": "Herunterladen fehlgeschlagen: {error}"
+    "downloadFailed": "Herunterladen fehlgeschlagen: {error}",
+    "edited": "Bearbeitet",
+    "addManual": "Tag manuell hinzufügen"
   },
   "settings": {
     "title": "Einstellungen.",
@@ -545,6 +553,29 @@
       "rainDescription": "Regenaussicht mit 15-Minuten-Balken",
       "hourly": "Stündlich",
       "hourlyDescription": "Temperatur und Regenwahrscheinlichkeit für die kommenden Stunden"
+    }
+  },
+  "dayForm": {
+    "date": "Datum",
+    "high": "Höchstwert",
+    "low": "Tiefstwert",
+    "feelsHigh": "Gefühlt max.",
+    "feelsLow": "Gefühlt min.",
+    "rain": "Niederschlag",
+    "snow": "Schneefall",
+    "wind": "Max. Wind",
+    "gusts": "Max. Böen",
+    "sunshine": "Sonnenschein",
+    "uv": "UV-Index",
+    "condition": "Wetterlage",
+    "save": "Speichern",
+    "createTitle": "Tag hinzufügen",
+    "editTitle": "Tag bearbeiten",
+    "errors": {
+      "range": "Muss zwischen {min} und {max} liegen",
+      "date": "Wähle ein Datum, das nicht in der Zukunft liegt",
+      "lowAboveHigh": "Tiefstwert darf nicht über dem Höchstwert liegen",
+      "gustBelowWind": "Böen dürfen nicht unter dem Wind liegen"
     }
   }
 }

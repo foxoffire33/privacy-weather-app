@@ -411,7 +411,13 @@
     "no2": "NO₂ kesk.",
     "ozoneMax": "Osoon max",
     "sourceForecast": "Open-Meteo prognoosimudelid (varasemad andmed)",
-    "sourceArchive": "Open-Meteo ajalooline ilm (ERA5 taasanalüüs)"
+    "sourceArchive": "Open-Meteo ajalooline ilm (ERA5 taasanalüüs)",
+    "edited": "Muudetud",
+    "edit": "Muuda",
+    "addToLog": "Lisa logisse",
+    "restore": "Taasta",
+    "restoreConfirm": "Asendada see päev arhiiviandmetega? Sinu muudatused lähevad kaotsi.",
+    "restoreFailed": "Taastamine ebaõnnestus: {error}"
   },
   "history": {
     "title": "See päev,\nteised aastad.",
@@ -462,7 +468,9 @@
       "one": "Lisatud {count} päev, uuendatud {updated}, säilitatud {kept} rakenduse logitud päeva.",
       "other": "Lisatud {count} päeva, uuendatud {updated}, säilitatud {kept} rakenduse logitud päeva."
     },
-    "downloadFailed": "Allalaadimine ebaõnnestus: {error}"
+    "downloadFailed": "Allalaadimine ebaõnnestus: {error}",
+    "edited": "Muudetud",
+    "addManual": "Lisa päev käsitsi"
   },
   "settings": {
     "title": "Seaded.",
@@ -545,6 +553,29 @@
       "rainDescription": "Vihmaprognoos 15-minutiliste tulpadena",
       "hourly": "Tunnipõhine",
       "hourlyDescription": "Temperatuur ja vihma tõenäosus järgmisteks tundideks"
+    }
+  },
+  "dayForm": {
+    "date": "Kuupäev",
+    "high": "Kõrgeim",
+    "low": "Madalaim",
+    "feelsHigh": "Tundub kõrgeim",
+    "feelsLow": "Tundub madalaim",
+    "rain": "Sademed",
+    "snow": "Lumi",
+    "wind": "Suurim tuul",
+    "gusts": "Suurimad puhangud",
+    "sunshine": "Päike",
+    "uv": "UV-indeks",
+    "condition": "Ilm",
+    "save": "Salvesta",
+    "createTitle": "Lisa päev",
+    "editTitle": "Muuda päeva",
+    "errors": {
+      "range": "Peab olema vahemikus {min}–{max}",
+      "date": "Vali kuupäev, mis pole tulevikus",
+      "lowAboveHigh": "Madalaim ei saa olla kõrgeimast suurem",
+      "gustBelowWind": "Puhangud ei saa olla tuulest nõrgemad"
     }
   }
 }

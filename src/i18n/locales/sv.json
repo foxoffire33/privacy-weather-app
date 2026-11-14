@@ -411,7 +411,13 @@
     "no2": "NO₂ medel",
     "ozoneMax": "Ozon max",
     "sourceForecast": "Open-Meteos prognosmodeller (tidigare data)",
-    "sourceArchive": "Open-Meteo historiskt väder (ERA5-återanalys)"
+    "sourceArchive": "Open-Meteo historiskt väder (ERA5-återanalys)",
+    "edited": "Redigerad",
+    "edit": "Redigera",
+    "addToLog": "Lägg till i loggen",
+    "restore": "Återställ",
+    "restoreConfirm": "Ersätta dagen med arkivdata? Dina ändringar går förlorade.",
+    "restoreFailed": "Återställning misslyckades: {error}"
   },
   "history": {
     "title": "Den här dagen,\nandra år.",
@@ -462,7 +468,9 @@
       "one": "{count} dag tillagd, {updated} uppdaterade, {kept} loggade av appen behölls.",
       "other": "{count} dagar tillagda, {updated} uppdaterade, {kept} loggade av appen behölls."
     },
-    "downloadFailed": "Nedladdningen misslyckades: {error}"
+    "downloadFailed": "Nedladdningen misslyckades: {error}",
+    "edited": "Redigerad",
+    "addManual": "Lägg till en dag manuellt"
   },
   "settings": {
     "title": "Inställningar.",
@@ -545,6 +553,29 @@
       "rainDescription": "Regnprognos med 15-minutersstaplar",
       "hourly": "Timme för timme",
       "hourlyDescription": "Temperatur och regnrisk för de kommande timmarna"
+    }
+  },
+  "dayForm": {
+    "date": "Datum",
+    "high": "Max",
+    "low": "Min",
+    "feelsHigh": "Känns som max",
+    "feelsLow": "Känns som min",
+    "rain": "Nederbörd",
+    "snow": "Snö",
+    "wind": "Max vind",
+    "gusts": "Max byar",
+    "sunshine": "Sol",
+    "uv": "UV-index",
+    "condition": "Väder",
+    "save": "Spara",
+    "createTitle": "Lägg till en dag",
+    "editTitle": "Redigera dag",
+    "errors": {
+      "range": "Måste vara mellan {min} och {max}",
+      "date": "Välj ett datum som inte ligger i framtiden",
+      "lowAboveHigh": "Min kan inte vara över max",
+      "gustBelowWind": "Byar kan inte vara lägre än vinden"
     }
   }
 }

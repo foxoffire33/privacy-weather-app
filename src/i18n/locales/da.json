@@ -411,7 +411,13 @@
     "no2": "NO₂ gns.",
     "ozoneMax": "Ozon maks.",
     "sourceForecast": "Open-Meteo-prognosemodeller (tidligere data)",
-    "sourceArchive": "Open-Meteo historisk vejr (ERA5-reanalyse)"
+    "sourceArchive": "Open-Meteo historisk vejr (ERA5-reanalyse)",
+    "edited": "Redigeret",
+    "edit": "Rediger",
+    "addToLog": "Føj til log",
+    "restore": "Gendan",
+    "restoreConfirm": "Erstat denne dag med arkivdata? Dine ændringer går tabt.",
+    "restoreFailed": "Gendannelse mislykkedes: {error}"
   },
   "history": {
     "title": "Denne dag,\nandre år.",
@@ -462,7 +468,9 @@
       "one": "{count} dag tilføjet, {updated} opdateret, {kept} logget af appen bevaret.",
       "other": "{count} dage tilføjet, {updated} opdateret, {kept} logget af appen bevaret."
     },
-    "downloadFailed": "Download mislykkedes: {error}"
+    "downloadFailed": "Download mislykkedes: {error}",
+    "edited": "Redigeret",
+    "addManual": "Tilføj en dag manuelt"
   },
   "settings": {
     "title": "Indstillinger.",
@@ -545,6 +553,29 @@
       "rainDescription": "Regnudsigt med 15-minutters søjler",
       "hourly": "Time for time",
       "hourlyDescription": "Temperatur og regnchance for de kommende timer"
+    }
+  },
+  "dayForm": {
+    "date": "Dato",
+    "high": "Maks.",
+    "low": "Min.",
+    "feelsHigh": "Føles maks.",
+    "feelsLow": "Føles min.",
+    "rain": "Nedbør",
+    "snow": "Sne",
+    "wind": "Maks. vind",
+    "gusts": "Maks. vindstød",
+    "sunshine": "Solskin",
+    "uv": "UV-indeks",
+    "condition": "Vejr",
+    "save": "Gem",
+    "createTitle": "Tilføj en dag",
+    "editTitle": "Rediger dag",
+    "errors": {
+      "range": "Skal være mellem {min} og {max}",
+      "date": "Vælg en dato, der ikke er i fremtiden",
+      "lowAboveHigh": "Min. kan ikke være over maks.",
+      "gustBelowWind": "Vindstød kan ikke være under vind"
     }
   }
 }

@@ -25,7 +25,7 @@ function toCity(c: unknown): City | null {
 function toBackupDay(date: string, rec: Record<string, unknown>): BackupDay {
   const day: BackupDay = {
     date,
-    source: rec.source === 'filled' ? 'filled' : 'log',
+    source: rec.source === 'filled' || rec.source === 'edited' ? rec.source : 'log',
     snapshots: isNum(rec.snapshots) ? rec.snapshots : 0,
   };
   for (const field of DAY_FIELDS) { day[field] = numOrNull(rec[field]); }

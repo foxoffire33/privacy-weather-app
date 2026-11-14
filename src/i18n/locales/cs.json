@@ -417,7 +417,13 @@
     "no2": "NO₂ prům.",
     "ozoneMax": "Ozon max",
     "sourceForecast": "Předpovědní modely Open-Meteo (minulá data)",
-    "sourceArchive": "Historické počasí Open-Meteo (reanalýza ERA5)"
+    "sourceArchive": "Historické počasí Open-Meteo (reanalýza ERA5)",
+    "edited": "Upraveno",
+    "edit": "Upravit",
+    "addToLog": "Přidat do záznamu",
+    "restore": "Obnovit",
+    "restoreConfirm": "Nahradit tento den archivními daty? Vaše úpravy budou ztraceny.",
+    "restoreFailed": "Obnovení selhalo: {error}"
   },
   "history": {
     "title": "Tento den,\njiné roky.",
@@ -474,7 +480,9 @@
       "many": "Přidáno {count} dne, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací.",
       "other": "Přidáno {count} dní, aktualizováno {updated}, ponecháno {kept} zaznamenaných aplikací."
     },
-    "downloadFailed": "Stažení se nezdařilo: {error}"
+    "downloadFailed": "Stažení se nezdařilo: {error}",
+    "edited": "Upraveno",
+    "addManual": "Přidat den ručně"
   },
   "settings": {
     "title": "Nastavení.",
@@ -557,6 +565,29 @@
       "rainDescription": "Výhled srážek ve 15minutových sloupcích",
       "hourly": "Po hodinách",
       "hourlyDescription": "Teplota a pravděpodobnost deště na příští hodiny"
+    }
+  },
+  "dayForm": {
+    "date": "Datum",
+    "high": "Max.",
+    "low": "Min.",
+    "feelsHigh": "Pocitově max.",
+    "feelsLow": "Pocitově min.",
+    "rain": "Srážky",
+    "snow": "Sníh",
+    "wind": "Max. vítr",
+    "gusts": "Max. nárazy",
+    "sunshine": "Slunce",
+    "uv": "UV index",
+    "condition": "Počasí",
+    "save": "Uložit",
+    "createTitle": "Přidat den",
+    "editTitle": "Upravit den",
+    "errors": {
+      "range": "Musí být mezi {min} a {max}",
+      "date": "Vyberte datum, které není v budoucnosti",
+      "lowAboveHigh": "Min. nemůže být vyšší než max.",
+      "gustBelowWind": "Nárazy nemohou být slabší než vítr"
     }
   }
 }

@@ -411,7 +411,13 @@
     "no2": "NO₂ avg",
     "ozoneMax": "Ozone max",
     "sourceForecast": "Open-Meteo forecast models (past data)",
-    "sourceArchive": "Open-Meteo historical weather (ERA5 reanalysis)"
+    "sourceArchive": "Open-Meteo historical weather (ERA5 reanalysis)",
+    "edited": "Edited",
+    "edit": "Edit",
+    "addToLog": "Add to log",
+    "restore": "Restore",
+    "restoreConfirm": "Replace this day with archive data? Your edits will be lost.",
+    "restoreFailed": "Restore failed: {error}"
   },
   "history": {
     "title": "This day,\nother years.",
@@ -462,7 +468,9 @@
       "one": "Added {count} day, updated {updated}, kept {kept} the app logged itself.",
       "other": "Added {count} days, updated {updated}, kept {kept} the app logged itself."
     },
-    "downloadFailed": "Could not download: {error}"
+    "downloadFailed": "Could not download: {error}",
+    "edited": "Edited",
+    "addManual": "Add a day by hand"
   },
   "settings": {
     "title": "Settings.",
@@ -545,6 +553,29 @@
       "rainDescription": "Rain outlook with 15-minute bars",
       "hourly": "Hourly",
       "hourlyDescription": "Temperature and chance of rain for the coming hours"
+    }
+  },
+  "dayForm": {
+    "date": "Date",
+    "high": "High",
+    "low": "Low",
+    "feelsHigh": "Feels like high",
+    "feelsLow": "Feels like low",
+    "rain": "Precipitation",
+    "snow": "Snowfall",
+    "wind": "Max wind",
+    "gusts": "Max gusts",
+    "sunshine": "Sunshine",
+    "uv": "UV index",
+    "condition": "Condition",
+    "save": "Save",
+    "createTitle": "Add a day",
+    "editTitle": "Edit day",
+    "errors": {
+      "range": "Must be between {min} and {max}",
+      "date": "Pick a date that is not in the future",
+      "lowAboveHigh": "Low can't be above high",
+      "gustBelowWind": "Gusts can't be below wind"
     }
   }
 }

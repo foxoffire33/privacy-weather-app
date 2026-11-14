@@ -31,7 +31,7 @@ function HistoryRow({ cityId, record: r, today, open, onOpenChange, onOpen }: Hi
       <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => { onOpen(r.date); }}>
         <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
         <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm ?? 0).toFixed(1) })}{r.feelsHi === null || r.feelsHi === undefined ? '' : t('history.rowFeels', { t: T(r.feelsHi) })}</Text>
-        <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}</Box>
+        <Box component="span">{r.source === 'filled' && <Badge variant="outline" color="gray" size="xs">{t('history.filled')}</Badge>}{r.source === 'edited' && <Badge variant="outline" color="gray" size="xs">{t('history.edited')}</Badge>}</Box>
         <Text fz={20} fw={800} ta="right">{T(r.hi)}°</Text>
         <Text fz={12} ta="right" c={delta?.startsWith('+') === true ? 'signal.3' : 'dimmed'}>{delta ?? ''}</Text>
       </UnstyledButton>
