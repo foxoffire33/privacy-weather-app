@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
+import { DayEntryForm } from '../components/day/DayEntryForm';
 import { HistoryLog } from '../components/history/HistoryLog';
 import { Trends } from '../components/history/Trends';
 import { Icon } from '../components/Icon';
@@ -37,6 +38,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
   const draft = useUiStore((st) => st.lookupDraft);
   const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
   const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,
@@ -103,7 +105,9 @@ export function History({ cityId }: CityScreenProps): ReactElement {
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
+        <Button fullWidth mt={12} variant="outline" color="gray" onClick={() => { setAdding(true); }}>{t('history.addManual')}</Button>
         <HistoryLog cityId={cityId} rows={rows} today={today} onOpen={open} />
+        <DayEntryForm cityId={cityId} opened={adding} onClose={() => { setAdding(false); }} />
       </Box>
     </Box>
   );

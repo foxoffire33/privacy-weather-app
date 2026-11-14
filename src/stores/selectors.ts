@@ -13,7 +13,7 @@ import { useLogStore } from './logStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { QueryState } from './core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LookupView, Settings, Units } from './types';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LogNeighbours, LookupView, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
 export const useUpdateSettings = (): ((patch: Partial<Settings>) => void) => useSettingsStore((s) => s.updateSettings);
@@ -53,6 +53,15 @@ export function useCityLog(cityId: string): Record<string, DayRecord> {
 }
 
 export const useLogCount = (cityId: string): number => useLogStore((s) => (s.dates[cityId] ?? []).length);
+
+export const useRestoreQuery = (cityId: string, date: string): QueryState =>
+  useLogStore((s) => s.queries[`restore:${dayKey(cityId, date)}`] ?? IDLE_QUERY);
+
+export function useLogNeighbours(cityId: string, date: string): LogNeighbours {
+  const prev = useLogStore((s) => (s.dates[cityId] ?? []).findLast((d) => d < date));
+  const next = useLogStore((s) => (s.dates[cityId] ?? []).find((d) => d > date));
+  return { prev, next };
+}
 
 export const useDayRecord = (cityId: string, date: string): DayRecord | undefined =>
   useEntityCache((s) => s.tables.dayRecord[dayKey(cityId, date)]);

@@ -411,7 +411,13 @@
     "no2": "NO₂ átl.",
     "ozoneMax": "Ózon max",
     "sourceForecast": "Open-Meteo előrejelző modellek (múltbeli adatok)",
-    "sourceArchive": "Open-Meteo múltbeli időjárás (ERA5 reanalízis)"
+    "sourceArchive": "Open-Meteo múltbeli időjárás (ERA5 reanalízis)",
+    "edited": "Szerkesztve",
+    "edit": "Szerkesztés",
+    "addToLog": "Hozzáadás a naplóhoz",
+    "restore": "Visszaállítás",
+    "restoreConfirm": "Lecseréled ezt a napot archív adatokra? A módosításaid elvesznek.",
+    "restoreFailed": "A visszaállítás sikertelen: {error}"
   },
   "history": {
     "title": "Ez a nap,\nmás években.",
@@ -462,7 +468,9 @@
       "one": "{count} nap hozzáadva, {updated} frissítve, {kept} app által rögzített megtartva.",
       "other": "{count} nap hozzáadva, {updated} frissítve, {kept} app által rögzített megtartva."
     },
-    "downloadFailed": "A letöltés sikertelen: {error}"
+    "downloadFailed": "A letöltés sikertelen: {error}",
+    "edited": "Szerkesztve",
+    "addManual": "Nap kézi hozzáadása"
   },
   "settings": {
     "title": "Beállítások.",
@@ -545,6 +553,29 @@
       "rainDescription": "Esőkilátás 15 perces oszlopokkal",
       "hourly": "Óránként",
       "hourlyDescription": "Hőmérséklet és esőesély a következő órákra"
+    }
+  },
+  "dayForm": {
+    "date": "Dátum",
+    "high": "Max.",
+    "low": "Min.",
+    "feelsHigh": "Hőérzet max.",
+    "feelsLow": "Hőérzet min.",
+    "rain": "Csapadék",
+    "snow": "Hó",
+    "wind": "Max. szél",
+    "gusts": "Max. széllökés",
+    "sunshine": "Napsütés",
+    "uv": "UV-index",
+    "condition": "Időjárás",
+    "save": "Mentés",
+    "createTitle": "Nap hozzáadása",
+    "editTitle": "Nap szerkesztése",
+    "errors": {
+      "range": "{min} és {max} között kell lennie",
+      "date": "Válassz olyan dátumot, amely nem a jövőben van",
+      "lowAboveHigh": "A min. nem lehet nagyobb a max.-nál",
+      "gustBelowWind": "A széllökés nem lehet kisebb a szélnél"
     }
   }
 }

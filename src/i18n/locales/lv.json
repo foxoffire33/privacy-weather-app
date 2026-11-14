@@ -414,7 +414,13 @@
     "no2": "NO₂ vid.",
     "ozoneMax": "Ozons maks.",
     "sourceForecast": "Open-Meteo prognožu modeļi (pagātnes dati)",
-    "sourceArchive": "Open-Meteo vēsturiskie laikapstākļi (ERA5 reanalīze)"
+    "sourceArchive": "Open-Meteo vēsturiskie laikapstākļi (ERA5 reanalīze)",
+    "edited": "Rediģēts",
+    "edit": "Rediģēt",
+    "addToLog": "Pievienot žurnālam",
+    "restore": "Atjaunot",
+    "restoreConfirm": "Aizstāt šo dienu ar arhīva datiem? Tavas izmaiņas tiks zaudētas.",
+    "restoreFailed": "Atjaunošana neizdevās: {error}"
   },
   "history": {
     "title": "Šī diena,\nciti gadi.",
@@ -468,7 +474,9 @@
       "one": "Pievienota {count} diena, atjauninātas {updated}, saglabātas {kept} lietotnes reģistrētās.",
       "other": "Pievienotas {count} dienas, atjauninātas {updated}, saglabātas {kept} lietotnes reģistrētās."
     },
-    "downloadFailed": "Lejupielāde neizdevās: {error}"
+    "downloadFailed": "Lejupielāde neizdevās: {error}",
+    "edited": "Rediģēts",
+    "addManual": "Pievienot dienu manuāli"
   },
   "settings": {
     "title": "Iestatījumi.",
@@ -551,6 +559,29 @@
       "rainDescription": "Lietus prognoze ar 15 minūšu stabiņiem",
       "hourly": "Pa stundām",
       "hourlyDescription": "Temperatūra un lietus iespēja tuvākajām stundām"
+    }
+  },
+  "dayForm": {
+    "date": "Datums",
+    "high": "Maks.",
+    "low": "Min.",
+    "feelsHigh": "Šķietamā maks.",
+    "feelsLow": "Šķietamā min.",
+    "rain": "Nokrišņi",
+    "snow": "Sniegs",
+    "wind": "Maks. vējš",
+    "gusts": "Maks. brāzmas",
+    "sunshine": "Saule",
+    "uv": "UV indekss",
+    "condition": "Laiks",
+    "save": "Saglabāt",
+    "createTitle": "Pievienot dienu",
+    "editTitle": "Rediģēt dienu",
+    "errors": {
+      "range": "Jābūt no {min} līdz {max}",
+      "date": "Izvēlies datumu, kas nav nākotnē",
+      "lowAboveHigh": "Min. nevar būt lielāka par maks.",
+      "gustBelowWind": "Brāzmas nevar būt vājākas par vēju"
     }
   }
 }

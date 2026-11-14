@@ -13,7 +13,7 @@ export interface DayRecord {
   sunshine?: number | null;
   uv?: number | null;
   code?: number | null;
-  source: 'log' | 'filled';
+  source: 'log' | 'filled' | 'edited';
   snapshots: number;
 }
 
@@ -23,4 +23,18 @@ export interface ArchiveYear {
   lo?: number;
   mm?: number;
   error?: boolean;
+}
+
+export interface DayEntry {
+  hi: number | null;
+  lo: number | null;
+  feelsHi: number | null;
+  feelsLo: number | null;
+  mm: number | null;
+  snow: number | null;
+  wind: number | null;
+  gust: number | null;
+  sunshine: number | null;
+  uv: number | null;
+  code: number | null;
 }

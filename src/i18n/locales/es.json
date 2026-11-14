@@ -414,7 +414,13 @@
     "no2": "NO₂ media",
     "ozoneMax": "Ozono máx",
     "sourceForecast": "Modelos de previsión de Open-Meteo (datos pasados)",
-    "sourceArchive": "Tiempo histórico de Open-Meteo (reanálisis ERA5)"
+    "sourceArchive": "Tiempo histórico de Open-Meteo (reanálisis ERA5)",
+    "edited": "Editado",
+    "edit": "Editar",
+    "addToLog": "Añadir al registro",
+    "restore": "Restaurar",
+    "restoreConfirm": "¿Sustituir este día por datos del archivo? Se perderán tus cambios.",
+    "restoreFailed": "Error al restaurar: {error}"
   },
   "history": {
     "title": "Este día,\notros años.",
@@ -468,7 +474,9 @@
       "many": "{count} días añadidos, {updated} actualizados, {kept} registrados por la app conservados.",
       "other": "{count} días añadidos, {updated} actualizados, {kept} registrados por la app conservados."
     },
-    "downloadFailed": "No se pudo descargar: {error}"
+    "downloadFailed": "No se pudo descargar: {error}",
+    "edited": "Editado",
+    "addManual": "Añadir un día a mano"
   },
   "settings": {
     "title": "Ajustes.",
@@ -551,6 +559,29 @@
       "rainDescription": "Previsión de lluvia con barras de 15 minutos",
       "hourly": "Por horas",
       "hourlyDescription": "Temperatura y probabilidad de lluvia para las próximas horas"
+    }
+  },
+  "dayForm": {
+    "date": "Fecha",
+    "high": "Máxima",
+    "low": "Mínima",
+    "feelsHigh": "Sensación máx.",
+    "feelsLow": "Sensación mín.",
+    "rain": "Precipitación",
+    "snow": "Nieve",
+    "wind": "Viento máx.",
+    "gusts": "Rachas máx.",
+    "sunshine": "Sol",
+    "uv": "Índice UV",
+    "condition": "Estado",
+    "save": "Guardar",
+    "createTitle": "Añadir un día",
+    "editTitle": "Editar día",
+    "errors": {
+      "range": "Debe estar entre {min} y {max}",
+      "date": "Elige una fecha que no sea futura",
+      "lowAboveHigh": "La mínima no puede superar la máxima",
+      "gustBelowWind": "Las rachas no pueden ser menores que el viento"
     }
   }
 }

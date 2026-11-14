@@ -411,7 +411,13 @@
     "no2": "NO₂ ka.",
     "ozoneMax": "Otsoni enintään",
     "sourceForecast": "Open-Meteon ennustemallit (menneet tiedot)",
-    "sourceArchive": "Open-Meteon historiallinen sää (ERA5-uudelleenanalyysi)"
+    "sourceArchive": "Open-Meteon historiallinen sää (ERA5-uudelleenanalyysi)",
+    "edited": "Muokattu",
+    "edit": "Muokkaa",
+    "addToLog": "Lisää lokiin",
+    "restore": "Palauta",
+    "restoreConfirm": "Korvataanko päivä arkistotiedoilla? Muutoksesi menetetään.",
+    "restoreFailed": "Palautus epäonnistui: {error}"
   },
   "history": {
     "title": "Tämä päivä,\nmuut vuodet.",
@@ -462,7 +468,9 @@
       "one": "{count} päivä lisätty, {updated} päivitetty, {kept} sovelluksen kirjaamaa säilytetty.",
       "other": "{count} päivää lisätty, {updated} päivitetty, {kept} sovelluksen kirjaamaa säilytetty."
     },
-    "downloadFailed": "Lataus epäonnistui: {error}"
+    "downloadFailed": "Lataus epäonnistui: {error}",
+    "edited": "Muokattu",
+    "addManual": "Lisää päivä käsin"
   },
   "settings": {
     "title": "Asetukset.",
@@ -545,6 +553,29 @@
       "rainDescription": "Sade-ennuste 15 minuutin palkkeina",
       "hourly": "Tunneittain",
       "hourlyDescription": "Lämpötila ja sateen todennäköisyys tuleville tunneille"
+    }
+  },
+  "dayForm": {
+    "date": "Päivämäärä",
+    "high": "Ylin",
+    "low": "Alin",
+    "feelsHigh": "Tuntuu ylin",
+    "feelsLow": "Tuntuu alin",
+    "rain": "Sademäärä",
+    "snow": "Lumi",
+    "wind": "Suurin tuuli",
+    "gusts": "Suurimmat puuskat",
+    "sunshine": "Aurinko",
+    "uv": "UV-indeksi",
+    "condition": "Sää",
+    "save": "Tallenna",
+    "createTitle": "Lisää päivä",
+    "editTitle": "Muokkaa päivää",
+    "errors": {
+      "range": "Oltava välillä {min}–{max}",
+      "date": "Valitse päivä, joka ei ole tulevaisuudessa",
+      "lowAboveHigh": "Alin ei voi olla ylintä suurempi",
+      "gustBelowWind": "Puuskat eivät voi olla tuulta heikompia"
     }
   }
 }
