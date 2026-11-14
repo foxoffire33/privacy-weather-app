@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 import { useDragControls } from 'motion/react';
-import { Suspense, useDeferredValue, useRef } from 'react';
+import { Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
@@ -8,6 +8,7 @@ import { DayActions } from '../components/day/DayActions';
 import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature, DayWind } from '../components/day/DaySections';
 import { MotionBox } from '../components/motionComponents';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { useScreenSettled } from '../components/screenSettled';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
@@ -100,7 +101,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
   const { prev, next } = useLogNeighbours(cityId, date);
   const navigate = useNavigate();
-  const settled = useDeferredValue(true, false);
+  const settled = useScreenSettled();
   const controls = useDragControls();
   const axis = useRef<'x' | 'y' | null>(null);
   const onDragEnd = (event: PointerEvent, info: PanInfo) => {

@@ -39,10 +39,10 @@ function formatDay(iso: string, style: DateStyle): string {
   const key = `${locale}|${style}`;
   let format = formatters.get(key);
   if (format === undefined) {
-    format = new Intl.DateTimeFormat(locale, DATE_STYLES[style]);
+    format = new Intl.DateTimeFormat(locale, { ...DATE_STYLES[style], timeZone: 'UTC' });
     formatters.set(key, format);
   }
-  return format.format(new Date(`${iso}T12:00`));
+  return format.format(new Date(`${iso}T12:00Z`));
 }
 
 export const weekday = (iso: string): string => formatDay(iso, 'weekday');

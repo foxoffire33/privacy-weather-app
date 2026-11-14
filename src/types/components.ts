@@ -335,6 +335,12 @@ export interface SpinProps {
   children: ReactNode;
 }
 
+export interface ScreenFrameProps {
+  direction: ScreenDirection;
+  ref?: Ref<HTMLDivElement>;
+  children: ReactNode;
+}
+
 export interface ScreenTransitionProps {
   children: ReactNode;
 }
