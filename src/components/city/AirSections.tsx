@@ -2,7 +2,7 @@ import { Box, Text } from '@mantine/core';
 
 import { t } from '../../i18n';
 import { hhmm } from '../../utils/format';
-import { euAqiLevel, levelName, nowIndex, pollenLevel, pollutantLevel, usAqiLabel } from '../../weather/insights';
+import { euAqiLevel, levelName, nowIndex, pollenLevel, pollutantLevel, usAqiLabel } from '../../utils/insights';
 
 import { levelColor } from './levelColor';
 import { n0 } from './num';

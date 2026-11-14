@@ -1,5 +1,6 @@
 import { Box, Button, Paper, Text, VisuallyHidden } from '@mantine/core';
 import { Suspense, memo } from 'react';
+import { useNavigate } from 'react-router';
 
 import { AirSection, PollenSection } from '../components/city/AirSections';
 import { CityHero, CityLoadError, CityTitle } from '../components/city/CityHero';
@@ -13,7 +14,8 @@ import { CityBodySk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { useForecastData, useForecastQuery, useLogCount, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
-import { rainOutlook, nowIndex } from '../weather/insights';
+import { rainOutlook, nowIndex } from '../utils/insights';
+import { paths } from '../utils/paths';
 
 import type { CityPageProps } from '../types';
 import type { ReactElement } from 'react';
@@ -38,7 +40,7 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
   const units = useUnits();
   const logged = useLogCount(city.id);
   const expanded = useUiStore((st) => st.expandedDay[city.id] ?? null);
-  const navigate = useUiStore((st) => st.navigate);
+  const navigate = useNavigate();
   if (!entry) { return <CityLoadError city={city} isDefault={isDefault} error={query.error} />; }
   const data = { city, entry, units };
   return (
@@ -68,7 +70,7 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
 
       <Box mx={12} mt={24}>
         <Button className="glass" variant="default" size="lg" fullWidth
-          rightSection={<Icon name="arrow" size={18} />} onClick={() => { navigate({ name: 'history', cityId: city.id }); }}>
+          rightSection={<Icon name="arrow" size={18} />} onClick={() => { void navigate(paths.history(city.id)); }}>
           {t('city.historyButton', { logged: t('common.daysLogged', { count: logged }) })}
         </Button>
       </Box>

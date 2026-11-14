@@ -7,7 +7,7 @@ import { t } from '../../i18n';
 import { useLogStore, useNormals, useUnits } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
 import { fmtDelta, fmtTemp, longDate, shortDate } from '../../utils/format';
-import { conditionLabel } from '../../weather/weatherCodes';
+import { conditionLabel } from '../../utils/weatherCodes';
 import { Icon } from '../Icon';
 import { SwipeRow } from '../SwipeRow';
 

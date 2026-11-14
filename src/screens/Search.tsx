@@ -1,6 +1,7 @@
 import { Box, Button, Group, Loader, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Icon } from '../components/Icon';
@@ -9,6 +10,7 @@ import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import { followCity, useCityStore, useSearchStore } from '../stores';
 import { useUiStore } from '../stores/uiStore';
+import { BACK_STATE, paths } from '../utils/paths';
 
 import type { GeoResult } from '../stores';
 import type { ReactElement } from 'react';
@@ -23,7 +25,8 @@ export function Search(): ReactElement {
     runSearch: st.run,
   })));
   const followedIds = useCityStore((st) => st.cityIds.join('|'));
-  const goHome = useUiStore((st) => st.goHome);
+  const setPage = useUiStore((st) => st.setPage);
+  const navigate = useNavigate();
   const [debounced] = useDebouncedValue(s.query, 300);
   const { runSearch } = s;
   useEffect(() => { void runSearch(debounced); }, [debounced, runSearch]);
@@ -31,7 +34,8 @@ export function Search(): ReactElement {
   const follow = (r: GeoResult) => {
     const i = followCity(r);
     s.setQuery('');
-    goHome(i);
+    setPage(i);
+    void navigate(paths.home, { state: BACK_STATE });
   };
   return (
     <Box className="screen">

@@ -15,15 +15,14 @@ npm run dev
 
 ```
 src/
-  main.tsx · App.tsx              Entry with Mantine providers, screen routing
+  main.tsx · App.tsx              Entry with Mantine providers and HashRouter; routes in App.tsx
   theme.ts                        Mantine theme and component defaults
   styles/global.css               App-wide layout CSS
   stores/                         Data layer: entity cache, Zustand stores, IndexedDB persistence, Suspense resources (see stores/README.md)
     api/                          Pure Open-Meteo calls and variable lists
   screens/                        Onboarding · Home (pager) · Cities · Search · History · Hourly · DayView · Settings · CityPage
   components/                     Shared UI: city/ and day/ sections, charts/, history/, skeletons, icons
-  utils/                          Generic pure helpers: formatting, scales, stats, chart series
-  weather/                        Weather interpretation: insights, condition labels
+  utils/                          Pure helpers: formatting, weather insights and labels, scales, stats, chart series
   native/                         Device side effects: app icon, orientation, home-screen widgets
   backup/                         Backup import validation
   i18n/                           t() and the 24 locale files

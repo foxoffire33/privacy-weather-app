@@ -17,9 +17,6 @@ function legacyHintSeen(): boolean {
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      route: { name: 'home' },
-      stack: [],
-      navDirection: 'forward',
       pageIndex: 0,
       expandedDay: {},
       chartMetric: 'temp',
@@ -47,9 +44,6 @@ export const useUiStore = create<UiState>()(
       dismissGestureHint: () => set({ gestureHintSeen: true }),
       openChart: (fullscreenChart) => set({ fullscreenChart }),
       closeChart: () => set({ fullscreenChart: null }),
-      navigate: (route) => set((s) => ({ stack: [...s.stack, s.route], route, navDirection: 'forward' })),
-      back: () => set((s) => ({ route: s.stack.at(-1) ?? { name: 'home' }, stack: s.stack.slice(0, -1), navDirection: 'back' })),
-      goHome: (pageIndex) => set((s) => ({ route: { name: 'home' }, stack: [], pageIndex: pageIndex ?? s.pageIndex, navDirection: 'back' })),
       setPage: (pageIndex) => set({ pageIndex }),
     }),
     {

@@ -1,6 +1,4 @@
 import type { Backup, BackupParts, QueryState } from '../stores';
-import type { NavDirection } from './components';
-import type { Route } from './route';
 
 export interface DateRange {
   from: string;
@@ -8,9 +6,6 @@ export interface DateRange {
 }
 
 export interface UiState {
-  route: Route;
-  stack: Route[];
-  navDirection: NavDirection;
   pageIndex: number;
   expandedDay: Record<string, string | null>;
   chartMetric: string;
@@ -32,9 +27,6 @@ export interface UiState {
   dismissGestureHint: () => void;
   openChart: (id: string) => void;
   closeChart: () => void;
-  navigate: (route: Route) => void;
-  back: () => void;
-  goHome: (pageIndex?: number) => void;
   setPage: (i: number) => void;
 }
 

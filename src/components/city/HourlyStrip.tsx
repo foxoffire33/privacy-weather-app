@@ -1,12 +1,13 @@
 import { Box, Group, Text, UnstyledButton } from '@mantine/core';
 import { useDrag, useMergedRef, useScroller } from '@mantine/hooks';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import { t } from '../../i18n';
 import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
-import { useUiStore } from '../../stores/uiStore';
 import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../utils/format';
-import { nowIndex } from '../../weather/insights';
+import { nowIndex } from '../../utils/insights';
+import { paths } from '../../utils/paths';
 import { Icon } from '../Icon';
 
 import type { DayData, ForecastEntry } from '../../stores';
@@ -94,7 +95,7 @@ export function Nowcast({ entry }: NowcastProps): ReactElement | null {
 
 export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): ReactElement {
   const days = useDayStore((st) => st.days);
-  const navigate = useUiStore((st) => st.navigate);
+  const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const scroller = useScroller();
@@ -169,7 +170,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
           </Fragment>
         ))}
       </Box>
-      <UnstyledButton w="100%" px={12} py={10} onClick={() => { navigate({ name: 'hourly', cityId: city.id }); }}
+      <UnstyledButton w="100%" px={12} py={10} onClick={() => { void navigate(paths.hourly(city.id)); }}
         style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(248,244,244,.2)' }}>
         <Text fz={13} fw={800}>{t('city.hourlyLink')}</Text>
         <Icon name="arrow" size={16} />
