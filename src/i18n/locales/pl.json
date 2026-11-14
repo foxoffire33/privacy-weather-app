@@ -623,7 +623,8 @@
     "editToday": "Edytuj dzisiejszą pogodę",
     "footer": "Tryb offline jest włączony. Wyłącz go w Ustawieniach, aby pobierać prognozy.",
     "manualCity": "Brak połączenia? Wpisz miasto i jego współrzędne samodzielnie.",
-    "footerOnline": "Nie udało się pobrać prognozy. Nadal możesz samodzielnie zapisywać pogodę."
+    "footerOnline": "Nie udało się pobrać prognozy. Nadal możesz samodzielnie zapisywać pogodę.",
+    "notFound": "Nie ma na liście? Wpisz miasto i jego współrzędne samodzielnie."
   },
   "splash": {
     "name": "Weather Log",

@@ -623,7 +623,8 @@
     "editToday": "Redaguoti šiandienos orus",
     "footer": "Neprisijungus režimas įjungtas. Išjunkite jį nustatymuose, kad atsisiųstumėte prognozes.",
     "manualCity": "Nėra ryšio? Įveskite miestą ir jo koordinates patys.",
-    "footerOnline": "Nepavyko atsisiųsti prognozės. Orus vis tiek galite registruoti patys."
+    "footerOnline": "Nepavyko atsisiųsti prognozės. Orus vis tiek galite registruoti patys.",
+    "notFound": "Nėra sąraše? Įveskite miestą ir jo koordinates patys."
   },
   "splash": {
     "name": "Weather Log",

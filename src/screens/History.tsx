@@ -36,11 +36,11 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const city = useCity(cityId);
   const entry = useForecast(cityId);
   const units = useUnits();
-  const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
+  const offline = useSettings().offline;
+  const today = entry && !offline ? entry.data.daily.time[entry.pastDays] : todayISO();
   const draft = useUiStore((st) => st.lookupDraft);
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
-  const offline = useSettings().offline;
   const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,

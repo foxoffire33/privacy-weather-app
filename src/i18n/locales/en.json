@@ -611,7 +611,8 @@
     "editToday": "Edit today's weather",
     "footer": "Offline mode is on. Turn it off in Settings to download forecasts.",
     "manualCity": "No connection? Enter the city and its coordinates yourself.",
-    "footerOnline": "No forecast could be downloaded. You can still log the weather yourself."
+    "footerOnline": "No forecast could be downloaded. You can still log the weather yourself.",
+    "notFound": "Not listed? Enter the city and its coordinates yourself."
   },
   "splash": {
     "name": "Weather Log",

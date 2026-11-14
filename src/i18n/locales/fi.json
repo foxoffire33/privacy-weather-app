@@ -611,7 +611,8 @@
     "editToday": "Muokkaa tämän päivän säätä",
     "footer": "Offline-tila on päällä. Poista se asetuksista ladataksesi ennusteita.",
     "manualCity": "Ei yhteyttä? Syötä kaupunki ja sen koordinaatit itse.",
-    "footerOnline": "Ennustetta ei voitu ladata. Voit silti kirjata sään itse."
+    "footerOnline": "Ennustetta ei voitu ladata. Voit silti kirjata sään itse.",
+    "notFound": "Eikö löydy? Syötä kaupunki ja sen koordinaatit itse."
   },
   "splash": {
     "name": "Weather Log",

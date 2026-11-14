@@ -611,7 +611,8 @@
     "editToday": "Mai időjárás szerkesztése",
     "footer": "Az offline mód be van kapcsolva. Kapcsold ki a Beállításokban az előrejelzések letöltéséhez.",
     "manualCity": "Nincs kapcsolat? Add meg magad a várost és a koordinátáit.",
-    "footerOnline": "Nem sikerült letölteni az előrejelzést. Az időjárást továbbra is rögzítheted magad."
+    "footerOnline": "Nem sikerült letölteni az előrejelzést. Az időjárást továbbra is rögzítheted magad.",
+    "notFound": "Nincs a listán? Add meg magad a várost és a koordinátáit."
   },
   "splash": {
     "name": "Weather Log",

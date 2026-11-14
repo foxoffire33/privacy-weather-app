@@ -611,7 +611,8 @@
     "editToday": "Redigera dagens väder",
     "footer": "Offlineläge är på. Stäng av det i Inställningar för att hämta prognoser.",
     "manualCity": "Ingen anslutning? Ange staden och dess koordinater själv.",
-    "footerOnline": "Ingen prognos kunde laddas ned. Du kan fortfarande logga vädret själv."
+    "footerOnline": "Ingen prognos kunde laddas ned. Du kan fortfarande logga vädret själv.",
+    "notFound": "Finns den inte? Ange staden och dess koordinater själv."
   },
   "splash": {
     "name": "Weather Log",

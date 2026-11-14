@@ -611,7 +611,8 @@
     "editToday": "Heutiges Wetter bearbeiten",
     "footer": "Der Offline-Modus ist an. Schalte ihn in den Einstellungen aus, um Vorhersagen zu laden.",
     "manualCity": "Keine Verbindung? Gib die Stadt und ihre Koordinaten selbst ein.",
-    "footerOnline": "Es konnte keine Vorhersage geladen werden. Du kannst das Wetter trotzdem selbst eintragen."
+    "footerOnline": "Es konnte keine Vorhersage geladen werden. Du kannst das Wetter trotzdem selbst eintragen.",
+    "notFound": "Nicht dabei? Gib die Stadt und ihre Koordinaten selbst ein."
   },
   "splash": {
     "name": "Weather Log",

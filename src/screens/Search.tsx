@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ManualCityForm } from '../components/city/ManualCityForm';
+import { SearchStatus } from '../components/city/SearchStatus';
 import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
@@ -21,7 +22,6 @@ export function Search(): ReactElement {
     query: st.query,
     results: st.results,
     searching: st.request.status === 'loading',
-    searchError: st.request.error,
     setQuery: st.setQuery,
     runSearch: st.run,
   })));
@@ -65,17 +65,7 @@ export function Search(): ReactElement {
 
       <Box px={20} style={{ flex: 1 }}>
         <Box className="kicker">{t('search.results')}</Box>
-        {(s.searchError !== null && s.searchError !== '') && (
-          <>
-            <Text py={12} fz={13} c="signal.3">{s.searchError}</Text>
-            <Text fz={13} c="dimmed" mb="md">{t('offline.manualCity')}</Text>
-            <ManualCityForm onAdded={goTo} />
-          </>
-        )}
-        {(s.searchError === null || s.searchError === '') && s.query.trim().length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
-        {!s.searching && s.query.trim().length >= 2 && s.results.length === 0 && (s.searchError === null || s.searchError === '') && (
-          <Text py={12} fz={13} c="dimmed">{t('search.noMatch', { query: s.query })}</Text>
-        )}
+        <SearchStatus onAdded={goTo} />
         {s.searching && s.results.length === 0 && Array.from({ length: 4 }, (_, i) => (
           <Group key={i} className="row" py={12} wrap="nowrap" justify="space-between">
             <Box><Sk w={120} h={20} /><Sk w={190} h={12} mt={6} /></Box>

@@ -617,7 +617,8 @@
     "editToday": "Uredi današnje vrijeme",
     "footer": "Izvanmrežni način je uključen. Isključite ga u Postavkama za preuzimanje prognoza.",
     "manualCity": "Nema veze? Sami unesite grad i njegove koordinate.",
-    "footerOnline": "Prognozu nije bilo moguće preuzeti. Vrijeme i dalje možete bilježiti sami."
+    "footerOnline": "Prognozu nije bilo moguće preuzeti. Vrijeme i dalje možete bilježiti sami.",
+    "notFound": "Nema ga na popisu? Sami unesite grad i njegove koordinate."
   },
   "splash": {
     "name": "Weather Log",

@@ -611,7 +611,8 @@
     "editToday": "Muuda tänast ilma",
     "footer": "Võrguühenduseta režiim on sees. Lülita see seadetes välja, et prognoose laadida.",
     "manualCity": "Ühendus puudub? Sisesta linn ja selle koordinaadid ise.",
-    "footerOnline": "Prognoosi ei õnnestunud alla laadida. Ilma saad endiselt ise üles märkida."
+    "footerOnline": "Prognoosi ei õnnestunud alla laadida. Ilma saad endiselt ise üles märkida.",
+    "notFound": "Pole loendis? Sisesta linn ja selle koordinaadid ise."
   },
   "splash": {
     "name": "Weather Log",

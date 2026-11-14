@@ -617,7 +617,8 @@
     "editToday": "Modifier la météo du jour",
     "footer": "Le mode hors ligne est activé. Désactivez-le dans les réglages pour télécharger les prévisions.",
     "manualCity": "Pas de connexion ? Saisissez vous-même la ville et ses coordonnées.",
-    "footerOnline": "Aucune prévision n’a pu être téléchargée. Vous pouvez toujours noter la météo vous-même."
+    "footerOnline": "Aucune prévision n’a pu être téléchargée. Vous pouvez toujours noter la météo vous-même.",
+    "notFound": "Introuvable ? Saisissez vous-même la ville et ses coordonnées."
   },
   "splash": {
     "name": "Weather Log",

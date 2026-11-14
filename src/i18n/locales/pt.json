@@ -617,7 +617,8 @@
     "editToday": "Editar o tempo de hoje",
     "footer": "O modo offline está ativo. Desativa-o nas Definições para transferir previsões.",
     "manualCity": "Sem ligação? Introduza a cidade e as coordenadas manualmente.",
-    "footerOnline": "Não foi possível transferir a previsão. Pode continuar a registar o tempo manualmente."
+    "footerOnline": "Não foi possível transferir a previsão. Pode continuar a registar o tempo manualmente.",
+    "notFound": "Não aparece? Introduza a cidade e as coordenadas manualmente."
   },
   "splash": {
     "name": "Weather Log",

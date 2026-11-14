@@ -623,7 +623,8 @@
     "editToday": "Upraviť dnešné počasie",
     "footer": "Režim offline je zapnutý. Vypnite ho v Nastaveniach na sťahovanie predpovedí.",
     "manualCity": "Žiadne pripojenie? Zadajte mesto a jeho súradnice sami.",
-    "footerOnline": "Predpoveď sa nepodarilo stiahnuť. Počasie môžete stále zapisovať sami."
+    "footerOnline": "Predpoveď sa nepodarilo stiahnuť. Počasie môžete stále zapisovať sami.",
+    "notFound": "Nie je v zozname? Zadajte mesto a jeho súradnice sami."
   },
   "splash": {
     "name": "Weather Log",

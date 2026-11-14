@@ -617,7 +617,8 @@
     "editToday": "Rediģēt šodienas laikapstākļus",
     "footer": "Bezsaistes režīms ir ieslēgts. Izslēdz to iestatījumos, lai lejupielādētu prognozes.",
     "manualCity": "Nav savienojuma? Ievadiet pilsētu un tās koordinātas paši.",
-    "footerOnline": "Prognozi neizdevās lejupielādēt. Laikapstākļus joprojām varat reģistrēt paši."
+    "footerOnline": "Prognozi neizdevās lejupielādēt. Laikapstākļus joprojām varat reģistrēt paši.",
+    "notFound": "Nav sarakstā? Ievadiet pilsētu un tās koordinātas paši."
   },
   "splash": {
     "name": "Weather Log",

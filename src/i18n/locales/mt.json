@@ -629,7 +629,8 @@
     "editToday": "Editja t-temp tal-lum",
     "footer": "Il-mod offline huwa mixgħul. Itfih fl-Issettjar biex tniżżel it-tbassir.",
     "manualCity": "M’hemmx konnessjoni? Daħħal il-belt u l-koordinati tagħha int stess.",
-    "footerOnline": "Ma setax jitniżżel tbassir. Xorta tista’ tirreġistra t-temp int stess."
+    "footerOnline": "Ma setax jitniżżel tbassir. Xorta tista’ tirreġistra t-temp int stess.",
+    "notFound": "Mhux fil-lista? Daħħal il-belt u l-koordinati tagħha int stess."
   },
   "splash": {
     "name": "Weather Log",

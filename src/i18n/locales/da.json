@@ -611,7 +611,8 @@
     "editToday": "Rediger dagens vejr",
     "footer": "Offlinetilstand er slået til. Slå den fra i Indstillinger for at hente prognoser.",
     "manualCity": "Ingen forbindelse? Indtast selv byen og dens koordinater.",
-    "footerOnline": "Ingen prognose kunne hentes. Du kan stadig selv registrere vejret."
+    "footerOnline": "Ingen prognose kunne hentes. Du kan stadig selv registrere vejret.",
+    "notFound": "Ikke på listen? Indtast selv byen og dens koordinater."
   },
   "splash": {
     "name": "Weather Log",

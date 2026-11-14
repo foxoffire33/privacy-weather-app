@@ -43,7 +43,7 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
   const logged = useLogCount(city.id);
   const expanded = useUiStore((st) => st.expandedDay[city.id] ?? null);
   const navigate = useNavigate();
-  if (!entry) {
+  if (offline || !entry) {
     return <OfflineCity city={city} isDefault={isDefault} error={offline ? null : query.error} />;
   }
   const data = { city, entry, units };

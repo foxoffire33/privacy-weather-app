@@ -611,7 +611,8 @@
     "editToday": "Weer van vandaag bewerken",
     "footer": "Offline modus staat aan. Zet hem uit in Instellingen om verwachtingen te downloaden.",
     "manualCity": "Geen verbinding? Vul de stad en de coördinaten zelf in.",
-    "footerOnline": "Er kon geen verwachting worden gedownload. Je kunt het weer nog steeds zelf vastleggen."
+    "footerOnline": "Er kon geen verwachting worden gedownload. Je kunt het weer nog steeds zelf vastleggen.",
+    "notFound": "Staat je plaats er niet bij? Vul de stad en de coördinaten zelf in."
   },
   "splash": {
     "name": "Weather Log",

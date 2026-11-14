@@ -623,7 +623,8 @@
     "editToday": "Uredi današnje vreme",
     "footer": "Način brez povezave je vklopljen. Izklopite ga v Nastavitvah za prenos napovedi.",
     "manualCity": "Ni povezave? Sami vnesite mesto in njegove koordinate.",
-    "footerOnline": "Napovedi ni bilo mogoče prenesti. Vreme lahko še vedno beležite sami."
+    "footerOnline": "Napovedi ni bilo mogoče prenesti. Vreme lahko še vedno beležite sami.",
+    "notFound": "Ga ni na seznamu? Sami vnesite mesto in njegove koordinate."
   },
   "splash": {
     "name": "Weather Log",

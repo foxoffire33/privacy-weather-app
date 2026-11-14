@@ -617,7 +617,8 @@
     "editToday": "Editar el tiempo de hoy",
     "footer": "El modo sin conexión está activado. Desactívalo en Ajustes para descargar previsiones.",
     "manualCity": "¿Sin conexión? Introduce tú mismo la ciudad y sus coordenadas.",
-    "footerOnline": "No se pudo descargar ningún pronóstico. Aún puedes registrar el tiempo tú mismo."
+    "footerOnline": "No se pudo descargar ningún pronóstico. Aún puedes registrar el tiempo tú mismo.",
+    "notFound": "¿No aparece? Introduce tú mismo la ciudad y sus coordenadas."
   },
   "splash": {
     "name": "Weather Log",

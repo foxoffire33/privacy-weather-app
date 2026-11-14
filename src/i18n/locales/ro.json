@@ -617,7 +617,8 @@
     "editToday": "Editează vremea de azi",
     "footer": "Modul offline este activ. Dezactivează-l din Setări pentru a descărca prognoze.",
     "manualCity": "Fără conexiune? Introdu singur orașul și coordonatele lui.",
-    "footerOnline": "Nu s-a putut descărca nicio prognoză. Poți înregistra totuși vremea singur."
+    "footerOnline": "Nu s-a putut descărca nicio prognoză. Poți înregistra totuși vremea singur.",
+    "notFound": "Nu apare? Introdu singur orașul și coordonatele lui."
   },
   "splash": {
     "name": "Weather Log",

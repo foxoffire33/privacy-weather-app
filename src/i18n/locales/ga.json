@@ -629,7 +629,8 @@
     "editToday": "Cuir aimsir an lae inniu in eagar",
     "footer": "Tá an mód as líne ar siúl. Múch é sna Socruithe chun réamhaisnéisí a íoslódáil.",
     "manualCity": "Gan nasc? Cuir isteach an chathair agus a comhordanáidí tú féin.",
-    "footerOnline": "Níorbh fhéidir réamhaisnéis a íoslódáil. Is féidir leat an aimsir a thaifeadadh tú féin fós."
+    "footerOnline": "Níorbh fhéidir réamhaisnéis a íoslódáil. Is féidir leat an aimsir a thaifeadadh tú féin fós.",
+    "notFound": "Níl sé liostaithe? Cuir isteach an chathair agus a comhordanáidí tú féin."
   },
   "splash": {
     "name": "Weather Log",

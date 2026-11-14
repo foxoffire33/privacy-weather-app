@@ -617,7 +617,8 @@
     "editToday": "Modifica il meteo di oggi",
     "footer": "La modalità offline è attiva. Disattivala nelle Impostazioni per scaricare le previsioni.",
     "manualCity": "Nessuna connessione? Inserisci tu la città e le sue coordinate.",
-    "footerOnline": "Impossibile scaricare le previsioni. Puoi comunque registrare il meteo da solo."
+    "footerOnline": "Impossibile scaricare le previsioni. Puoi comunque registrare il meteo da solo.",
+    "notFound": "Non c'è? Inserisci tu la città e le sue coordinate."
   },
   "splash": {
     "name": "Weather Log",
