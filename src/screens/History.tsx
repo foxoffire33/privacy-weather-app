@@ -54,7 +54,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   };
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
-  if (!s.city) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
+  if (!s.city || s.cityIndex < 0) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
   const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => {
