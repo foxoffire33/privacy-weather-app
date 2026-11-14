@@ -133,7 +133,8 @@ abstract class BaseWidget extends AppWidgetProvider {
 
     /**
      * Pixels per dp for the images: the screen density, capped at 3, and lowered when the
-     * images together would pass the system's limit for widget bitmaps (1.5 × the screen).
+     * images together would pass the system's limit for widget bitmaps (1.5 × the screen),
+     * even below one pixel per dp: a softer image beats an update the system rejects.
      */
     private static float bitmapScale(Context context, List<float[]> sizes) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -143,6 +144,6 @@ abstract class BaseWidget extends AppWidgetProvider {
         double budget = metrics.widthPixels * (double) metrics.heightPixels * 1.5 * BITMAP_SHARE;
         double needed = area * scale * scale;
         if (needed > budget && area > 0) scale = (float) Math.sqrt(budget / area);
-        return Math.max(1f, scale);
+        return scale;
     }
 }
