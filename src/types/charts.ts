@@ -100,6 +100,7 @@ export interface TrendRangeInput {
   back: number;
   today: string;
   followedAt: string;
+  earliest: string | undefined;
 }
 
 export interface TrendWindow {

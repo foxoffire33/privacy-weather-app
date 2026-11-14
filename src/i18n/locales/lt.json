@@ -417,7 +417,13 @@
     "no2": "NO₂ vid.",
     "ozoneMax": "Ozonas maks.",
     "sourceForecast": "Open-Meteo prognozių modeliai (praeities duomenys)",
-    "sourceArchive": "Open-Meteo istoriniai orai (ERA5 reanalizė)"
+    "sourceArchive": "Open-Meteo istoriniai orai (ERA5 reanalizė)",
+    "edited": "Redaguota",
+    "edit": "Redaguoti",
+    "addToLog": "Pridėti į žurnalą",
+    "restore": "Atkurti",
+    "restoreConfirm": "Pakeisti šią dieną archyvo duomenimis? Jūsų pakeitimai bus prarasti.",
+    "restoreFailed": "Atkurti nepavyko: {error}"
   },
   "history": {
     "title": "Ši diena,\nkiti metai.",
@@ -474,7 +480,12 @@
       "many": "Pridėta {count} dienos, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų.",
       "other": "Pridėta {count} dienų, atnaujinta {updated}, palikta {kept} programėlės užfiksuotų."
     },
-    "downloadFailed": "Atsisiųsti nepavyko: {error}"
+    "downloadFailed": "Atsisiųsti nepavyko: {error}",
+    "edited": "Redaguota",
+    "addManual": "Pridėti dieną rankiniu būdu",
+    "lenDays": "{n} d",
+    "lenYear": "1 m",
+    "editLabel": "Redaguoti {date}"
   },
   "settings": {
     "title": "Nustatymai.",
@@ -557,6 +568,29 @@
       "rainDescription": "Lietaus prognozė 15 minučių stulpeliais",
       "hourly": "Kas valandą",
       "hourlyDescription": "Temperatūra ir lietaus tikimybė artimiausioms valandoms"
+    }
+  },
+  "dayForm": {
+    "date": "Data",
+    "high": "Maks.",
+    "low": "Min.",
+    "feelsHigh": "Juntama maks.",
+    "feelsLow": "Juntama min.",
+    "rain": "Krituliai",
+    "snow": "Sniegas",
+    "wind": "Maks. vėjas",
+    "gusts": "Maks. gūsiai",
+    "sunshine": "Saulė",
+    "uv": "UV indeksas",
+    "condition": "Orai",
+    "save": "Išsaugoti",
+    "createTitle": "Pridėti dieną",
+    "editTitle": "Redaguoti dieną",
+    "errors": {
+      "range": "Turi būti nuo {min} iki {max}",
+      "date": "Pasirinkite datą, kuri nėra ateityje",
+      "lowAboveHigh": "Min. negali būti didesnė už maks.",
+      "gustBelowWind": "Gūsiai negali būti silpnesni už vėją"
     }
   }
 }

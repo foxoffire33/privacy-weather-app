@@ -420,7 +420,13 @@
     "no2": "NO₂ medja",
     "ozoneMax": "Ożonu mass.",
     "sourceForecast": "Mudelli tat-tbassir ta' Open-Meteo (data tal-passat)",
-    "sourceArchive": "Temp storiku ta' Open-Meteo (rianaliżi ERA5)"
+    "sourceArchive": "Temp storiku ta' Open-Meteo (rianaliżi ERA5)",
+    "edited": "Editjat",
+    "edit": "Editja",
+    "addToLog": "Żid mal-log",
+    "restore": "Irrestawra",
+    "restoreConfirm": "Tibdel din il-ġurnata b'data tal-arkivju? Il-bidliet tiegħek jintilfu.",
+    "restoreFailed": "Ir-restawr falla: {error}"
   },
   "history": {
     "title": "Dan il-jum,\nsnin oħra.",
@@ -480,7 +486,12 @@
       "many": "Żdiedu {count}-il jum, aġġornati {updated}, inżammu {kept} irreġistrati mill-app.",
       "other": "Żdiedu {count} jum, aġġornati {updated}, inżammu {kept} irreġistrati mill-app."
     },
-    "downloadFailed": "It-tniżżil falla: {error}"
+    "downloadFailed": "It-tniżżil falla: {error}",
+    "edited": "Editjat",
+    "addManual": "Żid ġurnata bl-idejn",
+    "lenDays": "{n} j",
+    "lenYear": "1 s",
+    "editLabel": "Editja {date}"
   },
   "settings": {
     "title": "Settings.",
@@ -563,6 +574,29 @@
       "rainDescription": "Tbassir tax-xita b'kolonni ta' 15-il minuta",
       "hourly": "Kull siegħa",
       "hourlyDescription": "Temperatura u ċans ta' xita għas-sigħat li ġejjin"
+    }
+  },
+  "dayForm": {
+    "date": "Data",
+    "high": "Massimu",
+    "low": "Minimu",
+    "feelsHigh": "Jinħass massimu",
+    "feelsLow": "Jinħass minimu",
+    "rain": "Preċipitazzjoni",
+    "snow": "Borra",
+    "wind": "Riħ massimu",
+    "gusts": "Buffuri massimi",
+    "sunshine": "Xemx",
+    "uv": "Indiċi UV",
+    "condition": "Temp",
+    "save": "Issejvja",
+    "createTitle": "Żid ġurnata",
+    "editTitle": "Editja l-ġurnata",
+    "errors": {
+      "range": "Irid ikun bejn {min} u {max}",
+      "date": "Agħżel data li mhix fil-futur",
+      "lowAboveHigh": "Il-minimu ma jistax ikun ogħla mill-massimu",
+      "gustBelowWind": "Il-buffuri ma jistgħux ikunu inqas mir-riħ"
     }
   }
 }

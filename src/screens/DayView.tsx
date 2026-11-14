@@ -1,18 +1,24 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
+import { useDrag } from '@mantine/hooks';
 import { Suspense } from 'react';
+import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
+import { DayActions } from '../components/day/DayActions';
 import { DayAir, DayHourly, DayPrecip, DaySky, DaySource, DaySun, DayTemperature, DayWind } from '../components/day/DaySections';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useNormals, useUnits } from '../stores';
+import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useUnits } from '../stores';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
+import { BACK_STATE, paths } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
 import type { DayData, DayRecord } from '../stores';
 import type { DayBodyProps, DayHeaderProps, DayHeroValues, DayViewProps } from '../types';
 import type { ReactElement } from 'react';
+
+const SWIPE_DISTANCE = 80;
 
 
 export function DayView({ cityId, date }: DayViewProps): ReactElement {
@@ -55,14 +61,27 @@ function DayDetailsSk() {
   );
 }
 
+function sourceLabel(source: DayRecord['source']): string {
+  if (source === 'log') { return t('dayView.logged'); }
+  return source === 'edited' ? t('dayView.edited') : t('dayView.filled');
+}
+
+function recordValues(record: DayRecord): DayHeroValues {
+  return { hi: record.hi ?? null, lo: record.lo, feelsHi: record.feelsHi, feelsLo: record.feelsLo, code: record.code };
+}
+
+const EMPTY_RECORD: Partial<DayRecord> = {};
+
 function heroValues(day: DayData | undefined, record: DayRecord | undefined): DayHeroValues {
+  if (record?.source === 'edited') { return recordValues(record); }
   const d = day?.daily.v ?? {};
+  const r = record ?? EMPTY_RECORD;
   return {
-    hi: d.temperature_2m_max ?? record?.hi ?? null,
-    lo: d.temperature_2m_min ?? record?.lo,
-    feelsHi: d.apparent_temperature_max ?? record?.feelsHi,
-    feelsLo: d.apparent_temperature_min ?? record?.feelsLo,
-    code: d.weather_code ?? record?.code,
+    hi: d.temperature_2m_max ?? r.hi ?? null,
+    lo: d.temperature_2m_min ?? r.lo,
+    feelsHi: d.apparent_temperature_max ?? r.feelsHi,
+    feelsLo: d.apparent_temperature_min ?? r.feelsLo,
+    code: d.weather_code ?? r.code,
   };
 }
 
@@ -74,13 +93,21 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const T = (c?: number | null) => fmtTemp(c, units.temp);
   const v = heroValues(day, record);
   const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
+  const { prev, next } = useLogNeighbours(cityId, date);
+  const navigate = useNavigate();
+  const { ref: swipeRef } = useDrag<HTMLDivElement>((gesture) => {
+    if (!gesture.last || gesture.canceled || Math.abs(gesture.movement[0]) < SWIPE_DISTANCE) { return; }
+    const target = gesture.movement[0] < 0 ? next : prev;
+    if (target === undefined) { return; }
+    void navigate(paths.day(cityId, target), { replace: true, state: target < date ? BACK_STATE : undefined });
+  }, { axis: 'x', threshold: 10 });
   return (
     <>
-      <Box className="hero" style={{ paddingTop: 8 }}>
+      <Box className="hero" ref={swipeRef} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>
           <Text fz={15} fw={800}>{cityName}</Text>
-          {record && <Badge variant="white" color="dark" size="sm">{record.source === 'log' ? t('dayView.logged') : t('dayView.filled')}</Badge>}
+          {record && <Badge variant="white" color="dark" size="sm">{sourceLabel(record.source)}</Badge>}
         </Group>
         <Text fz={13} fw={600}>{fullDate(date)}</Text>
         <Box className="hero-temp">{T(v.hi)}°</Box>
@@ -90,6 +117,8 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
           {delta !== '' && ` · ${t('city.vsAverage', { delta })}`}
         </Text>
       </Box>
+
+      <DayActions cityId={cityId} date={date} record={record} />
 
       <Suspense fallback={<DayDetailsSk />}>
         <DayDetails cityId={cityId} date={date} />

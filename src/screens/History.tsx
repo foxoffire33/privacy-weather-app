@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
+import { DayEntryForm } from '../components/day/DayEntryForm';
 import { HistoryLog } from '../components/history/HistoryLog';
 import { Trends } from '../components/history/Trends';
 import { Icon } from '../components/Icon';
@@ -15,6 +16,7 @@ import {
   useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
+import { sortedCopy } from '../stores/core/sort';
 import { useUiStore } from '../stores/uiStore';
 import { fireAndForget } from '../utils/fireAndForget';
 import { downloadFile, fmtTemp, fmtWind, longDate } from '../utils/format';
@@ -37,6 +39,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
   const draft = useUiStore((st) => st.lookupDraft);
   const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
   const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,
@@ -53,7 +56,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
   if (!s.city || s.cityIndex < 0) {return <Box className="screen"><ScreenHeader /><Text px={20}>{t('common.noLongerFollowed')}</Text></Box>;}
-  const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
+  const rows = sortedCopy(Object.values(s.log), (a, b) => b.date.localeCompare(a.date));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => {
     if (date === today) {
@@ -103,7 +106,9 @@ export function History({ cityId }: CityScreenProps): ReactElement {
           <Box component="span">{t('history.yourLog', { days: t('common.days', { count: rows.length }) })}</Box>
           <ImportRange cityId={cityId} maxDate={maxLookup} />
         </Group>
+        <Button fullWidth mt={12} variant="outline" color="gray" onClick={() => { setAdding(true); }}>{t('history.addManual')}</Button>
         <HistoryLog cityId={cityId} rows={rows} today={today} onOpen={open} />
+        <DayEntryForm cityId={cityId} opened={adding} onClose={() => { setAdding(false); }} />
       </Box>
     </Box>
   );

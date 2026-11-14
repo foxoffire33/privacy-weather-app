@@ -33,6 +33,8 @@ const LABELS: Partial<Record<number, MessageKey>> = {
   99: 'weather.99',
 };
 
+export const WEATHER_CODES: readonly number[] = Object.keys(LABELS).map(Number);
+
 export const conditionLabel = (code?: number | null): string =>
   labelFor(code === null || code === undefined ? undefined : LABELS[code]);
 

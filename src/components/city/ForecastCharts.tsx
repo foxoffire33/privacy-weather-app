@@ -1,7 +1,5 @@
 import { CompositeChart } from '@mantine/charts';
 import { Box } from '@mantine/core';
-import { useTimeout } from '@mantine/hooks';
-import { useEffect, useState } from 'react';
 
 import { t } from '../../i18n';
 import { useUiStore } from '../../stores/uiStore';
@@ -11,11 +9,10 @@ import { visibleSeries, NO_HIDDEN } from '../../utils/series';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { HourlyExplorer } from '../charts/HourlyExplorer';
 import { SeriesLegend } from '../charts/SeriesToggle';
-import { ChartSk } from '../Skeletons';
 
 import { Section } from './Parts';
 
-import type { ChartHeight, CityDataProps, DeferredProps } from '../../types';
+import type { ChartHeight, CityDataProps } from '../../types';
 import type { ReactElement } from 'react';
 
 const weekSeries = () => [
@@ -23,13 +20,6 @@ const weekSeries = () => [
   { name: 'High', label: t('city.high'), type: 'line' as const, color: 'signal.4' },
   { name: 'Low', label: t('city.low'), type: 'line' as const, color: 'signal.2' },
 ];
-
-function Deferred({ h, children }: DeferredProps): ReactElement {
-  const [ready, setReady] = useState(false);
-  const { start, clear } = useTimeout(() => { setReady(true); }, 250);
-  useEffect(() => { start(); return clear; }, [start, clear]);
-  return ready ? <>{children}</> : <ChartSk h={h} />;
-}
 
 export function Next48Section({ city, entry }: CityDataProps): ReactElement {
   const { data, air } = entry;
@@ -40,7 +30,7 @@ export function Next48Section({ city, entry }: CityDataProps): ReactElement {
   );
   return (
     <Section title={t('city.next48')} action={<ExpandButton id={`next48:${city.id}`} />}>
-      <Box pt={12}><Deferred h={270}>{chart(INLINE_HEIGHT)}</Deferred></Box>
+      <Box pt={12}>{chart(INLINE_HEIGHT)}</Box>
       <FullscreenChart id={`next48:${city.id}`} title={t('city.next48')} render={chart} />
     </Section>
   );
@@ -66,7 +56,7 @@ export function Next7Section({ city, entry, units }: CityDataProps): ReactElemen
   );
   return (
     <Section title={t('city.next7')} action={<ExpandButton id={`next7:${city.id}`} />}>
-      <Box pt={12}><Deferred h={230}>{chart(200)}</Deferred></Box>
+      <Box pt={12}>{chart(200)}</Box>
       <FullscreenChart id={`next7:${city.id}`} title={t('city.next7')} render={chart} />
     </Section>
   );

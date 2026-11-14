@@ -18,7 +18,10 @@ async function openDb(): Promise<IDBDatabase> {
     request.addEventListener('success', () => { resolve(request.result); });
     request.addEventListener('error', () => { reject(request.error ?? new Error('IndexedDB open failed')); });
   });
-  return dbPromise;
+  return dbPromise.catch((error: unknown) => {
+    dbPromise = null;
+    throw error;
+  });
 }
 
 async function database(): Promise<IDBDatabase | null> {
@@ -37,14 +40,16 @@ async function read<T>(request: (store: IDBObjectStore) => IDBRequest<T>): Promi
 }
 
 async function write(change: (store: IDBObjectStore) => void): Promise<void> {
-  const db = await database();
-  if (db === null) { return; }
-  await new Promise<void>((resolve) => {
+  if (!hasIndexedDb()) { return; }
+  const db = await openDb();
+  await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
-    change(tx.objectStore(STORE_NAME));
+    const fail = () => { reject(tx.error ?? new Error('IndexedDB write failed')); };
     tx.addEventListener('complete', () => { resolve(); });
-    tx.addEventListener('error', () => { resolve(); });
-  }).catch(() => null);
+    tx.addEventListener('error', fail);
+    tx.addEventListener('abort', fail);
+    change(tx.objectStore(STORE_NAME));
+  });
 }
 
 export async function idbGet(key: string): Promise<unknown> {

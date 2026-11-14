@@ -11,3 +11,8 @@ export interface LookupView {
   record: DayRecord | undefined;
   query: QueryState;
 }
+
+export interface LogNeighbours {
+  prev: string | undefined;
+  next: string | undefined;
+}

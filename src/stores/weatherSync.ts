@@ -91,6 +91,12 @@ export async function addDayToLog(cityId: string, date: string): Promise<void> {
   await addDateRange(cityId, date, date);
 }
 
+export async function restoreDay(cityId: string, date: string): Promise<void> {
+  const city = entityCache.getOne('city', cityId);
+  if (city === undefined) { return; }
+  await useLogStore.getState().restoreDay(city, date);
+}
+
 export async function fillRange(cityId: string, start: string, end: string): Promise<void> {
   const city = entityCache.getOne('city', cityId);
   if (city === undefined) { return; }

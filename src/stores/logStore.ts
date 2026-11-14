@@ -7,6 +7,7 @@ import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
 import { inSequence } from './core/guards';
 import { idbStorage } from './core/persistStorage';
+import { sortedCopy } from './core/sort';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
@@ -20,7 +21,7 @@ const FORECAST_PAST_DAYS = 92;
 export const NO_ARCHIVE_DATA = 'no-archive-data';
 
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
-  [...new Set([...existing, ...added])].toSorted((a, b) => a.localeCompare(b));
+  sortedCopy(new Set([...existing, ...added]), (a, b) => a.localeCompare(b));
 
 function sources(start: string, end: string): SourceSpan[] {
   const horizon = addDays(todayISO(), -FORECAST_PAST_DAYS);
@@ -136,6 +137,33 @@ export const useLogStore = create<LogState>()(
           total.updated += counts.updated;
         });
         return total;
+      },
+      saveDay: (cityId, date, entry) => {
+        const id = dayKey(cityId, date);
+        const prev = entityCache.getOne('dayRecord', id);
+        entityCache.remove('dayRecord', id);
+        entityCache.upsert('dayRecord', { ...entry, id, cityId, date, source: 'edited', snapshots: prev?.snapshots ?? 0 });
+        set((s) => ({ dates: { ...s.dates, [cityId]: sortedUnion(s.dates[cityId] ?? [], [date]) } }));
+      },
+      restoreDay: async (city, date) => {
+        const id = dayKey(city.id, date);
+        const key = `restore:${id}`;
+        set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
+        try {
+          const recent = date >= addDays(todayISO(), -FORECAST_PAST_DAYS);
+          const rows = await fetchDailyRange(city, { from: date, to: date }, recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, recent ? 'forecast' : 'archive');
+          const record = fromRangeRow(city.id, rows, 0);
+          if (isEmptyRecord(record)) { throw new Error(NO_ARCHIVE_DATA); }
+          const prev = entityCache.getOne('dayRecord', id);
+          entityCache.remove('dayRecord', id);
+          entityCache.upsert('dayRecord', { ...record, snapshots: prev?.snapshots ?? 0 });
+          set((s) => ({
+            dates: { ...s.dates, [city.id]: sortedUnion(s.dates[city.id] ?? [], [date]) },
+            queries: setQuery(s.queries, key, succeed()),
+          }));
+        } catch (error) {
+          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+        }
       },
       removeDay: (cityId, date) => {
         entityCache.remove('dayRecord', dayKey(cityId, date));

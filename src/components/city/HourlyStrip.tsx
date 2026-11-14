@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 
 import { t } from '../../i18n';
 import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
-import { fmtTemp, hhmm, hourLabel, hourOf, weekday } from '../../utils/format';
+import { convWind, fmtTemp, hhmm, hourLabel, hourOf, orDash, weekday } from '../../utils/format';
 import { nowIndex } from '../../utils/insights';
 import { paths } from '../../utils/paths';
 import { Icon } from '../Icon';
@@ -165,7 +165,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
               <Text fz={12} c="dimmed" fw={h.dayBreak ? 800 : 400}>{h.label}</Text>
               <Text fz={16} fw={800}>{fmtTemp(h.temp, units.temp)}°</Text>
               <Text fz={12} fw={600} c="signal.3">{h.p === null ? '–' : `${String(h.p)}%`}</Text>
-              <Text fz={12} c="dimmed">{h.wind === null || h.wind === undefined ? '–' : Math.round(h.wind)}</Text>
+              <Text fz={12} c="dimmed">{orDash(convWind(h.wind, units.wind), (n) => String(Math.round(n)))}</Text>
             </Box>
           </Fragment>
         ))}

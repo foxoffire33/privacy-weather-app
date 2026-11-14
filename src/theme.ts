@@ -42,6 +42,7 @@ const chartStyles = {
 };
 
 const cursorBand = { stroke: 'var(--selected-bg)', strokeWidth: 26, strokeDasharray: '0' };
+const barCursor = { fill: 'var(--selected-bg)', stroke: 'none' };
 const chartBase = {
   'data-noswipe': true,
   className: 'chart-surface',
@@ -150,7 +151,7 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThem
     SegmentedControl: SegmentedControl.extend({ defaultProps: { radius: 0 } }),
     Switch: Switch.extend({ defaultProps: { radius: 0, color: 'signal' } }),
     LineChart: LineChart.extend({ defaultProps: lineBase, styles: chartStyles }),
-    BarChart: BarChart.extend({ defaultProps: { ...chartBase, cursorFill: 'var(--selected-bg)', maxBarWidth: 14 }, styles: chartStyles }),
+    BarChart: BarChart.extend({ defaultProps: { ...chartBase, tooltipProps: { ...chartBase.tooltipProps, cursor: barCursor }, maxBarWidth: 14 }, styles: chartStyles }),
     CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),
   },
 });

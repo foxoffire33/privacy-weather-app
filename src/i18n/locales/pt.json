@@ -414,7 +414,13 @@
     "no2": "NO₂ média",
     "ozoneMax": "Ozono máx",
     "sourceForecast": "Modelos de previsão Open-Meteo (dados passados)",
-    "sourceArchive": "Tempo histórico Open-Meteo (reanálise ERA5)"
+    "sourceArchive": "Tempo histórico Open-Meteo (reanálise ERA5)",
+    "edited": "Editado",
+    "edit": "Editar",
+    "addToLog": "Adicionar ao registo",
+    "restore": "Restaurar",
+    "restoreConfirm": "Substituir este dia por dados do arquivo? As suas alterações serão perdidas.",
+    "restoreFailed": "Falha ao restaurar: {error}"
   },
   "history": {
     "title": "Este dia,\noutros anos.",
@@ -468,7 +474,12 @@
       "many": "{count} dias adicionados, {updated} atualizados, {kept} registados pela app mantidos.",
       "other": "{count} dias adicionados, {updated} atualizados, {kept} registados pela app mantidos."
     },
-    "downloadFailed": "Não foi possível transferir: {error}"
+    "downloadFailed": "Não foi possível transferir: {error}",
+    "edited": "Editado",
+    "addManual": "Adicionar dia manualmente",
+    "lenDays": "{n} d",
+    "lenYear": "1 a",
+    "editLabel": "Editar {date}"
   },
   "settings": {
     "title": "Definições.",
@@ -551,6 +562,29 @@
       "rainDescription": "Previsão de chuva com barras de 15 minutos",
       "hourly": "Por hora",
       "hourlyDescription": "Temperatura e probabilidade de chuva para as próximas horas"
+    }
+  },
+  "dayForm": {
+    "date": "Data",
+    "high": "Máxima",
+    "low": "Mínima",
+    "feelsHigh": "Sensação máx.",
+    "feelsLow": "Sensação mín.",
+    "rain": "Precipitação",
+    "snow": "Neve",
+    "wind": "Vento máx.",
+    "gusts": "Rajadas máx.",
+    "sunshine": "Sol",
+    "uv": "Índice UV",
+    "condition": "Condição",
+    "save": "Guardar",
+    "createTitle": "Adicionar dia",
+    "editTitle": "Editar dia",
+    "errors": {
+      "range": "Deve estar entre {min} e {max}",
+      "date": "Escolha uma data que não seja futura",
+      "lowAboveHigh": "A mínima não pode ser superior à máxima",
+      "gustBelowWind": "As rajadas não podem ser inferiores ao vento"
     }
   }
 }

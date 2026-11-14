@@ -24,7 +24,7 @@ export function FeelsSection({ entry, units }: EntryProps): ReactElement {
   const T = (v?: number | null) => fmtTemp(v, units.temp);
   const windChill = c.apparent_temperature !== null && c.temperature_2m !== null ? c.apparent_temperature - c.temperature_2m : 0;
   return (
-    <Section title={t('city.feels.title')} summary={t(feelsKey(windChill), { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(windChill)) })}>
+    <Section title={t('city.feels.title')} summary={t(feelsKey(windChill), { label: feelsLabel(c.apparent_temperature), n: Math.abs(Math.round(units.temp === 'F' ? windChill * 9 / 5 : windChill)) })}>
       <Box className="stat-grid">
         <Stat k={t('city.feels.title')} v={`${T(c.apparent_temperature)}°`} s={t('city.feels.air', { t: T(c.temperature_2m) })} />
         <Stat k={t('city.feels.humidity')} v={`${n0(c.relative_humidity_2m)}%`} s={dewLabel(c.dew_point_2m)} />
