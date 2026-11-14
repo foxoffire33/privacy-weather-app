@@ -14,6 +14,8 @@ The app is about data: historic, present and future.
 - **Types live in types files, never next to implementation.** App types in `src/types/`, data-layer types in
   the `types.ts` of each `src/stores` folder and in `src/stores/types/`. Components take a named `Props`
   interface, not an inline object type.
+- **Navigation uses react-router** (`HashRouter` in `main.tsx`, routes in `App.tsx`). Build URLs with `paths` from
+  `src/utils/paths.ts`; pass `BACK_STATE` when a jump should animate as going back. No route state in stores.
 - **No comments in source files.**
 
 ## Data

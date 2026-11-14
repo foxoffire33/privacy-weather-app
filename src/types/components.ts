@@ -315,8 +315,6 @@ export interface HistoryRowProps {
   onOpen: (date: string) => void;
 }
 
-export type NavDirection = 'forward' | 'back';
-
 export interface ScreenMotion {
   duration: number;
   easing: string;
@@ -326,4 +324,8 @@ export interface ScreenMotion {
 
 export interface ScreenTransitionProps {
   children: ReactNode;
+}
+
+export interface CityRouteProps {
+  screen: 'history' | 'hourly' | 'day';
 }

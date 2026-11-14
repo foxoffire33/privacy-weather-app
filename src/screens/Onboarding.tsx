@@ -1,13 +1,14 @@
 import { Box, Button, Group, Stack, Text, Title } from '@mantine/core';
+import { useNavigate } from 'react-router';
 
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
-import { useUiStore } from '../stores/uiStore';
+import { paths } from '../utils/paths';
 
 import type { ReactElement } from 'react';
 
 export function Onboarding(): ReactElement {
-  const navigate = useUiStore((s) => s.navigate);
+  const navigate = useNavigate();
   const STEPS = [
     { t: t('onboarding.step1Title'), d: t('onboarding.step1Text') },
     { t: t('onboarding.step2Title'), d: t('onboarding.step2Text') },
@@ -29,7 +30,7 @@ export function Onboarding(): ReactElement {
         ))}
       </Stack>
       <Button variant="white" color="dark" size="xl" fullWidth rightSection={<Icon name="arrow" />}
-        onClick={() => { navigate({ name: 'search' }); }}>
+        onClick={() => { void navigate(paths.search); }}>
         {t('onboarding.start')}
       </Button>
     </Box>

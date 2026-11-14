@@ -2,6 +2,7 @@ import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { StrictMode, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
+import { HashRouter } from 'react-router';
 
 import '@mantine/core/styles.css';
 import '@mantine/charts/styles.css';
@@ -18,7 +19,9 @@ function Root(): ReactElement {
   return (
     <MantineProvider theme={theme} forceColorScheme="dark">
       <ModalsProvider modalProps={CONFIRM_MODAL}>
-        <App />
+        <HashRouter>
+          <App />
+        </HashRouter>
       </ModalsProvider>
     </MantineProvider>
   );

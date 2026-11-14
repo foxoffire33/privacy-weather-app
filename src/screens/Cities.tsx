@@ -1,7 +1,7 @@
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useEffect, useRef, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import { useNavigate } from 'react-router';
 
 import { Icon } from '../components/Icon';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -10,6 +10,7 @@ import { t, tl } from '../i18n';
 import { unfollowCity, useCities, useCityStore, useForecastStore, useLogStore, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { fmtTemp } from '../utils/format';
+import { BACK_STATE, paths } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
 import type { ReorderDrag } from '../types';
@@ -29,7 +30,8 @@ export function Cities(): ReactElement {
   const logged = useLogStore((s) => s.dates);
   const tempUnit = useUnits().temp;
   const reorderCities = useCityStore((s) => s.reorder);
-  const { goHome, navigate } = useUiStore(useShallow((s) => ({ goHome: s.goHome, navigate: s.navigate })));
+  const setPage = useUiStore((s) => s.setPage);
+  const navigate = useNavigate();
   const n = cities.length;
   const scroller = useRef<HTMLDivElement>(null);
   const firstRow = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ export function Cities(): ReactElement {
                     <Icon name="grip" size={20} />
                   </Box>
                   <Group justify="space-between" align="center" wrap="nowrap" style={{ flex: 1, minWidth: 0 }} py={16} pr={8}>
-                    <UnstyledButton onClick={() => { goHome(i); }} style={{ flex: 1, minWidth: 0 }}>
+                    <UnstyledButton onClick={() => { setPage(i); void navigate(paths.home, { state: BACK_STATE }); }} style={{ flex: 1, minWidth: 0 }}>
                       <Group gap={8} wrap="nowrap">
                         <Text fz={22} fw={800} truncate>{c.name}</Text>
                         {i === 0 && <Badge size="sm">{t('common.default')}</Badge>}
@@ -132,7 +134,7 @@ export function Cities(): ReactElement {
         </Box>
       </Box>
 
-      <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => { navigate({ name: 'search' }); }}>
+      <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => { void navigate(paths.search); }}>
         {t('cities.followCity')}
       </Button>
     </Box>

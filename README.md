@@ -15,7 +15,7 @@ npm run dev
 
 ```
 src/
-  main.tsx · App.tsx              Entry with Mantine providers, screen routing
+  main.tsx · App.tsx              Entry with Mantine providers and HashRouter; routes in App.tsx
   theme.ts                        Mantine theme and component defaults
   styles/global.css               App-wide layout CSS
   stores/                         Data layer: entity cache, Zustand stores, IndexedDB persistence, Suspense resources (see stores/README.md)

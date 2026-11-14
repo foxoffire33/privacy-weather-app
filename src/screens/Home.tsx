@@ -1,12 +1,14 @@
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Icon } from '../components/Icon';
 import { t } from '../i18n';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
+import { paths } from '../utils/paths';
 
 import { CityPage } from './CityPage';
 
@@ -38,8 +40,9 @@ function settlePage(moved: number, idx: number, n: number): number {
 export function Home(): ReactElement {
   const cities = useCities();
   const updating = useAnyForecastLoading();
-  const { pageIndex, setPage, navigate } = useUiStore(useShallow((s) => ({
-    pageIndex: s.pageIndex, setPage: s.setPage, navigate: s.navigate,
+  const navigate = useNavigate();
+  const { pageIndex, setPage } = useUiStore(useShallow((s) => ({
+    pageIndex: s.pageIndex, setPage: s.setPage,
   })));
   const n = cities.length;
   const idx = Math.min(pageIndex, n - 1);
@@ -103,7 +106,7 @@ export function Home(): ReactElement {
       </Box>
       <GestureHint multiple={n > 1} />
       <Box className="overlay">
-        <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => { navigate({ name: 'cities' }); }}>
+        <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => { void navigate(paths.cities); }}>
           <Icon name="list" />
         </ActionIcon>
         <Group gap={6} wrap="nowrap">
@@ -117,7 +120,7 @@ export function Home(): ReactElement {
             onClick={() => { void refreshAll({ maxAgeMs: 0 }); }}>
             <Box component="span" className={updating ? 'spin' : undefined}><Icon name="refresh" size={20} /></Box>
           </ActionIcon>
-          <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => { navigate({ name: 'settings' }); }}>
+          <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => { void navigate(paths.settings); }}>
             <Icon name="sliders" />
           </ActionIcon>
         </Group>

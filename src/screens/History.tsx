@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Button, Drawer, Group, Paper, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { Suspense, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
 import { HistoryLog } from '../components/history/HistoryLog';
@@ -17,6 +18,7 @@ import { useAddDatesStore } from '../stores/addDatesStore';
 import { useUiStore } from '../stores/uiStore';
 import { fireAndForget } from '../utils/fireAndForget';
 import { downloadFile, fmtTemp, fmtWind, longDate } from '../utils/format';
+import { BACK_STATE, paths } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
 import type { AddDatesResult, CityScreenProps, ImportRangeProps, LookupCardProps, YearsRowProps } from '../types';
@@ -34,6 +36,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const units = useUnits();
   const today = entry ? entry.data.daily.time[entry.pastDays] : todayISO();
   const draft = useUiStore((st) => st.lookupDraft);
+  const navigate = useNavigate();
   const [settledDraft] = useDebouncedValue(draft, 350);
   const s = {
     city,
@@ -45,7 +48,7 @@ export function History({ cityId }: CityScreenProps): ReactElement {
     windUnit: units.wind,
     deleteLogDay: useLogStore((st) => st.removeDay),
     cityIndex: useCityIndex(cityId),
-    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, navigate: st.navigate, goHome: st.goHome }))),
+    ...useUiStore(useShallow((st) => ({ setLookupDraft: st.setLookupDraft, setPage: st.setPage }))),
   };
   const maxLookupDate = addDays(today, -5);
   const validDraft = /^\d{4}-\d{2}-\d{2}$/.test(settledDraft) && settledDraft >= '1940-01-01' && settledDraft <= maxLookupDate;
@@ -53,7 +56,12 @@ export function History({ cityId }: CityScreenProps): ReactElement {
   const rows = Object.values(s.log).toSorted((a, b) => b.date.localeCompare(a.date));
   const maxLookup = addDays(today, -5);
   const open = (date: string) => {
-    if (date === today) { s.goHome(s.cityIndex); } else { s.navigate({ name: 'day', cityId, date }); }
+    if (date === today) {
+      s.setPage(s.cityIndex);
+      void navigate(paths.home, { state: BACK_STATE });
+    } else {
+      void navigate(paths.day(cityId, date));
+    }
   };
   const cityName = s.city.name;
   const exportCsv = () => {
