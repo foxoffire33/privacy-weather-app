@@ -178,7 +178,8 @@
     "step2Text": "Iżżid il-bliet b'isimhom. L-app qatt ma titlob il-GPS.",
     "step3Title": "Storja sħiħa, fuq dan l-apparat",
     "step3Text": "Kull belt li ssegwi tiġi rreġistrata lokalment. Xejn ma jittella'.",
-    "start": "Agħżel l-ewwel belt tiegħek"
+    "start": "Agħżel l-ewwel belt tiegħek",
+    "privacyLink": "Politika tal-privatezza ta' Open-Meteo"
   },
   "search": {
     "title": "Segwi\nbelt.",
@@ -546,7 +547,14 @@
     "confirmDeleteAll": "Tħassar l-istorja rreġistrata kollha? Dan ma jistax jitreġġa' lura.",
     "about": "Dwar",
     "license": "Sors miftuħ · GPL-3.0 · v{version}",
-    "attribution": "Data tat-temp minn Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Data tat-temp minn Open-Meteo.com (CC BY 4.0)",
+    "services": "Servizzi użati",
+    "openMeteoUse": "Tbassir, temp storiku, kwalità tal-arja, data tal-baħar u tfittxija ta' postijiet.",
+    "openMeteoPrivacy": "Termini u privatezza ta' Open-Meteo",
+    "developer": "Żviluppatur",
+    "sourceCode": "Kodiċi sors",
+    "donate": "Agħti donazzjoni permezz ta' GitHub Sponsors",
+    "donateNote": "Weather Log huwa b'xejn u mingħajr reklami. Donazzjoni tgħin biex jibqa' hekk."
   },
   "backup": {
     "notJson": "Dan il-fajl mhux JSON validu.",
@@ -598,5 +606,34 @@
       "lowAboveHigh": "Il-minimu ma jistax ikun ogħla mill-massimu",
       "gustBelowWind": "Il-buffuri ma jistgħux ikunu inqas mir-riħ"
     }
+  },
+  "cityForm": {
+    "name": "Isem il-post",
+    "region": "Reġjun (mhux obbligatorju)",
+    "latitude": "Latitudni",
+    "longitude": "Lonġitudni",
+    "add": "Żid post",
+    "errors": {
+      "required": "Meħtieġ"
+    }
+  },
+  "offline": {
+    "label": "Mod offline",
+    "note": "Qatt ma tikkonnettja mal-internet. Tdaħħal it-temp kollu int.",
+    "onboarding": "Uża mingħajr internet: daħħal it-temp int",
+    "cityNote": "Mod offline: daħħal il-post u l-koordinati tiegħu.",
+    "dayNote": "Mod offline: id-dettalji kull siegħa ma jitniżżlux.",
+    "noToday": "Xejn reġistrat illum",
+    "heroNote": "Daħħal it-temp tal-lum biex tibda l-log.",
+    "enterToday": "Daħħal it-temp tal-lum",
+    "editToday": "Editja t-temp tal-lum",
+    "footer": "Il-mod offline huwa mixgħul. Itfih fl-Issettjar biex tniżżel it-tbassir.",
+    "manualCity": "M’hemmx konnessjoni? Daħħal il-belt u l-koordinati tagħha int stess.",
+    "footerOnline": "Ma setax jitniżżel tbassir. Xorta tista’ tirreġistra t-temp int stess.",
+    "notFound": "Mhux fil-lista? Daħħal il-belt u l-koordinati tagħha int stess."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Qed jillowdja"
   }
 }

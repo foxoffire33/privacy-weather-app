@@ -172,7 +172,8 @@
     "step2Text": "A városokat név szerint adod hozzá. Az app sosem kér GPS-t.",
     "step3Title": "Teljes előzmény ezen az eszközön",
     "step3Text": "Minden követett várost helyben rögzítünk. Semmi sem kerül feltöltésre.",
-    "start": "Válaszd ki az első várost"
+    "start": "Válaszd ki az első várost",
+    "privacyLink": "Az Open-Meteo adatvédelmi irányelvei"
   },
   "search": {
     "title": "Kövess\negy várost.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Törlöd a teljes rögzített előzményt? Ez nem vonható vissza.",
     "about": "Névjegy",
     "license": "Nyílt forráskód · GPL-3.0 · v{version}",
-    "attribution": "Időjárási adatok: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Időjárási adatok: Open-Meteo.com (CC BY 4.0)",
+    "services": "Használt szolgáltatások",
+    "openMeteoUse": "Előrejelzések, korábbi időjárás, levegőminőség, tengeri adatok és településkeresés.",
+    "openMeteoPrivacy": "Az Open-Meteo feltételei és adatvédelme",
+    "developer": "Fejlesztő",
+    "sourceCode": "Forráskód",
+    "donate": "Támogatás a GitHub Sponsors oldalon",
+    "donateNote": "A Weather Log ingyenes és reklámmentes. Egy adomány segít, hogy így maradjon."
   },
   "backup": {
     "notJson": "Ez a fájl nem érvényes JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "A min. nem lehet nagyobb a max.-nál",
       "gustBelowWind": "A széllökés nem lehet kisebb a szélnél"
     }
+  },
+  "cityForm": {
+    "name": "Település neve",
+    "region": "Régió (nem kötelező)",
+    "latitude": "Szélesség",
+    "longitude": "Hosszúság",
+    "add": "Település hozzáadása",
+    "errors": {
+      "required": "Kötelező"
+    }
+  },
+  "offline": {
+    "label": "Offline mód",
+    "note": "Soha ne csatlakozzon az internethez. Minden időjárást te adsz meg.",
+    "onboarding": "Használat internet nélkül: az időjárást te adod meg",
+    "cityNote": "Offline mód: add meg a települést és a koordinátáit.",
+    "dayNote": "Offline mód: az óránkénti adatok nem töltődnek le.",
+    "noToday": "Ma még nincs bejegyzés",
+    "heroNote": "Add meg a mai időjárást a napló indításához.",
+    "enterToday": "Mai időjárás megadása",
+    "editToday": "Mai időjárás szerkesztése",
+    "footer": "Az offline mód be van kapcsolva. Kapcsold ki a Beállításokban az előrejelzések letöltéséhez.",
+    "manualCity": "Nincs kapcsolat? Add meg magad a várost és a koordinátáit.",
+    "footerOnline": "Nem sikerült letölteni az előrejelzést. Az időjárást továbbra is rögzítheted magad.",
+    "notFound": "Nincs a listán? Add meg magad a várost és a koordinátáit."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Betöltés"
   }
 }

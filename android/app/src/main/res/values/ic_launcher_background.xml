@@ -32,4 +32,5 @@
     <color name="ic_launcher_h330d">#8C1752</color>
     <color name="ic_launcher_grey">#6E6B6B</color>
     <color name="ic_launcher_background">@color/ic_launcher_green</color>
+    <color name="splashBackground">@color/ic_launcher_green</color>
 </resources>

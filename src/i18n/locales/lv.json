@@ -174,7 +174,8 @@
     "step2Text": "Pilsētas pievienojat pēc nosaukuma. Lietotne nekad neprasa GPS.",
     "step3Title": "Pilna vēsture šajā ierīcē",
     "step3Text": "Katra pilsēta, kurai sekojat, tiek reģistrēta lokāli. Nekas netiek augšupielādēts.",
-    "start": "Izvēlieties pirmo pilsētu"
+    "start": "Izvēlieties pirmo pilsētu",
+    "privacyLink": "Open-Meteo privātuma politika"
   },
   "search": {
     "title": "Sekojiet\npilsētai.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Vai dzēst visu reģistrēto vēsturi? To nevar atsaukt.",
     "about": "Par lietotni",
     "license": "Atvērtais kods · GPL-3.0 · v{version}",
-    "attribution": "Laikapstākļu dati: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Laikapstākļu dati: Open-Meteo.com (CC BY 4.0)",
+    "services": "Izmantotie pakalpojumi",
+    "openMeteoUse": "Prognozes, vēsturiskie laikapstākļi, gaisa kvalitāte, jūras dati un vietu meklēšana.",
+    "openMeteoPrivacy": "Open-Meteo noteikumi un privātums",
+    "developer": "Izstrādātājs",
+    "sourceCode": "Pirmkods",
+    "donate": "Ziedot ar GitHub Sponsors",
+    "donateNote": "Weather Log ir bezmaksas un bez reklāmām. Ziedojums palīdz, lai tā paliktu."
   },
   "backup": {
     "notJson": "Šis fails nav derīgs JSON.",
@@ -586,5 +594,34 @@
       "lowAboveHigh": "Min. nevar būt lielāka par maks.",
       "gustBelowWind": "Brāzmas nevar būt vājākas par vēju"
     }
+  },
+  "cityForm": {
+    "name": "Vietas nosaukums",
+    "region": "Reģions (neobligāti)",
+    "latitude": "Platums",
+    "longitude": "Garums",
+    "add": "Pievienot vietu",
+    "errors": {
+      "required": "Obligāti"
+    }
+  },
+  "offline": {
+    "label": "Bezsaistes režīms",
+    "note": "Nekad nesavienoties ar internetu. Visus laikapstākļus ievadi pats.",
+    "onboarding": "Lietot bez interneta: laikapstākļus ievadi pats",
+    "cityNote": "Bezsaistē: ievadi vietu un tās koordinātas pats.",
+    "dayNote": "Bezsaistē: stundu dati netiek lejupielādēti.",
+    "noToday": "Šodien nekas nav reģistrēts",
+    "heroNote": "Ievadi šodienas laikapstākļus, lai sāktu žurnālu.",
+    "enterToday": "Ievadīt šodienas laikapstākļus",
+    "editToday": "Rediģēt šodienas laikapstākļus",
+    "footer": "Bezsaistes režīms ir ieslēgts. Izslēdz to iestatījumos, lai lejupielādētu prognozes.",
+    "manualCity": "Nav savienojuma? Ievadiet pilsētu un tās koordinātas paši.",
+    "footerOnline": "Prognozi neizdevās lejupielādēt. Laikapstākļus joprojām varat reģistrēt paši.",
+    "notFound": "Nav sarakstā? Ievadiet pilsētu un tās koordinātas paši."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Ielādē"
   }
 }

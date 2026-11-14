@@ -172,7 +172,8 @@
     "step2Text": "Du fügst Städte per Name hinzu. Die App fragt nie nach GPS.",
     "step3Title": "Eine vollständige Historie, auf diesem Gerät",
     "step3Text": "Jede Stadt, der du folgst, wird lokal erfasst. Nichts wird hochgeladen.",
-    "start": "Wähle deine erste Stadt"
+    "start": "Wähle deine erste Stadt",
+    "privacyLink": "Datenschutzerklärung von Open-Meteo"
   },
   "search": {
     "title": "Folge\neiner Stadt.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Gesamte erfasste Historie löschen? Das kann nicht rückgängig gemacht werden.",
     "about": "Über",
     "license": "Open Source · GPL-3.0 · v{version}",
-    "attribution": "Wetterdaten von Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Wetterdaten von Open-Meteo.com (CC BY 4.0)",
+    "services": "Genutzte Dienste",
+    "openMeteoUse": "Vorhersagen, historisches Wetter, Luftqualität, Meeresdaten und Ortssuche.",
+    "openMeteoPrivacy": "Bedingungen & Datenschutz von Open-Meteo",
+    "developer": "Entwickler",
+    "sourceCode": "Quellcode",
+    "donate": "Spenden über GitHub Sponsors",
+    "donateNote": "Weather Log ist kostenlos und werbefrei. Eine Spende hilft, dass es so bleibt."
   },
   "backup": {
     "notJson": "Diese Datei ist kein gültiges JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Tiefstwert darf nicht über dem Höchstwert liegen",
       "gustBelowWind": "Böen dürfen nicht unter dem Wind liegen"
     }
+  },
+  "cityForm": {
+    "name": "Ortsname",
+    "region": "Region (optional)",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "add": "Ort hinzufügen",
+    "errors": {
+      "required": "Pflichtfeld"
+    }
+  },
+  "offline": {
+    "label": "Offline-Modus",
+    "note": "Nie mit dem Internet verbinden. Du gibst das Wetter selbst ein.",
+    "onboarding": "Ohne Internet nutzen: Wetter selbst eingeben",
+    "cityNote": "Offline-Modus: Ort und Koordinaten selbst eingeben.",
+    "dayNote": "Offline-Modus: Stundendetails werden nicht geladen.",
+    "noToday": "Heute noch nichts erfasst",
+    "heroNote": "Gib das heutige Wetter ein, um dein Log zu beginnen.",
+    "enterToday": "Heutiges Wetter eingeben",
+    "editToday": "Heutiges Wetter bearbeiten",
+    "footer": "Der Offline-Modus ist an. Schalte ihn in den Einstellungen aus, um Vorhersagen zu laden.",
+    "manualCity": "Keine Verbindung? Gib die Stadt und ihre Koordinaten selbst ein.",
+    "footerOnline": "Es konnte keine Vorhersage geladen werden. Du kannst das Wetter trotzdem selbst eintragen.",
+    "notFound": "Nicht dabei? Gib die Stadt und ihre Koordinaten selbst ein."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Wird geladen"
   }
 }

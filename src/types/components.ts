@@ -5,7 +5,7 @@ import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'expand';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand';
 
 export interface IconProps {
   name: IconName;
@@ -318,6 +318,8 @@ export interface ScreenMotion {
   easing: string;
   forward: Exclude<MantineTransition, string>;
   back: Exclude<MantineTransition, string>;
+  swipeNext: Exclude<MantineTransition, string>;
+  swipePrev: Exclude<MantineTransition, string>;
 }
 
 export interface ScreenTransitionProps {
@@ -359,3 +361,18 @@ export interface DayActionsProps {
 }
 
 export type DayEntryFieldsProps = Omit<DayEntryFormProps, 'opened'>;
+
+export interface CityFormValues {
+  name: string;
+  region: string;
+  latitude: FormNumber;
+  longitude: FormNumber;
+}
+
+export interface ManualCityFormProps {
+  onAdded: (index: number) => void;
+}
+
+export interface SettingsAboutProps {
+  version: string;
+}

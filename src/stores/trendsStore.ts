@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
+import { isOffline } from './core/config';
 import { inSequence } from './core/guards';
+import { READY } from './core/inflight';
 
 import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, once, succeed, useLogStore } from '.';
 
@@ -43,7 +45,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
   setBack: (back) => { set({ back }); },
   setRangeDraft: (patch) => { set((s) => ({ rangeDraft: { ...s.rangeDraft, ...patch } })); },
 
-  ensureWindows: (cityId, windows) => once(trendsKey(cityId, windows), async () => {
+  ensureWindows: (cityId, windows) => (isOffline() ? READY : once(trendsKey(cityId, windows), async () => {
     const tried = new Set(get().attempted);
     const wanted = windows.filter((w) => hasGap(loggedDates(cityId), w) && !tried.has(windowKey(cityId, w)));
     if (wanted.length === 0) { return; }
@@ -62,7 +64,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
       download: error === null ? succeed() : fail(s.download, error),
       failed: [...s.failed.filter((k) => !wanted.some((w) => windowKey(cityId, w) === k)), ...failed],
     }));
-  }),
+  })),
 
   retryFailed: async (cityId, windows) => {
     const keys = new Set(windows.map((w) => windowKey(cityId, w)).filter((k) => get().failed.includes(k)));

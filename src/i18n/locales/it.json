@@ -174,7 +174,8 @@
     "step2Text": "Aggiungi le città per nome. L’app non chiede mai il GPS.",
     "step3Title": "Uno storico completo, su questo dispositivo",
     "step3Text": "Ogni città che segui viene registrata in locale. Non viene caricato nulla.",
-    "start": "Scegli la tua prima città"
+    "start": "Scegli la tua prima città",
+    "privacyLink": "Informativa sulla privacy di Open-Meteo"
   },
   "search": {
     "title": "Segui\nuna città.",
@@ -534,7 +535,14 @@
     "confirmDeleteAll": "Eliminare tutto lo storico registrato? L’operazione è irreversibile.",
     "about": "Informazioni",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Dati meteo di Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Dati meteo di Open-Meteo.com (CC BY 4.0)",
+    "services": "Servizi utilizzati",
+    "openMeteoUse": "Previsioni, meteo storico, qualità dell'aria, dati marini e ricerca di città.",
+    "openMeteoPrivacy": "Termini e privacy di Open-Meteo",
+    "developer": "Sviluppatore",
+    "sourceCode": "Codice sorgente",
+    "donate": "Dona con GitHub Sponsors",
+    "donateNote": "Weather Log è gratuito e senza pubblicità. Una donazione aiuta a mantenerlo così."
   },
   "backup": {
     "notJson": "Questo file non è un JSON valido.",
@@ -586,5 +594,34 @@
       "lowAboveHigh": "La minima non può superare la massima",
       "gustBelowWind": "Le raffiche non possono essere inferiori al vento"
     }
+  },
+  "cityForm": {
+    "name": "Nome della città",
+    "region": "Regione (facoltativa)",
+    "latitude": "Latitudine",
+    "longitude": "Longitudine",
+    "add": "Aggiungi città",
+    "errors": {
+      "required": "Obbligatorio"
+    }
+  },
+  "offline": {
+    "label": "Modalità offline",
+    "note": "Non connettersi mai a internet. Inserisci tu tutto il meteo.",
+    "onboarding": "Usa senza internet: inserisci tu il meteo",
+    "cityNote": "Modalità offline: inserisci la città e le coordinate.",
+    "dayNote": "Modalità offline: il dettaglio orario non viene scaricato.",
+    "noToday": "Niente registrato oggi",
+    "heroNote": "Inserisci il meteo di oggi per iniziare il registro.",
+    "enterToday": "Inserisci il meteo di oggi",
+    "editToday": "Modifica il meteo di oggi",
+    "footer": "La modalità offline è attiva. Disattivala nelle Impostazioni per scaricare le previsioni.",
+    "manualCity": "Nessuna connessione? Inserisci tu la città e le sue coordinate.",
+    "footerOnline": "Impossibile scaricare le previsioni. Puoi comunque registrare il meteo da solo.",
+    "notFound": "Non c'è? Inserisci tu la città e le sue coordinate."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Caricamento"
   }
 }

@@ -1,1 +1,1 @@
-Private weather with a full on-device history of every city you follow
+Private weather log for every city you follow, online or fully offline

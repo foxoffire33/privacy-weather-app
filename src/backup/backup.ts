@@ -55,6 +55,7 @@ function parseSettings(raw: unknown): Backup['settings'] {
   if (isWindUnit(s.windUnit)) { settings.windUnit = s.windUnit; }
   if (isNum(s.snapshotMinutes)) { settings.snapshotMinutes = s.snapshotMinutes; }
   if (typeof s.backfill === 'boolean') { settings.backfill = s.backfill; }
+  if (typeof s.offline === 'boolean') { settings.offline = s.offline; }
   if (isAccent(s.accent)) { settings.accent = s.accent; }
   if (isStr(s.accentColor) && /^#[0-9a-f]{6}$/i.test(s.accentColor)) { settings.accentColor = s.accentColor; }
   return settings;

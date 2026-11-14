@@ -176,7 +176,8 @@
     "step2Text": "Miasta dodajesz po nazwie. Aplikacja nigdy nie prosi o GPS.",
     "step3Title": "Pełna historia na tym urządzeniu",
     "step3Text": "Każde obserwowane miasto jest zapisywane lokalnie. Nic nie jest wysyłane.",
-    "start": "Wybierz pierwsze miasto"
+    "start": "Wybierz pierwsze miasto",
+    "privacyLink": "Polityka prywatności Open-Meteo"
   },
   "search": {
     "title": "Obserwuj\nmiasto.",
@@ -540,7 +541,14 @@
     "confirmDeleteAll": "Usunąć całą zapisaną historię? Tej operacji nie można cofnąć.",
     "about": "O aplikacji",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Dane pogodowe: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Dane pogodowe: Open-Meteo.com (CC BY 4.0)",
+    "services": "Używane usługi",
+    "openMeteoUse": "Prognozy, pogoda historyczna, jakość powietrza, dane morskie i wyszukiwanie miejscowości.",
+    "openMeteoPrivacy": "Warunki i prywatność Open-Meteo",
+    "developer": "Twórca",
+    "sourceCode": "Kod źródłowy",
+    "donate": "Wesprzyj przez GitHub Sponsors",
+    "donateNote": "Weather Log jest darmowy i bez reklam. Darowizna pomaga, by tak zostało."
   },
   "backup": {
     "notJson": "Ten plik nie jest poprawnym JSON-em.",
@@ -592,5 +600,34 @@
       "lowAboveHigh": "Min. nie może być wyższe niż maks.",
       "gustBelowWind": "Porywy nie mogą być słabsze niż wiatr"
     }
+  },
+  "cityForm": {
+    "name": "Nazwa miejscowości",
+    "region": "Region (opcjonalnie)",
+    "latitude": "Szerokość geogr.",
+    "longitude": "Długość geogr.",
+    "add": "Dodaj miejscowość",
+    "errors": {
+      "required": "Wymagane"
+    }
+  },
+  "offline": {
+    "label": "Tryb offline",
+    "note": "Nigdy nie łącz się z internetem. Całą pogodę wpisujesz sam.",
+    "onboarding": "Używaj bez internetu: wpisuj pogodę sam",
+    "cityNote": "Tryb offline: wpisz miejscowość i jej współrzędne.",
+    "dayNote": "Tryb offline: szczegóły godzinowe nie są pobierane.",
+    "noToday": "Dziś nic nie zapisano",
+    "heroNote": "Wpisz dzisiejszą pogodę, aby zacząć dziennik.",
+    "enterToday": "Wpisz dzisiejszą pogodę",
+    "editToday": "Edytuj dzisiejszą pogodę",
+    "footer": "Tryb offline jest włączony. Wyłącz go w Ustawieniach, aby pobierać prognozy.",
+    "manualCity": "Brak połączenia? Wpisz miasto i jego współrzędne samodzielnie.",
+    "footerOnline": "Nie udało się pobrać prognozy. Nadal możesz samodzielnie zapisywać pogodę.",
+    "notFound": "Nie ma na liście? Wpisz miasto i jego współrzędne samodzielnie."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Ładowanie"
   }
 }

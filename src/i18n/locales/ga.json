@@ -178,7 +178,8 @@
     "step2Text": "Cuireann tú cathracha leis de réir ainm. Ní iarrann an aip GPS riamh.",
     "step3Title": "Stair iomlán, ar an ngléas seo",
     "step3Text": "Taifeadtar gach cathair a leanann tú go háitiúil. Ní uaslódáiltear dada.",
-    "start": "Roghnaigh do chéad chathair"
+    "start": "Roghnaigh do chéad chathair",
+    "privacyLink": "Polasaí príobháideachta Open-Meteo"
   },
   "search": {
     "title": "Lean\ncathair.",
@@ -546,7 +547,14 @@
     "confirmDeleteAll": "An stair thaifeadta ar fad a scriosadh? Ní féidir é seo a chealú.",
     "about": "Maidir leis",
     "license": "Foinse oscailte · GPL-3.0 · v{version}",
-    "attribution": "Sonraí aimsire ó Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Sonraí aimsire ó Open-Meteo.com (CC BY 4.0)",
+    "services": "Seirbhísí a úsáidtear",
+    "openMeteoUse": "Réamhaisnéisí, aimsir stairiúil, cáilíocht aeir, sonraí mara agus cuardach áiteanna.",
+    "openMeteoPrivacy": "Téarmaí agus príobháideacht Open-Meteo",
+    "developer": "Forbróir",
+    "sourceCode": "Cód foinseach",
+    "donate": "Tabhair síntiús trí GitHub Sponsors",
+    "donateNote": "Tá Weather Log saor in aisce agus gan fógraí. Cabhraíonn síntiús é a choinneáil mar sin."
   },
   "backup": {
     "notJson": "Ní JSON bailí an comhad seo.",
@@ -598,5 +606,34 @@
       "lowAboveHigh": "Ní féidir an t-íosmhéid a bheith os cionn an uasmhéid",
       "gustBelowWind": "Ní féidir séideáin a bheith níos lú ná an ghaoth"
     }
+  },
+  "cityForm": {
+    "name": "Ainm na háite",
+    "region": "Réigiún (roghnach)",
+    "latitude": "Domhanleithead",
+    "longitude": "Domhanfhad",
+    "add": "Cuir áit leis",
+    "errors": {
+      "required": "Riachtanach"
+    }
+  },
+  "offline": {
+    "label": "Mód as líne",
+    "note": "Ná ceangail leis an idirlíon riamh. Cuireann tú an aimsir isteach tú féin.",
+    "onboarding": "Úsáid gan idirlíon: cuir an aimsir isteach tú féin",
+    "cityNote": "Mód as líne: cuir an áit agus a comhordanáidí isteach.",
+    "dayNote": "Mód as líne: ní íoslódáiltear sonraí in aghaidh na huaire.",
+    "noToday": "Níl aon rud logáilte inniu",
+    "heroNote": "Cuir aimsir an lae inniu isteach chun do loga a thosú.",
+    "enterToday": "Cuir aimsir an lae inniu isteach",
+    "editToday": "Cuir aimsir an lae inniu in eagar",
+    "footer": "Tá an mód as líne ar siúl. Múch é sna Socruithe chun réamhaisnéisí a íoslódáil.",
+    "manualCity": "Gan nasc? Cuir isteach an chathair agus a comhordanáidí tú féin.",
+    "footerOnline": "Níorbh fhéidir réamhaisnéis a íoslódáil. Is féidir leat an aimsir a thaifeadadh tú féin fós.",
+    "notFound": "Níl sé liostaithe? Cuir isteach an chathair agus a comhordanáidí tú féin."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Á lódáil"
   }
 }

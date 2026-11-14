@@ -9,3 +9,5 @@ export const paths = {
 };
 
 export const BACK_STATE = { back: true };
+export const SWIPE_NEXT_STATE = { swipe: 'next' };
+export const SWIPE_PREV_STATE = { swipe: 'prev' };

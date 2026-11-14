@@ -172,7 +172,8 @@
     "step2Text": "Lisad linnad nime järgi. Rakendus ei küsi kunagi GPS-i.",
     "step3Title": "Täielik ajalugu selles seadmes",
     "step3Text": "Iga jälgitavat linna logitakse kohapeal. Midagi ei laadita üles.",
-    "start": "Vali oma esimene linn"
+    "start": "Vali oma esimene linn",
+    "privacyLink": "Open-Meteo privaatsuspoliitika"
   },
   "search": {
     "title": "Jälgi\nlinna.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Kas kustutada kogu logitud ajalugu? Seda ei saa tagasi võtta.",
     "about": "Teave",
     "license": "Avatud lähtekood · GPL-3.0 · v{version}",
-    "attribution": "Ilmaandmed: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Ilmaandmed: Open-Meteo.com (CC BY 4.0)",
+    "services": "Kasutatud teenused",
+    "openMeteoUse": "Prognoosid, ajalooline ilm, õhukvaliteet, mereandmed ja kohaotsing.",
+    "openMeteoPrivacy": "Open-Meteo tingimused ja privaatsus",
+    "developer": "Arendaja",
+    "sourceCode": "Lähtekood",
+    "donate": "Anneta GitHub Sponsorsi kaudu",
+    "donateNote": "Weather Log on tasuta ja reklaamideta. Annetus aitab sel nii jääda."
   },
   "backup": {
     "notJson": "See fail ei ole kehtiv JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Madalaim ei saa olla kõrgeimast suurem",
       "gustBelowWind": "Puhangud ei saa olla tuulest nõrgemad"
     }
+  },
+  "cityForm": {
+    "name": "Koha nimi",
+    "region": "Piirkond (valikuline)",
+    "latitude": "Laiuskraad",
+    "longitude": "Pikkuskraad",
+    "add": "Lisa koht",
+    "errors": {
+      "required": "Kohustuslik"
+    }
+  },
+  "offline": {
+    "label": "Võrguühenduseta režiim",
+    "note": "Ära kunagi internetiga ühendu. Sisestad kogu ilma ise.",
+    "onboarding": "Kasuta ilma internetita: sisesta ilm ise",
+    "cityNote": "Võrguühenduseta: sisesta koht ja selle koordinaadid.",
+    "dayNote": "Võrguühenduseta: tunniandmeid ei laadita.",
+    "noToday": "Täna pole midagi logitud",
+    "heroNote": "Sisesta tänane ilm, et logi alustada.",
+    "enterToday": "Sisesta tänane ilm",
+    "editToday": "Muuda tänast ilma",
+    "footer": "Võrguühenduseta režiim on sees. Lülita see seadetes välja, et prognoose laadida.",
+    "manualCity": "Ühendus puudub? Sisesta linn ja selle koordinaadid ise.",
+    "footerOnline": "Prognoosi ei õnnestunud alla laadida. Ilma saad endiselt ise üles märkida.",
+    "notFound": "Pole loendis? Sisesta linn ja selle koordinaadid ise."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Laadimine"
   }
 }

@@ -172,7 +172,8 @@
     "step2Text": "Du tilføjer byer efter navn. Appen beder aldrig om GPS.",
     "step3Title": "En komplet historik på denne enhed",
     "step3Text": "Alle byer, du følger, logges lokalt. Intet bliver uploadet.",
-    "start": "Vælg din første by"
+    "start": "Vælg din første by",
+    "privacyLink": "Open-Meteos privatlivspolitik"
   },
   "search": {
     "title": "Følg\nen by.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Slet al logget historik? Det kan ikke fortrydes.",
     "about": "Om",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Vejrdata fra Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Vejrdata fra Open-Meteo.com (CC BY 4.0)",
+    "services": "Anvendte tjenester",
+    "openMeteoUse": "Prognoser, historisk vejr, luftkvalitet, havdata og bysøgning.",
+    "openMeteoPrivacy": "Open-Meteos vilkår og privatliv",
+    "developer": "Udvikler",
+    "sourceCode": "Kildekode",
+    "donate": "Donér via GitHub Sponsors",
+    "donateNote": "Weather Log er gratis og uden reklamer. En donation hjælper med at holde det sådan."
   },
   "backup": {
     "notJson": "Denne fil er ikke gyldig JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Min. kan ikke være over maks.",
       "gustBelowWind": "Vindstød kan ikke være under vind"
     }
+  },
+  "cityForm": {
+    "name": "Bynavn",
+    "region": "Region (valgfri)",
+    "latitude": "Breddegrad",
+    "longitude": "Længdegrad",
+    "add": "Tilføj by",
+    "errors": {
+      "required": "Påkrævet"
+    }
+  },
+  "offline": {
+    "label": "Offlinetilstand",
+    "note": "Forbind aldrig til internettet. Du indtaster selv alt vejr.",
+    "onboarding": "Brug uden internet: indtast selv vejret",
+    "cityNote": "Offlinetilstand: indtast byen og dens koordinater selv.",
+    "dayNote": "Offlinetilstand: timedetaljer hentes ikke.",
+    "noToday": "Intet logget i dag",
+    "heroNote": "Indtast dagens vejr for at starte din log.",
+    "enterToday": "Indtast dagens vejr",
+    "editToday": "Rediger dagens vejr",
+    "footer": "Offlinetilstand er slået til. Slå den fra i Indstillinger for at hente prognoser.",
+    "manualCity": "Ingen forbindelse? Indtast selv byen og dens koordinater.",
+    "footerOnline": "Ingen prognose kunne hentes. Du kan stadig selv registrere vejret.",
+    "notFound": "Ikke på listen? Indtast selv byen og dens koordinater."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Indlæser"
   }
 }

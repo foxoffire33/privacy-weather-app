@@ -1,0 +1,8 @@
+Offline mode: use the app without internet. Add cities by coordinates and log the weather yourself. Turn it on at setup or in Settings.
+Without a connection in online mode you can still enter cities and weather by hand.
+Swipe between logged days with a real slide.
+New splash screen.
+Restore only shows on edited days.
+Full-screen chart tooltips are no longer cut off.
+Settings: developer details, services used and a donate button.
+Setup links to Open-Meteo's privacy policy.

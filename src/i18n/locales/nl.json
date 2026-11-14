@@ -172,7 +172,8 @@
     "step2Text": "Je voegt steden toe op naam. De app vraagt nooit om GPS.",
     "step3Title": "Een volledige geschiedenis, op dit apparaat",
     "step3Text": "Elke stad die je volgt wordt lokaal gelogd. Er wordt niets geüpload.",
-    "start": "Kies je eerste stad"
+    "start": "Kies je eerste stad",
+    "privacyLink": "Privacybeleid van Open-Meteo"
   },
   "search": {
     "title": "Volg\neen stad.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Alle gelogde geschiedenis verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "about": "Over",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Weergegevens van Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Weergegevens van Open-Meteo.com (CC BY 4.0)",
+    "services": "Gebruikte diensten",
+    "openMeteoUse": "Verwachtingen, historisch weer, luchtkwaliteit, zeegegevens en plaatsen zoeken.",
+    "openMeteoPrivacy": "Voorwaarden en privacy van Open-Meteo",
+    "developer": "Ontwikkelaar",
+    "sourceCode": "Broncode",
+    "donate": "Doneer via GitHub Sponsors",
+    "donateNote": "Weather Log is gratis en zonder advertenties. Een donatie helpt dat zo te houden."
   },
   "backup": {
     "notJson": "Dit bestand is geen geldige JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Min kan niet boven max liggen",
       "gustBelowWind": "Windstoten kunnen niet lager zijn dan wind"
     }
+  },
+  "cityForm": {
+    "name": "Plaatsnaam",
+    "region": "Regio (optioneel)",
+    "latitude": "Breedtegraad",
+    "longitude": "Lengtegraad",
+    "add": "Plaats toevoegen",
+    "errors": {
+      "required": "Verplicht"
+    }
+  },
+  "offline": {
+    "label": "Offline modus",
+    "note": "Nooit verbinding maken met internet. Je voert al het weer zelf in.",
+    "onboarding": "Gebruik zonder internet: voer het weer zelf in",
+    "cityNote": "Offline modus: voer de plaats en coördinaten zelf in.",
+    "dayNote": "Offline modus: details per uur worden niet gedownload.",
+    "noToday": "Vandaag nog niets gelogd",
+    "heroNote": "Voer het weer van vandaag in om je log te starten.",
+    "enterToday": "Weer van vandaag invoeren",
+    "editToday": "Weer van vandaag bewerken",
+    "footer": "Offline modus staat aan. Zet hem uit in Instellingen om verwachtingen te downloaden.",
+    "manualCity": "Geen verbinding? Vul de stad en de coördinaten zelf in.",
+    "footerOnline": "Er kon geen verwachting worden gedownload. Je kunt het weer nog steeds zelf vastleggen.",
+    "notFound": "Staat je plaats er niet bij? Vul de stad en de coördinaten zelf in."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Laden"
   }
 }

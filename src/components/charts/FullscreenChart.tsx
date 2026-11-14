@@ -25,7 +25,7 @@ export function FullscreenChart({ id, title, render }: FullscreenChartProps): Re
   return (
     <Modal opened={opened} onClose={close} fullScreen title={title}
       closeButtonProps={{ size: 44, iconSize: 20, 'aria-label': t('common.close') }}>
-      {opened && <Box px={12} pt={12}>{render(FULL_HEIGHT)}</Box>}
+      {opened && <Box px={12} pt={40}>{render(FULL_HEIGHT)}</Box>}
     </Modal>
   );
 }

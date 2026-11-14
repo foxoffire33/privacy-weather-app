@@ -172,7 +172,8 @@
     "step2Text": "You add cities by name. The app never asks for GPS.",
     "step3Title": "A full history, on this device",
     "step3Text": "Every city you follow is logged locally. Nothing is uploaded.",
-    "start": "Choose your first city"
+    "start": "Choose your first city",
+    "privacyLink": "Open-Meteo privacy policy"
   },
   "search": {
     "title": "Follow\na city.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Delete all logged history? This cannot be undone.",
     "about": "About",
     "license": "Open source · GPL-3.0 · v{version}",
-    "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
+    "services": "Services used",
+    "openMeteoUse": "Forecasts, historical weather, air quality, marine data and city search.",
+    "openMeteoPrivacy": "Open-Meteo terms & privacy",
+    "developer": "Developer",
+    "sourceCode": "Source code",
+    "donate": "Donate via GitHub Sponsors",
+    "donateNote": "Weather Log is free and has no ads. A donation helps keep it that way."
   },
   "backup": {
     "notJson": "This file is not valid JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Low can't be above high",
       "gustBelowWind": "Gusts can't be below wind"
     }
+  },
+  "cityForm": {
+    "name": "City name",
+    "region": "Region (optional)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "add": "Add city",
+    "errors": {
+      "required": "Required"
+    }
+  },
+  "offline": {
+    "label": "Offline mode",
+    "note": "Never connect to the internet. You enter all weather yourself.",
+    "onboarding": "Use without internet: enter the weather yourself",
+    "cityNote": "Offline mode: enter the city and its coordinates yourself.",
+    "dayNote": "Offline mode: hourly details are not downloaded.",
+    "noToday": "Nothing logged today",
+    "heroNote": "Enter today's weather to start your log.",
+    "enterToday": "Enter today's weather",
+    "editToday": "Edit today's weather",
+    "footer": "Offline mode is on. Turn it off in Settings to download forecasts.",
+    "manualCity": "No connection? Enter the city and its coordinates yourself.",
+    "footerOnline": "No forecast could be downloaded. You can still log the weather yourself.",
+    "notFound": "Not listed? Enter the city and its coordinates yourself."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Loading"
   }
 }

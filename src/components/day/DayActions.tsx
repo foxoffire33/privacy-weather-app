@@ -3,7 +3,7 @@ import { modals } from '@mantine/modals';
 import { useState } from 'react';
 
 import { t } from '../../i18n';
-import { NO_ARCHIVE_DATA, restoreDay, useRestoreQuery } from '../../stores';
+import { NO_ARCHIVE_DATA, restoreDay, useRestoreQuery, useSettings } from '../../stores';
 
 import { DayEntryForm } from './DayEntryForm';
 
@@ -14,6 +14,8 @@ export function DayActions({ cityId, date, record }: DayActionsProps): ReactElem
   const [editing, setEditing] = useState(false);
   const restore = useRestoreQuery(cityId, date);
   const busy = restore.status === 'loading';
+  const offline = useSettings().offline;
+  const canRestore = record?.source === 'edited' && !offline;
   const confirmRestore = () => {
     modals.openConfirmModal({
       groupProps: { grow: true, wrap: 'nowrap', mt: 16 },
@@ -28,7 +30,7 @@ export function DayActions({ cityId, date, record }: DayActionsProps): ReactElem
         <Button variant="outline" color="gray" onClick={() => { setEditing(true); }}>
           {record === undefined ? t('dayView.addToLog') : t('dayView.edit')}
         </Button>
-        {record !== undefined && <Button variant="outline" color="gray" loading={busy} onClick={confirmRestore}>{t('dayView.restore')}</Button>}
+        {canRestore && <Button variant="outline" color="gray" loading={busy} onClick={confirmRestore}>{t('dayView.restore')}</Button>}
       </Group>
       {restore.status === 'error' && (
         <Text fz={12} c="signal.3" mt={6} role="status">

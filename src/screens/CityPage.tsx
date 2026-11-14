@@ -3,16 +3,17 @@ import { Suspense, memo } from 'react';
 import { useNavigate } from 'react-router';
 
 import { AirSection, PollenSection } from '../components/city/AirSections';
-import { CityHero, CityLoadError, CityTitle } from '../components/city/CityHero';
+import { CityHero, CityTitle } from '../components/city/CityHero';
 import { FeelsSection, PrecipSection, SunSection, WindSection } from '../components/city/ConditionSections';
 import { DayList } from '../components/city/DayList';
 import { Next48Section, Next7Section } from '../components/city/ForecastCharts';
 import { HourlyStrip, Nowcast } from '../components/city/HourlyStrip';
+import { OfflineCity } from '../components/city/OfflineCity';
 import { AtmosphereSection, CityFooter, SeaSection, SkySection } from '../components/city/SkySections';
 import { Icon } from '../components/Icon';
 import { CityBodySk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { useForecastData, useForecastQuery, useLogCount, useUnits } from '../stores';
+import { useForecastData, useForecastQuery, useLogCount, useSettings, useUnits } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { rainOutlook, nowIndex } from '../utils/insights';
 import { paths } from '../utils/paths';
@@ -38,10 +39,13 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
   const entry = useForecastData(city.id);
   const query = useForecastQuery(city.id);
   const units = useUnits();
+  const offline = useSettings().offline;
   const logged = useLogCount(city.id);
   const expanded = useUiStore((st) => st.expandedDay[city.id] ?? null);
   const navigate = useNavigate();
-  if (!entry) { return <CityLoadError city={city} isDefault={isDefault} error={query.error} />; }
+  if (offline || !entry) {
+    return <OfflineCity city={city} isDefault={isDefault} error={offline ? null : query.error} />;
+  }
   const data = { city, entry, units };
   return (
     <>

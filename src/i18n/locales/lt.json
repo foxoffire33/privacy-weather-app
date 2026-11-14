@@ -176,7 +176,8 @@
     "step2Text": "Miestus pridedate pagal pavadinimą. Programėlė niekada neprašo GPS.",
     "step3Title": "Visa istorija šiame įrenginyje",
     "step3Text": "Kiekvienas stebimas miestas fiksuojamas vietoje. Niekas neįkeliama.",
-    "start": "Pasirinkite pirmąjį miestą"
+    "start": "Pasirinkite pirmąjį miestą",
+    "privacyLink": "Open-Meteo privatumo politika"
   },
   "search": {
     "title": "Stebėkite\nmiestą.",
@@ -540,7 +541,14 @@
     "confirmDeleteAll": "Ištrinti visą užfiksuotą istoriją? Šio veiksmo atšaukti negalima.",
     "about": "Apie",
     "license": "Atvirasis kodas · GPL-3.0 · v{version}",
-    "attribution": "Orų duomenys: Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Orų duomenys: Open-Meteo.com (CC BY 4.0)",
+    "services": "Naudojamos paslaugos",
+    "openMeteoUse": "Prognozės, istoriniai orai, oro kokybė, jūros duomenys ir vietovių paieška.",
+    "openMeteoPrivacy": "Open-Meteo sąlygos ir privatumas",
+    "developer": "Kūrėjas",
+    "sourceCode": "Pirminis kodas",
+    "donate": "Paremti per GitHub Sponsors",
+    "donateNote": "Weather Log yra nemokama ir be reklamų. Parama padeda, kad taip ir liktų."
   },
   "backup": {
     "notJson": "Šis failas nėra tinkamas JSON.",
@@ -592,5 +600,34 @@
       "lowAboveHigh": "Min. negali būti didesnė už maks.",
       "gustBelowWind": "Gūsiai negali būti silpnesni už vėją"
     }
+  },
+  "cityForm": {
+    "name": "Vietovės pavadinimas",
+    "region": "Regionas (nebūtina)",
+    "latitude": "Platuma",
+    "longitude": "Ilguma",
+    "add": "Pridėti vietovę",
+    "errors": {
+      "required": "Privaloma"
+    }
+  },
+  "offline": {
+    "label": "Neprisijungus režimas",
+    "note": "Niekada nesijungti prie interneto. Visus orus įvedate patys.",
+    "onboarding": "Naudoti be interneto: orus įvedate patys",
+    "cityNote": "Neprisijungus: įveskite vietovę ir jos koordinates.",
+    "dayNote": "Neprisijungus: valandiniai duomenys nesiunčiami.",
+    "noToday": "Šiandien nieko neužregistruota",
+    "heroNote": "Įveskite šiandienos orus, kad pradėtumėte žurnalą.",
+    "enterToday": "Įvesti šiandienos orus",
+    "editToday": "Redaguoti šiandienos orus",
+    "footer": "Neprisijungus režimas įjungtas. Išjunkite jį nustatymuose, kad atsisiųstumėte prognozes.",
+    "manualCity": "Nėra ryšio? Įveskite miestą ir jo koordinates patys.",
+    "footerOnline": "Nepavyko atsisiųsti prognozės. Orus vis tiek galite registruoti patys.",
+    "notFound": "Nėra sąraše? Įveskite miestą ir jo koordinates patys."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Įkeliama"
   }
 }

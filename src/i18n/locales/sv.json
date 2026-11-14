@@ -172,7 +172,8 @@
     "step2Text": "Du lägger till städer med namn. Appen frågar aldrig efter GPS.",
     "step3Title": "En komplett historik, på den här enheten",
     "step3Text": "Varje stad du följer loggas lokalt. Inget laddas upp.",
-    "start": "Välj din första stad"
+    "start": "Välj din första stad",
+    "privacyLink": "Open-Meteos integritetspolicy"
   },
   "search": {
     "title": "Följ\nen stad.",
@@ -528,7 +529,14 @@
     "confirmDeleteAll": "Radera all loggad historik? Det går inte att ångra.",
     "about": "Om",
     "license": "Öppen källkod · GPL-3.0 · v{version}",
-    "attribution": "Väderdata från Open-Meteo.com (CC BY 4.0)"
+    "attribution": "Väderdata från Open-Meteo.com (CC BY 4.0)",
+    "services": "Tjänster som används",
+    "openMeteoUse": "Prognoser, historiskt väder, luftkvalitet, havsdata och ortsökning.",
+    "openMeteoPrivacy": "Open-Meteos villkor och integritet",
+    "developer": "Utvecklare",
+    "sourceCode": "Källkod",
+    "donate": "Donera via GitHub Sponsors",
+    "donateNote": "Weather Log är gratis och utan reklam. En donation hjälper till att hålla det så."
   },
   "backup": {
     "notJson": "Filen är inte giltig JSON.",
@@ -580,5 +588,34 @@
       "lowAboveHigh": "Min kan inte vara över max",
       "gustBelowWind": "Byar kan inte vara lägre än vinden"
     }
+  },
+  "cityForm": {
+    "name": "Ortnamn",
+    "region": "Region (valfritt)",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "add": "Lägg till ort",
+    "errors": {
+      "required": "Obligatoriskt"
+    }
+  },
+  "offline": {
+    "label": "Offlineläge",
+    "note": "Anslut aldrig till internet. Du anger allt väder själv.",
+    "onboarding": "Använd utan internet: ange vädret själv",
+    "cityNote": "Offlineläge: ange orten och dess koordinater själv.",
+    "dayNote": "Offlineläge: timdetaljer laddas inte ned.",
+    "noToday": "Inget loggat i dag",
+    "heroNote": "Ange dagens väder för att starta din logg.",
+    "enterToday": "Ange dagens väder",
+    "editToday": "Redigera dagens väder",
+    "footer": "Offlineläge är på. Stäng av det i Inställningar för att hämta prognoser.",
+    "manualCity": "Ingen anslutning? Ange staden och dess koordinater själv.",
+    "footerOnline": "Ingen prognos kunde laddas ned. Du kan fortfarande logga vädret själv.",
+    "notFound": "Finns den inte? Ange staden och dess koordinater själv."
+  },
+  "splash": {
+    "name": "Weather Log",
+    "loading": "Laddar"
   }
 }
