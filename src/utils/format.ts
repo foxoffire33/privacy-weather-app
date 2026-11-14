@@ -6,6 +6,14 @@ import { currentLocale, t } from '../i18n';
 
 
 import type { TempUnit, WindUnit } from '../stores';
+import type { DateStyle } from '../types';
+
+const DATE_STYLES: Record<DateStyle, Intl.DateTimeFormatOptions> = {
+  weekday: { weekday: 'short' },
+  short: { day: 'numeric', month: 'short' },
+  long: { day: 'numeric', month: 'short', year: 'numeric' },
+  full: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
+};
 
 export function fmtTemp(c: number | null | undefined, unit: TempUnit): string {
   if ((c === null || c === undefined) || Number.isNaN(c)) {return '–';}
@@ -24,9 +32,22 @@ export function fmtWind(kmh: number | null | undefined, unit: WindUnit): string 
 }
 export const hhmm = (iso?: string): string => ((iso !== undefined && iso !== '') ? iso.slice(11, 16) : '–');
 export const hourOf = (iso: string): string => iso.slice(11, 13);
-export const weekday = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { weekday: 'short' });
-export const shortDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
-export const longDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+function formatDay(iso: string, style: DateStyle): string {
+  const locale = currentLocale();
+  const key = `${locale}|${style}`;
+  let format = formatters.get(key);
+  if (format === undefined) {
+    format = new Intl.DateTimeFormat(locale, DATE_STYLES[style]);
+    formatters.set(key, format);
+  }
+  return format.format(new Date(`${iso}T12:00`));
+}
+
+export const weekday = (iso: string): string => formatDay(iso, 'weekday');
+export const shortDate = (iso: string): string => formatDay(iso, 'short');
+export const longDate = (iso: string): string => formatDay(iso, 'long');
 const WIND_DIVISOR: Record<WindUnit, number> = { kmh: 1, ms: 3.6, mph: 1.609 };
 const WIND_LABEL: Record<WindUnit, string> = { kmh: 'km/h', ms: 'm/s', mph: 'mph' };
 const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
@@ -62,7 +83,7 @@ export const convWind = (kmh: number | null | undefined, unit: WindUnit): number
 export const tempToCelsius = (v: number, unit: TempUnit): number => (unit === 'F' ? (v - 32) * 5 / 9 : v);
 export const windToKmh = (v: number, unit: WindUnit): number => v * WIND_DIVISOR[unit];
 export const windUnitLabel = (unit: WindUnit): string => WIND_LABEL[unit];
-export const fullDate = (iso: string): string => new Date(`${iso  }T12:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+export const fullDate = (iso: string): string => formatDay(iso, 'full');
 
 export function orDash(v: number | null | undefined, show: (n: number) => string): string {
   return v === null || v === undefined ? '–' : show(v);

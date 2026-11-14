@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Group, UnstyledButton } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import { useDragControls } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -59,6 +59,7 @@ export function Home(): ReactElement {
   })));
   const n = cities.length;
   const idx = Math.min(pageIndex, n - 1);
+  const [mountIdx, setMountIdx] = useState(idx);
   const controls = useDragControls();
   const justDragged = useRef(false);
   const axis = useRef<'x' | 'y' | null>(null);
@@ -86,13 +87,14 @@ export function Home(): ReactElement {
   };
   return (
     <Box style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-      <MotionBox className="pager" animate={{ x: `${String(-idx * 100)}%` }} transition={MOTION.settle} initial={false}>
+      <MotionBox className="pager" animate={{ transform: `translateX(${String(-idx * 100)}%)` }} transition={MOTION.settle} initial={false}
+        onAnimationComplete={() => { setMountIdx(idx); }}>
         <MotionBox className="pager-track" drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin
           dragMomentum={false} dragConstraints={{ left: 0, right: 0 }} dragTransition={MOTION.settle}
           dragElastic={{ left: idx < n - 1 ? 1 : EDGE_ELASTIC, right: idx > 0 ? 1 : EDGE_ELASTIC }}
           onPointerDown={onDown} onDirectionLock={(a) => { axis.current = a; }} onDragStart={() => { justDragged.current = true; }} onDragEnd={onDragEnd}
           onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}>
-          {cities.map((c, i) => (Math.abs(i - idx) <= 1
+          {cities.map((c, i) => (i === idx || Math.abs(i - mountIdx) <= 1
             ? <CityPage key={c.id} city={c} isDefault={i === 0} />
             : <Box key={c.id} className="page" />))}
         </MotionBox>

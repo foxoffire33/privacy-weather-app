@@ -88,18 +88,21 @@ export const MOTION: MotionPresets = {
   instant: { duration: 0 },
 };
 
+const shift = (x: string): string => `translateX(${x})`;
+
 export const SCREEN_MOTION: ScreenMotion = {
+  center: { opacity: 1, transform: shift('0px') },
   enter: {
-    forward: { opacity: 0, x: MOTION_SHIFT },
-    back: { opacity: 0, x: -MOTION_SHIFT },
-    swipeNext: { x: '100%' },
-    swipePrev: { x: '-100%' },
+    forward: { opacity: 0, transform: shift(`${String(MOTION_SHIFT)}px`) },
+    back: { opacity: 0, transform: shift(`${String(-MOTION_SHIFT)}px`) },
+    swipeNext: { transform: shift('100%') },
+    swipePrev: { transform: shift('-100%') },
   },
   exit: {
-    forward: { opacity: 0, x: -MOTION_SHIFT },
-    back: { opacity: 0, x: MOTION_SHIFT },
-    swipeNext: { x: '-100%' },
-    swipePrev: { x: '100%' },
+    forward: { opacity: 0, transform: shift(`${String(-MOTION_SHIFT)}px`) },
+    back: { opacity: 0, transform: shift(`${String(MOTION_SHIFT)}px`) },
+    swipeNext: { transform: shift('-100%') },
+    swipePrev: { transform: shift('100%') },
   },
 };
 

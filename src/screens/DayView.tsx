@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Group, Text } from '@mantine/core';
 import { useDragControls } from 'motion/react';
-import { Suspense, useRef } from 'react';
+import { Suspense, useDeferredValue, useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Section } from '../components/city/Parts';
@@ -100,6 +100,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const delta = normal !== undefined && v.hi !== null ? fmtDelta(v.hi - normal, units.temp) : '';
   const { prev, next } = useLogNeighbours(cityId, date);
   const navigate = useNavigate();
+  const settled = useDeferredValue(true, false);
   const controls = useDragControls();
   const axis = useRef<'x' | 'y' | null>(null);
   const onDragEnd = (event: PointerEvent, info: PanInfo) => {
@@ -133,7 +134,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
       <DayActions cityId={cityId} date={date} record={record} />
 
       <Suspense fallback={<DayDetailsSk />}>
-        <DayDetails cityId={cityId} date={date} />
+        {settled ? <DayDetails cityId={cityId} date={date} /> : <DayDetailsSk />}
       </Suspense>
     </MotionBox>
   );

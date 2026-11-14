@@ -20,7 +20,7 @@ function directionFor(popped: boolean, state: Record<string, unknown>): ScreenDi
 
 const VARIANTS = {
   enter: (d: ScreenDirection) => SCREEN_MOTION.enter[d],
-  center: { opacity: 1, x: 0 },
+  center: SCREEN_MOTION.center,
   exit: (d: ScreenDirection) => SCREEN_MOTION.exit[d],
 };
 

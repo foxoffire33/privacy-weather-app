@@ -1,6 +1,6 @@
 import { Badge, Box, Text, TextInput, UnstyledButton } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
@@ -20,15 +20,15 @@ function matches(r: DayRecord, q: string): boolean {
   return [r.date, longDate(r.date), shortDate(r.date), conditionLabel(r.code), r.source].some((v) => v.toLowerCase().includes(q));
 }
 
-function HistoryRow({ cityId, record: r, today, open, onOpenChange, onOpen, onEdit }: HistoryRowProps): ReactElement {
+function HistoryRowView({ cityId, record: r, today, open, onSwipe, onOpen, onEdit }: HistoryRowProps): ReactElement {
   const units = useUnits();
   const normal = useNormals(cityId)?.[r.date.slice(5)];
   const deleteLogDay = useLogStore((st) => st.removeDay);
   const T = (c?: number | null) => fmtTemp(c, units.temp);
   const delta = normal !== undefined && r.hi !== null && r.hi !== undefined ? fmtDelta(r.hi - normal, units.temp) : null;
   return (
-    <SwipeRow label={longDate(r.date)} disabled={r.date === today} open={open} onOpenChange={onOpenChange}
-      onDelete={() => { deleteLogDay(cityId, r.date); onOpenChange(false); }} onEdit={() => { onEdit(r.date); }}>
+    <SwipeRow label={longDate(r.date)} disabled={r.date === today} open={open} onOpenChange={(o) => { onSwipe(o ? r.date : null); }}
+      onDelete={() => { deleteLogDay(cityId, r.date); onSwipe(null); }} onEdit={() => { onEdit(r.date); }}>
       <UnstyledButton className="log-row row" py={10} w="100%" onClick={() => { onOpen(r.date); }}>
         <Text fz={14} fw={800}>{r.date === today ? t('common.today') : shortDate(r.date)}</Text>
         <Text fz={13} c="dimmed" truncate>{t('history.rowDetail', { cond: conditionLabel(r.code), mm: (r.mm ?? 0).toFixed(1) })}{r.feelsHi === null || r.feelsHi === undefined ? '' : t('history.rowFeels', { t: T(r.feelsHi) })}</Text>
@@ -40,12 +40,17 @@ function HistoryRow({ cityId, record: r, today, open, onOpenChange, onOpen, onEd
   );
 }
 
+const HistoryRow = memo(HistoryRowView);
+
 export function HistoryLog({ cityId, rows, today, onOpen }: HistoryLogProps): ReactElement {
   const { filter, setFilter, limit, showMore, resetLimit } = useUiStore(useShallow((st) => ({
     filter: st.logFilter, setFilter: st.setLogFilter, limit: st.logLimit, showMore: st.showMoreLog, resetLimit: st.resetLogLimit,
   })));
   const [swiped, setSwiped] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const latestOpen = useRef(onOpen);
+  useEffect(() => { latestOpen.current = onOpen; }, [onOpen]);
+  const openDay = useCallback((date: string) => { latestOpen.current(date); }, []);
   const { ref: sentinelRef, entry } = useIntersection<HTMLDivElement>({ rootMargin: '400px 0px' });
   const q = filter.trim().toLowerCase();
   const visible = q === '' ? rows : rows.filter((r) => matches(r, q));
@@ -53,7 +58,7 @@ export function HistoryLog({ cityId, rows, today, onOpen }: HistoryLogProps): Re
   const more = shown.length < visible.length;
   const reachedEnd = entry?.isIntersecting === true;
   useEffect(() => { resetLimit(); }, [cityId, resetLimit]);
-  useEffect(() => { if (reachedEnd && more) { showMore(); } }, [reachedEnd, more, shown.length, showMore]);
+  useEffect(() => { if (reachedEnd && more) { showMore(); } }, [reachedEnd, more, showMore]);
   return (
     <>
       {rows.length > 0 && (
@@ -65,7 +70,7 @@ export function HistoryLog({ cityId, rows, today, onOpen }: HistoryLogProps): Re
       {rows.length > 0 && visible.length === 0 && <Text py={12} fz={13} c="dimmed">{t('history.noMatches')}</Text>}
       {shown.map((r) => (
         <HistoryRow key={r.date} cityId={cityId} record={r} today={today} open={swiped === r.date}
-          onOpenChange={(o) => { setSwiped(o ? r.date : null); }} onOpen={onOpen} onEdit={setEditing} />
+          onSwipe={setSwiped} onOpen={openDay} onEdit={setEditing} />
       ))}
       {more && <Box ref={sentinelRef} h={1} aria-hidden />}
       <DayEntryForm cityId={cityId} date={editing ?? undefined} opened={editing !== null} onClose={() => { setEditing(null); }} />
