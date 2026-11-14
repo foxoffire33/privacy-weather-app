@@ -170,7 +170,7 @@
   "onboarding": {
     "title": "Vremea,\npăstrată.",
     "step1Title": "Fără cont, fără urmărire",
-    "step1Text": "Prognozele vin de la Open-Meteo. Gratuit pentru uz personal, fără cheie.",
+    "step1Text": "Prognozele vin de la Open-Meteo, un API meteo independent și open source, care nu este administrat de această aplicație. Gratuit pentru uz personal, fără cheie.",
     "step2Title": "Fără acces la locație",
     "step2Text": "Adăugați orașe după nume. Aplicația nu cere niciodată GPS.",
     "step3Title": "Un istoric complet, pe acest dispozitiv",
@@ -543,7 +543,9 @@
     "developer": "Dezvoltator",
     "sourceCode": "Cod sursă",
     "donate": "Donează prin GitHub Sponsors",
-    "donateNote": "Weather Log este gratuit și fără reclame. O donație ajută să rămână așa."
+    "donateNote": "Weather Log este gratuit și fără reclame. O donație ajută să rămână așa.",
+    "openMeteoThirdParty": "Open-Meteo este un serviciu terț independent, care nu este administrat de dezvoltatorul Weather Log. Serverul său este open source (AGPL-3.0) și poate fi găzduit de tine.",
+    "openMeteoSource": "Codul sursă Open-Meteo"
   },
   "backup": {
     "notJson": "Acest fișier nu este JSON valid.",

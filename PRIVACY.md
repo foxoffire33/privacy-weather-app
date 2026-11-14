@@ -20,7 +20,9 @@ where you choose to save or share it.
 cities and log the weather yourself.
 
 **Online mode** (the default): the app talks only to [Open-Meteo](https://open-meteo.com), or to the
-forecast server you set in Settings:
+forecast server you set in Settings. Open-Meteo is an independent third-party service: it is not run by the
+developer of Weather Log, and this policy does not cover it. Open-Meteo is open source
+([AGPL-3.0](https://github.com/open-meteo/open-meteo)) and can be self-hosted.
 
 | Service | Sent | When |
 | --- | --- | --- |

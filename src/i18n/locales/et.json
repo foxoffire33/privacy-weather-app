@@ -168,7 +168,7 @@
   "onboarding": {
     "title": "Ilm,\nhoitud.",
     "step1Title": "Kontot pole, jälgimist pole",
-    "step1Text": "Prognoosid tulevad Open-Meteost. Isiklikuks kasutuseks tasuta, võtit pole vaja.",
+    "step1Text": "Prognoosid pärinevad Open-Meteost, sõltumatust avatud lähtekoodiga ilmaliidesest, mida see rakendus ei halda. Isiklikuks kasutuseks tasuta, võtit pole vaja.",
     "step2Title": "Asukohale juurdepääs puudub",
     "step2Text": "Lisad linnad nime järgi. Rakendus ei küsi kunagi GPS-i.",
     "step3Title": "Täielik ajalugu selles seadmes",
@@ -537,7 +537,9 @@
     "developer": "Arendaja",
     "sourceCode": "Lähtekood",
     "donate": "Anneta GitHub Sponsorsi kaudu",
-    "donateNote": "Weather Log on tasuta ja reklaamideta. Annetus aitab sel nii jääda."
+    "donateNote": "Weather Log on tasuta ja reklaamideta. Annetus aitab sel nii jääda.",
+    "openMeteoThirdParty": "Open-Meteo on sõltumatu kolmanda osapoole teenus, mida Weather Logi arendaja ei halda. Selle server on avatud lähtekoodiga (AGPL-3.0) ja seda saab ise majutada.",
+    "openMeteoSource": "Open-Meteo lähtekood"
   },
   "backup": {
     "notJson": "See fail ei ole kehtiv JSON.",

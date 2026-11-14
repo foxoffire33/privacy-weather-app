@@ -170,7 +170,7 @@
   "onboarding": {
     "title": "Vrijeme,\nsačuvano.",
     "step1Title": "Bez računa, bez praćenja",
-    "step1Text": "Prognoze dolaze s Open-Meteo. Besplatno za osobnu uporabu, bez ključa.",
+    "step1Text": "Prognoze dolaze s Open-Meteo, neovisnog API-ja za vrijeme otvorenog koda kojim ova aplikacija ne upravlja. Besplatno za osobnu upotrebu, bez ključa.",
     "step2Title": "Bez pristupa lokaciji",
     "step2Text": "Gradove dodajete po imenu. Aplikacija nikad ne traži GPS.",
     "step3Title": "Potpuna povijest na ovom uređaju",
@@ -543,7 +543,9 @@
     "developer": "Razvojni programer",
     "sourceCode": "Izvorni kod",
     "donate": "Doniraj putem GitHub Sponsors",
-    "donateNote": "Weather Log je besplatan i bez oglasa. Donacija pomaže da tako i ostane."
+    "donateNote": "Weather Log je besplatan i bez oglasa. Donacija pomaže da tako i ostane.",
+    "openMeteoThirdParty": "Open-Meteo je neovisna usluga treće strane kojom ne upravlja razvojni programer aplikacije Weather Log. Njezin je poslužitelj otvorenog koda (AGPL-3.0) i možete ga sami hostati.",
+    "openMeteoSource": "Izvorni kod Open-Meteo"
   },
   "backup": {
     "notJson": "Ova datoteka nije valjan JSON.",

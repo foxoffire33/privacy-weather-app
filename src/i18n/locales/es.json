@@ -170,7 +170,7 @@
   "onboarding": {
     "title": "El tiempo,\nguardado.",
     "step1Title": "Sin cuenta, sin rastreo",
-    "step1Text": "Las previsiones vienen de Open-Meteo. Gratis para uso personal, sin clave.",
+    "step1Text": "Los pronósticos proceden de Open-Meteo, una API meteorológica independiente y de código abierto que no gestiona esta app. Gratis para uso personal, sin clave.",
     "step2Title": "Sin acceso a la ubicación",
     "step2Text": "Añades ciudades por su nombre. La app nunca pide el GPS.",
     "step3Title": "Un historial completo, en este dispositivo",
@@ -543,7 +543,9 @@
     "developer": "Desarrollador",
     "sourceCode": "Código fuente",
     "donate": "Donar con GitHub Sponsors",
-    "donateNote": "Weather Log es gratis y sin anuncios. Una donación ayuda a que siga así."
+    "donateNote": "Weather Log es gratis y sin anuncios. Una donación ayuda a que siga así.",
+    "openMeteoThirdParty": "Open-Meteo es un servicio independiente de terceros, no gestionado por el desarrollador de Weather Log. Su servidor es de código abierto (AGPL-3.0) y se puede alojar por cuenta propia.",
+    "openMeteoSource": "Código fuente de Open-Meteo"
   },
   "backup": {
     "notJson": "Este archivo no es un JSON válido.",

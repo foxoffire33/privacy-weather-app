@@ -168,7 +168,7 @@
   "onboarding": {
     "title": "Vädret,\nsparat.",
     "step1Title": "Inget konto, ingen spårning",
-    "step1Text": "Prognoserna kommer från Open-Meteo. Gratis för personligt bruk, ingen nyckel behövs.",
+    "step1Text": "Prognoserna kommer från Open-Meteo, ett oberoende väder-API med öppen källkod som inte drivs av den här appen. Gratis för privat bruk, ingen nyckel behövs.",
     "step2Title": "Ingen platsåtkomst",
     "step2Text": "Du lägger till städer med namn. Appen frågar aldrig efter GPS.",
     "step3Title": "En komplett historik, på den här enheten",
@@ -537,7 +537,9 @@
     "developer": "Utvecklare",
     "sourceCode": "Källkod",
     "donate": "Donera via GitHub Sponsors",
-    "donateNote": "Weather Log är gratis och utan reklam. En donation hjälper till att hålla det så."
+    "donateNote": "Weather Log är gratis och utan reklam. En donation hjälper till att hålla det så.",
+    "openMeteoThirdParty": "Open-Meteo är en oberoende tredjepartstjänst som inte drivs av utvecklaren av Weather Log. Servern har öppen källkod (AGPL-3.0) och kan köras på egen server.",
+    "openMeteoSource": "Källkod för Open-Meteo"
   },
   "backup": {
     "notJson": "Filen är inte giltig JSON.",

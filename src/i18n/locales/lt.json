@@ -172,7 +172,7 @@
   "onboarding": {
     "title": "Orai,\nišsaugoti.",
     "step1Title": "Be paskyros, be sekimo",
-    "step1Text": "Prognozės gaunamos iš Open-Meteo. Asmeniniam naudojimui nemokamai, rakto nereikia.",
+    "step1Text": "Prognozės gaunamos iš Open-Meteo – nepriklausomos atvirojo kodo orų API, kurios nevaldo ši programėlė. Nemokama asmeniniam naudojimui, rakto nereikia.",
     "step2Title": "Be prieigos prie vietos",
     "step2Text": "Miestus pridedate pagal pavadinimą. Programėlė niekada neprašo GPS.",
     "step3Title": "Visa istorija šiame įrenginyje",
@@ -549,7 +549,9 @@
     "developer": "Kūrėjas",
     "sourceCode": "Pirminis kodas",
     "donate": "Paremti per GitHub Sponsors",
-    "donateNote": "Weather Log yra nemokama ir be reklamų. Parama padeda, kad taip ir liktų."
+    "donateNote": "Weather Log yra nemokama ir be reklamų. Parama padeda, kad taip ir liktų.",
+    "openMeteoThirdParty": "Open-Meteo yra nepriklausoma trečiosios šalies paslauga, kurios nevaldo Weather Log kūrėjas. Jos serveris yra atvirojo kodo (AGPL-3.0) ir jį galima talpinti patiems.",
+    "openMeteoSource": "Open-Meteo šaltinio kodas"
   },
   "backup": {
     "notJson": "Šis failas nėra tinkamas JSON.",

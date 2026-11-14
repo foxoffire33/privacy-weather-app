@@ -15,7 +15,9 @@ export function SettingsAbout({ version }: SettingsAboutProps): ReactElement {
       <Stack gap={4} py={12}>
         <Text fz={14} fw={600}>Open-Meteo</Text>
         <Text fz={13} c="dimmed">{t('settings.openMeteoUse')}</Text>
+        <Text fz={13} c="dimmed">{t('settings.openMeteoThirdParty')}</Text>
         <Anchor fz={13} href={LINKS.openMeteo} target="_blank" rel="noopener noreferrer">open-meteo.com</Anchor>
+        <Anchor fz={13} href={LINKS.openMeteoSource} target="_blank" rel="noopener noreferrer">{t('settings.openMeteoSource')}</Anchor>
         <Anchor fz={13} href={LINKS.openMeteoTerms} target="_blank" rel="noopener noreferrer">{t('settings.openMeteoPrivacy')}</Anchor>
       </Stack>
 
