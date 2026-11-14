@@ -24,7 +24,8 @@
       "many": "{count} días registrados",
       "other": "{count} días registrados"
     },
-    "touchChart": "Toca el gráfico para ver detalles"
+    "touchChart": "Toca el gráfico para ver detalles",
+    "screenFailed": "No se pudo cargar esta pantalla."
   },
   "ago": {
     "never": "nunca",

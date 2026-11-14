@@ -22,7 +22,8 @@
       "one": "{count} päev logitud",
       "other": "{count} päeva logitud"
     },
-    "touchChart": "Puuduta graafikut üksikasjade nägemiseks"
+    "touchChart": "Puuduta graafikut üksikasjade nägemiseks",
+    "screenFailed": "Seda vaadet ei õnnestunud laadida."
   },
   "ago": {
     "never": "mitte kunagi",

@@ -17,7 +17,7 @@ export interface CityState {
   onboarded: boolean;
   follow: (geo: GeoResult) => { id: string; index: number; added: boolean };
   unfollow: (id: string) => void;
-  reorder: (from: number, to: number) => void;
+  arrange: (ids: string[]) => void;
   makeDefault: (id: string) => void;
   addMany: (cities: City[]) => string[];
 }

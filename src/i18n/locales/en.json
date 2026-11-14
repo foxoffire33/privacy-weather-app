@@ -22,7 +22,8 @@
       "one": "{count} day logged",
       "other": "{count} days logged"
     },
-    "touchChart": "Touch the chart for details"
+    "touchChart": "Touch the chart for details",
+    "screenFailed": "This screen could not be loaded."
   },
   "ago": {
     "never": "never",

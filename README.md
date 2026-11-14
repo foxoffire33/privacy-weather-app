@@ -9,7 +9,7 @@ Open-source, privacy-first weather app built on [Open-Meteo](https://open-meteo.
 
 Get it on [F-Droid](https://f-droid.org/packages/nl.delaparraservices.apps.weather/) (once published) or from the [GitHub releases](https://github.com/foxoffire33/privacy-weather-app/releases).
 
-Stack: React 19 · Vite · TypeScript · Mantine 9 · Zustand 5 (slices, `useShallow`) · IndexedDB (`idb-keyval`) · official `openmeteo` SDK. Packaged for Android with Capacitor 7.
+Stack: React 19 · Vite · TypeScript · Mantine 9 · Zustand 5 (slices, `useShallow`) · [Motion](https://motion.dev) for animation and gestures · IndexedDB (`idb-keyval`) · official `openmeteo` SDK. Packaged for Android with Capacitor 7.
 
 ## Run
 

@@ -27,6 +27,7 @@
     "@mantine/hooks": "^9.7.1",
     "@mantine/modals": "^9.8.0",
     "idb-keyval": "^6.2.1",
+    "motion": "^14.14.0",
     "openmeteo": "^1.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

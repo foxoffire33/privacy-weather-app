@@ -1,21 +1,30 @@
 import { Box, Group, Text, UnstyledButton } from '@mantine/core';
-import { useDrag, useMergedRef, useScroller } from '@mantine/hooks';
+import { useMergedRef, useScroller } from '@mantine/hooks';
+import { animate, useMotionValue } from 'motion/react';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { t } from '../../i18n';
 import { addDays, openDay, useDayQuery, useDayStore } from '../../stores';
+import { MOTION } from '../../theme';
 import { convWind, fmtTemp, hhmm, hourLabel, hourOf, orDash, weekday } from '../../utils/format';
 import { nowIndex } from '../../utils/insights';
 import { paths } from '../../utils/paths';
 import { Icon } from '../Icon';
+import { MotionBox, useMotionPreset } from '../motionComponents';
 
 import type { DayData, ForecastEntry } from '../../stores';
 import type { DayDividerProps, ExpandableProps, NowcastProps, StripCell, StripLabel } from '../../types';
+import type { PanInfo } from 'motion/react';
 import type { ReactElement, WheelEvent } from 'react';
 
 const PULL_TRIGGER = 64;
 const PULL_MAX = 96;
+const PULL_RATIO = 0.5;
+
+function pullWidth(info: PanInfo): number {
+  return Math.min(PULL_MAX, Math.max(0, info.offset.x * PULL_RATIO));
+}
 
 function wheelAcross(e: WheelEvent<HTMLDivElement>): void {
   const el = e.currentTarget;
@@ -97,7 +106,9 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const days = useDayStore((st) => st.days);
   const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
-  const indicatorRef = useRef<HTMLDivElement>(null);
+  const quick = useMotionPreset(MOTION.quick);
+  const pullW = useMotionValue(0);
+  const pulling = useRef(false);
   const scroller = useScroller();
   const [back, setBack] = useState(0);
   const [armed, setArmed] = useState(false);
@@ -116,18 +127,21 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
     widthBefore.current = el.scrollWidth;
     setBack(n);
   };
-  const pull = useDrag<HTMLDivElement>((gesture) => {
-    if (gesture.first && (scroller.canScrollStart || loadingPast)) { gesture.cancel(); return; }
-    const width = gesture.last ? 0 : Math.min(PULL_MAX, Math.max(0, gesture.movement[0] * 0.5));
-    const indicator = indicatorRef.current;
-    if (indicator) {
-      indicator.style.transition = gesture.last ? '' : 'none';
-      indicator.style.width = `${String(width)}px`;
-    }
+  const onPanStart = () => { pulling.current = !scroller.canScrollStart && !loadingPast; };
+  const onPan = (_: PointerEvent, info: PanInfo) => {
+    if (!pulling.current) { return; }
+    const width = pullWidth(info);
+    pullW.set(width);
     setArmed(width >= PULL_TRIGGER);
-    if (gesture.last && !gesture.canceled && gesture.movement[0] * 0.5 >= PULL_TRIGGER) { void loadPast(); }
-  }, { axis: 'x', threshold: 4 });
-  const ref = useMergedRef(stripRef, scroller.ref, pull.ref);
+  };
+  const onPanEnd = (_: PointerEvent, info: PanInfo) => {
+    if (!pulling.current) { return; }
+    pulling.current = false;
+    void animate(pullW, 0, quick);
+    setArmed(false);
+    if (pullWidth(info) >= PULL_TRIGGER) { void loadPast(); }
+  };
+  const ref = useMergedRef(stripRef, scroller.ref);
   useLayoutEffect(() => {
     const el = stripRef.current;
     if (!el || back === 0) { return; }
@@ -153,11 +167,12 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const first = hours.at(0);
   return (
     <>
-      <Box className="hourly-strip" ref={ref} data-noswipe {...scroller.dragHandlers} onWheel={wheelAcross}
+      <MotionBox className="hourly-strip" ref={ref} data-noswipe {...scroller.dragHandlers} onWheel={wheelAcross}
+        onPanStart={onPanStart} onPan={onPan} onPanEnd={onPanEnd}
         style={{ touchAction: scroller.canScrollStart ? 'pan-x pan-y' : 'pan-right pan-y' }}>
-        <Box ref={indicatorRef} className="pull-past" data-armed={armed || undefined}>
+        <MotionBox className="pull-past" data-armed={armed || undefined} style={{ width: pullW }}>
           {pullLabel(loadingPast, armed, back)}
-        </Box>
+        </MotionBox>
         {hours.map((h) => (
           <Fragment key={h.time}>
             {h.dayName !== '' && <DayDivider name={h.dayName} on={h.date === expanded} />}
@@ -169,7 +184,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
             </Box>
           </Fragment>
         ))}
-      </Box>
+      </MotionBox>
       <UnstyledButton w="100%" px={12} py={10} onClick={() => { void navigate(paths.hourly(city.id)); }}
         style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(248,244,244,.2)' }}>
         <Text fz={13} fw={800}>{t('city.hourlyLink')}</Text>

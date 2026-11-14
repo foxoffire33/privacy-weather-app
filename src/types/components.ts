@@ -1,7 +1,8 @@
 import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
-import type { MantineTransition } from '@mantine/core';
-import type { CSSProperties, ReactElement, ReactNode } from 'react';
+import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
+import type { TargetAndTransition, Transition } from 'motion/react';
+import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
@@ -50,14 +51,6 @@ export interface SwipeRowProps {
   disabled?: boolean;
   label: string;
   children: ReactNode;
-}
-
-export interface SwipeGesture {
-  x: number;
-  y: number;
-  base: number;
-  dir: 'h' | 'v' | null;
-  width: number;
 }
 
 export interface BarProps {
@@ -124,13 +117,6 @@ export interface GestureHintProps {
   multiple: boolean;
 }
 
-export interface PagerGesture {
-  x: number;
-  y: number;
-  id: number;
-  active: boolean;
-}
-
 export interface HourlyCellProps {
   k: string;
   v: string;
@@ -139,13 +125,6 @@ export interface HourlyCellProps {
 export interface HourGroup {
   date: string;
   rows: number[];
-}
-
-export interface ReorderDrag {
-  from: number;
-  to: number;
-  dy: number;
-  rowH: number;
 }
 
 export interface StripCell {
@@ -313,13 +292,44 @@ export interface HistoryRowProps {
   onEdit: (date: string) => void;
 }
 
+export type ScreenDirection = 'forward' | 'back' | 'swipeNext' | 'swipePrev';
+
 export interface ScreenMotion {
-  duration: number;
-  easing: string;
-  forward: Exclude<MantineTransition, string>;
-  back: Exclude<MantineTransition, string>;
-  swipeNext: Exclude<MantineTransition, string>;
-  swipePrev: Exclude<MantineTransition, string>;
+  enter: Record<ScreenDirection, TargetAndTransition>;
+  exit: Record<ScreenDirection, TargetAndTransition>;
+}
+
+export interface MotionPresets {
+  screen: Transition;
+  quick: Transition;
+  settle: Transition;
+  spin: Transition;
+  instant: Transition;
+}
+
+export type MotionBoxBase = BoxProps & ElementProps<'div'> & { component?: 'span'; ref?: Ref<HTMLDivElement> };
+
+export type MotionButtonBase = UnstyledButtonProps & ElementProps<'button'> & { ref?: Ref<HTMLButtonElement> };
+
+export interface CityRowProps {
+  value: string;
+  label: string;
+  onGrab: () => void;
+  onDrop: () => void;
+  children: ReactNode;
+}
+
+export interface ScreenBoundaryProps {
+  children: ReactNode;
+}
+
+export interface ScreenBoundaryState {
+  failed: boolean;
+}
+
+export interface SpinProps {
+  active: boolean;
+  children: ReactNode;
 }
 
 export interface ScreenTransitionProps {

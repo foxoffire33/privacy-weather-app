@@ -76,3 +76,14 @@ export function CityBodySk(): ReactElement {
   );
 }
 
+export function ScreenSk(): ReactElement {
+  return (
+    <Box className="screen" px={20} pt={56} aria-busy>
+      <Sk w={220} h={48} />
+      <Sk w={160} h={48} mt={8} />
+      <Sk h={44} mt={32} />
+      <Sk h={44} mt={12} />
+      <Sk h={44} mt={12} />
+    </Box>
+  );
+}

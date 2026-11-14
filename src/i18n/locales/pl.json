@@ -26,7 +26,8 @@
       "many": "{count} dni zapisanych",
       "other": "{count} dnia zapisanego"
     },
-    "touchChart": "Dotknij wykresu, aby zobaczyć szczegóły"
+    "touchChart": "Dotknij wykresu, aby zobaczyć szczegóły",
+    "screenFailed": "Nie udało się załadować tego ekranu."
   },
   "ago": {
     "never": "nigdy",

@@ -26,7 +26,8 @@
       "many": "{count} užfiksuotos dienos",
       "other": "{count} užfiksuotų dienų"
     },
-    "touchChart": "Palieskite grafiką, kad pamatytumėte išsamiau"
+    "touchChart": "Palieskite grafiką, kad pamatytumėte išsamiau",
+    "screenFailed": "Šio ekrano nepavyko įkelti."
   },
   "ago": {
     "never": "niekada",

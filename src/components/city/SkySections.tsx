@@ -5,6 +5,7 @@ import { refreshCity } from '../../stores';
 import { ago, compass, fmtTemp, orDash } from '../../utils/format';
 import { capeLabel, nowIndex, pressureTrend, visibilityLabel } from '../../utils/insights';
 import { Icon } from '../Icon';
+import { Spin } from '../Spin';
 
 import { n0 } from './num';
 import { Bar, Section, Stat } from './Parts';
@@ -82,7 +83,7 @@ export function CityFooter({ city, entry, loading }: CityFooterProps): ReactElem
       </Box>
       <ActionIcon size={36} aria-label={loading ? t('common.updating') : t('common.refresh')} aria-busy={loading || undefined}
         onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>
-        <Box component="span" className={loading ? 'spin' : undefined}><Icon name="refresh" size={16} /></Box>
+        <Spin active={loading}><Icon name="refresh" size={16} /></Spin>
       </ActionIcon>
     </Group>
   );

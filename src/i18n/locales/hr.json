@@ -24,7 +24,8 @@
       "few": "{count} zabilježena dana",
       "other": "{count} zabilježenih dana"
     },
-    "touchChart": "Dodirnite grafikon za pojedinosti"
+    "touchChart": "Dodirnite grafikon za pojedinosti",
+    "screenFailed": "Ovaj zaslon nije bilo moguće učitati."
   },
   "ago": {
     "never": "nikad",
