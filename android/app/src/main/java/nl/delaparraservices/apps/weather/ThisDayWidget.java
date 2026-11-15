@@ -20,9 +20,13 @@ public class ThisDayWidget extends BaseWidget {
         c.drawColor(WidgetPainter.BLACK);
         p.frame(c);
 
-        p.kicker(c, WidgetPainter.label(data, "onThisDay", "On this day") + " · " + thisDay.optString("date"), pad, pad + 9, WidgetPainter.DIM, Paint.Align.LEFT, p.w - pad * 2);
-        float top = pad + 22;
-        float rowH = 21;
+        String kicker = WidgetPainter.label(data, "onThisDay", "On this day") + " · " + thisDay.optString("date");
+        p.style(10, p.bold, WidgetPainter.DIM, Paint.Align.LEFT).setLetterSpacing(0.08f);
+        boolean full = p.text.measureText(kicker.toUpperCase()) <= p.w - pad * 2;
+        p.text.setLetterSpacing(0);
+        p.kicker(c, full ? kicker : thisDay.optString("date"), pad, pad + 9 * p.fontScale, WidgetPainter.DIM, Paint.Align.LEFT, p.w - pad * 2);
+        float top = pad + 22 * p.fontScale;
+        float rowH = 21 * p.fontScale;
         int fit = Math.max(1, (int) ((p.h - top - pad + 6) / rowH));
         int count = Math.min(rows.length(), fit);
 
@@ -41,8 +45,14 @@ public class ThisDayWidget extends BaseWidget {
         max += span * 0.05f;
 
         boolean bars = p.w >= 170 && min <= max;
-        float labelW = 58;
-        float valueW = 38;
+        float labelW = 0;
+        float valueW = 0;
+        for (int i = 0; i < count; i++) {
+            JSONObject r = rows.getJSONObject(i);
+            labelW = Math.max(labelW, p.measure(r.optString("label"), 12, p.bold) + 8);
+            valueW = Math.max(valueW, p.measure(r.optString("text"), 13, p.bold) + 4);
+        }
+        labelW = Math.min(labelW, p.w >= 170 ? (p.w - pad * 2) * 0.55f : p.w - pad * 2 - valueW - 4);
         float barL = pad + labelW;
         float barR = p.w - pad - valueW;
 
@@ -50,7 +60,7 @@ public class ThisDayWidget extends BaseWidget {
             JSONObject r = rows.getJSONObject(i);
             String kind = r.optString("kind");
             boolean isToday = "today".equals(kind);
-            float baseline = top + i * rowH + 12;
+            float baseline = top + i * rowH + 12 * p.fontScale;
             int labelColor = isToday ? WidgetPainter.WHITE : "avg".equals(kind) ? WidgetPainter.DIM : WidgetPainter.PAST;
             p.text(c, r.optString("label"), pad, baseline, 12, isToday ? p.bold : p.regular, labelColor, Paint.Align.LEFT, labelW - 4);
             p.text(c, r.optString("text"), p.w - pad, baseline, 13, p.bold,
@@ -70,8 +80,8 @@ public class ThisDayWidget extends BaseWidget {
         }
 
         if (rows.length() <= 2 && p.h >= top + rowH * 3) {
-            p.text(c, WidgetPainter.label(data, "earlierYears", "Earlier years load the next time the app is online"), pad, top + 2 * rowH + 12, 11, p.regular,
-                WidgetPainter.FAINT, Paint.Align.LEFT, p.w - pad * 2);
+            p.lines(c, WidgetPainter.label(data, "earlierYears", "Earlier years load the next time the app is online"), pad, top + 2 * rowH + 12 * p.fontScale, 11, p.regular,
+                WidgetPainter.FAINT, p.w - pad * 2, (int) ((p.h - pad - (top + 2 * rowH)) / (14 * p.fontScale)), 14 * p.fontScale);
         }
     }
 
