@@ -1,5 +1,5 @@
 import { assertOnline, getConfig, onlineSignal } from '../core/config';
-import { isRecord } from '../core/guards';
+import { isAbsent, isRecord } from '../core/guards';
 import { responseGet, responsePut } from '../core/idb';
 import { sortedCopy } from '../core/sort';
 
@@ -130,7 +130,7 @@ export async function cachedJson<T>(kind: EndpointKind, path: string, params: Qu
   const now = Date.now();
   if (maxAgeMs > 0) {
     const hit = await responseGet(key).catch(() => null);
-    const cached = hit !== null && now - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
+    const cached = !isAbsent(hit) && now - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
     if (cached !== null) { return cached.value; }
   }
   const body = await getJson(kind, path, params);

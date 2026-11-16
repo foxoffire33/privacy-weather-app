@@ -85,6 +85,17 @@ and the host override — the host pushes in through `configureDataLayer` (`core
 A refresh measures the gap, fetches, logs what came back and makes sure the normals exist — in
 that order, in one readable place.
 
+**11. A storage failure is never "no data".** `core/idb` rejects every open/read/write failure with a
+typed `StorageError` (codes `unavailable`, `blocked`, `read-failed`, `write-failed`, `quota-exceeded`, …)
+and keeps the "absent" result exclusive: `get` yields `undefined` only for a key that genuinely does not
+exist, `range` yields `[]` only for a successful transaction with zero rows. Each reader declares its own
+policy: `recordSync.readRecord` is a best-effort cache read — day and radar records are re-fetchable, so
+a failed read degrades to "not cached" and triggers a network re-fetch — while `recordSync.readRange` is
+strict, because the hydration restores read user-owned data and a failure must surface, not masquerade as
+an empty history. Boot degrades instead of hanging: `hydrateAll` records the first storage failure in
+`bootStore.storageError`, keeps the app usable in memory, and leaves retry/reporting to the persistence
+layer, so a failed read can never lead to defaults being written over the user's stored state.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

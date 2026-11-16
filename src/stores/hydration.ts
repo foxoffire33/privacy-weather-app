@@ -1,7 +1,8 @@
 import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
-import { inSequence, isRecord } from './core/guards';
+import { errorMessage } from './core/errors';
+import { inSequence, isAbsent, isRecord } from './core/guards';
 import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
@@ -62,7 +63,7 @@ function entityEntries(envelope: unknown): IdbEntry[] {
 
 async function migrateKvToRecords(): Promise<void> {
   const [entities, forecasts, log, days] = await Promise.all(LEGACY_KEYS.map(async (k) => idbGet(k)));
-  if (entities === null && forecasts === null && log === null && days === null) { return; }
+  if (isAbsent(entities) && isAbsent(forecasts) && isAbsent(log) && isAbsent(days)) { return; }
   const entries = [
     ...entityEntries(entities),
     ...prefixed(FORECAST_PREFIX, stateOf(forecasts, 'forecasts')),
@@ -160,18 +161,31 @@ function keepStorage(): void {
   });
 }
 
+async function bootStep(run: () => Pending, note: (error: unknown) => void): Promise<void> {
+  try {
+    await run();
+  } catch (error) {
+    note(error);
+  }
+}
+
+async function rehydrateStores(): Promise<void> {
+  await Promise.all(PERSISTED.map(async (store) => {
+    await store.persist.rehydrate();
+    await waitForHydration(store);
+  }));
+  await restoreCore();
+}
+
 export function hydrateAll(): Pending {
   booting ??= measure('hydrate', async () => {
-    await importLegacyStore().catch(() => false);
-    await migrateKvToRecords().catch(() => null);
-    await Promise.all([
-      ...PERSISTED.map(async (store) => {
-        await store.persist.rehydrate();
-        await waitForHydration(store);
-      }),
-      restoreCore(),
-    ]);
-    await restoreRecent();
+    let firstError: string | undefined;
+    const note = (error: unknown): void => { firstError ??= errorMessage(error); };
+    await bootStep(async () => { await importLegacyStore(); }, note);
+    await bootStep(migrateKvToRecords, note);
+    await bootStep(rehydrateStores, note);
+    await bootStep(restoreRecent, note);
+    if (firstError !== undefined) { useBootStore.setState({ storageError: firstError }); }
     useBootStore.setState({ hydrated: true });
     keepStorage();
   });

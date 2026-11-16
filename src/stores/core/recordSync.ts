@@ -95,7 +95,7 @@ export async function readRecord(key: string): Promise<unknown> {
 }
 
 export async function readRange(prefix: string, from = '', to = '\uFFFF'): Promise<IdbEntry[]> {
-  const rows = await recordsRange(prefix + from, prefix + to).catch(() => []);
+  const rows = await recordsRange(prefix + from, prefix + to);
   return rows.map(([key, value]): IdbEntry => [key.slice(prefix.length), value]);
 }
 

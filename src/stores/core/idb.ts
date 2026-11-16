@@ -104,19 +104,20 @@ async function openDb(): Promise<IDBDatabase> {
   });
 }
 
-async function database(): Promise<IDBDatabase | null> {
-  if (!hasIndexedDb()) { return null; }
-  return openDb().catch(() => null);
+async function database(): Promise<IDBDatabase> {
+  if (!hasIndexedDb()) { throw new StorageError('unavailable', 'IndexedDB is not available in this environment'); }
+  return openDb();
 }
 
-async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest<T>): Promise<T | null> {
+async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest<T>): Promise<T | undefined> {
   const db = await database();
-  if (db === null) { return null; }
-  return new Promise<T | null>((resolve) => {
+  return new Promise<T | undefined>((resolve, reject) => {
     const req = request(db.transaction(store, 'readonly').objectStore(store));
     req.addEventListener('success', () => { resolve(req.result); });
-    req.addEventListener('error', () => { resolve(null); });
-  }).catch(() => null);
+    req.addEventListener('error', () => { reject(toStorageError('read', req.error)); });
+  }).catch((error: unknown) => {
+    throw toStorageError('read', error);
+  });
 }
 
 async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
@@ -133,8 +134,7 @@ async function write(store: string, change: (s: IDBObjectStore) => void): Promis
 }
 
 export async function idbGet(key: string): Promise<unknown> {
-  const value: unknown = await read(KV, (s) => s.get(key));
-  return value ?? null;
+  return read(KV, (s) => s.get(key));
 }
 
 export async function idbSet(key: string, value: unknown): Promise<void> {
@@ -146,8 +146,7 @@ export async function idbDel(key: string): Promise<void> {
 }
 
 export async function recordGet(key: string): Promise<unknown> {
-  const value: unknown = await read(RECORDS, (s) => s.get(key));
-  return value ?? null;
+  return read(RECORDS, (s) => s.get(key));
 }
 
 export async function recordsWrite(puts: readonly IdbEntry[], deletes: readonly string[]): Promise<void> {
@@ -174,28 +173,33 @@ export async function recordsDeletePrefix(prefix: string): Promise<void> {
 
 export async function recordsRange(lower: string, upper: string): Promise<IdbEntry[]> {
   const db = await database();
-  if (db === null) { return []; }
-  return new Promise<IdbEntry[]>((resolve) => {
+  return new Promise<IdbEntry[]>((resolve, reject) => {
     const tx = db.transaction(RECORDS, 'readonly');
     const store = tx.objectStore(RECORDS);
     const range = IDBKeyRange.bound(lower, upper);
     const keys = store.getAllKeys(range);
     const values = store.getAll(range);
+    let settled = false;
+    const fail = (): void => { if (!settled) { settled = true; reject(toStorageError('read', tx.error)); } };
     tx.addEventListener('complete', () => {
+      if (settled) { return; }
+      settled = true;
       const out: IdbEntry[] = [];
       for (const [i, key] of keys.result.entries()) {
         if (typeof key === 'string') { out.push([key, values.result[i]]); }
       }
       resolve(out);
     });
-    tx.addEventListener('error', () => { resolve([]); });
-    tx.addEventListener('abort', () => { resolve([]); });
+    tx.addEventListener('error', fail);
+    tx.addEventListener('abort', fail);
+  }).catch((error: unknown) => {
+    throw toStorageError('read', error);
   });
 }
 
-export async function responseGet(key: string): Promise<ResponseRecord | null> {
+export async function responseGet(key: string): Promise<ResponseRecord | undefined> {
   const value: unknown = await read(RESPONSES, (s) => s.get(key));
-  return isResponseRecord(value) ? value : null;
+  return isResponseRecord(value) ? value : undefined;
 }
 
 export async function responsePut(key: string, record: ResponseRecord): Promise<void> {
@@ -203,9 +207,9 @@ export async function responsePut(key: string, record: ResponseRecord): Promise<
 }
 
 export async function responsesPrune(now: number, keep: number): Promise<void> {
-  const all = await read(RESPONSES, (s) => s.getAll());
-  const keys = await read(RESPONSES, (s) => s.getAllKeys());
-  if (all?.length !== keys?.length || all === null || keys === null) { return; }
+  const all = (await read(RESPONSES, (s) => s.getAll())) ?? [];
+  const keys = (await read(RESPONSES, (s) => s.getAllKeys())) ?? [];
+  if (all.length !== keys.length) { return; }
   const rows = keys.flatMap((key, i) => {
     const value: unknown = all[i];
     return typeof key === 'string' && isResponseRecord(value) ? [{ key, value }] : [];

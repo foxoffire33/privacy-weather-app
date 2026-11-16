@@ -92,6 +92,7 @@ export interface BootState {
   hydrated: boolean;
   historyReady: boolean;
   storageBlocked: boolean;
+  storageError: string | null;
 }
 
 export interface DiagnosticEntry {
