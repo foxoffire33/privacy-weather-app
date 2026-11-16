@@ -31,11 +31,6 @@ export interface DataLayerConfig {
   offline: boolean;
 }
 
-export interface PendingWrite {
-  value: unknown;
-  timer: ReturnType<typeof setTimeout>;
-}
-
 export interface Rehydratable extends HydratablePersist {
   persist: HydratablePersist['persist'] & RehydrateHandle;
 }
