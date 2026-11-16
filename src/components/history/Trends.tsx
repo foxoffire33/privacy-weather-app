@@ -12,6 +12,7 @@ import { NO_HIDDEN, visibleSeries } from '../../utils/series';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { SeriesLegend } from '../charts/SeriesToggle';
 import { ChartSk } from '../Skeletons';
+import { TabRow } from '../TabRow';
 
 import type { TempUnit } from '../../stores';
 import type {
@@ -111,23 +112,12 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
         </UnstyledButton>
       </Box>
 
-      <Box className="tab-row" role="tablist">
-        {LENGTHS.map((d) => {
-          const on = custom === null && d === len;
-          return (
-            <UnstyledButton key={d} type="button" role="tab" aria-selected={on} data-active={on || undefined}
-              onClick={() => { setLen(d); }}>{lenLabel(d)}</UnstyledButton>
-          );
-        })}
-      </Box>
+      <TabRow className="tab-row" items={LENGTHS.map((d) => ({ value: d, label: lenLabel(d) }))}
+        active={custom === null ? len : undefined} onChange={setLen} />
 
       <Text fz={12} c="dimmed" pb={4}>{t('history.compare')}</Text>
-      <Box className="tab-row" role="tablist">
-        {BACK_YEARS.map((y) => (
-          <UnstyledButton key={y} type="button" role="tab" aria-selected={y === back} data-active={y === back || undefined}
-            onClick={() => { setBack(y); }}>{y === 0 ? t('history.off') : String(year - y)}</UnstyledButton>
-        ))}
-      </Box>
+      <TabRow className="tab-row" items={BACK_YEARS.map((y) => ({ value: y, label: y === 0 ? t('history.off') : String(year - y) }))}
+        active={back} onChange={setBack} />
     </>
   );
 }
