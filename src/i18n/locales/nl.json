@@ -620,5 +620,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Laden"
+  },
+  "diagnostics": {
+    "title": "Diagnose",
+    "link": "Prestatiediagnose",
+    "note": "Trage frames en gegevenstijden van deze sessie. Er verlaat niets je apparaat, tenzij je het kopieert.",
+    "summary": "{count} trage frames · traagste {ms} ms",
+    "copy": "Rapport kopiëren",
+    "copied": "Gekopieerd",
+    "clear": "Wissen",
+    "empty": "Nog geen trage frames vastgelegd."
   }
 }

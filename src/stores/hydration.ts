@@ -4,14 +4,15 @@ import { useCityStore } from './cityStore';
 import { inSequence, isRecord } from './core/guards';
 import { idbDel, idbGet, recordsWrite } from './core/idb';
 import { READY } from './core/inflight';
-import { measure, whenIdle, yieldToMain } from './core/marks';
+import { yieldToMain, measure } from './core/marks';
+import { requestPersistentStorage } from './core/persistence';
 import { waitForHydration } from './core/persistStorage';
 import { readRange, restore } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
 import { FORECAST_PREFIX, restoreForecasts } from './forecastStore';
-import { LOG_PREFIX, restoreLog } from './logStore';
+import { LOG_PREFIX, restoreLog, useLogStore } from './logStore';
 import { importLegacyStore } from './migrateLegacy';
 import { useSettingsStore } from './settingsStore';
 
@@ -94,12 +95,31 @@ async function restoreHistory(): Promise<void> {
   const chunks = useCityStore.getState().cityIds.flatMap((id) => decades.map((decade) => (
     { id, from: String(decade), to: decade === lastDecade ? before : String(decade + 10) }
   )));
+  const found: DayRecord[] = [];
   await inSequence(chunks, async ({ id, from, to }) => {
-    await restoreDays(id, from, to);
+    const rows = await readRange(`${ENTITY_PREFIX}dayRecord:${id}:`, from, to);
+    found.push(...values(rows, isDay));
     await yieldToMain();
   });
+  restore(() => { useEntityCache.getState().hydrate('dayRecord', found); });
   historyDone = true;
   useBootStore.setState({ historyReady: true });
+}
+
+function ask(): boolean {
+  void requestPersistentStorage();
+  return true;
+}
+
+function keepStorage(): void {
+  const logged = () => Object.values(useLogStore.getState().dates).some((d) => (d?.length ?? 0) > 0);
+  if (logged()) {
+    ask();
+    return;
+  }
+  const stop = useLogStore.subscribe(() => {
+    if (logged() && ask()) { stop(); }
+  });
 }
 
 export function hydrateAll(): Pending {
@@ -115,7 +135,7 @@ export function hydrateAll(): Pending {
     ]);
     await restoreRecent();
     useBootStore.setState({ hydrated: true });
-    whenIdle(() => { void whenHistoryReady(); });
+    keepStorage();
   });
   return booting;
 }

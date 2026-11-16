@@ -620,5 +620,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Indlæser"
+  },
+  "diagnostics": {
+    "title": "Diagnostik",
+    "link": "Ydelsesdiagnostik",
+    "note": "Langsomme billeder og datatider fra denne session. Intet forlader din enhed, medmindre du kopierer det.",
+    "summary": "{count} langsomme billeder · langsomste {ms} ms",
+    "copy": "Kopiér rapport",
+    "copied": "Kopieret",
+    "clear": "Ryd",
+    "empty": "Ingen langsomme billeder registreret endnu."
   }
 }

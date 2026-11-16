@@ -63,7 +63,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label
     onOpenChange(shouldOpen);
   };
   return (
-    <Box ref={root} style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
+    <Box ref={root} className="swipe-row" style={{ position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
       onPointerDown={() => { swallowClick.current = false; }}
       onClickCapture={(e) => {
         if (swallowClick.current || (open && !(e.target instanceof Element && e.target.closest('[data-swipe-action]') !== null))) {

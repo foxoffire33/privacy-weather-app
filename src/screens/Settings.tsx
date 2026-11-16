@@ -135,7 +135,7 @@ export function Settings(): ReactElement {
             <Text fz={12} c="dimmed">{t('settings.storedCount', { cities: counts.cities, days: counts.days })}</Text>
           </Box>
           <Group gap={8} wrap="nowrap">
-            <Button variant="outline" color="gray" onClick={exportFile}>{t('settings.export')}</Button>
+            <Button variant="outline" color="gray" onClick={() => void exportFile()}>{t('settings.export')}</Button>
             <FileButton resetRef={resetFile} accept="application/json,.json" onChange={(file) => void onFile(file)}>
               {(props) => <Button {...props} variant="outline" color="gray">{t('settings.import')}</Button>}
             </FileButton>

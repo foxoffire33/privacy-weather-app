@@ -632,5 +632,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Nalaganje"
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Diagnostika zmogljivosti",
+    "note": "Počasne sličice in časi podatkov iz te seje. Nič ne zapusti naprave, razen če to kopirate.",
+    "summary": "{count} počasnih sličic · najpočasnejša {ms} ms",
+    "copy": "Kopiraj poročilo",
+    "copied": "Kopirano",
+    "clear": "Počisti",
+    "empty": "Počasne sličice še niso bile zabeležene."
   }
 }

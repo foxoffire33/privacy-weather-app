@@ -632,5 +632,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Įkeliama"
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Našumo diagnostika",
+    "note": "Lėti kadrai ir duomenų laikai iš šios sesijos. Niekas nepalieka įrenginio, nebent tai nukopijuosite.",
+    "summary": "{count} lėti kadrai · lėčiausias {ms} ms",
+    "copy": "Kopijuoti ataskaitą",
+    "copied": "Nukopijuota",
+    "clear": "Išvalyti",
+    "empty": "Lėtų kadrų dar neužfiksuota."
   }
 }

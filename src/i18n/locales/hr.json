@@ -626,5 +626,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Učitavanje"
+  },
+  "diagnostics": {
+    "title": "Dijagnostika",
+    "link": "Dijagnostika performansi",
+    "note": "Spori okviri i vremena podataka iz ove sesije. Ništa ne napušta uređaj osim ako to ne kopirate.",
+    "summary": "{count} sporih okvira · najsporiji {ms} ms",
+    "copy": "Kopiraj izvješće",
+    "copied": "Kopirano",
+    "clear": "Očisti",
+    "empty": "Još nisu zabilježeni spori okviri."
   }
 }

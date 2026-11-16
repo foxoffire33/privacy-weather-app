@@ -12,6 +12,7 @@ export async function measure<T>(name: string, task: () => Promise<T>): Promise<
     return await task();
   } finally {
     const duration = performance.now() - start;
+    performance.measure(`wl:${name}`, { start, duration });
     listener?.(name, start, duration);
   }
 }

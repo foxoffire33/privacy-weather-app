@@ -104,3 +104,4 @@ body { font-variant-numeric: tabular-nums; }
 
 :root { --chart-full-h: max(200px, calc(100dvh - 258px)); }
 @media (orientation: landscape) { :root { --chart-full-h: max(160px, calc(100dvh - 228px)); } }
+.swipe-row { content-visibility: auto; contain-intrinsic-size: auto 64px; }

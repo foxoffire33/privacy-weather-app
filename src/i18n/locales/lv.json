@@ -626,5 +626,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Ielādē"
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Veiktspējas diagnostika",
+    "note": "Lēnie kadri un datu laiki no šīs sesijas. Nekas neatstāj ierīci, ja vien jūs to nenokopējat.",
+    "summary": "{count} lēni kadri · lēnākais {ms} ms",
+    "copy": "Kopēt atskaiti",
+    "copied": "Nokopēts",
+    "clear": "Notīrīt",
+    "empty": "Lēni kadri vēl nav reģistrēti."
   }
 }

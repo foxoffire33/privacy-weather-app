@@ -81,15 +81,15 @@ export const useEntityCache = create<EntityCacheState>()((set, get) => ({
     save(name, next);
   },
   remove: (name, id) => {
+    drop(name, id);
     if (get().tables[name][id] === undefined) { return; }
     set((s) => ({ tables: dropFrom(s.tables, name, [id]) }));
-    drop(name, id);
   },
   removeMany: (name, ids) => {
+    for (const id of ids) { drop(name, id); }
     const present = ids.filter((id) => get().tables[name][id] !== undefined);
     if (present.length === 0) { return; }
     set((s) => ({ tables: dropFrom(s.tables, name, present) }));
-    for (const id of present) { drop(name, id); }
   },
   getOne: (name, id) => get().tables[name][id],
   getMany: (name, ids) => {

@@ -626,5 +626,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Cargando"
+  },
+  "diagnostics": {
+    "title": "Diagnóstico",
+    "link": "Diagnóstico de rendimiento",
+    "note": "Fotogramas lentos y tiempos de datos de esta sesión. Nada sale de tu dispositivo salvo que lo copies.",
+    "summary": "{count} fotogramas lentos · el más lento {ms} ms",
+    "copy": "Copiar informe",
+    "copied": "Copiado",
+    "clear": "Borrar",
+    "empty": "Aún no hay fotogramas lentos registrados."
   }
 }

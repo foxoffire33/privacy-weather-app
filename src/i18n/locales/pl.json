@@ -632,5 +632,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Ładowanie"
+  },
+  "diagnostics": {
+    "title": "Diagnostyka",
+    "link": "Diagnostyka wydajności",
+    "note": "Wolne klatki i czasy danych z tej sesji. Nic nie opuszcza urządzenia, chyba że to skopiujesz.",
+    "summary": "{count} wolnych klatek · najwolniejsza {ms} ms",
+    "copy": "Kopiuj raport",
+    "copied": "Skopiowano",
+    "clear": "Wyczyść",
+    "empty": "Nie zarejestrowano jeszcze wolnych klatek."
   }
 }

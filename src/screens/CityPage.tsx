@@ -1,5 +1,5 @@
 import { Box, Button, Paper, Text, VisuallyHidden } from '@mantine/core';
-import { Suspense, memo } from 'react';
+import { Suspense, memo, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router';
 
 import { AirSection, PollenSection } from '../components/city/AirSections';
@@ -43,10 +43,12 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
   const logged = useLogCount(city.id);
   const expanded = useUiStore((st) => st.expandedDay[city.id] ?? null);
   const navigate = useNavigate();
+  const chartEntry = useDeferredValue(entry);
   if (offline || !entry) {
     return <OfflineCity city={city} isDefault={isDefault} error={offline ? null : query.error} />;
   }
   const data = { city, entry, units };
+  const charts = { city, entry: chartEntry ?? entry, units };
   return (
     <>
       <CityHero {...data} isDefault={isDefault} />
@@ -60,17 +62,17 @@ function CityPageContent({ city, isDefault }: CityPageProps): ReactElement {
         <DayList {...data} expanded={expanded} />
       </Paper>
 
-      <Next48Section {...data} />
-      <Next7Section {...data} />
-      <FeelsSection entry={entry} units={units} />
-      <SunSection entry={entry} units={units} />
-      <PrecipSection entry={entry} units={units} />
-      <WindSection entry={entry} units={units} />
-      <AirSection entry={entry} />
-      <PollenSection entry={entry} />
-      <SkySection entry={entry} />
-      <AtmosphereSection entry={entry} />
-      <SeaSection entry={entry} units={units} />
+      <Next48Section {...charts} />
+      <Next7Section {...charts} />
+      <FeelsSection entry={charts.entry} units={units} />
+      <SunSection entry={charts.entry} units={units} />
+      <PrecipSection entry={charts.entry} units={units} />
+      <WindSection entry={charts.entry} units={units} />
+      <AirSection entry={charts.entry} />
+      <PollenSection entry={charts.entry} />
+      <SkySection entry={charts.entry} />
+      <AtmosphereSection entry={charts.entry} />
+      <SeaSection entry={charts.entry} units={units} />
 
       <Box mx={12} mt={24}>
         <Button className="glass" variant="default" size="lg" fullWidth

@@ -620,5 +620,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Ladataan"
+  },
+  "diagnostics": {
+    "title": "Diagnostiikka",
+    "link": "Suorituskyvyn diagnostiikka",
+    "note": "Tämän istunnon hitaat kehykset ja tietojen ajat. Mitään ei lähde laitteelta, ellet kopioi sitä.",
+    "summary": "{count} hidasta kehystä · hitain {ms} ms",
+    "copy": "Kopioi raportti",
+    "copied": "Kopioitu",
+    "clear": "Tyhjennä",
+    "empty": "Hitaita kehyksiä ei ole vielä kirjattu."
   }
 }

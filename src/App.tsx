@@ -12,8 +12,8 @@ import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n
 import { syncAppIcon } from './native/appIcon';
 import { allowLandscape } from './native/orientation';
 import { startWidgetSync } from './native/widgets';
-import { Cities, DayView, History, Home, Hourly, Onboarding, preloadScreens, Search, Settings } from './screens/lazy';
-import { refreshAll, useCityStore, useHydration, useIsHydrated, useSettings } from './stores';
+import { Cities, DayView, Diagnostics, History, Home, Hourly, Onboarding, preloadScreens, Search, Settings } from './screens/lazy';
+import { refreshAll, useCityStore, useHydration, useIsHydrated, useSettings, whenHistoryReady, whenIdle } from './stores';
 import { useUiStore } from './stores/uiStore';
 import { BACK_STATE, paths } from './utils/paths';
 
@@ -92,7 +92,12 @@ function Screens() {
   useEffect(() => { allowLandscape(chartOpen); }, [chartOpen]);
   useEffect(() => { syncAppIcon(accent, accentColor); }, [accent, accentColor]);
   useEffect(() => startWidgetSync(), []);
-  useEffect(() => { globalThis.setTimeout(preloadScreens, PRELOAD_DELAY); }, []);
+  useEffect(() => {
+    globalThis.setTimeout(() => {
+      preloadScreens();
+      whenIdle(() => { void whenHistoryReady(); });
+    }, PRELOAD_DELAY);
+  }, []);
   const onboarding = !hasCities && location.pathname !== paths.search && location.pathname !== paths.settings;
   return (
     <Fragment key={lang}>
@@ -103,6 +108,7 @@ function Screens() {
             <Route path={paths.cities} element={<Cities />} />
             <Route path={paths.search} element={<Search />} />
             <Route path={paths.settings} element={<Settings />} />
+            <Route path={paths.diagnostics} element={<Diagnostics />} />
             <Route path="/city/:cityId/history" element={<CityRoute screen="history" />} />
             <Route path="/city/:cityId/hourly" element={<CityRoute screen="hourly" />} />
             <Route path="/city/:cityId/day/:date" element={<CityRoute screen="day" />} />

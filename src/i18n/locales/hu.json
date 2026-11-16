@@ -620,5 +620,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Betöltés"
+  },
+  "diagnostics": {
+    "title": "Diagnosztika",
+    "link": "Teljesítménydiagnosztika",
+    "note": "A munkamenet lassú képkockái és adatidői. Semmi nem hagyja el az eszközt, hacsak ki nem másolod.",
+    "summary": "{count} lassú képkocka · leglassabb {ms} ms",
+    "copy": "Jelentés másolása",
+    "copied": "Másolva",
+    "clear": "Törlés",
+    "empty": "Még nincs rögzített lassú képkocka."
   }
 }

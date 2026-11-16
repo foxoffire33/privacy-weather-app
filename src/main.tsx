@@ -10,6 +10,7 @@ import './styles/global.css';
 import App from './App';
 import { useSettings } from './stores';
 import { buildTheme, CONFIRM_MODAL } from './theme';
+import { startDiagnostics } from './utils/diagnostics';
 
 import type { ReactElement } from 'react';
 
@@ -26,6 +27,8 @@ function Root(): ReactElement {
     </MantineProvider>
   );
 }
+
+startDiagnostics();
 
 const container = document.querySelector('#root');
 if (container === null) { throw new Error('Missing #root element'); }

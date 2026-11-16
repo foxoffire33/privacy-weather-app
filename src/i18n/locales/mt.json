@@ -638,5 +638,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Qed jillowdja"
+  },
+  "diagnostics": {
+    "title": "Dijanjostika",
+    "link": "Dijanjostika tal-prestazzjoni",
+    "note": "Frejms bil-mod u ħinijiet tad-dejta minn din is-sessjoni. Xejn ma jħalli l-apparat tiegħek sakemm ma tikkopjahx.",
+    "summary": "{count} frejms bil-mod · l-iktar bil-mod {ms} ms",
+    "copy": "Ikkopja r-rapport",
+    "copied": "Ikkopjat",
+    "clear": "Neħħi",
+    "empty": "Għadu ma ġie rreġistrat ebda frejm bil-mod."
   }
 }

@@ -638,5 +638,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Á lódáil"
+  },
+  "diagnostics": {
+    "title": "Diagnóisic",
+    "link": "Diagnóisic feidhmíochta",
+    "note": "Frámaí malla agus amanna sonraí ón seisiún seo. Ní fhágann aon rud do ghléas mura gcóipeálann tú é.",
+    "summary": "{count} fráma mall · an ceann is moille {ms} ms",
+    "copy": "Cóipeáil an tuairisc",
+    "copied": "Cóipeáilte",
+    "clear": "Glan",
+    "empty": "Níl aon fhrámaí malla taifeadta fós."
   }
 }

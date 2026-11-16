@@ -620,5 +620,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Wird geladen"
+  },
+  "diagnostics": {
+    "title": "Diagnose",
+    "link": "Leistungsdiagnose",
+    "note": "Langsame Frames und Datenzeiten dieser Sitzung. Nichts verlässt dein Gerät, außer du kopierst es.",
+    "summary": "{count} langsame Frames · langsamster {ms} ms",
+    "copy": "Bericht kopieren",
+    "copied": "Kopiert",
+    "clear": "Leeren",
+    "empty": "Noch keine langsamen Frames erfasst."
   }
 }

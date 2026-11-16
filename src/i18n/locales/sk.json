@@ -632,5 +632,15 @@
   "splash": {
     "name": "Weather Log",
     "loading": "Načítava sa"
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Diagnostika výkonu",
+    "note": "Pomalé snímky a časy dát z tejto relácie. Nič neopustí zariadenie, pokiaľ to neskopírujete.",
+    "summary": "{count} pomalých snímok · najpomalšia {ms} ms",
+    "copy": "Kopírovať správu",
+    "copied": "Skopírované",
+    "clear": "Vymazať",
+    "empty": "Zatiaľ neboli zaznamenané žiadne pomalé snímky."
   }
 }
