@@ -673,8 +673,6 @@
     "city": "Oraș",
     "play": "Redă",
     "pause": "Pauză",
-    "prev": "Cadrul anterior",
-    "next": "Cadrul următor",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar de precipitații în jurul orașului",
     "waiting": "Se așteaptă datele radar",
@@ -684,14 +682,14 @@
     "retry": "Încearcă din nou",
     "noServer": "Radarul este oprit. Adaugă un server radar în Setări.",
     "openSettings": "Deschide setările",
-    "zoomIn": "Mărește",
-    "zoomOut": "Micșorează",
     "area": "{km} km lățime",
     "inH": "peste {h} h",
     "agoH": "acum {h} h",
     "inHm": "peste {h} h {m} min",
     "agoHm": "acum {h} h {m} min",
     "modelNote": "Nu există radar atât de departe. Ploaia afișată este prognoza pentru oraș (Open-Meteo).",
-    "title": "Radar de precipitații"
+    "title": "Radar de precipitații",
+    "modelMap": "După radar: ploaie din modelul de prognoză Open-Meteo, nemăsurată.",
+    "twoFingers": "Folosește două degete pentru a muta harta"
   }
 }

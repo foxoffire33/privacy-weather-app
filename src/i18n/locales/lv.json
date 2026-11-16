@@ -673,8 +673,6 @@
     "city": "Pilsēta",
     "play": "Atskaņot",
     "pause": "Pauze",
-    "prev": "Iepriekšējais kadrs",
-    "next": "Nākamais kadrs",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Nokrišņu radars ap pilsētu",
     "waiting": "Gaida radara datus",
@@ -684,14 +682,14 @@
     "retry": "Mēģināt vēlreiz",
     "noServer": "Radars ir izslēgts. Pievienojiet radara serveri Iestatījumos.",
     "openSettings": "Atvērt iestatījumus",
-    "zoomIn": "Tuvināt",
-    "zoomOut": "Tālināt",
     "area": "{km} km plats",
     "inH": "pēc {h} h",
     "agoH": "pirms {h} h",
     "inHm": "pēc {h} h {m} min",
     "agoHm": "pirms {h} h {m} min",
     "modelNote": "Tik tālu radara nav. Parādītais lietus ir pašas pilsētas prognoze (Open-Meteo).",
-    "title": "Nokrišņu radars"
+    "title": "Nokrišņu radars",
+    "modelMap": "Pēc radara: lietus no Open-Meteo prognožu modeļa, nav izmērīts.",
+    "twoFingers": "Izmantojiet divus pirkstus, lai pārvietotu karti"
   }
 }

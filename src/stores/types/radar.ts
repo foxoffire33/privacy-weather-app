@@ -80,3 +80,20 @@ export interface TileJson {
   tiles: string[];
   maxzoom: number;
 }
+
+export interface ModelFrame {
+  time: number;
+  cells: string;
+  cityMm: number;
+}
+
+export interface ModelSet {
+  version: number;
+  fetchedAt: number;
+  frames: ModelFrame[];
+}
+
+export interface GeoPoint {
+  lat: number;
+  lon: number;
+}

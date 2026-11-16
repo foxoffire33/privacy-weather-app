@@ -667,8 +667,6 @@
     "city": "Stad",
     "play": "Afspelen",
     "pause": "Pauze",
-    "prev": "Vorig beeld",
-    "next": "Volgend beeld",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Regenradar rond de stad",
     "waiting": "Wachten op radargegevens",
@@ -678,14 +676,14 @@
     "retry": "Opnieuw proberen",
     "noServer": "De radar staat uit. Voeg een radarserver toe bij Instellingen.",
     "openSettings": "Instellingen openen",
-    "zoomIn": "Inzoomen",
-    "zoomOut": "Uitzoomen",
     "area": "{km} km breed",
     "inH": "over {h} u",
     "agoH": "{h} u geleden",
     "inHm": "over {h} u {m} min",
     "agoHm": "{h} u {m} min geleden",
     "modelNote": "Zo ver vooruit is er geen radar. De getoonde regen is de verwachting voor de stad zelf (Open-Meteo).",
-    "title": "Regenradar"
+    "title": "Regenradar",
+    "modelMap": "Na de radar: regen uit het Open-Meteo-weermodel, niet gemeten.",
+    "twoFingers": "Gebruik twee vingers om de kaart te verplaatsen"
   }
 }

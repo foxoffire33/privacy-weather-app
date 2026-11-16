@@ -54,6 +54,7 @@ export const fetchMarine: typeof direct.fetchMarine = async (...args) => call(as
 export const fetchDailyRange: typeof direct.fetchDailyRange = async (...args) => call(async (w) => w.fetchDailyRange(...args), async () => direct.fetchDailyRange(...args));
 export const fetchArchive: typeof direct.fetchArchive = async (...args) => call(async (w) => w.fetchArchive(...args), async () => direct.fetchArchive(...args));
 export const fetchDay: typeof direct.fetchDay = async (...args) => call(async (w) => w.fetchDay(...args), async () => direct.fetchDay(...args));
+export const fetchModelRain: typeof direct.fetchModelRain = async (...args) => call(async (w) => w.fetchModelRain(...args), async () => direct.fetchModelRain(...args));
 export const fetchAirDay: typeof direct.fetchAirDay = async (...args) => call(async (w) => w.fetchAirDay(...args), async () => direct.fetchAirDay(...args));
 const radarDirect = async (): Promise<typeof radar> => import('./radar');
 

@@ -685,8 +685,6 @@
     "city": "Cathair",
     "play": "Seinn",
     "pause": "Sos",
-    "prev": "Fráma roimhe",
-    "next": "An chéad fhráma eile",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar báistí timpeall na cathrach",
     "waiting": "Ag fanacht le sonraí radair",
@@ -696,14 +694,14 @@
     "retry": "Bain triail eile as",
     "noServer": "Tá an radar múchta. Cuir freastalaí radair leis sna Socruithe.",
     "openSettings": "Oscail socruithe",
-    "zoomIn": "Zúmáil isteach",
-    "zoomOut": "Zúmáil amach",
     "area": "{km} km ar leithead",
     "inH": "i gceann {h} u",
     "agoH": "{h} u ó shin",
     "inHm": "i gceann {h} u {m} nóim",
     "agoHm": "{h} u {m} nóim ó shin",
     "modelNote": "Níl radar chomh fada sin chun cinn. Is í an bháisteach a thaispeántar réamhaisnéis na cathrach féin (Open-Meteo).",
-    "title": "Radar báistí"
+    "title": "Radar báistí",
+    "modelMap": "Thar an radar: báisteach ó mhúnla réamhaisnéise Open-Meteo, gan tomhas.",
+    "twoFingers": "Úsáid dhá mhéar chun an léarscáil a bhogadh"
   }
 }

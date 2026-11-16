@@ -41,3 +41,5 @@ export const tileJsonSchema = z.object({
   tiles: z.array(z.string()).min(1),
   maxzoom: z.number(),
 });
+
+export const multiWeatherSchema = z.union([z.array(weatherSchema), weatherSchema]);

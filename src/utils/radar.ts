@@ -3,7 +3,7 @@ import { levelOf, rainRate } from '../stores';
 
 import { fmtNumber, zonedEpoch } from './format';
 
-import type { ForecastData, RadarFrame } from '../stores';
+import type { ForecastData, ModelFrame, RadarFrame } from '../stores';
 import type { ModelPoint, TimelineFrame } from '../types';
 
 const NEAR = 6;
@@ -26,13 +26,17 @@ function modelPoints(forecast: ForecastData): ModelPoint[] {
   return [...quarters, ...hours.filter((p) => p.time > end)];
 }
 
-export function buildTimeline(frames: readonly RadarFrame[], forecast: ForecastData, now: number): TimelineFrame[] {
-  const radar = frames.map((frame): TimelineFrame => ({ time: frame.time, kind: frame.forecast ? 'nowcast' : 'radar', frame, mmPerHour: null }));
+export function buildTimeline(frames: readonly RadarFrame[], forecast: ForecastData, now: number, grid: readonly ModelFrame[]): TimelineFrame[] {
+  const radar = frames.map((frame): TimelineFrame => ({ time: frame.time, kind: frame.forecast ? 'nowcast' : 'radar', frame, cells: frame.cells, mmPerHour: null }));
   const after = Math.max(now, frames.at(-1)?.time ?? now);
-  const model = modelPoints(forecast)
-    .filter((p) => p.time > after && p.time <= now + HORIZON)
-    .map((p): TimelineFrame => ({ time: p.time, kind: 'model', frame: undefined, mmPerHour: p.mmPerHour }));
-  return [...radar, ...model];
+  const inRange = (time: number) => time > after && time <= now + HORIZON;
+  const mapped = grid.filter((g) => inRange(g.time))
+    .map((g): TimelineFrame => ({ time: g.time, kind: 'model', frame: undefined, cells: g.cells, mmPerHour: g.cityMm }));
+  const lastMapped = mapped.at(-1)?.time ?? after;
+  const cityOnly = modelPoints(forecast)
+    .filter((p) => inRange(p.time) && p.time > lastMapped)
+    .map((p): TimelineFrame => ({ time: p.time, kind: 'model', frame: undefined, cells: undefined, mmPerHour: p.mmPerHour }));
+  return [...radar, ...mapped, ...cityOnly];
 }
 
 export function nowIndex(frames: readonly TimelineFrame[], now: number): number {
@@ -57,13 +61,13 @@ export function modelLevel(mmPerHour: number): number {
 }
 
 export function rainNear(frame: TimelineFrame, cols: number, rows: number): number {
-  if (frame.frame === undefined) { return modelLevel(frame.mmPerHour ?? 0) * 40; }
+  if (frame.cells === undefined) { return modelLevel(frame.mmPerHour ?? 0) * 40; }
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
   let sum = 0;
   for (let y = Math.max(0, cy - NEAR); y <= Math.min(rows - 1, cy + NEAR); y += 1) {
     for (let x = Math.max(0, cx - NEAR); x <= Math.min(cols - 1, cx + NEAR); x += 1) {
-      sum += Number(frame.frame.cells[y * cols + x] ?? '0');
+      sum += Number(frame.cells[y * cols + x] ?? '0');
     }
   }
   return sum;

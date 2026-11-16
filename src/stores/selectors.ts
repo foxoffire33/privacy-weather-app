@@ -15,7 +15,7 @@ import { useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { QueryState } from './core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LandMap, LogNeighbours, LookupView, RadarSet, Settings, Units } from './types';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LandMap, LogNeighbours, LookupView, ModelSet, RadarSet, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
 export const useUpdateSettings = (): ((patch: Partial<Settings>) => void) => useSettingsStore((s) => s.updateSettings);
@@ -39,6 +39,7 @@ export const useRadarShownKey = (cityId: string, cell: number, source: string): 
   const keys = nearestCells(cell).map((c) => radarKey(cityId, c, source));
   return keys.find((k) => s.radar[k] !== undefined) ?? keys.find((k) => s.land[k] !== undefined) ?? radarKey(cityId, cell, source);
 });
+export const useModelSet = (key: string): ModelSet | undefined => useRadarStore((s) => s.model[key]);
 export const useLandMap = (key: string): LandMap | undefined => useRadarStore((s) => s.land[key]);
 export const useRadarSet = (key: string): RadarSet | undefined => useRadarStore((s) => s.radar[key]);
 export const useRadarQuery = (key: string): QueryState => useRadarStore((s) => s.queries[key] ?? IDLE_QUERY);

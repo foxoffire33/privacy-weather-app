@@ -667,8 +667,6 @@
     "city": "City",
     "play": "Play",
     "pause": "Pause",
-    "prev": "Previous frame",
-    "next": "Next frame",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Rain radar around the city",
     "waiting": "Waiting for radar data",
@@ -678,14 +676,14 @@
     "retry": "Try again",
     "noServer": "The radar is off. Add a radar server in Settings.",
     "openSettings": "Open settings",
-    "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out",
     "area": "{km} km wide",
     "inH": "in {h} h",
     "agoH": "{h} h ago",
     "inHm": "in {h} h {m} min",
     "agoHm": "{h} h {m} min ago",
     "modelNote": "No radar this far ahead. The rain shown is the forecast for the city itself (Open-Meteo).",
-    "title": "Rain radar"
+    "title": "Rain radar",
+    "modelMap": "Beyond the radar: rain from the Open-Meteo forecast model, not measured.",
+    "twoFingers": "Use two fingers to move the map"
   }
 }

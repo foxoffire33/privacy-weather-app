@@ -6,7 +6,7 @@ import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'reorder' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'reorder' | 'play' | 'pause';
 
 export interface IconProps {
   name: IconName;

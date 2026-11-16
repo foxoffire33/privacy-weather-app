@@ -667,8 +667,6 @@
     "city": "Város",
     "play": "Lejátszás",
     "pause": "Szünet",
-    "prev": "Előző kép",
-    "next": "Következő kép",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Csapadékradar a város körül",
     "waiting": "Várakozás a radaradatokra",
@@ -678,14 +676,14 @@
     "retry": "Újra",
     "noServer": "A radar ki van kapcsolva. Adj meg radarszervert a Beállításokban.",
     "openSettings": "Beállítások megnyitása",
-    "zoomIn": "Nagyítás",
-    "zoomOut": "Kicsinyítés",
     "area": "{km} km széles",
     "inH": "{h} óra múlva",
     "agoH": "{h} órája",
     "inHm": "{h} óra {m} perc múlva",
     "agoHm": "{h} óra {m} perce",
     "modelNote": "Ilyen messze nincs radar. A mutatott eső a város előrejelzése (Open-Meteo).",
-    "title": "Csapadékradar"
+    "title": "Csapadékradar",
+    "modelMap": "A radaron túl: eső az Open-Meteo előrejelző modelljéből, nem mért adat.",
+    "twoFingers": "A térkép mozgatásához használj két ujjat"
   }
 }

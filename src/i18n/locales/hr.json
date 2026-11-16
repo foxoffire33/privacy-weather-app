@@ -673,8 +673,6 @@
     "city": "Grad",
     "play": "Reproduciraj",
     "pause": "Pauza",
-    "prev": "Prethodna slika",
-    "next": "Sljedeća slika",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar oborina oko grada",
     "waiting": "Čekanje na radarske podatke",
@@ -684,14 +682,14 @@
     "retry": "Pokušaj ponovno",
     "noServer": "Radar je isključen. Dodajte radarski poslužitelj u Postavkama.",
     "openSettings": "Otvori postavke",
-    "zoomIn": "Povećaj",
-    "zoomOut": "Smanji",
     "area": "širina {km} km",
     "inH": "za {h} h",
     "agoH": "prije {h} h",
     "inHm": "za {h} h {m} min",
     "agoHm": "prije {h} h {m} min",
     "modelNote": "Toliko unaprijed nema radara. Prikazana kiša je prognoza za sam grad (Open-Meteo).",
-    "title": "Radar oborina"
+    "title": "Radar oborina",
+    "modelMap": "Nakon radara: kiša iz prognostičkog modela Open-Meteo, nije izmjerena.",
+    "twoFingers": "Upotrijebite dva prsta za pomicanje karte"
   }
 }
