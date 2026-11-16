@@ -551,7 +551,9 @@
     "donate": "Přispět přes GitHub Sponsors",
     "donateNote": "Weather Log je zdarma a bez reklam. Dar pomáhá, aby to tak zůstalo.",
     "openMeteoThirdParty": "Open-Meteo je nezávislá služba třetí strany, kterou neprovozuje vývojář Weather Log. Její server je open source (AGPL-3.0) a lze jej hostovat sám.",
-    "openMeteoSource": "Zdrojový kód Open-Meteo"
+    "openMeteoSource": "Zdrojový kód Open-Meteo",
+    "radarServer": "Radarový server",
+    "radarServerNote": "Váš vlastní server LibreWXR v EU. Bez něj je radar vypnutý. Odesílá se jen oblast mapy kolem města."
   },
   "backup": {
     "notJson": "Tento soubor není platný JSON.",
@@ -643,5 +645,33 @@
     "copied": "Zkopírováno",
     "clear": "Vymazat",
     "empty": "Zatím nebyly zaznamenány žádné pomalé snímky."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Grafy",
+    "now": "Teď",
+    "inMin": "za {n} min",
+    "agoMin": "před {n} min",
+    "hours": "{n} h",
+    "dry": "Sucho",
+    "light": "Slabý déšť",
+    "moderate": "Mírný déšť",
+    "heavy": "Silný déšť",
+    "snow": "Sníh",
+    "rate": "{mm} mm/h",
+    "city": "Město",
+    "play": "Přehrát",
+    "pause": "Pozastavit",
+    "prev": "Předchozí snímek",
+    "next": "Další snímek",
+    "credit": "Radar EUMETNET OPERA · Mapa © OpenStreetMap",
+    "mapLabel": "Srážkový radar kolem města",
+    "waiting": "Čekání na data radaru",
+    "offline": "Radar není dostupný offline.",
+    "failed": "Radar se nepodařilo načíst.",
+    "stale": "Radar se nepodařilo obnovit.",
+    "retry": "Zkusit znovu",
+    "noServer": "Radar potřebuje vlastní radarový server v EU. Zadejte jeho adresu v Nastavení.",
+    "openSettings": "Otevřít nastavení"
   }
 }

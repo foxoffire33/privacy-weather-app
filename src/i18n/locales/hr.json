@@ -545,7 +545,9 @@
     "donate": "Doniraj putem GitHub Sponsors",
     "donateNote": "Weather Log je besplatan i bez oglasa. Donacija pomaže da tako i ostane.",
     "openMeteoThirdParty": "Open-Meteo je neovisna usluga treće strane kojom ne upravlja razvojni programer aplikacije Weather Log. Njezin je poslužitelj otvorenog koda (AGPL-3.0) i možete ga sami hostati.",
-    "openMeteoSource": "Izvorni kod Open-Meteo"
+    "openMeteoSource": "Izvorni kod Open-Meteo",
+    "radarServer": "Radarski poslužitelj",
+    "radarServerNote": "Vaš vlastiti LibreWXR poslužitelj u EU. Bez njega je radar isključen. Šalje se samo područje karte oko grada."
   },
   "backup": {
     "notJson": "Ova datoteka nije valjan JSON.",
@@ -637,5 +639,33 @@
     "copied": "Kopirano",
     "clear": "Očisti",
     "empty": "Još nisu zabilježeni spori okviri."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Grafikoni",
+    "now": "Sada",
+    "inMin": "za {n} min",
+    "agoMin": "prije {n} min",
+    "hours": "{n} h",
+    "dry": "Suho",
+    "light": "Slaba kiša",
+    "moderate": "Umjerena kiša",
+    "heavy": "Jaka kiša",
+    "snow": "Snijeg",
+    "rate": "{mm} mm/h",
+    "city": "Grad",
+    "play": "Reproduciraj",
+    "pause": "Pauza",
+    "prev": "Prethodna slika",
+    "next": "Sljedeća slika",
+    "credit": "Radar EUMETNET OPERA · Karta © OpenStreetMap",
+    "mapLabel": "Radar oborina oko grada",
+    "waiting": "Čekanje na radarske podatke",
+    "offline": "Radar nije dostupan izvan mreže.",
+    "failed": "Radar se nije mogao učitati.",
+    "stale": "Radar se nije mogao osvježiti.",
+    "retry": "Pokušaj ponovno",
+    "noServer": "Radar treba vaš vlastiti radarski poslužitelj u EU. Dodajte njegovu adresu u Postavkama.",
+    "openSettings": "Otvori postavke"
   }
 }

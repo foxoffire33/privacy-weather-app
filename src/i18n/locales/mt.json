@@ -557,7 +557,9 @@
     "donate": "Agħti donazzjoni permezz ta' GitHub Sponsors",
     "donateNote": "Weather Log huwa b'xejn u mingħajr reklami. Donazzjoni tgħin biex jibqa' hekk.",
     "openMeteoThirdParty": "Open-Meteo huwa servizz indipendenti ta’ parti terza, mhux immexxi mill-iżviluppatur ta’ Weather Log. Is-server tiegħu huwa b’kodiċi miftuħ (AGPL-3.0) u tista’ tospitah int stess.",
-    "openMeteoSource": "Il-kodiċi sors ta’ Open-Meteo"
+    "openMeteoSource": "Il-kodiċi sors ta’ Open-Meteo",
+    "radarServer": "Server tar-radar",
+    "radarServerNote": "Is-server LibreWXR tiegħek fl-UE. Mingħajru r-radar huwa mitfi. Tintbagħat biss iż-żona tal-mappa madwar belt."
   },
   "backup": {
     "notJson": "Dan il-fajl mhux JSON validu.",
@@ -649,5 +651,33 @@
     "copied": "Ikkopjat",
     "clear": "Neħħi",
     "empty": "Għadu ma ġie rreġistrat ebda frejm bil-mod."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Graffs",
+    "now": "Issa",
+    "inMin": "fi {n} min",
+    "agoMin": "{n} min ilu",
+    "hours": "{n} siegħa",
+    "dry": "Niexef",
+    "light": "Xita ħafifa",
+    "moderate": "Xita moderata",
+    "heavy": "Xita qawwija",
+    "snow": "Silġ",
+    "rate": "{mm} mm/siegħa",
+    "city": "Belt",
+    "play": "Ħaddem",
+    "pause": "Pawża",
+    "prev": "Qafas preċedenti",
+    "next": "Qafas li jmiss",
+    "credit": "Radar EUMETNET OPERA · Mappa © OpenStreetMap",
+    "mapLabel": "Radar tax-xita madwar il-belt",
+    "waiting": "Qed nistennew id-data tar-radar",
+    "offline": "Ir-radar mhuwiex disponibbli offline.",
+    "failed": "Ir-radar ma setax jitgħabba.",
+    "stale": "Ir-radar ma setax jiġġedded.",
+    "retry": "Erġa' pprova",
+    "noServer": "Ir-radar jeħtieġ server tar-radar tiegħek fl-UE. Żid l-indirizz tiegħu fl-Issettjar.",
+    "openSettings": "Iftaħ l-issettjar"
   }
 }

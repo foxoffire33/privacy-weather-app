@@ -557,7 +557,9 @@
     "donate": "Tabhair síntiús trí GitHub Sponsors",
     "donateNote": "Tá Weather Log saor in aisce agus gan fógraí. Cabhraíonn síntiús é a choinneáil mar sin.",
     "openMeteoThirdParty": "Seirbhís neamhspleách tríú páirtí é Open-Meteo, nach bhfuil á reáchtáil ag forbróir Weather Log. Is foinse oscailte (AGPL-3.0) a fhreastalaí agus is féidir é a óstáil tú féin.",
-    "openMeteoSource": "Cód foinse Open-Meteo"
+    "openMeteoSource": "Cód foinse Open-Meteo",
+    "radarServer": "Freastalaí radair",
+    "radarServerNote": "Do fhreastalaí LibreWXR féin san AE. Gan é, tá an radar múchta. Ní sheoltar ach limistéar na léarscáile timpeall cathrach."
   },
   "backup": {
     "notJson": "Ní JSON bailí an comhad seo.",
@@ -649,5 +651,33 @@
     "copied": "Cóipeáilte",
     "clear": "Glan",
     "empty": "Níl aon fhrámaí malla taifeadta fós."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Cairteacha",
+    "now": "Anois",
+    "inMin": "i gceann {n} nóim",
+    "agoMin": "{n} nóim ó shin",
+    "hours": "{n} u",
+    "dry": "Tirim",
+    "light": "Báisteach éadrom",
+    "moderate": "Báisteach mheasartha",
+    "heavy": "Báisteach throm",
+    "snow": "Sneachta",
+    "rate": "{mm} mm/u",
+    "city": "Cathair",
+    "play": "Seinn",
+    "pause": "Sos",
+    "prev": "Fráma roimhe",
+    "next": "An chéad fhráma eile",
+    "credit": "Radar EUMETNET OPERA · Léarscáil © OpenStreetMap",
+    "mapLabel": "Radar báistí timpeall na cathrach",
+    "waiting": "Ag fanacht le sonraí radair",
+    "offline": "Níl an radar ar fáil as líne.",
+    "failed": "Níorbh fhéidir an radar a lódáil.",
+    "stale": "Níorbh fhéidir an radar a athnuachan.",
+    "retry": "Bain triail eile as",
+    "noServer": "Teastaíonn do fhreastalaí radair féin san AE. Cuir a sheoladh isteach sna Socruithe.",
+    "openSettings": "Oscail socruithe"
   }
 }

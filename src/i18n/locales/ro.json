@@ -545,7 +545,9 @@
     "donate": "Donează prin GitHub Sponsors",
     "donateNote": "Weather Log este gratuit și fără reclame. O donație ajută să rămână așa.",
     "openMeteoThirdParty": "Open-Meteo este un serviciu terț independent, care nu este administrat de dezvoltatorul Weather Log. Serverul său este open source (AGPL-3.0) și poate fi găzduit de tine.",
-    "openMeteoSource": "Codul sursă Open-Meteo"
+    "openMeteoSource": "Codul sursă Open-Meteo",
+    "radarServer": "Server radar",
+    "radarServerNote": "Propriul tău server LibreWXR în UE. Fără el, radarul este oprit. Se trimite doar zona hărții din jurul unui oraș."
   },
   "backup": {
     "notJson": "Acest fișier nu este JSON valid.",
@@ -637,5 +639,33 @@
     "copied": "Copiat",
     "clear": "Golește",
     "empty": "Încă nu s-au înregistrat cadre lente."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Grafice",
+    "now": "Acum",
+    "inMin": "peste {n} min",
+    "agoMin": "acum {n} min",
+    "hours": "{n} h",
+    "dry": "Uscat",
+    "light": "Ploaie slabă",
+    "moderate": "Ploaie moderată",
+    "heavy": "Ploaie puternică",
+    "snow": "Ninsoare",
+    "rate": "{mm} mm/h",
+    "city": "Oraș",
+    "play": "Redă",
+    "pause": "Pauză",
+    "prev": "Cadrul anterior",
+    "next": "Cadrul următor",
+    "credit": "Radar EUMETNET OPERA · Hartă © OpenStreetMap",
+    "mapLabel": "Radar de precipitații în jurul orașului",
+    "waiting": "Se așteaptă datele radar",
+    "offline": "Radarul nu este disponibil offline.",
+    "failed": "Radarul nu a putut fi încărcat.",
+    "stale": "Radarul nu a putut fi actualizat.",
+    "retry": "Încearcă din nou",
+    "noServer": "Radarul are nevoie de propriul tău server radar în UE. Adaugă adresa în Setări.",
+    "openSettings": "Deschide setările"
   }
 }

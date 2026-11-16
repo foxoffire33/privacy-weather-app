@@ -545,7 +545,9 @@
     "donate": "Ziedot ar GitHub Sponsors",
     "donateNote": "Weather Log ir bezmaksas un bez reklāmām. Ziedojums palīdz, lai tā paliktu.",
     "openMeteoThirdParty": "Open-Meteo ir neatkarīgs trešās puses pakalpojums, ko nepārvalda Weather Log izstrādātājs. Tā serveris ir atvērtā koda (AGPL-3.0), un to var mitināt pats.",
-    "openMeteoSource": "Open-Meteo pirmkods"
+    "openMeteoSource": "Open-Meteo pirmkods",
+    "radarServer": "Radara serveris",
+    "radarServerNote": "Jūsu pašu LibreWXR serveris ES. Bez tā radars ir izslēgts. Tiek nosūtīts tikai kartes apgabals ap pilsētu."
   },
   "backup": {
     "notJson": "Šis fails nav derīgs JSON.",
@@ -637,5 +639,33 @@
     "copied": "Nokopēts",
     "clear": "Notīrīt",
     "empty": "Lēni kadri vēl nav reģistrēti."
+  },
+  "radar": {
+    "tab": "Radars",
+    "charts": "Grafiki",
+    "now": "Tagad",
+    "inMin": "pēc {n} min",
+    "agoMin": "pirms {n} min",
+    "hours": "{n} h",
+    "dry": "Sauss",
+    "light": "Neliels lietus",
+    "moderate": "Mērens lietus",
+    "heavy": "Stiprs lietus",
+    "snow": "Sniegs",
+    "rate": "{mm} mm/h",
+    "city": "Pilsēta",
+    "play": "Atskaņot",
+    "pause": "Pauze",
+    "prev": "Iepriekšējais kadrs",
+    "next": "Nākamais kadrs",
+    "credit": "Radars EUMETNET OPERA · Karte © OpenStreetMap",
+    "mapLabel": "Nokrišņu radars ap pilsētu",
+    "waiting": "Gaida radara datus",
+    "offline": "Radars nav pieejams bezsaistē.",
+    "failed": "Radaru neizdevās ielādēt.",
+    "stale": "Radaru neizdevās atjaunināt.",
+    "retry": "Mēģināt vēlreiz",
+    "noServer": "Radaram vajag jūsu pašu radara serveri ES. Pievienojiet tā adresi Iestatījumos.",
+    "openSettings": "Atvērt iestatījumus"
   }
 }

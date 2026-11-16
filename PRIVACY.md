@@ -30,6 +30,16 @@ developer of Weather Log, and this policy does not cover it. Open-Meteo is open 
 | Forecast, Air Quality and Marine APIs | the coordinates of cities you follow | on refresh |
 | Historical Weather API | coordinates and dates | when filling or looking up past days |
 
+**Radar** (only when you set a *Radar server* in Settings): the app talks to that server, which you run
+yourself in the EU ([setup](deploy/radar/README.md)). It is sent the radar and map tiles around each city you
+open, which reveals the area of that city, and like any web server it sees your IP address. Without a radar
+server the radar is off and nothing is sent.
+
+| Service | Sent | When |
+| --- | --- | --- |
+| Radar frames (LibreWXR) | map tiles around a city | while the radar is shown, every 5 minutes |
+| Map file (PMTiles) | byte ranges of the map around a city | once per city |
+
 If you add an Open-Meteo API key, it is sent with these requests. Like any web server, Open-Meteo sees your
 IP address. See Open-Meteo's [terms and privacy policy](https://open-meteo.com/en/terms). To avoid this,
 point the app at a self-hosted Open-Meteo instance or use offline mode.

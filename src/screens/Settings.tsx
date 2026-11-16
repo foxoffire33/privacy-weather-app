@@ -1,4 +1,4 @@
-import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, PasswordInput, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
+import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
@@ -7,8 +7,9 @@ import { version } from '../../package.json';
 import { countDays } from '../backup/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SettingsAbout } from '../components/SettingsAbout';
+import { SettingsDataSource } from '../components/SettingsDataSource';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
-import { clearHistory, refreshAll, storedCounts, useSettings, useUpdateSettings } from '../stores';
+import { clearHistory, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
 import { ACCENT_NAMES, ACCENTS } from '../theme';
 
@@ -53,18 +54,7 @@ export function Settings(): ReactElement {
             ]} />
         </Box>
 
-        <Box className="kicker">{t('settings.dataSource')}</Box>
-        <Box py={12} className="row">
-          <PasswordInput label={t('settings.apiKey')} placeholder={t('settings.optional')} value={s.settings.apiKey}
-            description={t('settings.apiKeyNote')}
-            onChange={(e) => { set({ apiKey: e.currentTarget.value.trim() }); }} />
-        </Box>
-        <Box py={12} className="row">
-          <TextInput label={t('settings.server')} placeholder="https://api.open-meteo.com" value={s.settings.server}
-            description={t('settings.serverNote')}
-            onChange={(e) => { set({ server: e.currentTarget.value.trim() }); }} />
-        </Box>
-        <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
+        <SettingsDataSource />
 
         <Box className="kicker">{t('settings.appearance')}</Box>
         <Box py={12} className="row">

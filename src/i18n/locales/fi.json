@@ -539,7 +539,9 @@
     "donate": "Lahjoita GitHub Sponsorsin kautta",
     "donateNote": "Weather Log on ilmainen ja mainokseton. Lahjoitus auttaa pitämään sen sellaisena.",
     "openMeteoThirdParty": "Open-Meteo on riippumaton kolmannen osapuolen palvelu, jota Weather Login kehittäjä ei ylläpidä. Sen palvelin on avointa lähdekoodia (AGPL-3.0), ja sen voi ajaa itse.",
-    "openMeteoSource": "Open-Meteon lähdekoodi"
+    "openMeteoSource": "Open-Meteon lähdekoodi",
+    "radarServer": "Tutkapalvelin",
+    "radarServerNote": "Oma LibreWXR-palvelimesi EU:ssa. Ilman sitä tutka on pois päältä. Palvelimelle lähetetään vain kaupungin ympäröivä kartta-alue."
   },
   "backup": {
     "notJson": "Tiedosto ei ole kelvollista JSONia.",
@@ -631,5 +633,33 @@
     "copied": "Kopioitu",
     "clear": "Tyhjennä",
     "empty": "Hitaita kehyksiä ei ole vielä kirjattu."
+  },
+  "radar": {
+    "tab": "Tutka",
+    "charts": "Kaaviot",
+    "now": "Nyt",
+    "inMin": "{n} min päästä",
+    "agoMin": "{n} min sitten",
+    "hours": "{n} t",
+    "dry": "Poutaa",
+    "light": "Heikkoa sadetta",
+    "moderate": "Kohtalaista sadetta",
+    "heavy": "Voimakasta sadetta",
+    "snow": "Lunta",
+    "rate": "{mm} mm/t",
+    "city": "Kaupunki",
+    "play": "Toista",
+    "pause": "Tauko",
+    "prev": "Edellinen kuva",
+    "next": "Seuraava kuva",
+    "credit": "Tutka EUMETNET OPERA · Kartta © OpenStreetMap",
+    "mapLabel": "Sadetutka kaupungin ympärillä",
+    "waiting": "Odotetaan tutkatietoja",
+    "offline": "Tutka ei ole käytettävissä offline-tilassa.",
+    "failed": "Tutkaa ei voitu ladata.",
+    "stale": "Tutkaa ei voitu päivittää.",
+    "retry": "Yritä uudelleen",
+    "noServer": "Tutka tarvitsee oman tutkapalvelimen EU:ssa. Lisää sen osoite asetuksiin.",
+    "openSettings": "Avaa asetukset"
   }
 }

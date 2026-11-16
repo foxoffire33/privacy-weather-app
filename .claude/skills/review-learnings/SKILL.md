@@ -80,3 +80,8 @@ same class of mistake is not made again. Add to this list when a review finds so
     TanStack Virtual's `useVirtualizer`, and suppression is not allowed. Prefer memoized rows plus
     `content-visibility` on rows, or hand-written windowing.
 
+## Persistence
+
+14. **Every Zustand `persist` store over IndexedDB needs `partialize`.** Without it the whole state, actions
+    included, is stored; IndexedDB cannot clone a function, the write throws `DataCloneError` and the debounced
+    writer swallows it. *From the radar PR: no setting change had been saved since settings moved to IndexedDB.*

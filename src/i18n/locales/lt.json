@@ -551,7 +551,9 @@
     "donate": "Paremti per GitHub Sponsors",
     "donateNote": "Weather Log yra nemokama ir be reklamų. Parama padeda, kad taip ir liktų.",
     "openMeteoThirdParty": "Open-Meteo yra nepriklausoma trečiosios šalies paslauga, kurios nevaldo Weather Log kūrėjas. Jos serveris yra atvirojo kodo (AGPL-3.0) ir jį galima talpinti patiems.",
-    "openMeteoSource": "Open-Meteo šaltinio kodas"
+    "openMeteoSource": "Open-Meteo šaltinio kodas",
+    "radarServer": "Radaro serveris",
+    "radarServerNote": "Jūsų pačių LibreWXR serveris ES. Be jo radaras išjungtas. Siunčiama tik žemėlapio sritis aplink miestą."
   },
   "backup": {
     "notJson": "Šis failas nėra tinkamas JSON.",
@@ -643,5 +645,33 @@
     "copied": "Nukopijuota",
     "clear": "Išvalyti",
     "empty": "Lėtų kadrų dar neužfiksuota."
+  },
+  "radar": {
+    "tab": "Radaras",
+    "charts": "Diagramos",
+    "now": "Dabar",
+    "inMin": "po {n} min",
+    "agoMin": "prieš {n} min",
+    "hours": "{n} val.",
+    "dry": "Sausa",
+    "light": "Silpnas lietus",
+    "moderate": "Vidutinis lietus",
+    "heavy": "Stiprus lietus",
+    "snow": "Sniegas",
+    "rate": "{mm} mm/val.",
+    "city": "Miestas",
+    "play": "Leisti",
+    "pause": "Pauzė",
+    "prev": "Ankstesnis kadras",
+    "next": "Kitas kadras",
+    "credit": "Radaras EUMETNET OPERA · Žemėlapis © OpenStreetMap",
+    "mapLabel": "Kritulių radaras aplink miestą",
+    "waiting": "Laukiama radaro duomenų",
+    "offline": "Radaras nepasiekiamas neprisijungus.",
+    "failed": "Nepavyko įkelti radaro.",
+    "stale": "Nepavyko atnaujinti radaro.",
+    "retry": "Bandyti dar kartą",
+    "noServer": "Radarui reikia jūsų pačių radaro serverio ES. Įveskite jo adresą nustatymuose.",
+    "openSettings": "Atidaryti nustatymus"
   }
 }

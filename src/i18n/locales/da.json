@@ -539,7 +539,9 @@
     "donate": "Donér via GitHub Sponsors",
     "donateNote": "Weather Log er gratis og uden reklamer. En donation hjælper med at holde det sådan.",
     "openMeteoThirdParty": "Open-Meteo er en uafhængig tredjepartstjeneste, som ikke drives af udvikleren af Weather Log. Serveren er open source (AGPL-3.0) og kan hostes af dig selv.",
-    "openMeteoSource": "Kildekode til Open-Meteo"
+    "openMeteoSource": "Kildekode til Open-Meteo",
+    "radarServer": "Radarserver",
+    "radarServerNote": "Din egen LibreWXR-server i EU. Uden den er radaren slået fra. Kun kortområdet omkring en by sendes."
   },
   "backup": {
     "notJson": "Denne fil er ikke gyldig JSON.",
@@ -631,5 +633,33 @@
     "copied": "Kopieret",
     "clear": "Ryd",
     "empty": "Ingen langsomme billeder registreret endnu."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Diagrammer",
+    "now": "Nu",
+    "inMin": "om {n} min",
+    "agoMin": "for {n} min siden",
+    "hours": "{n} t",
+    "dry": "Tørt",
+    "light": "Let regn",
+    "moderate": "Moderat regn",
+    "heavy": "Kraftig regn",
+    "snow": "Sne",
+    "rate": "{mm} mm/t",
+    "city": "By",
+    "play": "Afspil",
+    "pause": "Pause",
+    "prev": "Forrige billede",
+    "next": "Næste billede",
+    "credit": "Radar EUMETNET OPERA · Kort © OpenStreetMap",
+    "mapLabel": "Regnradar omkring byen",
+    "waiting": "Venter på radardata",
+    "offline": "Radaren er ikke tilgængelig offline.",
+    "failed": "Radaren kunne ikke indlæses.",
+    "stale": "Radaren kunne ikke opdateres.",
+    "retry": "Prøv igen",
+    "noServer": "Radaren kræver din egen radarserver i EU. Tilføj adressen under Indstillinger.",
+    "openSettings": "Åbn indstillinger"
   }
 }

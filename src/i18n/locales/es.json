@@ -545,7 +545,9 @@
     "donate": "Donar con GitHub Sponsors",
     "donateNote": "Weather Log es gratis y sin anuncios. Una donación ayuda a que siga así.",
     "openMeteoThirdParty": "Open-Meteo es un servicio independiente de terceros, no gestionado por el desarrollador de Weather Log. Su servidor es de código abierto (AGPL-3.0) y se puede alojar por cuenta propia.",
-    "openMeteoSource": "Código fuente de Open-Meteo"
+    "openMeteoSource": "Código fuente de Open-Meteo",
+    "radarServer": "Servidor de radar",
+    "radarServerNote": "Tu propio servidor LibreWXR en la UE. Sin él, el radar está desactivado. Solo se envía la zona del mapa alrededor de una ciudad."
   },
   "backup": {
     "notJson": "Este archivo no es un JSON válido.",
@@ -637,5 +639,33 @@
     "copied": "Copiado",
     "clear": "Borrar",
     "empty": "Aún no hay fotogramas lentos registrados."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Gráficos",
+    "now": "Ahora",
+    "inMin": "en {n} min",
+    "agoMin": "hace {n} min",
+    "hours": "{n} h",
+    "dry": "Seco",
+    "light": "Lluvia ligera",
+    "moderate": "Lluvia moderada",
+    "heavy": "Lluvia fuerte",
+    "snow": "Nieve",
+    "rate": "{mm} mm/h",
+    "city": "Ciudad",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "prev": "Imagen anterior",
+    "next": "Imagen siguiente",
+    "credit": "Radar EUMETNET OPERA · Mapa © OpenStreetMap",
+    "mapLabel": "Radar de lluvia alrededor de la ciudad",
+    "waiting": "Esperando datos del radar",
+    "offline": "El radar no está disponible sin conexión.",
+    "failed": "No se pudo cargar el radar.",
+    "stale": "No se pudo actualizar el radar.",
+    "retry": "Reintentar",
+    "noServer": "El radar necesita tu propio servidor de radar en la UE. Añade su dirección en Ajustes.",
+    "openSettings": "Abrir ajustes"
   }
 }

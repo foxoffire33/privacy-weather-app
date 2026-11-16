@@ -10,6 +10,7 @@ import type { Settings } from './types';
 const defaultSettings: Settings = {
   apiKey: '',
   server: '',
+  radarServer: '',
   tempUnit: 'C',
   windUnit: 'kmh',
   snapshotMinutes: 60,
@@ -31,6 +32,7 @@ export const useSettingsStore = create<SettingsState>()(
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      partialize: (s) => ({ settings: s.settings }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>;
         return { ...current, settings: { ...current.settings, ...p.settings } };
@@ -40,15 +42,15 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 function publishApiConfig(s: Settings): void {
-  configureDataLayer({ apiKey: s.apiKey, server: s.server, offline: s.offline });
+  configureDataLayer({ apiKey: s.apiKey, server: s.server, radarServer: s.radarServer, offline: s.offline });
 }
 
 publishApiConfig(useSettingsStore.getState().settings);
 
 let lastKey = '';
 useSettingsStore.subscribe((state) => {
-  const { apiKey, server, offline } = state.settings;
-  const key = `${apiKey}\u0000${server}\u0000${String(offline)}`;
+  const { apiKey, server, radarServer, offline } = state.settings;
+  const key = [apiKey, server, radarServer, String(offline)].join('\u0000');
   if (key === lastKey) {return;}
   lastKey = key;
   publishApiConfig(state.settings);

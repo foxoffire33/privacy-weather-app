@@ -1,4 +1,4 @@
-import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
+import type { City, DayData, DayRecord, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
@@ -6,7 +6,7 @@ import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'prev' | 'next' | 'play' | 'pause';
 
 export interface IconProps {
   name: IconName;
@@ -406,4 +406,36 @@ export interface ManualCityFormProps {
 
 export interface SettingsAboutProps {
   version: string;
+}
+
+export interface RadarPanelProps {
+  cityId: string;
+  timeZone: string;
+  height?: ChartHeight;
+}
+
+export interface RadarMapProps {
+  land: LandMap;
+  frame: RadarFrame | undefined;
+  height?: ChartHeight;
+}
+
+export interface RadarFramesProps {
+  frames: readonly RadarFrame[];
+  selected: number;
+  cols: number;
+  rows: number;
+  onSelect: (time: number) => void;
+}
+
+export interface RadarNoticeProps {
+  text: string;
+  action?: string;
+  onAction?: () => void;
+}
+
+export interface RadarReadoutProps {
+  frame: RadarFrame | undefined;
+  nowTime: number;
+  timeZone: string;
 }

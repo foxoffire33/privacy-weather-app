@@ -96,4 +96,13 @@ that order, in one readable place.
 ## Privacy
 
 No device location is ever read: a city is added by name search only. Nothing leaves the device
-except the Open-Meteo requests themselves, and the API key is never written to a backup.
+except the Open-Meteo requests themselves and, when a radar server is set, the radar and map tile requests
+to that server (`api/radar.ts`). The API key is never written to a backup.
+
+## Radar
+
+`radarStore` keeps per city a land map (`radarland:<city>`, kept until the factory version changes) and the
+last radar frames (`radar:<city>`, refreshed after 5 minutes). Both are records, restored before any download.
+`api/radar.ts` reads the frame list from the radar server, draws each frame's tiles onto an `OffscreenCanvas`
+in the worker and turns them into a 46 × 40 grid of levels (`factories/radar.ts`); the map comes from a PMTiles
+file on the same server, with land and water rasterised the same way. Past frames are never downloaded twice.

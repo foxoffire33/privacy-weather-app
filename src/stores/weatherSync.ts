@@ -7,6 +7,7 @@ import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
+import { useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { Pending } from './core/types';
@@ -20,7 +21,15 @@ export const resourceKey = {
   day: (cityId: string, date: string): string => `day:${cityId}:${date}`,
   lookup: (cityId: string, date: string): string => `lookup:${cityId}:${date}`,
   thisDay: (cityId: string, date: string): string => `thisDay:${cityId}:${date.slice(5)}`,
+  radar: (cityId: string): string => `radar:${cityId}`,
 };
+
+export function loadRadar(cityId: string): Pending {
+  return once(resourceKey.radar(cityId), async () => {
+    const city = entityCache.getOne('city', cityId);
+    if (city !== undefined) { await useRadarStore.getState().load(city); }
+  });
+}
 
 export function refreshCity(cityId: string, opts: RefreshOptions = {}): Pending {
   if (isOffline()) { return READY; }
@@ -52,6 +61,7 @@ export function followCity(geo: GeoResult): number {
 export function unfollowCity(cityId: string): void {
   useCityStore.getState().unfollow(cityId);
   useForecastStore.getState().drop(cityId);
+  useRadarStore.getState().drop(cityId);
 }
 
 export function openDay(cityId: string, date: string): Pending {

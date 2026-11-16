@@ -539,7 +539,9 @@
     "donate": "Támogatás a GitHub Sponsors oldalon",
     "donateNote": "A Weather Log ingyenes és reklámmentes. Egy adomány segít, hogy így maradjon.",
     "openMeteoThirdParty": "Az Open-Meteo független, harmadik féltől származó szolgáltatás, amelyet nem a Weather Log fejlesztője üzemeltet. A szervere nyílt forráskódú (AGPL-3.0), és saját magad is üzemeltetheted.",
-    "openMeteoSource": "Az Open-Meteo forráskódja"
+    "openMeteoSource": "Az Open-Meteo forráskódja",
+    "radarServer": "Radarszerver",
+    "radarServerNote": "Saját LibreWXR-szervered az EU-ban. Nélküle a radar ki van kapcsolva. Csak a város körüli térképrész kerül elküldésre."
   },
   "backup": {
     "notJson": "Ez a fájl nem érvényes JSON.",
@@ -631,5 +633,33 @@
     "copied": "Másolva",
     "clear": "Törlés",
     "empty": "Még nincs rögzített lassú képkocka."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Grafikonok",
+    "now": "Most",
+    "inMin": "{n} perc múlva",
+    "agoMin": "{n} perce",
+    "hours": "{n} óra",
+    "dry": "Száraz",
+    "light": "Gyenge eső",
+    "moderate": "Mérsékelt eső",
+    "heavy": "Erős eső",
+    "snow": "Hó",
+    "rate": "{mm} mm/óra",
+    "city": "Város",
+    "play": "Lejátszás",
+    "pause": "Szünet",
+    "prev": "Előző kép",
+    "next": "Következő kép",
+    "credit": "Radar EUMETNET OPERA · Térkép © OpenStreetMap",
+    "mapLabel": "Csapadékradar a város körül",
+    "waiting": "Várakozás a radaradatokra",
+    "offline": "A radar offline nem érhető el.",
+    "failed": "A radart nem sikerült betölteni.",
+    "stale": "A radart nem sikerült frissíteni.",
+    "retry": "Újra",
+    "noServer": "A radarhoz saját radarszerver kell az EU-ban. Add meg a címét a Beállításokban.",
+    "openSettings": "Beállítások megnyitása"
   }
 }

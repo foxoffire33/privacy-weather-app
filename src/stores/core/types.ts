@@ -25,6 +25,7 @@ export interface HydratablePersist {
 export interface DataLayerConfig {
   apiKey: string;
   server: string;
+  radarServer: string;
   fetch: typeof fetch | null;
   offline: boolean;
 }
@@ -65,5 +66,5 @@ export type MarkListener = (name: string, start: number, duration: number) => vo
 
 export type ConfigListener = (config: DataLayerConfig) => void;
 
-export type WorkerConfig = Pick<DataLayerConfig, 'apiKey' | 'server' | 'offline'>;
+export type WorkerConfig = Pick<DataLayerConfig, 'apiKey' | 'server' | 'radarServer' | 'offline'>;
 

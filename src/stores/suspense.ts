@@ -2,10 +2,10 @@ import { use } from 'react';
 
 import { lastSettled } from './core/inflight';
 import { hydrateAll, whenHistoryReady } from './hydration';
-import { useCity, useDay, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
-import { lookupDate, openDay, loadThisDay, refreshCity, resourceKey } from './weatherSync';
+import { useCity, useDay, useLandMap, useRadarQuery, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
+import { lookupDate, openDay, loadRadar, loadThisDay, refreshCity, resourceKey } from './weatherSync';
 
-import type { ArchiveYear, DayData, ForecastEntry, LookupView } from './types';
+import type { ArchiveYear, DayData, ForecastEntry, LookupView, RadarView } from './types';
 
 export function useHydration(): void {
   use(hydrateAll());
@@ -43,4 +43,15 @@ export function useLookupData(cityId: string, date: string): LookupView {
   const lookup = useLookup(cityId, date);
   use(city !== undefined && date !== '' && lookup.record === undefined && lookup.query.status !== 'error' ? lookupDate(cityId, date) : lastSettled(resourceKey.lookup(cityId, date)));
   return lookup;
+}
+
+export function useRadarData(cityId: string): RadarView {
+  const city = useCity(cityId);
+  const land = useLandMap(cityId);
+  const radar = useRadarSet(cityId);
+  const query = useRadarQuery(cityId);
+  const server = useRadarServer();
+  const empty = land === undefined && radar === undefined;
+  use(city !== undefined && empty && server !== '' && query.status === 'idle' ? loadRadar(cityId) : lastSettled(resourceKey.radar(cityId)));
+  return { land, radar, query };
 }

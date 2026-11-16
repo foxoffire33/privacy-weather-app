@@ -27,3 +27,12 @@ export const geoResultSchema = z.object({
 });
 
 export const geoSchema = z.object({ results: z.array(z.unknown()).optional() }).loose();
+
+const radarFrameSchema = z.object({ time: z.number(), path: z.string() });
+
+export const radarMapsSchema = z.object({
+  radar: z.object({
+    past: z.array(radarFrameSchema),
+    nowcast: z.array(radarFrameSchema).optional(),
+  }),
+});

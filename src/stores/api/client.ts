@@ -71,21 +71,44 @@ async function attempt(url: string, signal: AbortSignal): Promise<unknown> {
   throw new ApiError(reason, res.status >= 500 || res.status === 429);
 }
 
+async function attemptBytes(url: string, signal: AbortSignal, headers: HeadersInit): Promise<ArrayBuffer> {
+  const doFetch = getConfig().fetch ?? fetch;
+  const res = await doFetch(url, { signal, headers });
+  if (!res.ok) { throw new ApiError(`HTTP ${String(res.status)}`, res.status >= 500 || res.status === 429); }
+  const body = await res.arrayBuffer();
+  signal.throwIfAborted();
+  return body;
+}
+
 const retryable = (error: unknown) => (error instanceof ApiError ? error.retry : error instanceof TypeError);
 
-async function withRetries(url: string, signal: AbortSignal, round: number): Promise<unknown> {
+async function withRetries<T>(run: () => Promise<T>, signal: AbortSignal, round: number): Promise<T> {
   try {
-    return await attempt(url, signal);
+    return await run();
   } catch (error) {
     if (round >= RETRIES || signal.aborted || !retryable(error)) { throw error; }
     await sleep(Math.min(BACKOFF_MS * 2 ** round, BACKOFF_MAX_MS), signal);
-    return withRetries(url, signal, round + 1);
+    return withRetries(run, signal, round + 1);
   }
 }
 
 export async function getJson(kind: EndpointKind, path: string, params: QueryParams, signal?: AbortSignal): Promise<unknown> {
   assertOnline();
-  return withRetries(requestUrl(kind, path, params), onlineSignal(signal), 0);
+  const url = requestUrl(kind, path, params);
+  const live = onlineSignal(signal);
+  return withRetries(async () => attempt(url, live), live, 0);
+}
+
+export async function getUrlJson(url: string, signal?: AbortSignal): Promise<unknown> {
+  assertOnline();
+  const live = onlineSignal(signal);
+  return withRetries(async () => attempt(url, live), live, 0);
+}
+
+export async function getBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<ArrayBuffer> {
+  assertOnline();
+  const live = onlineSignal(signal);
+  return withRetries(async () => attemptBytes(url, live, headers), live, 0);
 }
 
 function fromCache<T>(body: unknown, build: (json: unknown) => T): { value: T } | null {

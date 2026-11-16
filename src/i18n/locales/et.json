@@ -539,7 +539,9 @@
     "donate": "Anneta GitHub Sponsorsi kaudu",
     "donateNote": "Weather Log on tasuta ja reklaamideta. Annetus aitab sel nii jääda.",
     "openMeteoThirdParty": "Open-Meteo on sõltumatu kolmanda osapoole teenus, mida Weather Logi arendaja ei halda. Selle server on avatud lähtekoodiga (AGPL-3.0) ja seda saab ise majutada.",
-    "openMeteoSource": "Open-Meteo lähtekood"
+    "openMeteoSource": "Open-Meteo lähtekood",
+    "radarServer": "Radariserver",
+    "radarServerNote": "Sinu enda LibreWXR-server ELis. Ilma selleta on radar välja lülitatud. Saadetakse ainult linna ümbrus kaardil."
   },
   "backup": {
     "notJson": "See fail ei ole kehtiv JSON.",
@@ -631,5 +633,33 @@
     "copied": "Kopeeritud",
     "clear": "Tühjenda",
     "empty": "Aeglasi kaadreid pole veel salvestatud."
+  },
+  "radar": {
+    "tab": "Radar",
+    "charts": "Graafikud",
+    "now": "Praegu",
+    "inMin": "{n} min pärast",
+    "agoMin": "{n} min tagasi",
+    "hours": "{n} h",
+    "dry": "Kuiv",
+    "light": "Nõrk vihm",
+    "moderate": "Mõõdukas vihm",
+    "heavy": "Tugev vihm",
+    "snow": "Lumi",
+    "rate": "{mm} mm/h",
+    "city": "Linn",
+    "play": "Esita",
+    "pause": "Paus",
+    "prev": "Eelmine kaader",
+    "next": "Järgmine kaader",
+    "credit": "Radar EUMETNET OPERA · Kaart © OpenStreetMap",
+    "mapLabel": "Sademeradar linna ümber",
+    "waiting": "Ootan radariandmeid",
+    "offline": "Radar pole võrguühenduseta saadaval.",
+    "failed": "Radarit ei õnnestunud laadida.",
+    "stale": "Radarit ei õnnestunud värskendada.",
+    "retry": "Proovi uuesti",
+    "noServer": "Radar vajab sinu enda radariserverit ELis. Lisa selle aadress seadetes.",
+    "openSettings": "Ava seaded"
   }
 }
