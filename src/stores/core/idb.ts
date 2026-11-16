@@ -1,6 +1,57 @@
+import { errorMessage } from './errors';
 import { sortedCopy } from './sort';
 
 import type { BlockedListener, IdbEntry, ResponseRecord } from './types';
+
+export type StorageErrorCode =
+  | 'unavailable'
+  | 'open-failed'
+  | 'blocked'
+  | 'read-failed'
+  | 'write-failed'
+  | 'quota-exceeded'
+  | 'transaction-aborted'
+  | 'corrupt-data';
+
+export class StorageError extends Error {
+  constructor(
+    public readonly code: StorageErrorCode,
+    message: string,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = 'StorageError';
+  }
+}
+
+export function isStorageError(error: unknown): error is StorageError {
+  return error instanceof StorageError;
+}
+
+const DOM_CODE: Readonly<Record<string, StorageErrorCode>> = {
+  QuotaExceededError: 'quota-exceeded',
+  AbortError: 'transaction-aborted',
+  InvalidStateError: 'unavailable',
+  BlockedError: 'blocked',
+};
+
+const OP_CODE: Readonly<Record<'open' | 'read' | 'write', StorageErrorCode>> = {
+  open: 'open-failed',
+  read: 'read-failed',
+  write: 'write-failed',
+};
+
+const OP_MESSAGE: Readonly<Record<'open' | 'read' | 'write', string>> = {
+  open: 'IndexedDB open failed',
+  read: 'IndexedDB read failed',
+  write: 'IndexedDB write failed',
+};
+
+export function toStorageError(operation: 'open' | 'read' | 'write', cause: unknown): StorageError {
+  if (cause instanceof StorageError) { return cause; }
+  const code: StorageErrorCode = cause instanceof DOMException && cause.name in DOM_CODE ? DOM_CODE[cause.name] : OP_CODE[operation];
+  return new StorageError(code, `${OP_MESSAGE[operation]}: ${errorMessage(cause)}`, { cause });
+}
 
 const DB_NAME = 'wl-storesv2';
 const DB_VERSION = 2;
@@ -37,12 +88,15 @@ async function openDb(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains(name)) { db.createObjectStore(name); }
       }
     });
-    request.addEventListener('blocked', () => { blockedListener?.(true); });
+    request.addEventListener('blocked', () => {
+      blockedListener?.(true);
+      reject(new StorageError('blocked', 'IndexedDB upgrade is blocked by another tab', { cause: request.error }));
+    });
     request.addEventListener('success', () => {
       blockedListener?.(false);
       resolve(manage(request.result));
     });
-    request.addEventListener('error', () => { reject(request.error ?? new Error('IndexedDB open failed')); });
+    request.addEventListener('error', () => { reject(toStorageError('open', request.error ?? new Error('IndexedDB open failed'))); });
   });
   return dbPromise.catch((error: unknown) => {
     dbPromise = null;
