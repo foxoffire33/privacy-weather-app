@@ -104,6 +104,16 @@ export async function recordsWrite(puts: readonly IdbEntry[], deletes: readonly 
   });
 }
 
+export async function recordsWriteMissing(entries: readonly IdbEntry[]): Promise<void> {
+  if (entries.length === 0) { return; }
+  await write(RECORDS, (s) => {
+    for (const [key, value] of entries) {
+      const found = s.count(key);
+      found.addEventListener('success', () => { if (found.result === 0) { s.put(value, key); } });
+    }
+  });
+}
+
 export async function recordsDeletePrefix(prefix: string): Promise<void> {
   await write(RECORDS, (s) => { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); });
 }

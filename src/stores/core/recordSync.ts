@@ -10,28 +10,40 @@ const deletes = new Set<string>();
 let timer: ReturnType<typeof setTimeout> | null = null;
 let restoring = 0;
 
-export async function flushRecords(): Promise<void> {
-  if (timer !== null) { clearTimeout(timer); }
-  timer = null;
+let chain: Promise<void> = Promise.resolve();
+const clearedPrefixes: string[] = [];
+const touched = new Set<string>();
+
+async function flushOnce(): Promise<void> {
   if (puts.size === 0 && deletes.size === 0) { return; }
   const batch: IdbEntry[] = [...puts];
   const gone = [...deletes];
+  const clearMark = clearedPrefixes.length;
   puts.clear();
   deletes.clear();
   try {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
   } catch {
-    requeue(batch, gone);
+    requeue(batch, gone, clearedPrefixes.slice(clearMark));
   }
+}
+
+export async function flushRecords(): Promise<void> {
+  if (timer !== null) { clearTimeout(timer); }
+  timer = null;
+  chain = chain.then(flushOnce, flushOnce);
+  return chain;
 }
 
 const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
 
-function requeue(batch: readonly IdbEntry[], gone: readonly string[]): void {
-  for (const [key, value] of batch) { if (!newer(key)) { puts.set(key, value); } }
-  for (const key of gone) { if (!newer(key)) { deletes.add(key); } }
+function requeue(batch: readonly IdbEntry[], gone: readonly string[], clearedSince: readonly string[]): void {
+  const keep = (key: string) => !newer(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
+  for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
+  for (const key of gone) { if (keep(key)) { deletes.add(key); } }
   schedule();
 }
+
 
 function schedule(): void {
   timer ??= setTimeout(() => { void flushRecords(); }, FLUSH_MS);
@@ -42,8 +54,13 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords(); } });
 }
 
+export function changedSinceStart(key: string): boolean {
+  return touched.has(key) || clearedPrefixes.some((prefix) => key.startsWith(prefix));
+}
+
 export function putRecord(key: string, value: unknown): void {
   if (restoring > 0) { return; }
+  touched.add(key);
   deletes.delete(key);
   puts.set(key, value);
   schedule();
@@ -51,12 +68,14 @@ export function putRecord(key: string, value: unknown): void {
 
 export function deleteRecord(key: string): void {
   if (restoring > 0) { return; }
+  touched.add(key);
   puts.delete(key);
   deletes.add(key);
   schedule();
 }
 
 export async function clearRecords(prefix: string): Promise<void> {
+  clearedPrefixes.push(prefix);
   for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
   for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
   await recordsDeletePrefix(prefix).catch(() => null);
