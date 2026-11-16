@@ -678,6 +678,7 @@
     "agoH": "för {h} h sedan",
     "inHm": "om {h} h {m} min",
     "agoHm": "för {h} h {m} min sedan",
-    "modelNote": "Ingen radar så långt fram. Regnet som visas är prognosen för själva staden (Open-Meteo)."
+    "modelNote": "Ingen radar så långt fram. Regnet som visas är prognosen för själva staden (Open-Meteo).",
+    "title": "Regnradar"
   }
 }

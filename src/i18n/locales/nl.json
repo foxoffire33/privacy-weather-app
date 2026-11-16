@@ -678,6 +678,7 @@
     "agoH": "{h} u geleden",
     "inHm": "over {h} u {m} min",
     "agoHm": "{h} u {m} min geleden",
-    "modelNote": "Zo ver vooruit is er geen radar. De getoonde regen is de verwachting voor de stad zelf (Open-Meteo)."
+    "modelNote": "Zo ver vooruit is er geen radar. De getoonde regen is de verwachting voor de stad zelf (Open-Meteo).",
+    "title": "Regenradar"
   }
 }

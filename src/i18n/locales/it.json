@@ -684,6 +684,7 @@
     "agoH": "{h} h fa",
     "inHm": "tra {h} h {m} min",
     "agoHm": "{h} h {m} min fa",
-    "modelNote": "Nessun radar così avanti. La pioggia mostrata è la previsione per la città stessa (Open-Meteo)."
+    "modelNote": "Nessun radar così avanti. La pioggia mostrata è la previsione per la città stessa (Open-Meteo).",
+    "title": "Radar della pioggia"
   }
 }

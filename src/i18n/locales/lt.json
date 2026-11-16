@@ -690,6 +690,7 @@
     "agoH": "prieš {h} val.",
     "inHm": "po {h} val. {m} min",
     "agoHm": "prieš {h} val. {m} min",
-    "modelNote": "Taip toli radaro nėra. Rodomas lietus yra paties miesto prognozė (Open-Meteo)."
+    "modelNote": "Taip toli radaro nėra. Rodomas lietus yra paties miesto prognozė (Open-Meteo).",
+    "title": "Kritulių radaras"
   }
 }

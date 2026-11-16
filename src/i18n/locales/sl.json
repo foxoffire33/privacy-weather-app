@@ -690,6 +690,7 @@
     "agoH": "pred {h} h",
     "inHm": "čez {h} h {m} min",
     "agoHm": "pred {h} h {m} min",
-    "modelNote": "Tako daleč naprej radarja ni. Prikazan dež je napoved za samo mesto (Open-Meteo)."
+    "modelNote": "Tako daleč naprej radarja ni. Prikazan dež je napoved za samo mesto (Open-Meteo).",
+    "title": "Padavinski radar"
   }
 }

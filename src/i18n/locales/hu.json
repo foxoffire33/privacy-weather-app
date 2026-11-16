@@ -678,6 +678,7 @@
     "agoH": "{h} órája",
     "inHm": "{h} óra {m} perc múlva",
     "agoHm": "{h} óra {m} perce",
-    "modelNote": "Ilyen messze nincs radar. A mutatott eső a város előrejelzése (Open-Meteo)."
+    "modelNote": "Ilyen messze nincs radar. A mutatott eső a város előrejelzése (Open-Meteo).",
+    "title": "Csapadékradar"
   }
 }

@@ -1,5 +1,5 @@
 import { Box, Button, ColorSwatch, Group, SimpleGrid, Stack, Text, UnstyledButton } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
+import { useInViewport, useMediaQuery } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -100,9 +100,8 @@ function zoomedCell(cell: number, by: number): number | undefined {
   return at >= 0 ? CELLS.at(at) : undefined;
 }
 
-function ZoomRow({ cell, fullscreenId, full }: RadarZoomProps): ReactElement {
+function ZoomRow({ cell }: RadarZoomProps): ReactElement {
   const setCell = useUiStore((s) => s.setRadarCell);
-  const openChart = useUiStore((s) => s.openChart);
   const at = CELLS.indexOf(cell);
   const zoom = (by: number) => {
     const next = zoomedCell(cell, by);
@@ -112,16 +111,16 @@ function ZoomRow({ cell, fullscreenId, full }: RadarZoomProps): ReactElement {
     <Group grow gap={4} mt={4} wrap="nowrap">
       <Button variant="default" aria-label={t('radar.zoomOut')} disabled={at >= CELLS.length - 1} onClick={() => { zoom(1); }}><Icon name="minus" size={18} /></Button>
       <Button variant="default" aria-label={t('radar.zoomIn')} disabled={at <= 0} onClick={() => { zoom(-1); }}><Icon name="plus" size={18} /></Button>
-      {!full && <Button variant="default" aria-label={t('chart.fullscreen')} onClick={() => { openChart(fullscreenId); }}><Icon name="expand" size={18} /></Button>}
     </Group>
   );
 }
 
-function RadarControls({ frames, index, cols, rows, cell, fullscreenId, full, stale, onRetry }: RadarControlsProps): ReactElement {
+function RadarControls({ frames, index, cols, rows, cell, stale, visible, onRetry }: RadarControlsProps): ReactElement {
   const setFrame = useUiStore((s) => s.setRadarFrame);
-  const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const playing = visible && !paused;
   const step = (by: number) => {
-    setPlaying(false);
+    setPaused(true);
     const next = frames.at((index + by) % Math.max(1, frames.length));
     if (next !== undefined) { setFrame(next.time); }
   };
@@ -141,25 +140,26 @@ function RadarControls({ frames, index, cols, rows, cell, fullscreenId, full, st
       )}
       {frames.length > 0 && (
         <>
-          <RadarFrames frames={frames} selected={index} cols={cols} rows={rows} onSelect={(time) => { setPlaying(false); setFrame(time); }} />
+          <RadarFrames frames={frames} selected={index} cols={cols} rows={rows} onSelect={(time) => { setPaused(true); setFrame(time); }} />
           <Group grow gap={4} mt={10} wrap="nowrap">
             <Button variant="default" aria-label={t('radar.prev')} onClick={() => { step(-1); }}><Icon name="prev" size={18} /></Button>
-            <Button variant="default" onClick={() => { setPlaying((p) => !p); }}>
+            <Button variant="default" onClick={() => { setPaused(playing); }}>
               <Group gap={8} wrap="nowrap"><Icon name={playing ? 'pause' : 'play'} size={16} />{playing ? t('radar.pause') : t('radar.play')}</Group>
             </Button>
             <Button variant="default" aria-label={t('radar.next')} onClick={() => { step(1); }}><Icon name="next" size={18} /></Button>
           </Group>
         </>
       )}
-      <ZoomRow cell={cell} fullscreenId={fullscreenId} full={full} />
+      <ZoomRow cell={cell} />
       <Legend />
     </>
   );
 }
 
-function RadarContent({ cityId, timeZone, forecast, height, fullscreenId }: RadarPanelProps): ReactElement {
+function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): ReactElement {
   const cell = useUiStore((s) => s.radarCell);
   const setCell = useUiStore((s) => s.setRadarCell);
+  const { ref: viewportRef, inViewport } = useInViewport();
   const { key, land, radar, query, shownCell } = useRadarData(cityId, cell);
   const offline = useIsOffline();
   const landscape = useMediaQuery('(orientation: landscape)');
@@ -191,7 +191,7 @@ function RadarContent({ cityId, timeZone, forecast, height, fullscreenId }: Rada
   const side = height !== undefined && landscape;
   const readout = <Readout frame={selected} nowTime={nowTime} timeZone={timeZone} />;
   const mapBox = (
-    <>
+    <Box ref={viewportRef}>
       <RadarMap land={map} frame={selected?.frame} height={side ? LANDSCAPE_MAP_H : height} visibleCols={VISIBLE_COLS} visibleRows={VISIBLE_ROWS}
         baseScale={shownCell / cell} onPinchZoom={pinchZoom} />
       {selected?.kind === 'model' && <Text fz={11} c="dimmed" mt={4}>{t('radar.modelNote')}</Text>}
@@ -199,11 +199,11 @@ function RadarContent({ cityId, timeZone, forecast, height, fullscreenId }: Rada
         <Text span inherit style={{ flex: 'none' }}>{t('radar.area', { km: Math.round((VISIBLE_COLS * cell) / 1000) })}</Text>
         <Text span inherit ta="right">{t('radar.credit')}</Text>
       </Group>
-    </>
+    </Box>
   );
   const controls = (
-    <RadarControls frames={frames} index={index} cols={map.cols} rows={map.rows} cell={cell} fullscreenId={fullscreenId}
-      full={height !== undefined} stale={query.status === 'error' && !offline} onRetry={reload} />
+    <RadarControls frames={frames} index={index} cols={map.cols} rows={map.rows} cell={cell} visible={inViewport}
+      stale={query.status === 'error' && !offline} onRetry={reload} />
   );
   if (side) {
     return <SimpleGrid cols={2} spacing={16}><Box>{mapBox}</Box><Box>{readout}{controls}</Box></SimpleGrid>;
@@ -211,11 +211,11 @@ function RadarContent({ cityId, timeZone, forecast, height, fullscreenId }: Rada
   return <>{readout}<Box mt={8}>{mapBox}</Box>{controls}</>;
 }
 
-export function RadarPanel({ cityId, timeZone, forecast, height, fullscreenId }: RadarPanelProps): ReactElement {
+export function RadarPanel({ cityId, timeZone, forecast, height }: RadarPanelProps): ReactElement {
   const server = useRadarServer();
   const navigate = useNavigate();
   if (server.trim() === '') {
     return <Notice text={t('radar.noServer')} action={t('radar.openSettings')} onAction={() => { void navigate(paths.settings); }} />;
   }
-  return <RadarContent cityId={cityId} timeZone={timeZone} forecast={forecast} height={height} fullscreenId={fullscreenId} />;
+  return <RadarContent cityId={cityId} timeZone={timeZone} forecast={forecast} height={height} />;
 }

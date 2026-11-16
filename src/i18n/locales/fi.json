@@ -678,6 +678,7 @@
     "agoH": "{h} t sitten",
     "inHm": "{h} t {m} min päästä",
     "agoHm": "{h} t {m} min sitten",
-    "modelNote": "Näin pitkälle ei ole tutkaa. Näytetty sade on kaupungin oma ennuste (Open-Meteo)."
+    "modelNote": "Näin pitkälle ei ole tutkaa. Näytetty sade on kaupungin oma ennuste (Open-Meteo).",
+    "title": "Sadetutka"
   }
 }

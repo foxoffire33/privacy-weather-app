@@ -690,6 +690,7 @@
     "agoH": "{h} h temu",
     "inHm": "za {h} h {m} min",
     "agoHm": "{h} h {m} min temu",
-    "modelNote": "Tak daleko nie ma radaru. Pokazany deszcz to prognoza dla samego miasta (Open-Meteo)."
+    "modelNote": "Tak daleko nie ma radaru. Pokazany deszcz to prognoza dla samego miasta (Open-Meteo).",
+    "title": "Radar opadów"
   }
 }

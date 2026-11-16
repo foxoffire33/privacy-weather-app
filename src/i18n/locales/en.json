@@ -678,6 +678,7 @@
     "agoH": "{h} h ago",
     "inHm": "in {h} h {m} min",
     "agoHm": "{h} h {m} min ago",
-    "modelNote": "No radar this far ahead. The rain shown is the forecast for the city itself (Open-Meteo)."
+    "modelNote": "No radar this far ahead. The rain shown is the forecast for the city itself (Open-Meteo).",
+    "title": "Rain radar"
   }
 }

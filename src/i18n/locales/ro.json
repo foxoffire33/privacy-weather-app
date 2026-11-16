@@ -684,6 +684,7 @@
     "agoH": "acum {h} h",
     "inHm": "peste {h} h {m} min",
     "agoHm": "acum {h} h {m} min",
-    "modelNote": "Nu există radar atât de departe. Ploaia afișată este prognoza pentru oraș (Open-Meteo)."
+    "modelNote": "Nu există radar atât de departe. Ploaia afișată este prognoza pentru oraș (Open-Meteo).",
+    "title": "Radar de precipitații"
   }
 }

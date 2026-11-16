@@ -684,6 +684,7 @@
     "agoH": "il y a {h} h",
     "inHm": "dans {h} h {m} min",
     "agoHm": "il y a {h} h {m} min",
-    "modelNote": "Pas de radar aussi loin. La pluie affichée est la prévision pour la ville elle-même (Open-Meteo)."
+    "modelNote": "Pas de radar aussi loin. La pluie affichée est la prévision pour la ville elle-même (Open-Meteo).",
+    "title": "Radar de pluie"
   }
 }

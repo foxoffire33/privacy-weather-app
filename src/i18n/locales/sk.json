@@ -690,6 +690,7 @@
     "agoH": "pred {h} h",
     "inHm": "o {h} h {m} min",
     "agoHm": "pred {h} h {m} min",
-    "modelNote": "Tak ďaleko radar nie je. Zobrazený dážď je predpoveď pre samotné mesto (Open-Meteo)."
+    "modelNote": "Tak ďaleko radar nie je. Zobrazený dážď je predpoveď pre samotné mesto (Open-Meteo).",
+    "title": "Zrážkový radar"
   }
 }

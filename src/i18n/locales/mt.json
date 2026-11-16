@@ -696,6 +696,7 @@
     "agoH": "{h} siegħa ilu",
     "inHm": "fi {h} siegħa {m} min",
     "agoHm": "{h} siegħa {m} min ilu",
-    "modelNote": "M'hemmx radar daqshekk 'il quddiem. Ix-xita murija hija t-tbassir għall-belt innifisha (Open-Meteo)."
+    "modelNote": "M'hemmx radar daqshekk 'il quddiem. Ix-xita murija hija t-tbassir għall-belt innifisha (Open-Meteo).",
+    "title": "Radar tax-xita"
   }
 }

@@ -678,6 +678,7 @@
     "agoH": "vor {h} Std.",
     "inHm": "in {h} Std. {m} Min.",
     "agoHm": "vor {h} Std. {m} Min.",
-    "modelNote": "So weit voraus gibt es kein Radar. Der angezeigte Regen ist die Vorhersage für die Stadt selbst (Open-Meteo)."
+    "modelNote": "So weit voraus gibt es kein Radar. Der angezeigte Regen ist die Vorhersage für die Stadt selbst (Open-Meteo).",
+    "title": "Regenradar"
   }
 }

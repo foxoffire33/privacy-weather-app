@@ -684,6 +684,7 @@
     "agoH": "pirms {h} h",
     "inHm": "pēc {h} h {m} min",
     "agoHm": "pirms {h} h {m} min",
-    "modelNote": "Tik tālu radara nav. Parādītais lietus ir pašas pilsētas prognoze (Open-Meteo)."
+    "modelNote": "Tik tālu radara nav. Parādītais lietus ir pašas pilsētas prognoze (Open-Meteo).",
+    "title": "Nokrišņu radars"
   }
 }

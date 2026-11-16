@@ -412,14 +412,11 @@ export interface RadarPanelProps {
   cityId: string;
   timeZone: string;
   forecast: ForecastData;
-  fullscreenId: string;
   height?: ChartHeight;
 }
 
 export interface RadarZoomProps {
   cell: number;
-  fullscreenId: string;
-  full: boolean;
 }
 
 export interface RadarMapProps {
@@ -472,8 +469,7 @@ export interface RadarControlsProps {
   cols: number;
   rows: number;
   cell: number;
-  fullscreenId: string;
-  full: boolean;
   stale: boolean;
+  visible: boolean;
   onRetry: () => void;
 }

@@ -678,6 +678,7 @@
     "agoH": "for {h} t siden",
     "inHm": "om {h} t {m} min",
     "agoHm": "for {h} t {m} min siden",
-    "modelNote": "Ingen radar så langt frem. Den viste regn er prognosen for selve byen (Open-Meteo)."
+    "modelNote": "Ingen radar så langt frem. Den viste regn er prognosen for selve byen (Open-Meteo).",
+    "title": "Regnradar"
   }
 }

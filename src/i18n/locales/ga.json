@@ -696,6 +696,7 @@
     "agoH": "{h} u ó shin",
     "inHm": "i gceann {h} u {m} nóim",
     "agoHm": "{h} u {m} nóim ó shin",
-    "modelNote": "Níl radar chomh fada sin chun cinn. Is í an bháisteach a thaispeántar réamhaisnéis na cathrach féin (Open-Meteo)."
+    "modelNote": "Níl radar chomh fada sin chun cinn. Is í an bháisteach a thaispeántar réamhaisnéis na cathrach féin (Open-Meteo).",
+    "title": "Radar báistí"
   }
 }

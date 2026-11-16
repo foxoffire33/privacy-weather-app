@@ -684,6 +684,7 @@
     "agoH": "hace {h} h",
     "inHm": "en {h} h {m} min",
     "agoHm": "hace {h} h {m} min",
-    "modelNote": "No hay radar tan adelante. La lluvia mostrada es el pronóstico para la propia ciudad (Open-Meteo)."
+    "modelNote": "No hay radar tan adelante. La lluvia mostrada es el pronóstico para la propia ciudad (Open-Meteo).",
+    "title": "Radar de lluvia"
   }
 }
