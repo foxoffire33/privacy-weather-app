@@ -85,3 +85,18 @@ same class of mistake is not made again. Add to this list when a review finds so
 14. **Every Zustand `persist` store over IndexedDB needs `partialize`.** Without it the whole state, actions
     included, is stored; IndexedDB cannot clone a function, the write throws `DataCloneError` and the debounced
     writer swallows it. *From the radar PR: no setting change had been saved since settings moved to IndexedDB.*
+
+## Code style
+
+15. **One `try` per function, multiple `catch`, one `finally`.** Never use multiple try-catch blocks in a
+    function. Wrap the risky code in a single `try`; use consecutive `catch` clauses to distinguish the different
+    exception types the code can throw (rethrow from a clause that does not own the error so the next one can);
+    put all cleanup in one `finally`. When separate steps each need independent fault tolerance, give each step its
+    own small helper function with its own single `try`. *From user rule, 2026-11-16.*
+
+16. **No comments in code.** Do not annotate the code with inline comments; the code and its types should carry
+    the meaning. *From user rule, 2026-11-16.*
+
+17. **Long explanations live in the docs, not in code.** If behavior needs explaining, write it in the relevant
+    README or doc file. In code, at most a short one-line JSDoc-style comment, and only where truly necessary.
+    *From user rule, 2026-11-16.*
