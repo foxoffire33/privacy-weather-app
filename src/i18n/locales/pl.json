@@ -353,6 +353,13 @@
       "ofDaylight": "z {d} dnia",
       "sunrise": "Wschód słońca",
       "solarEnergy": "Energia słoneczna"
+    },
+    "order": {
+      "title": "Kolejność sekcji",
+      "hint": "Przeciągnij sekcję za uchwyt, aby ją przenieść. Przytrzymaj stronę miasta, aby ponownie otworzyć tę listę.",
+      "reset": "Przywróć",
+      "done": "Gotowe",
+      "move": "Przenieś {name}"
     }
   },
   "chart": {

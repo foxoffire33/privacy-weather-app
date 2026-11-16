@@ -1,12 +1,11 @@
 import { ActionIcon, Badge, Box, Button, Group, Text, Title, UnstyledButton } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { Reorder } from 'motion/react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { CityRow } from '../components/city/CityRow';
 import { Icon } from '../components/Icon';
 import { MotionBox } from '../components/motionComponents';
+import { ReorderList, ReorderRow } from '../components/ReorderList';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t, tl } from '../i18n';
@@ -47,7 +46,7 @@ export function Cities(): ReactElement {
         <Title className="display" style={{ whiteSpace: 'pre-line' }}>{t('cities.title', { count: n, word: tl('cities.count')[n] ?? n })}</Title>
         <Text px={20} pb={16} fz={13} c="dimmed">{t('cities.hint')}</Text>
 
-        <Reorder.Group as="div" axis="y" values={shown} onReorder={onReorder} className="rule-top">
+        <ReorderList values={shown} onReorder={onReorder}>
           {shown.map((id) => {
             const entry = byId.get(id);
             if (entry === undefined) { return null; }
@@ -55,7 +54,7 @@ export function Cities(): ReactElement {
             const f = forecasts[c.id];
             const days = (logged[c.id] ?? []).length;
             return (
-              <CityRow key={c.id} value={c.id} label={t('cities.reorder', { name: c.name })} onGrab={() => { dragging.current = true; }} onDrop={drop}>
+              <ReorderRow key={c.id} value={c.id} label={t('cities.reorder', { name: c.name })} onGrab={() => { dragging.current = true; }} onDrop={drop}>
                   <Group justify="space-between" align="center" wrap="nowrap" style={{ flex: 1, minWidth: 0 }} py={16} pr={8}>
                     <UnstyledButton onClick={() => { setPage(i); void navigate(paths.home, { state: BACK_STATE }); }} style={{ flex: 1, minWidth: 0 }}>
                       <Group gap={8} wrap="nowrap">
@@ -83,10 +82,10 @@ export function Cities(): ReactElement {
                       <Icon name="x" size={18} />
                     </ActionIcon>
                   </Group>
-              </CityRow>
+              </ReorderRow>
             );
           })}
-        </Reorder.Group>
+        </ReorderList>
       </MotionBox>
 
       <Button size="xl" fullWidth rightSection={<Icon name="plus" />} onClick={() => { void navigate(paths.search); }}>

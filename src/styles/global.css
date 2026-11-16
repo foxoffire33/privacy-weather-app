@@ -111,3 +111,4 @@ body { font-variant-numeric: tabular-nums; }
 
 :root { --chart-full-h: max(200px, calc(100dvh - 230px)); }
 @media (orientation: landscape) { :root { --chart-full-h: max(160px, calc(100dvh - 200px)); } }
+

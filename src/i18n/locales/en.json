@@ -347,7 +347,14 @@
       "sunrise": "Sunrise",
       "solarEnergy": "Solar energy"
     },
-    "updatingCity": "Updating {name}"
+    "updatingCity": "Updating {name}",
+    "order": {
+      "title": "Order sections",
+      "hint": "Drag a section by its handle to move it. Long press the city page to open this list again.",
+      "reset": "Reset",
+      "done": "Done",
+      "move": "Move {name}"
+    }
   },
   "chart": {
     "temp": "Temp",

@@ -347,6 +347,13 @@
       "ofDaylight": "af {d} dagslys",
       "sunrise": "Solopgang",
       "solarEnergy": "Solenergi"
+    },
+    "order": {
+      "title": "Rækkefølge af afsnit",
+      "hint": "Træk et afsnit i håndtaget for at flytte det. Tryk længe på bysiden for at åbne listen igen.",
+      "reset": "Nulstil",
+      "done": "Færdig",
+      "move": "Flyt {name}"
     }
   },
   "chart": {

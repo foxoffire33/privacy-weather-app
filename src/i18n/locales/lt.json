@@ -353,6 +353,13 @@
       "ofDaylight": "iš {d} šviesaus laiko",
       "sunrise": "Saulėtekis",
       "solarEnergy": "Saulės energija"
+    },
+    "order": {
+      "title": "Skilčių tvarka",
+      "hint": "Vilkite skiltį už rankenėlės, kad ją perkeltumėte. Ilgai paspauskite miesto puslapį, kad vėl atidarytumėte šį sąrašą.",
+      "reset": "Atkurti",
+      "done": "Atlikta",
+      "move": "Perkelti {name}"
     }
   },
   "chart": {

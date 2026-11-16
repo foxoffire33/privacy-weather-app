@@ -350,6 +350,13 @@
       "ofDaylight": "no {d} dienasgaismas",
       "sunrise": "Saullēkts",
       "solarEnergy": "Saules enerģija"
+    },
+    "order": {
+      "title": "Sadaļu secība",
+      "hint": "Velciet sadaļu aiz roktura, lai to pārvietotu. Ilgi nospiediet pilsētas lapu, lai atkal atvērtu šo sarakstu.",
+      "reset": "Atiestatīt",
+      "done": "Gatavs",
+      "move": "Pārvietot {name}"
     }
   },
   "chart": {

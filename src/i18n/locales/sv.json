@@ -347,6 +347,13 @@
       "ofDaylight": "av {d} dagsljus",
       "sunrise": "Soluppgång",
       "solarEnergy": "Solenergi"
+    },
+    "order": {
+      "title": "Ordning på avsnitt",
+      "hint": "Dra ett avsnitt i handtaget för att flytta det. Tryck länge på stadssidan för att öppna listan igen.",
+      "reset": "Återställ",
+      "done": "Klar",
+      "move": "Flytta {name}"
     }
   },
   "chart": {

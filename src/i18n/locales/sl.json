@@ -353,6 +353,13 @@
       "ofDaylight": "od {d} svetlobe",
       "sunrise": "Sončni vzhod",
       "solarEnergy": "Sončna energija"
+    },
+    "order": {
+      "title": "Vrstni red razdelkov",
+      "hint": "Razdelek premaknete tako, da ga povlečete za ročaj. Z dolgim pritiskom na stran mesta ta seznam znova odprete.",
+      "reset": "Ponastavi",
+      "done": "Končano",
+      "move": "Premakni {name}"
     }
   },
   "chart": {

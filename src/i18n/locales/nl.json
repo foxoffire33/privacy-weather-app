@@ -347,6 +347,13 @@
       "ofDaylight": "van {d} daglicht",
       "sunrise": "Zonsopkomst",
       "solarEnergy": "Zonne-energie"
+    },
+    "order": {
+      "title": "Volgorde van onderdelen",
+      "hint": "Sleep een onderdeel aan de greep om het te verplaatsen. Druk lang op de stadspagina om deze lijst weer te openen.",
+      "reset": "Herstellen",
+      "done": "Klaar",
+      "move": "{name} verplaatsen"
     }
   },
   "chart": {

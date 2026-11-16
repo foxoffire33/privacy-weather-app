@@ -356,6 +356,13 @@
       "ofDaylight": "minn {d} ta' dawl tal-jum",
       "sunrise": "Tlugħ ix-xemx",
       "solarEnergy": "Enerġija solari"
+    },
+    "order": {
+      "title": "Ordni tat-taqsimiet",
+      "hint": "Kaxkar taqsima mill-manku biex iċċaqlaqha. Agħfas fit-tul fuq il-paġna tal-belt biex terġa' tiftaħ din il-lista.",
+      "reset": "Irrisettja",
+      "done": "Lest",
+      "move": "Ċaqlaq {name}"
     }
   },
   "chart": {

@@ -1,12 +1,12 @@
 import type { City, DayData, DayRecord, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
-import type { DateRange } from './stores';
+import type { CitySectionId, DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
 import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'reorder' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
 
 export interface IconProps {
   name: IconName;
@@ -314,11 +314,17 @@ export type MotionBoxBase = BoxProps & ElementProps<'div'> & { component?: 'span
 
 export type MotionButtonBase = UnstyledButtonProps & ElementProps<'button'> & { ref?: Ref<HTMLButtonElement> };
 
-export interface CityRowProps {
+export interface ReorderListProps<T extends string> {
+  values: T[];
+  onReorder: (values: T[]) => void;
+  children: ReactNode;
+}
+
+export interface ReorderRowProps {
   value: string;
   label: string;
-  onGrab: () => void;
-  onDrop: () => void;
+  onGrab?: () => void;
+  onDrop?: () => void;
   children: ReactNode;
 }
 
@@ -457,4 +463,16 @@ export interface RadarControlsProps {
   full: boolean;
   stale: boolean;
   onRetry: () => void;
+}
+
+export interface CitySectionProps extends CityDataProps {
+  id: CitySectionId;
+  liveEntry: ForecastEntry;
+  expanded: string | null;
+  first: boolean;
+}
+
+export interface OverviewCardProps extends CityDataProps {
+  expanded: string | null;
+  first: boolean;
 }

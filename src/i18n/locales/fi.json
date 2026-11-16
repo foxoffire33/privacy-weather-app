@@ -347,6 +347,13 @@
       "ofDaylight": "/ {d} päivänvaloa",
       "sunrise": "Auringonnousu",
       "solarEnergy": "Aurinkoenergia"
+    },
+    "order": {
+      "title": "Osioiden järjestys",
+      "hint": "Siirrä osiota vetämällä sen kahvasta. Avaa luettelo uudelleen painamalla kaupunkisivua pitkään.",
+      "reset": "Palauta",
+      "done": "Valmis",
+      "move": "Siirrä {name}"
     }
   },
   "chart": {

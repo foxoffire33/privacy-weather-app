@@ -347,6 +347,13 @@
       "ofDaylight": "{d} nappali fényből",
       "sunrise": "Napkelte",
       "solarEnergy": "Napenergia"
+    },
+    "order": {
+      "title": "Szakaszok sorrendje",
+      "hint": "Húzz egy szakaszt a fogójánál fogva az áthelyezéshez. Hosszan nyomd meg a város oldalát a lista újbóli megnyitásához.",
+      "reset": "Visszaállítás",
+      "done": "Kész",
+      "move": "{name} áthelyezése"
     }
   },
   "chart": {

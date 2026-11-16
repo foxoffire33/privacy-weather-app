@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { CITY_SECTIONS } from '../utils/citySectionIds';
+
 import { DEFAULT_RADAR_CELL } from './factories/radar';
+
 
 import type { UiState } from '../types';
 
@@ -29,6 +32,11 @@ export const useUiStore = create<UiState>()(
       hiddenSeries: {},
       gestureHintSeen: legacyHintSeen(),
       fullscreenChart: null,
+      sectionOrder: [...CITY_SECTIONS],
+      sectionOrderOpen: false,
+      setSectionOrderOpen: (sectionOrderOpen) => set({ sectionOrderOpen }),
+      setSectionOrder: (sectionOrder) => set({ sectionOrder }),
+      resetSectionOrder: () => set({ sectionOrder: [...CITY_SECTIONS] }),
       next48View: 'radar',
       radarFrame: null,
       radarCell: DEFAULT_RADAR_CELL,
@@ -57,7 +65,7 @@ export const useUiStore = create<UiState>()(
     {
       name: 'wl2-ui',
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ gestureHintSeen: s.gestureHintSeen, next48View: s.next48View, radarCell: s.radarCell }),
+      partialize: (s) => ({ gestureHintSeen: s.gestureHintSeen, next48View: s.next48View, radarCell: s.radarCell, sectionOrder: s.sectionOrder }),
     },
   ),
 );
