@@ -17,7 +17,7 @@ const MIN_DOT = 1.5;
 const PINCH_MIN = 0.25;
 const PINCH_MAX = 4;
 
-export function RadarMap({ land, frame, height, visibleCols, visibleRows, baseScale, onPinchZoom }: RadarMapProps): ReactElement {
+export function RadarMap({ land, frame, height, visibleCols, visibleRows, baseScale, zoom, onPinchZoom }: RadarMapProps): ReactElement {
   const theme = useMantineTheme();
   const { ref, width, height: boxHeight } = useElementSize<HTMLDivElement>();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -35,7 +35,7 @@ export function RadarMap({ land, frame, height, visibleCols, visibleRows, baseSc
   const signal = theme.colors.signal;
   useEffect(() => {
     void animate(scale, baseScale, MOTION.settle);
-  }, [baseScale, scale]);
+  }, [baseScale, zoom, scale]);
   useEffect(() => {
     void animate(x, 0, MOTION.settle);
     void animate(y, 0, MOTION.settle);
@@ -47,7 +47,7 @@ export function RadarMap({ land, frame, height, visibleCols, visibleRows, baseSc
       return;
     }
     scale.set(baseScale * ratio);
-  }, { target: area, eventOptions: { passive: false } });
+  }, { target: area, eventOptions: { passive: false }, pinchOnWheel: false });
   useEffect(() => {
     const el = canvas.current;
     const ctx = el?.getContext('2d');

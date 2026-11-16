@@ -36,8 +36,8 @@ export const useCityIndex = (cityId: string): number => useCityStore((s) => s.ci
 export const useForecast = (cityId: string): ForecastEntry | undefined => useForecastStore((s) => s.forecasts[cityId]);
 
 export const useRadarShownKey = (cityId: string, cell: number, source: string): string => useRadarStore((s) => {
-  const found = nearestCells(cell).map((c) => radarKey(cityId, c, source)).find((k) => s.land[k] !== undefined || s.radar[k] !== undefined);
-  return found ?? radarKey(cityId, cell, source);
+  const keys = nearestCells(cell).map((c) => radarKey(cityId, c, source));
+  return keys.find((k) => s.radar[k] !== undefined) ?? keys.find((k) => s.land[k] !== undefined) ?? radarKey(cityId, cell, source);
 });
 export const useLandMap = (key: string): LandMap | undefined => useRadarStore((s) => s.land[key]);
 export const useRadarSet = (key: string): RadarSet | undefined => useRadarStore((s) => s.radar[key]);

@@ -425,6 +425,7 @@ export interface RadarMapProps {
   visibleCols: number;
   visibleRows: number;
   baseScale: number;
+  zoom: number;
   onPinchZoom: (ratio: number) => boolean;
   height?: ChartHeight;
 }

@@ -193,7 +193,7 @@ function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): 
   const mapBox = (
     <Box ref={viewportRef}>
       <RadarMap land={map} frame={selected?.frame} height={side ? LANDSCAPE_MAP_H : height} visibleCols={VISIBLE_COLS} visibleRows={VISIBLE_ROWS}
-        baseScale={shownCell / cell} onPinchZoom={pinchZoom} />
+        baseScale={shownCell / cell} zoom={cell} onPinchZoom={pinchZoom} />
       {selected?.kind === 'model' && <Text fz={11} c="dimmed" mt={4}>{t('radar.modelNote')}</Text>}
       <Group justify="space-between" wrap="nowrap" mt={4} fz={10} c="dimmed">
         <Text span inherit style={{ flex: 'none' }}>{t('radar.area', { km: Math.round((VISIBLE_COLS * cell) / 1000) })}</Text>
