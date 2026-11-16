@@ -137,9 +137,9 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
   );
 }
 
-function TrendCharts({ cityId, range, attrs, names, data, windUnit }: TrendChartsProps): ReactElement {
-  const { back, download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
-    back: st.back, download: st.download, failed: st.failed, retryFailed: st.retryFailed,
+function TrendCharts({ cityId, range, attrs, names, data, windUnit, back }: TrendChartsProps): ReactElement {
+  const { download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
+    download: st.download, failed: st.failed, retryFailed: st.retryFailed,
   })));
   const failedHere = range.windows.some((w) => failed.includes(windowKey(cityId, w)));
   const error = failedHere ? download.error : null;
@@ -181,7 +181,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const names = trendNames(back, range.to);
   const chart = useDeferredValue({
-    range, attrs, names, windUnit, data: trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } }),
+    range, attrs, names, windUnit, back, data: trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } }),
   });
   return (
     <Box px={20}>
@@ -197,7 +197,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         </>
       )}>
         <TrendsFill cityId={cityId} windows={range.windows} ensureWindows={ensureWindows}>
-          <TrendCharts cityId={cityId} range={chart.range} attrs={chart.attrs} names={chart.names} data={chart.data} windUnit={chart.windUnit} />
+          <TrendCharts cityId={cityId} range={chart.range} attrs={chart.attrs} names={chart.names} data={chart.data} windUnit={chart.windUnit} back={chart.back} />
         </TrendsFill>
       </Suspense>
 
