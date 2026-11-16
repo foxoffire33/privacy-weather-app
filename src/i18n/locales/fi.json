@@ -667,8 +667,6 @@
     "city": "Kaupunki",
     "play": "Toista",
     "pause": "Tauko",
-    "prev": "Edellinen kuva",
-    "next": "Seuraava kuva",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Sadetutka kaupungin ympärillä",
     "waiting": "Odotetaan tutkatietoja",
@@ -678,14 +676,14 @@
     "retry": "Yritä uudelleen",
     "noServer": "Tutka on pois päältä. Lisää tutkapalvelin asetuksissa.",
     "openSettings": "Avaa asetukset",
-    "zoomIn": "Lähennä",
-    "zoomOut": "Loitonna",
     "area": "{km} km leveä",
     "inH": "{h} t päästä",
     "agoH": "{h} t sitten",
     "inHm": "{h} t {m} min päästä",
     "agoHm": "{h} t {m} min sitten",
     "modelNote": "Näin pitkälle ei ole tutkaa. Näytetty sade on kaupungin oma ennuste (Open-Meteo).",
-    "title": "Sadetutka"
+    "title": "Sadetutka",
+    "modelMap": "Tutkan jälkeen: sade Open-Meteon ennustemallista, ei mitattu.",
+    "twoFingers": "Siirrä karttaa kahdella sormella"
   }
 }

@@ -1,5 +1,5 @@
 import type { QueryMap, QueryState } from './core/types';
-import type { ArchiveYear, City, DayData, DayEntry, ForecastData, ForecastEntry, GeoResult, LandMap, RadarSet, Settings } from './types';
+import type { ArchiveYear, City, DayData, DayEntry, ForecastData, ForecastEntry, GeoResult, LandMap, ModelSet, RadarSet, Settings } from './types';
 
 export interface ImportCounts { added: number; updated: number; kept: number }
 
@@ -32,6 +32,7 @@ export interface DayState {
 export interface RadarState {
   land: Partial<Record<string, LandMap>>;
   radar: Partial<Record<string, RadarSet>>;
+  model: Partial<Record<string, ModelSet>>;
   queries: QueryMap;
   load: (city: City, cellMeters: number) => Promise<void>;
   retry: (key: string) => void;

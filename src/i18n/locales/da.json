@@ -667,8 +667,6 @@
     "city": "By",
     "play": "Afspil",
     "pause": "Pause",
-    "prev": "Forrige billede",
-    "next": "Næste billede",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Regnradar omkring byen",
     "waiting": "Venter på radardata",
@@ -678,14 +676,14 @@
     "retry": "Prøv igen",
     "noServer": "Radaren er slået fra. Tilføj en radarserver under Indstillinger.",
     "openSettings": "Åbn indstillinger",
-    "zoomIn": "Zoom ind",
-    "zoomOut": "Zoom ud",
     "area": "{km} km bred",
     "inH": "om {h} t",
     "agoH": "for {h} t siden",
     "inHm": "om {h} t {m} min",
     "agoHm": "for {h} t {m} min siden",
     "modelNote": "Ingen radar så langt frem. Den viste regn er prognosen for selve byen (Open-Meteo).",
-    "title": "Regnradar"
+    "title": "Regnradar",
+    "modelMap": "Efter radaren: regn fra Open-Meteos prognosemodel, ikke målt.",
+    "twoFingers": "Brug to fingre til at flytte kortet"
   }
 }

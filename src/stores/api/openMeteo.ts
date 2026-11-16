@@ -1,11 +1,14 @@
 import { addDays, todayISO } from '../core/time';
+import { gridView, MODEL_COLS, MODEL_ROWS, MODEL_SET_VERSION, modelFrame, modelPoints } from '../factories/radar';
 import { createAir, createAirDay, createDayData, createForecast, createGeoResults, createMarine, createRangeRows, parseWeather } from '../factories/weather';
 
+
 import { cachedJson, getJson } from './client';
+import { multiWeatherSchema } from './schemas';
 import { AIR_VARS, ARCHIVE_DAY_DAILY_VARS, ARCHIVE_HOURLY_VARS, ARCHIVE_VARS, CURRENT_VARS, DAILY_VARS, HOURLY_VARS, MARINE_VARS } from './variables';
 
 import type { DateSpan } from '../storeTypes';
-import type { AirData, City, DayData, ForecastData, GeoResult, MarineData } from '../types';
+import type { AirData, City, DayData, ForecastData, GeoResult, GridView, MarineData, ModelSet } from '../types';
 import type { RangeRows } from './types';
 
 const MINUTE = 60 * 1000;
@@ -13,6 +16,7 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 const FOREVER = Number.MAX_SAFE_INTEGER;
 const ARCHIVE_SETTLED_DAYS = 5;
+const MODEL_STEPS = 13;
 
 const at = (city: City) => ({ latitude: city.lat, longitude: city.lon, timezone: 'auto' });
 
@@ -73,4 +77,31 @@ export async function fetchAirDay(city: City, date: string): Promise<DayData['ai
 export async function searchCities(name: string, signal?: AbortSignal): Promise<GeoResult[]> {
   const json = await getJson('geo', '/v1/search', { name, count: '8', language: 'en', format: 'json' }, signal);
   return createGeoResults(json);
+}
+
+function modelSet(json: unknown, view: GridView): ModelSet {
+  const parsed = multiWeatherSchema.parse(json);
+  const places = Array.isArray(parsed) ? parsed : [parsed];
+  const first = places[0]?.minutely_15;
+  if (first === undefined || places.length !== MODEL_COLS * MODEL_ROWS) { throw new Error('Incomplete model grid'); }
+  const frames = first.time.map((iso, step) => {
+    const mm = places.map((place) => {
+      const value: unknown = place.minutely_15?.precipitation.at(step);
+      return typeof value === 'number' ? value : 0;
+    });
+    return modelFrame(Math.round(Date.parse(`${iso}Z`) / 1000), mm, view);
+  });
+  return { version: MODEL_SET_VERSION, fetchedAt: Date.now(), frames };
+}
+
+export async function fetchModelRain(city: City, cellMeters: number): Promise<ModelSet> {
+  const view = gridView(city.lat, city.lon, cellMeters);
+  const points = modelPoints(view);
+  return cachedJson('forecast', '/v1/forecast', {
+    latitude: points.map((p) => p.lat.toFixed(3)),
+    longitude: points.map((p) => p.lon.toFixed(3)),
+    minutely_15: ['precipitation'],
+    forecast_minutely_15: MODEL_STEPS,
+    timezone: 'GMT',
+  }, { maxAgeMs: 15 * MINUTE, keepMs: HOUR, build: (json) => modelSet(json, view) });
 }

@@ -679,8 +679,6 @@
     "city": "Mesto",
     "play": "Predvajaj",
     "pause": "Premor",
-    "prev": "Prejšnja slika",
-    "next": "Naslednja slika",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Padavinski radar okoli mesta",
     "waiting": "Čakanje na radarske podatke",
@@ -690,14 +688,14 @@
     "retry": "Poskusi znova",
     "noServer": "Radar je izklopljen. Dodajte radarski strežnik v Nastavitvah.",
     "openSettings": "Odpri nastavitve",
-    "zoomIn": "Povečaj",
-    "zoomOut": "Pomanjšaj",
     "area": "širina {km} km",
     "inH": "čez {h} h",
     "agoH": "pred {h} h",
     "inHm": "čez {h} h {m} min",
     "agoHm": "pred {h} h {m} min",
     "modelNote": "Tako daleč naprej radarja ni. Prikazan dež je napoved za samo mesto (Open-Meteo).",
-    "title": "Padavinski radar"
+    "title": "Padavinski radar",
+    "modelMap": "Za radarjem: dež iz napovednega modela Open-Meteo, ni izmerjen.",
+    "twoFingers": "Zemljevid premaknite z dvema prstoma"
   }
 }

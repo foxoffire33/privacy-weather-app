@@ -679,8 +679,6 @@
     "city": "Miasto",
     "play": "Odtwórz",
     "pause": "Pauza",
-    "prev": "Poprzednia klatka",
-    "next": "Następna klatka",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar opadów wokół miasta",
     "waiting": "Oczekiwanie na dane radarowe",
@@ -690,14 +688,14 @@
     "retry": "Spróbuj ponownie",
     "noServer": "Radar jest wyłączony. Dodaj serwer radarowy w Ustawieniach.",
     "openSettings": "Otwórz ustawienia",
-    "zoomIn": "Przybliż",
-    "zoomOut": "Oddal",
     "area": "{km} km szerokości",
     "inH": "za {h} h",
     "agoH": "{h} h temu",
     "inHm": "za {h} h {m} min",
     "agoHm": "{h} h {m} min temu",
     "modelNote": "Tak daleko nie ma radaru. Pokazany deszcz to prognoza dla samego miasta (Open-Meteo).",
-    "title": "Radar opadów"
+    "title": "Radar opadów",
+    "modelMap": "Poza radarem: opady z modelu prognozy Open-Meteo, niezmierzone.",
+    "twoFingers": "Użyj dwóch palców, aby przesunąć mapę"
   }
 }

@@ -679,8 +679,6 @@
     "city": "Mesto",
     "play": "Prehrať",
     "pause": "Pozastaviť",
-    "prev": "Predchádzajúca snímka",
-    "next": "Ďalšia snímka",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Zrážkový radar okolo mesta",
     "waiting": "Čaká sa na údaje radaru",
@@ -690,14 +688,14 @@
     "retry": "Skúsiť znova",
     "noServer": "Radar je vypnutý. Pridajte radarový server v Nastaveniach.",
     "openSettings": "Otvoriť nastavenia",
-    "zoomIn": "Priblížiť",
-    "zoomOut": "Oddialiť",
     "area": "šírka {km} km",
     "inH": "o {h} h",
     "agoH": "pred {h} h",
     "inHm": "o {h} h {m} min",
     "agoHm": "pred {h} h {m} min",
     "modelNote": "Tak ďaleko radar nie je. Zobrazený dážď je predpoveď pre samotné mesto (Open-Meteo).",
-    "title": "Zrážkový radar"
+    "title": "Zrážkový radar",
+    "modelMap": "Za radarom: dážď z predpovedného modelu Open-Meteo, nemeraný.",
+    "twoFingers": "Mapu posuniete dvoma prstami"
   }
 }

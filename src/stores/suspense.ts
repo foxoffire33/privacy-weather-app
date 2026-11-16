@@ -3,7 +3,7 @@ import { use } from 'react';
 import { lastSettled } from './core/inflight';
 import { cellOfKey, radarKey, sourceId } from './factories/radar';
 import { hydrateAll, whenHistoryReady } from './hydration';
-import { useCity, useDay, useIsOffline, useLandMap, useMapServer, useRadarQuery, useRadarShownKey, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
+import { useCity, useDay, useIsOffline, useLandMap, useMapServer, useModelSet, useRadarQuery, useRadarShownKey, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
 import { lookupDate, openDay, loadRadar, loadThisDay, refreshCity, resourceKey } from './weatherSync';
 
 import type { ArchiveYear, DayData, ForecastEntry, LookupView, RadarView } from './types';
@@ -55,9 +55,10 @@ export function useRadarData(cityId: string, cell: number): RadarView {
   const city = useCity(cityId);
   const land = useLandMap(shownKey);
   const radar = useRadarSet(shownKey);
+  const model = useModelSet(shownKey);
   const query = useRadarQuery(key);
   const offline = useIsOffline();
   const empty = land === undefined && radar === undefined;
   use(city !== undefined && empty && server !== '' && !offline && query.status === 'idle' ? loadRadar(cityId, cell) : lastSettled(resourceKey.radar(cityId, cell, key)));
-  return { key, land, radar, query, shownCell: cellOfKey(shownKey, cell) };
+  return { key, land, radar, model, query, shownCell: cellOfKey(shownKey, cell) };
 }

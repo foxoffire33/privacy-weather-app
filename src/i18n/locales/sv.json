@@ -667,8 +667,6 @@
     "city": "Stad",
     "play": "Spela",
     "pause": "Paus",
-    "prev": "Föregående bild",
-    "next": "Nästa bild",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Regnradar runt staden",
     "waiting": "Väntar på radardata",
@@ -678,14 +676,14 @@
     "retry": "Försök igen",
     "noServer": "Radarn är avstängd. Lägg till en radarserver under Inställningar.",
     "openSettings": "Öppna inställningar",
-    "zoomIn": "Zooma in",
-    "zoomOut": "Zooma ut",
     "area": "{km} km bred",
     "inH": "om {h} h",
     "agoH": "för {h} h sedan",
     "inHm": "om {h} h {m} min",
     "agoHm": "för {h} h {m} min sedan",
     "modelNote": "Ingen radar så långt fram. Regnet som visas är prognosen för själva staden (Open-Meteo).",
-    "title": "Regnradar"
+    "title": "Regnradar",
+    "modelMap": "Efter radarn: regn från Open-Meteos prognosmodell, inte uppmätt.",
+    "twoFingers": "Använd två fingrar för att flytta kartan"
   }
 }

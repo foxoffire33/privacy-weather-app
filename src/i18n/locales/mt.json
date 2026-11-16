@@ -685,8 +685,6 @@
     "city": "Belt",
     "play": "Ħaddem",
     "pause": "Pawża",
-    "prev": "Qafas preċedenti",
-    "next": "Qafas li jmiss",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar tax-xita madwar il-belt",
     "waiting": "Qed nistennew id-data tar-radar",
@@ -696,14 +694,14 @@
     "retry": "Erġa' pprova",
     "noServer": "Ir-radar huwa mitfi. Żid server tar-radar fl-Issettjar.",
     "openSettings": "Iftaħ l-issettjar",
-    "zoomIn": "Kabbar",
-    "zoomOut": "Ċekken",
     "area": "wiesa' {km} km",
     "inH": "fi {h} siegħa",
     "agoH": "{h} siegħa ilu",
     "inHm": "fi {h} siegħa {m} min",
     "agoHm": "{h} siegħa {m} min ilu",
     "modelNote": "M'hemmx radar daqshekk 'il quddiem. Ix-xita murija hija t-tbassir għall-belt innifisha (Open-Meteo).",
-    "title": "Radar tax-xita"
+    "title": "Radar tax-xita",
+    "modelMap": "Wara r-radar: xita mill-mudell tat-tbassir ta' Open-Meteo, mhux imkejla.",
+    "twoFingers": "Uża żewġ swaba' biex iċċaqlaq il-mappa"
   }
 }

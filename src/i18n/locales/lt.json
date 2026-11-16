@@ -679,8 +679,6 @@
     "city": "Miestas",
     "play": "Leisti",
     "pause": "Pauzė",
-    "prev": "Ankstesnis kadras",
-    "next": "Kitas kadras",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Kritulių radaras aplink miestą",
     "waiting": "Laukiama radaro duomenų",
@@ -690,14 +688,14 @@
     "retry": "Bandyti dar kartą",
     "noServer": "Radaras išjungtas. Pridėkite radaro serverį nustatymuose.",
     "openSettings": "Atidaryti nustatymus",
-    "zoomIn": "Priartinti",
-    "zoomOut": "Nutolinti",
     "area": "{km} km pločio",
     "inH": "po {h} val.",
     "agoH": "prieš {h} val.",
     "inHm": "po {h} val. {m} min",
     "agoHm": "prieš {h} val. {m} min",
     "modelNote": "Taip toli radaro nėra. Rodomas lietus yra paties miesto prognozė (Open-Meteo).",
-    "title": "Kritulių radaras"
+    "title": "Kritulių radaras",
+    "modelMap": "Po radaro: lietus iš Open-Meteo prognozės modelio, nepamatuotas.",
+    "twoFingers": "Žemėlapį perkelkite dviem pirštais"
   }
 }

@@ -8,13 +8,10 @@ export interface RadarPanelProps {
   height?: ChartHeight;
 }
 
-export interface RadarZoomProps {
-  cell: number;
-}
-
 export interface RadarMapProps {
   land: LandMap;
-  frame: RadarFrame | undefined;
+  cells: string | undefined;
+  hidden: readonly string[];
   visibleCols: number;
   visibleRows: number;
   baseScale: number;
@@ -34,6 +31,7 @@ export interface TimelineFrame {
   time: number;
   kind: TimelineKind;
   frame: RadarFrame | undefined;
+  cells: string | undefined;
   mmPerHour: number | null;
 }
 
@@ -62,8 +60,19 @@ export interface RadarControlsProps {
   index: number;
   cols: number;
   rows: number;
-  cell: number;
   stale: boolean;
   visible: boolean;
   onRetry: () => void;
+}
+
+export interface RadarMapNotesProps {
+  frame: TimelineFrame | undefined;
+  cell: number;
+}
+
+export interface PinchStart {
+  ox: number;
+  oy: number;
+  x: number;
+  y: number;
 }

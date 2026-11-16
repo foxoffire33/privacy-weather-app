@@ -1,6 +1,6 @@
 import { sortedCopy } from '../core/sort';
 
-import type { CityRain, GridView, RadarCells, RadarGrid, RadarLevel, TileCover, TilePlacement } from '../types';
+import type { CityRain, GeoPoint, GridView, ModelFrame, RadarCells, RadarGrid, RadarLevel, TileCover, TilePlacement } from '../types';
 
 export const LAND_VERSION = 2;
 export const RADAR_SET_VERSION = 2;
@@ -139,4 +139,60 @@ export function landCells(rgba: Uint8ClampedArray, view: GridView): string {
     }
   }
   return cells;
+}
+
+export const MODEL_SET_VERSION = 1;
+export const MODEL_COLS = 9;
+export const MODEL_ROWS = 8;
+const METERS_PER_DEGREE = 111_320;
+const QUARTERS_PER_HOUR = 4;
+const MODEL_LIGHT_MM = 0.1;
+const MODEL_MODERATE_MM = 2.5;
+const MODEL_HEAVY_MM = 10;
+
+export function modelLevel(mmPerHour: number): RadarLevel {
+  if (mmPerHour < MODEL_LIGHT_MM) { return 0; }
+  if (mmPerHour < MODEL_MODERATE_MM) { return 1; }
+  return mmPerHour < MODEL_HEAVY_MM ? 2 : 3;
+}
+
+export function modelPoints(view: GridView): GeoPoint[] {
+  const width = view.cols * view.cellMeters;
+  const height = view.rows * view.cellMeters;
+  const points: GeoPoint[] = [];
+  for (let row = 0; row < MODEL_ROWS; row += 1) {
+    for (let col = 0; col < MODEL_COLS; col += 1) {
+      const east = (col / (MODEL_COLS - 1) - 0.5) * width;
+      const north = (0.5 - row / (MODEL_ROWS - 1)) * height;
+      points.push({
+        lat: Math.round((view.lat + north / METERS_PER_DEGREE) * 1000) / 1000,
+        lon: Math.round((view.lon + east / (METERS_PER_DEGREE * Math.cos((view.lat * Math.PI) / 180))) * 1000) / 1000,
+      });
+    }
+  }
+  return points;
+}
+
+function sample(values: readonly number[], u: number, v: number): number {
+  const c0 = Math.min(MODEL_COLS - 2, Math.floor(u));
+  const r0 = Math.min(MODEL_ROWS - 2, Math.floor(v));
+  const fu = u - c0;
+  const fv = v - r0;
+  const at = (c: number, r: number) => values[r * MODEL_COLS + c] ?? 0;
+  const top = at(c0, r0) * (1 - fu) + at(c0 + 1, r0) * fu;
+  const bottom = at(c0, r0 + 1) * (1 - fu) + at(c0 + 1, r0 + 1) * fu;
+  return top * (1 - fv) + bottom * fv;
+}
+
+export function modelFrame(time: number, quarterMm: readonly number[], view: GridView): ModelFrame {
+  const perHour = quarterMm.map((mm) => mm * QUARTERS_PER_HOUR);
+  let cells = '';
+  for (let row = 0; row < view.rows; row += 1) {
+    for (let col = 0; col < view.cols; col += 1) {
+      const u = ((col + 0.5) / view.cols) * (MODEL_COLS - 1);
+      const v = ((row + 0.5) / view.rows) * (MODEL_ROWS - 1);
+      cells += String(modelLevel(sample(perHour, u, v)));
+    }
+  }
+  return { time, cells, cityMm: sample(perHour, (MODEL_COLS - 1) / 2, (MODEL_ROWS - 1) / 2) };
 }

@@ -667,8 +667,6 @@
     "city": "Linn",
     "play": "Esita",
     "pause": "Paus",
-    "prev": "Eelmine kaader",
-    "next": "Järgmine kaader",
     "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Sademeradar linna ümber",
     "waiting": "Ootan radariandmeid",
@@ -678,14 +676,14 @@
     "retry": "Proovi uuesti",
     "noServer": "Radar on välja lülitatud. Lisa seadetes radariserver.",
     "openSettings": "Ava seaded",
-    "zoomIn": "Suurenda",
-    "zoomOut": "Vähenda",
     "area": "{km} km lai",
     "inH": "{h} h pärast",
     "agoH": "{h} h tagasi",
     "inHm": "{h} h {m} min pärast",
     "agoHm": "{h} h {m} min tagasi",
     "modelNote": "Nii kaugele radarit pole. Näidatud vihm on linna enda prognoos (Open-Meteo).",
-    "title": "Sademeradar"
+    "title": "Sademeradar",
+    "modelMap": "Pärast radarit: vihm Open-Meteo prognoosimudelist, mõõtmata.",
+    "twoFingers": "Kaardi liigutamiseks kasuta kahte sõrme"
   }
 }
