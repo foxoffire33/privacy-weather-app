@@ -35,13 +35,13 @@
 
 | Field | Value |
 |---|---|
-| Status | **Milestone 1 complete** — P0 exit gate passed (15 tests) |
-| Completed tasks | **7 / 26** (T1.1–T1.7) |
+| Status | **Milestone 2 in progress** — T2.1 done, 19 tests green |
+| Completed tasks | **8 / 26** (T1.1–T1.7, T2.1) |
 | In progress | none |
-| Next task | **T2.1** |
-| Last session | 4 — 2026-11-17, see session log |
+| Next task | **T2.2** |
+| Last session | 5 — 2026-11-17, see session log |
 
-*Milestone 2 starts with T2.1: bounded, observable record flush retries in `recordSync.ts` (attempt counts, jittered backoff, stop-on-permanent, `flushRecords()` must reject on batch failure, best-effort pagehide flush).*
+*T2.2: radar `Promise.allSettled` handling — the third result (`loadModel`) is currently ignored; introduce the `RadarLoadResult` discriminated union with required (land + frames) vs optional (model) policy, so a failed model yields an explicit partial state, never a silent success (report §7).*
 
 ---
 
@@ -94,7 +94,7 @@ Exit gate: P0 tests pass; no critical write or clear can fail silently.
 ### Milestone 2 — Deterministic async behavior (P1)
 Exit gate: cancellation, retry and partial-failure tests pass; no request is marked successful when required work failed.
 
-- [ ] **T2.1 — Bounded, observable record flush retries in `recordSync.ts`** *(report §6)*
+- [x] **T2.1 — Bounded, observable record flush retries in `recordSync.ts`** *(report §6)*
   - Track attempt count per batch/key; bounded exponential backoff with jitter (do **not** retry at fixed 250 ms forever — that creates a tight failure loop when storage is full/unavailable).
   - Stop automatic retries for permanent errors (invalid DB state) until database is reopened or the user retries.
   - Expose pending record count and last error.
@@ -206,3 +206,5 @@ Exit gate: all invariants pass in CI and critical scenarios verified on supporte
 | 1 | 2026-11-16 21:31 | Plan created; report read in full; implementation not started | 0 / 26 | **T1.1** | Server restarted mid-session before implementation began — nothing lost; report read, plan written, this log started. User apologized for downloading the app zip to a random folder instead of Downloads (no impact: source tree already in workspace). |
 | 2 | 2026-11-16 22:59 | Branch `claude/data-integrity-plan` created; T1.1 committed (9ef18c7); T1.2 edits made, uncommitted; standing code-style rules added (one-try rule, no comments, docs-not-code) | 1 / 26 | **T1.2** (finish: refactor hydrateAll per one-try rule, strip added comments, fix `hit` possibly-undefined in client.ts, doc the read policy in stores/README.md, then tsc+lint+commit) | Rules persisted in `.claude/skills/review-learnings/SKILL.md` (15–17) and `.remember/now.md`. Refactor of already-changed files in progress. |
 | 3 | 2026-11-16 (later) | T1.2 finished + committed (6d99ca2: hydrateAll refactored to one-try via bootStep helper, comments stripped, `isAbsent` type guard added to guards, README rule 11/12); T1.3 committed (baa953f: withTransaction helper, write rejects when IDB absent); T1.4 committed (47bf61b: per-key write coordinator — revisions, serialized chain, bounded jittered backoff, read-failed gate, persistenceStatus); T1.5 committed (1a391bf: flushPersistedState, backup export awaits it, README rule 11); T1.6 committed (de362e7: clearRecords queued on the write chain, failures reject + noteStorageFault) | 6 / 26 | **T1.7** (test infra: vitest + fake-indexeddb + fake timers; P0 suite incl. the 5 clearRecords scheduling tests) | All code passes tsc, eslint, vite build. Lint gotchas hit this session: eqeqeq (no `!= null` → use isAbsent guard), prefer-promise-reject-errors, promise-function-async, no-unnecessary-condition, unicorn rules (no-useless-undefined, no-negated-condition, prefer-spread vs no-useless-spread), no-await-in-loop + no-unnecessary-condition forbid `while (true)` → use bounded recursion. `yarn.lock` is pre-existing untracked — do not commit it. |
+| 4 | 2026-11-17 00:05 | T1.7 committed (a534716): vitest 5.1.0 + fake-indexeddb 6.2.8 devDeps, `test` script, 15 P0 tests across idb/persistStorage/recordSync — all passing. Testing exposed two real bugs, both fixed in the same commit: (a) `openDb` did not wrap a synchronous `indexedDB.open` throw (raw DOMException escaped the taxonomy); (b) the blocked-upgrade listener read `request.error`, which the spec forbids outside the error state — it crashed instead of rejecting. Also added `retryPersistedState()` (manual recovery path) and an error `code` to `PersistenceStatus`. **MILESTONE 1 COMPLETE — P0 exit gate passed.** | 7 / 26 | **T2.1** (bounded, observable record flush retries in recordSync.ts) | ESLint gotchas for tests: `no-unsafe-type-assertion` + `objectLiteralTypeAssertions: 'never'` + `ban-ts-comment` (all @ts-* banned) → NO stubs with casts, no escape hatches; use real fake-indexeddb failure modes (spy-throws, real second-connection block) and `vi.fn()` mocks. `require-await` + `promise-function-async` together: mock impls of `() => Promise<void>` must be `async` with a real `await` (or throw synchronously with inferred `never`). `consistent-type-imports` bans `typeof import('…')` annotations → `import type * as X` + `typeof X`. |
+| 5 | 2026-11-17 00:35 | T2.1 committed (d24d9a5): bounded, observable record flush retries in recordSync.ts — requeue keeps newer-wins + clear-drop, typed StorageError recorded in module state, bounded jittered backoff (8 attempts, 250 ms base, 30 s cap) for transient codes only, permanent codes stop auto-retry (manual `flushRecords()` or a new write recovers), `recordSyncStatus()` pull getter (pending/attempts/code/lastError), `flushRecords()` rejects on batch failure, pagehide/visibility flush best-effort via `onRecordFault` hook wired in the stores barrel into `noteStorageFault`; `RETRYABLE_WRITE_CODES` moved to idb.ts (shared); README rule 14; 4 new tests (19 total) — all green (tsc/eslint/build/tests). | 8 / 26 | **T2.2** (radar `Promise.allSettled`: handle the ignored `loadModel` result; `RadarLoadResult` union; required land+frames vs optional model) | Gotchas this session: `@typescript-eslint/require-await` exempts async fns that RETURN a promise (empirically verified — `flushRecords` returns `chain.then(...)` and passes) but flags async fns returning nothing; mock impls throwing synchronously must have inferred `never` return (an explicit `: void` annotation breaks the `Promise<void>` mock signature); `let x: T | null;` WITHOUT initializer + null-check in a later closure is the CFA-safe pattern (an `= null` initializer narrows to `never` in the other closure). |
