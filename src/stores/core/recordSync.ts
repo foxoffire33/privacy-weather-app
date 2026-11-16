@@ -1,7 +1,7 @@
 import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite } from './idb';
 import { measure } from './marks';
 
-import type { IdbEntry, MapStore } from './types';
+import type { IdbEntry, MapStore, SeedWatch } from './types';
 
 const FLUSH_MS = 250;
 
@@ -10,27 +10,60 @@ const deletes = new Set<string>();
 let timer: ReturnType<typeof setTimeout> | null = null;
 let restoring = 0;
 
-export async function flushRecords(): Promise<void> {
-  if (timer !== null) { clearTimeout(timer); }
-  timer = null;
+let chain: Promise<void> = Promise.resolve();
+const clearedPrefixes: string[] = [];
+const seeds = new Set<SeedWatch>();
+
+async function flushOnce(): Promise<void> {
   if (puts.size === 0 && deletes.size === 0) { return; }
   const batch: IdbEntry[] = [...puts];
   const gone = [...deletes];
+  const clearMark = clearedPrefixes.length;
   puts.clear();
   deletes.clear();
   try {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
   } catch {
-    requeue(batch, gone);
+    requeue(batch, gone, clearedPrefixes.slice(clearMark));
+    return;
   }
+  written([...batch.map(([key]) => key), ...gone]);
+}
+
+export async function flushRecords(): Promise<void> {
+  if (timer !== null) { clearTimeout(timer); }
+  timer = null;
+  chain = chain.then(flushOnce, flushOnce);
+  return chain;
 }
 
 const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
 
-function requeue(batch: readonly IdbEntry[], gone: readonly string[]): void {
-  for (const [key, value] of batch) { if (!newer(key)) { puts.set(key, value); } }
-  for (const key of gone) { if (!newer(key)) { deletes.add(key); } }
+function requeue(batch: readonly IdbEntry[], gone: readonly string[], clearedSince: readonly string[]): void {
+  const keep = (key: string) => !newer(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
+  for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
+  for (const key of gone) { if (keep(key)) { deletes.add(key); } }
   schedule();
+}
+
+function written(keys: readonly string[]): void {
+  for (const seed of seeds) {
+    for (const key of keys) { seed.remaining.delete(key); }
+    if (seed.remaining.size === 0) {
+      seeds.delete(seed);
+      seed.done();
+    }
+  }
+}
+
+export async function seedRecords(entries: readonly IdbEntry[]): Promise<void> {
+  const fresh = entries.filter(([key]) => !newer(key));
+  if (fresh.length === 0) { return; }
+  await new Promise<void>((resolve) => {
+    seeds.add({ remaining: new Set(fresh.map(([key]) => key)), done: resolve });
+    for (const [key, value] of fresh) { puts.set(key, value); }
+    schedule();
+  });
 }
 
 function schedule(): void {
@@ -57,6 +90,10 @@ export function deleteRecord(key: string): void {
 }
 
 export async function clearRecords(prefix: string): Promise<void> {
+  clearedPrefixes.push(prefix);
+  for (const seed of seeds) {
+    for (const key of seed.remaining) { if (key.startsWith(prefix)) { seed.remaining.delete(key); } }
+  }
   for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
   for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
   await recordsDeletePrefix(prefix).catch(() => null);

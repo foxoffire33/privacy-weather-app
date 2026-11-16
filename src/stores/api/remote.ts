@@ -28,7 +28,7 @@ function start(): Remote<WorkerApi> | null {
     });
     failed.catch(() => null);
     onConfigure(({ apiKey, server, offline }) => {
-      if (proxy === remote) { void remote.configure({ apiKey, server, offline }).catch(() => null); }
+      if (!broken) { void remote.configure({ apiKey, server, offline }).catch(() => null); }
     });
     return remote;
   } catch {

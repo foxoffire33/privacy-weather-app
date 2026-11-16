@@ -2,12 +2,12 @@ import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
 import { inSequence, isRecord } from './core/guards';
-import { idbDel, idbGet, onUpgradeBlocked, recordsWrite } from './core/idb';
+import { idbDel, idbGet, onUpgradeBlocked, recordKeys, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
 import { waitForHydration } from './core/persistStorage';
-import { readRange, restore } from './core/recordSync';
+import { readRange, restore, seedRecords } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
@@ -68,11 +68,17 @@ async function migrateKvToRecords(): Promise<void> {
     ...prefixed(DAY_PREFIX, stateOf(days, 'days')),
   ];
   try {
-    await recordsWrite(entries, []);
+    await recordsWriteMissing(entries);
   } catch {
-    unmigrated = entries;
+    const stored = new Set(await recordKeys().catch(() => []));
+    unmigrated = entries.filter(([key]) => !stored.has(key));
+    void seedRecords(unmigrated).then(dropLegacy);
     return;
   }
+  await dropLegacy();
+}
+
+async function dropLegacy(): Promise<void> {
   await Promise.all(LEGACY_KEYS.map(async (k) => idbDel(k)));
 }
 
