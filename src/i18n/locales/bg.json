@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Open-Meteo е независима услуга на трета страна, която не се управлява от разработчика на Weather Log. Сървърът ѝ е с отворен код (AGPL-3.0) и може да се хоства самостоятелно.",
     "openMeteoSource": "Изходен код на Open-Meteo",
     "radarServer": "Радарен сървър",
-    "radarServerNote": "Вашият собствен LibreWXR сървър в ЕС. Без него радарът е изключен. Изпраща се само областта на картата около града."
+    "radarServerNote": "LibreWXR сървър за радара. Оставете празно, за да изключите радара.",
+    "mapServer": "Сървър за карта",
+    "mapServerNote": "OpenFreeMap или друг OpenMapTiles TileJSON адрес, или .pmtiles файл, за суша и вода на радарната карта.",
+    "libreWxrUse": "Радар за валежи за последните 2 часа и следващия час.",
+    "libreWxrThirdParty": "LibreWXR е независим проект с отворен код (AGPL-3.0), който не се управлява от разработчика на Weather Log. Публичният му сървър заявява, че не записва IP адреси и данни за заявките. Получава плочките на картата около града, който разглеждате.",
+    "libreWxrSource": "Изходен код на LibreWXR",
+    "openFreeMapUse": "Суша и вода на радарната карта от данни на OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap е независим проект с отворен код от ЕС (Унгария), не се управлява от разработчика на Weather Log. Без акаунти и бисквитки. Получава плочките на картата около града, който разглеждате.",
+    "openFreeMapSource": "Изходен код на OpenFreeMap",
+    "openFreeMapPrivacy": "Поверителност на OpenFreeMap",
+    "osmCopyright": "Авторски права на OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Този файл не е валиден JSON.",
@@ -652,14 +663,17 @@
     "pause": "Пауза",
     "prev": "Предишен кадър",
     "next": "Следващ кадър",
-    "credit": "Радар EUMETNET OPERA · Карта © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Радар за валежи около града",
     "waiting": "Изчакване на радарни данни",
     "offline": "Радарът не е достъпен офлайн.",
     "failed": "Радарът не можа да се зареди.",
     "stale": "Радарът не можа да се обнови.",
     "retry": "Опитай отново",
-    "noServer": "Радарът изисква собствен радарен сървър в ЕС. Добавете адреса му в Настройки.",
-    "openSettings": "Отвори настройките"
+    "noServer": "Радарът е изключен. Добавете радарен сървър в Настройки.",
+    "openSettings": "Отвори настройките",
+    "zoomIn": "Увеличи",
+    "zoomOut": "Намали",
+    "area": "{km} км ширина"
   }
 }

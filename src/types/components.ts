@@ -6,7 +6,7 @@ import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'prev' | 'next' | 'play' | 'pause';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
 
 export interface IconProps {
   name: IconName;
@@ -411,7 +411,14 @@ export interface SettingsAboutProps {
 export interface RadarPanelProps {
   cityId: string;
   timeZone: string;
+  fullscreenId: string;
   height?: ChartHeight;
+}
+
+export interface RadarZoomProps {
+  cell: number;
+  fullscreenId: string;
+  full: boolean;
 }
 
 export interface RadarMapProps {
@@ -438,4 +445,16 @@ export interface RadarReadoutProps {
   frame: RadarFrame | undefined;
   nowTime: number;
   timeZone: string;
+}
+
+export interface RadarControlsProps {
+  frames: readonly RadarFrame[];
+  index: number;
+  cols: number;
+  rows: number;
+  cell: number;
+  fullscreenId: string;
+  full: boolean;
+  stale: boolean;
+  onRetry: () => void;
 }

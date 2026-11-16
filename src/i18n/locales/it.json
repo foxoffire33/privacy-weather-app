@@ -547,7 +547,18 @@
     "openMeteoThirdParty": "Open-Meteo è un servizio di terze parti indipendente, non gestito dallo sviluppatore di Weather Log. Il suo server è open source (AGPL-3.0) e può essere ospitato in proprio.",
     "openMeteoSource": "Codice sorgente di Open-Meteo",
     "radarServer": "Server radar",
-    "radarServerNote": "Il tuo server LibreWXR nell'UE. Senza di esso il radar è disattivato. Viene inviata solo l'area della mappa intorno a una città."
+    "radarServerNote": "Server LibreWXR per il radar. Lascia vuoto per disattivare il radar.",
+    "mapServer": "Server mappe",
+    "mapServerNote": "OpenFreeMap o un altro indirizzo TileJSON OpenMapTiles, oppure un file .pmtiles, per terra e acqua sulla mappa radar.",
+    "libreWxrUse": "Radar della pioggia per le ultime 2 ore e la prossima ora.",
+    "libreWxrThirdParty": "LibreWXR è un progetto open source indipendente (AGPL-3.0), non gestito dallo sviluppatore di Weather Log. Il suo server pubblico dichiara di non registrare indirizzi IP né dettagli delle richieste. Riceve i riquadri della mappa intorno alla città che visualizzi.",
+    "libreWxrSource": "Codice sorgente di LibreWXR",
+    "openFreeMapUse": "Terra e acqua sulla mappa radar, da dati OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap è un progetto open source indipendente gestito dall'UE (Ungheria), non dallo sviluppatore di Weather Log. Nessun account né cookie. Riceve i riquadri della mappa intorno alla città che visualizzi.",
+    "openFreeMapSource": "Codice sorgente di OpenFreeMap",
+    "openFreeMapPrivacy": "Privacy di OpenFreeMap",
+    "osmCopyright": "Copyright di OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Questo file non è un JSON valido.",
@@ -658,14 +669,17 @@
     "pause": "Pausa",
     "prev": "Immagine precedente",
     "next": "Immagine successiva",
-    "credit": "Radar EUMETNET OPERA · Mappa © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar della pioggia intorno alla città",
     "waiting": "In attesa dei dati radar",
     "offline": "Il radar non è disponibile offline.",
     "failed": "Impossibile caricare il radar.",
     "stale": "Impossibile aggiornare il radar.",
     "retry": "Riprova",
-    "noServer": "Il radar richiede un tuo server radar nell'UE. Inserisci l'indirizzo nelle Impostazioni.",
-    "openSettings": "Apri impostazioni"
+    "noServer": "Il radar è disattivato. Aggiungi un server radar nelle Impostazioni.",
+    "openSettings": "Apri impostazioni",
+    "zoomIn": "Ingrandisci",
+    "zoomOut": "Riduci",
+    "area": "{km} km di larghezza"
   }
 }

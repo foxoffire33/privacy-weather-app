@@ -547,7 +547,18 @@
     "openMeteoThirdParty": "Open-Meteo ir neatkarīgs trešās puses pakalpojums, ko nepārvalda Weather Log izstrādātājs. Tā serveris ir atvērtā koda (AGPL-3.0), un to var mitināt pats.",
     "openMeteoSource": "Open-Meteo pirmkods",
     "radarServer": "Radara serveris",
-    "radarServerNote": "Jūsu pašu LibreWXR serveris ES. Bez tā radars ir izslēgts. Tiek nosūtīts tikai kartes apgabals ap pilsētu."
+    "radarServerNote": "LibreWXR serveris radaram. Atstājiet tukšu, lai izslēgtu radaru.",
+    "mapServer": "Kartes serveris",
+    "mapServerNote": "OpenFreeMap vai cita OpenMapTiles TileJSON adrese, vai .pmtiles fails, sauszemei un ūdenim radara kartē.",
+    "libreWxrUse": "Nokrišņu radars par pēdējām 2 stundām un nākamo stundu.",
+    "libreWxrThirdParty": "LibreWXR ir neatkarīgs atvērtā koda projekts (AGPL-3.0), ko nepārvalda Weather Log izstrādātājs. Tā publiskais serveris norāda, ka nesaglabā IP adreses vai pieprasījumu informāciju. Tas saņem kartes flīzes ap skatīto pilsētu.",
+    "libreWxrSource": "LibreWXR pirmkods",
+    "openFreeMapUse": "Sauszeme un ūdens radara kartē no OpenStreetMap datiem (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap ir neatkarīgs atvērtā koda projekts no ES (Ungārija), ko nepārvalda Weather Log izstrādātājs. Bez kontiem un sīkdatnēm. Tas saņem kartes flīzes ap skatīto pilsētu.",
+    "openFreeMapSource": "OpenFreeMap pirmkods",
+    "openFreeMapPrivacy": "OpenFreeMap privātums",
+    "osmCopyright": "OpenStreetMap autortiesības",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Šis fails nav derīgs JSON.",
@@ -658,14 +669,17 @@
     "pause": "Pauze",
     "prev": "Iepriekšējais kadrs",
     "next": "Nākamais kadrs",
-    "credit": "Radars EUMETNET OPERA · Karte © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Nokrišņu radars ap pilsētu",
     "waiting": "Gaida radara datus",
     "offline": "Radars nav pieejams bezsaistē.",
     "failed": "Radaru neizdevās ielādēt.",
     "stale": "Radaru neizdevās atjaunināt.",
     "retry": "Mēģināt vēlreiz",
-    "noServer": "Radaram vajag jūsu pašu radara serveri ES. Pievienojiet tā adresi Iestatījumos.",
-    "openSettings": "Atvērt iestatījumus"
+    "noServer": "Radars ir izslēgts. Pievienojiet radara serveri Iestatījumos.",
+    "openSettings": "Atvērt iestatījumus",
+    "zoomIn": "Tuvināt",
+    "zoomOut": "Tālināt",
+    "area": "{km} km plats"
   }
 }

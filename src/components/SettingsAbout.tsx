@@ -22,6 +22,22 @@ export function SettingsAbout({ version }: SettingsAboutProps): ReactElement {
         <Anchor fz={13} href={LINKS.openMeteoSource} target="_blank" rel="noopener noreferrer">{t('settings.openMeteoSource')}</Anchor>
         <Anchor fz={13} href={LINKS.openMeteoTerms} target="_blank" rel="noopener noreferrer">{t('settings.openMeteoPrivacy')}</Anchor>
       </Stack>
+      <Stack gap={4} py={12}>
+        <Text fz={14} fw={600}>LibreWXR</Text>
+        <Text fz={13} c="dimmed">{t('settings.libreWxrUse')}</Text>
+        <Text fz={13} c="dimmed">{t('settings.libreWxrThirdParty')}</Text>
+        <Anchor fz={13} href={LINKS.libreWxr} target="_blank" rel="noopener noreferrer">librewxr.net</Anchor>
+        <Anchor fz={13} href={LINKS.libreWxrSource} target="_blank" rel="noopener noreferrer">{t('settings.libreWxrSource')}</Anchor>
+      </Stack>
+      <Stack gap={4} py={12}>
+        <Text fz={14} fw={600}>OpenFreeMap · OpenStreetMap</Text>
+        <Text fz={13} c="dimmed">{t('settings.openFreeMapUse')}</Text>
+        <Text fz={13} c="dimmed">{t('settings.openFreeMapThirdParty')}</Text>
+        <Anchor fz={13} href={LINKS.openFreeMap} target="_blank" rel="noopener noreferrer">openfreemap.org</Anchor>
+        <Anchor fz={13} href={LINKS.openFreeMapSource} target="_blank" rel="noopener noreferrer">{t('settings.openFreeMapSource')}</Anchor>
+        <Anchor fz={13} href={LINKS.openFreeMapPrivacy} target="_blank" rel="noopener noreferrer">{t('settings.openFreeMapPrivacy')}</Anchor>
+        <Anchor fz={13} href={LINKS.osmCopyright} target="_blank" rel="noopener noreferrer">{t('settings.osmCopyright')}</Anchor>
+      </Stack>
 
       <Box className="kicker">{t('settings.developer')}</Box>
       <Stack gap={4} py={12}>
@@ -40,6 +56,7 @@ export function SettingsAbout({ version }: SettingsAboutProps): ReactElement {
       <Stack gap={4} py={12}>
         <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
         <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
+        <Text fz={13} c="dimmed">{t('settings.attributionRadar')}</Text>
         <Anchor component={Link} to={paths.diagnostics} fz={13}>{t('diagnostics.link')}</Anchor>
       </Stack>
     </>

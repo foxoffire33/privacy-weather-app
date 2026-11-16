@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Open-Meteo on riippumaton kolmannen osapuolen palvelu, jota Weather Login kehittäjä ei ylläpidä. Sen palvelin on avointa lähdekoodia (AGPL-3.0), ja sen voi ajaa itse.",
     "openMeteoSource": "Open-Meteon lähdekoodi",
     "radarServer": "Tutkapalvelin",
-    "radarServerNote": "Oma LibreWXR-palvelimesi EU:ssa. Ilman sitä tutka on pois päältä. Palvelimelle lähetetään vain kaupungin ympäröivä kartta-alue."
+    "radarServerNote": "LibreWXR-palvelin tutkalle. Jätä tyhjäksi, niin tutka on pois päältä.",
+    "mapServer": "Karttapalvelin",
+    "mapServerNote": "OpenFreeMap tai muu OpenMapTiles TileJSON -osoite tai .pmtiles-tiedosto tutkakartan maalle ja vedelle.",
+    "libreWxrUse": "Sadetutka kahdelta viime tunnilta ja seuraavalle tunnille.",
+    "libreWxrThirdParty": "LibreWXR on itsenäinen avoimen lähdekoodin projekti (AGPL-3.0), jota Weather Login kehittäjä ei ylläpidä. Sen julkinen palvelin ilmoittaa, ettei se tallenna IP-osoitteita tai pyyntöjen tietoja. Se saa katsomasi kaupungin ympäröivät karttaruudut.",
+    "libreWxrSource": "LibreWXR:n lähdekoodi",
+    "openFreeMapUse": "Maa ja vesi tutkakartalla OpenStreetMap-tiedoista (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap on itsenäinen avoimen lähdekoodin projekti EU:sta (Unkari), jota Weather Login kehittäjä ei ylläpidä. Ei tilejä eikä evästeitä. Se saa katsomasi kaupungin ympäröivät karttaruudut.",
+    "openFreeMapSource": "OpenFreeMapin lähdekoodi",
+    "openFreeMapPrivacy": "OpenFreeMapin tietosuoja",
+    "osmCopyright": "OpenStreetMapin tekijänoikeudet",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Tiedosto ei ole kelvollista JSONia.",
@@ -652,14 +663,17 @@
     "pause": "Tauko",
     "prev": "Edellinen kuva",
     "next": "Seuraava kuva",
-    "credit": "Tutka EUMETNET OPERA · Kartta © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Sadetutka kaupungin ympärillä",
     "waiting": "Odotetaan tutkatietoja",
     "offline": "Tutka ei ole käytettävissä offline-tilassa.",
     "failed": "Tutkaa ei voitu ladata.",
     "stale": "Tutkaa ei voitu päivittää.",
     "retry": "Yritä uudelleen",
-    "noServer": "Tutka tarvitsee oman tutkapalvelimen EU:ssa. Lisää sen osoite asetuksiin.",
-    "openSettings": "Avaa asetukset"
+    "noServer": "Tutka on pois päältä. Lisää tutkapalvelin asetuksissa.",
+    "openSettings": "Avaa asetukset",
+    "zoomIn": "Lähennä",
+    "zoomOut": "Loitonna",
+    "area": "{km} km leveä"
   }
 }

@@ -25,6 +25,7 @@ export interface Settings {
   apiKey: string;
   server: string;
   radarServer: string;
+  mapServer: string;
   tempUnit: TempUnit;
   windUnit: WindUnit;
   snapshotMinutes: number;

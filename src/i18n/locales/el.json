@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Το Open-Meteo είναι ανεξάρτητη υπηρεσία τρίτου μέρους και δεν το διαχειρίζεται ο δημιουργός του Weather Log. Ο διακομιστής του είναι ανοιχτού κώδικα (AGPL-3.0) και μπορεί να φιλοξενηθεί από εσάς.",
     "openMeteoSource": "Πηγαίος κώδικας του Open-Meteo",
     "radarServer": "Διακομιστής ραντάρ",
-    "radarServerNote": "Ο δικός σας διακομιστής LibreWXR στην ΕΕ. Χωρίς αυτόν το ραντάρ είναι απενεργοποιημένο. Αποστέλλεται μόνο η περιοχή του χάρτη γύρω από την πόλη."
+    "radarServerNote": "Διακομιστής LibreWXR για το ραντάρ. Αφήστε κενό για να απενεργοποιήσετε το ραντάρ.",
+    "mapServer": "Διακομιστής χάρτη",
+    "mapServerNote": "OpenFreeMap ή άλλη διεύθυνση TileJSON OpenMapTiles, ή αρχείο .pmtiles, για ξηρά και νερό στον χάρτη ραντάρ.",
+    "libreWxrUse": "Ραντάρ βροχής για τις τελευταίες 2 ώρες και την επόμενη ώρα.",
+    "libreWxrThirdParty": "Το LibreWXR είναι ανεξάρτητο έργο ανοιχτού κώδικα (AGPL-3.0), που δεν διαχειρίζεται ο προγραμματιστής του Weather Log. Ο δημόσιος διακομιστής του δηλώνει ότι δεν καταγράφει διευθύνσεις IP ή λεπτομέρειες αιτημάτων. Λαμβάνει τα πλακίδια χάρτη γύρω από την πόλη που βλέπετε.",
+    "libreWxrSource": "Πηγαίος κώδικας LibreWXR",
+    "openFreeMapUse": "Ξηρά και νερό στον χάρτη ραντάρ, από δεδομένα OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "Το OpenFreeMap είναι ανεξάρτητο έργο ανοιχτού κώδικα από την ΕΕ (Ουγγαρία), που δεν διαχειρίζεται ο προγραμματιστής του Weather Log. Χωρίς λογαριασμούς ή cookies. Λαμβάνει τα πλακίδια χάρτη γύρω από την πόλη που βλέπετε.",
+    "openFreeMapSource": "Πηγαίος κώδικας OpenFreeMap",
+    "openFreeMapPrivacy": "Απόρρητο OpenFreeMap",
+    "osmCopyright": "Πνευματικά δικαιώματα OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Το αρχείο δεν είναι έγκυρο JSON.",
@@ -652,14 +663,17 @@
     "pause": "Παύση",
     "prev": "Προηγούμενο καρέ",
     "next": "Επόμενο καρέ",
-    "credit": "Ραντάρ EUMETNET OPERA · Χάρτης © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Ραντάρ βροχής γύρω από την πόλη",
     "waiting": "Αναμονή για δεδομένα ραντάρ",
     "offline": "Το ραντάρ δεν είναι διαθέσιμο εκτός σύνδεσης.",
     "failed": "Δεν ήταν δυνατή η φόρτωση του ραντάρ.",
     "stale": "Δεν ήταν δυνατή η ανανέωση του ραντάρ.",
     "retry": "Δοκιμάστε ξανά",
-    "noServer": "Το ραντάρ χρειάζεται δικό σας διακομιστή ραντάρ στην ΕΕ. Προσθέστε τη διεύθυνσή του στις Ρυθμίσεις.",
-    "openSettings": "Άνοιγμα ρυθμίσεων"
+    "noServer": "Το ραντάρ είναι απενεργοποιημένο. Προσθέστε διακομιστή ραντάρ στις Ρυθμίσεις.",
+    "openSettings": "Άνοιγμα ρυθμίσεων",
+    "zoomIn": "Μεγέθυνση",
+    "zoomOut": "Σμίκρυνση",
+    "area": "πλάτος {km} km"
   }
 }

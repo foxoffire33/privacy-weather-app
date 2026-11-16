@@ -553,7 +553,18 @@
     "openMeteoThirdParty": "Open-Meteo je neodvisna storitev tretje osebe, ki je ne upravlja razvijalec aplikacije Weather Log. Njen strežnik je odprtokoden (AGPL-3.0) in ga lahko gostite sami.",
     "openMeteoSource": "Izvorna koda Open-Meteo",
     "radarServer": "Radarski strežnik",
-    "radarServerNote": "Vaš lasten strežnik LibreWXR v EU. Brez njega je radar izklopljen. Pošlje se le območje zemljevida okoli mesta."
+    "radarServerNote": "Strežnik LibreWXR za radar. Pustite prazno, da izklopite radar.",
+    "mapServer": "Strežnik zemljevida",
+    "mapServerNote": "OpenFreeMap ali drug naslov TileJSON OpenMapTiles ali datoteka .pmtiles za kopno in vodo na radarskem zemljevidu.",
+    "libreWxrUse": "Padavinski radar za zadnji 2 uri in naslednjo uro.",
+    "libreWxrThirdParty": "LibreWXR je neodvisen odprtokodni projekt (AGPL-3.0), ki ga ne upravlja razvijalec Weather Log. Njegov javni strežnik navaja, da ne beleži naslovov IP ali podrobnosti zahtev. Prejme ploščice zemljevida okoli mesta, ki ga gledate.",
+    "libreWxrSource": "Izvorna koda LibreWXR",
+    "openFreeMapUse": "Kopno in voda na radarskem zemljevidu iz podatkov OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap je neodvisen odprtokodni projekt iz EU (Madžarska), ki ga ne upravlja razvijalec Weather Log. Brez računov in piškotkov. Prejme ploščice zemljevida okoli mesta, ki ga gledate.",
+    "openFreeMapSource": "Izvorna koda OpenFreeMap",
+    "openFreeMapPrivacy": "Zasebnost OpenFreeMap",
+    "osmCopyright": "Avtorske pravice OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Ta datoteka ni veljaven JSON.",
@@ -664,14 +675,17 @@
     "pause": "Premor",
     "prev": "Prejšnja slika",
     "next": "Naslednja slika",
-    "credit": "Radar EUMETNET OPERA · Zemljevid © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Padavinski radar okoli mesta",
     "waiting": "Čakanje na radarske podatke",
     "offline": "Radar ni na voljo brez povezave.",
     "failed": "Radarja ni bilo mogoče naložiti.",
     "stale": "Radarja ni bilo mogoče osvežiti.",
     "retry": "Poskusi znova",
-    "noServer": "Radar potrebuje vaš lasten radarski strežnik v EU. Naslov dodajte v Nastavitvah.",
-    "openSettings": "Odpri nastavitve"
+    "noServer": "Radar je izklopljen. Dodajte radarski strežnik v Nastavitvah.",
+    "openSettings": "Odpri nastavitve",
+    "zoomIn": "Povečaj",
+    "zoomOut": "Pomanjšaj",
+    "area": "širina {km} km"
   }
 }

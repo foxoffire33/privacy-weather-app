@@ -36,3 +36,8 @@ export const radarMapsSchema = z.object({
     nowcast: z.array(radarFrameSchema).optional(),
   }),
 });
+
+export const tileJsonSchema = z.object({
+  tiles: z.array(z.string()).min(1),
+  maxzoom: z.number(),
+});

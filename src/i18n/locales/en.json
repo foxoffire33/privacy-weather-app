@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Open-Meteo is an independent third-party service, not run by the developer of Weather Log. Its server is open source (AGPL-3.0) and can be self-hosted.",
     "openMeteoSource": "Open-Meteo source code",
     "radarServer": "Radar server",
-    "radarServerNote": "Your own LibreWXR server in the EU. The radar is off without it. Only the map area around a city is sent to it."
+    "radarServerNote": "LibreWXR server for the radar. Leave it empty to turn the radar off.",
+    "mapServer": "Map server",
+    "mapServerNote": "OpenFreeMap or another OpenMapTiles TileJSON address, or a .pmtiles file, for land and water on the radar map.",
+    "libreWxrUse": "Rain radar for the past 2 hours and the next hour.",
+    "libreWxrThirdParty": "LibreWXR is an independent open-source project (AGPL-3.0), not run by the developer of Weather Log. Its public server says it records no IP addresses or request details. It receives the map tiles around a city you view.",
+    "libreWxrSource": "LibreWXR source code",
+    "openFreeMapUse": "Land and water on the radar map, from OpenStreetMap data (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap is an independent open-source project run from the EU (Hungary), not run by the developer of Weather Log. No accounts or cookies. It receives the map tiles around a city you view.",
+    "openFreeMapSource": "OpenFreeMap source code",
+    "openFreeMapPrivacy": "OpenFreeMap privacy policy",
+    "osmCopyright": "OpenStreetMap copyright",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "This file is not valid JSON.",
@@ -652,14 +663,17 @@
     "pause": "Pause",
     "prev": "Previous frame",
     "next": "Next frame",
-    "credit": "Radar EUMETNET OPERA · Map © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Rain radar around the city",
     "waiting": "Waiting for radar data",
     "offline": "Radar is not available offline.",
     "failed": "The radar could not be loaded.",
     "stale": "Could not refresh the radar.",
     "retry": "Try again",
-    "noServer": "Radar needs your own radar server in the EU. Add its address in Settings.",
-    "openSettings": "Open settings"
+    "noServer": "The radar is off. Add a radar server in Settings.",
+    "openSettings": "Open settings",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "area": "{km} km wide"
   }
 }

@@ -105,3 +105,15 @@ export function clockAt(ms: number, timeZone: string): string {
   }
   return format.format(ms);
 }
+
+const numbers = new Map<string, Intl.NumberFormat>();
+
+export function fmtNumber(value: number, maxDigits: number, minDigits = 0): string {
+  const key = `${currentLocale()}|${String(minDigits)}|${String(maxDigits)}`;
+  let format = numbers.get(key);
+  if (format === undefined) {
+    format = new Intl.NumberFormat(currentLocale(), { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
+    numbers.set(key, format);
+  }
+  return format.format(value);
+}

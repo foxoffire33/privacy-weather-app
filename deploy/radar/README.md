@@ -1,7 +1,10 @@
-# Radar server (EU, self-hosted)
+# Radar server (optional, self-hosted in the EU)
 
-The radar in *Next 48 hours* needs one HTTPS server that you run yourself, inside the EU. It serves two
-things, both open source:
+By default the app uses the public servers: `https://api.librewxr.net` for radar frames and
+`https://tiles.openfreemap.org/planet` for land and water. This guide is for running both parts yourself
+instead, on one HTTPS server inside the EU. Then set *Settings → Radar server* to `https://radar.example.eu`
+and *Settings → Map server* to `https://radar.example.eu/map/basemap.pmtiles`. The server serves two things,
+both open source:
 
 | Path | What | Software | Data |
 | --- | --- | --- | --- |
@@ -38,7 +41,7 @@ LIBREWXR_ALERTS_ENABLED=false
 Keep `LIBREWXR_REGIONAL_NWP_ENABLED` on: the 60-minute forecast blends radar into ICON-EU. Then
 `docker compose pull && docker compose up -d`, and note the host port its compose file publishes.
 
-The app requests colour scheme `0` with smoothing off and snow on (`/0/0_1.png`) at zoom 8 to 10, and
+The app requests colour scheme `0` with smoothing off and snow on (`/0/0_1.png`) at zoom 6 to 11, and
 decodes grey `1..127` as rain (`dBZ = grey - 32`) and `129..255` as snow (`dBZ = grey - 160`).
 
 ## 3. The map file
@@ -63,7 +66,8 @@ RADAR_DOMAIN=radar.example.eu LIBREWXR_UPSTREAM=127.0.0.1:<port> caddy run --con
 
 ## 5. In the app
 
-Settings → *Radar server* → `https://radar.example.eu`. Open a city: *Next 48 hours* shows Radar first.
+Settings → *Radar server* → `https://radar.example.eu`, and *Map server* →
+`https://radar.example.eu/map/basemap.pmtiles`. Open a city: *Next 48 hours* shows Radar first.
 
 Check from a browser: `https://radar.example.eu/public/weather-maps.json` lists frames, and
 `curl -sI -H 'Range: bytes=0-126' https://radar.example.eu/map/basemap.pmtiles` answers `206`.

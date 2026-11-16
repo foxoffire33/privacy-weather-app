@@ -28,8 +28,8 @@ function start(): Remote<WorkerApi> | null {
       }, { once: true });
     });
     failed.catch(() => null);
-    onConfigure(({ apiKey, server, radarServer, offline }) => {
-      if (!broken) { void remote.configure({ apiKey, server, radarServer, offline }).catch(() => null); }
+    onConfigure(({ apiKey, server, radarServer, mapServer, offline }) => {
+      if (!broken) { void remote.configure({ apiKey, server, radarServer, mapServer, offline }).catch(() => null); }
     });
     return remote;
   } catch {

@@ -1,8 +1,9 @@
 import { use } from 'react';
 
 import { lastSettled } from './core/inflight';
+import { radarKey, sourceId } from './factories/radar';
 import { hydrateAll, whenHistoryReady } from './hydration';
-import { useCity, useDay, useLandMap, useRadarQuery, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
+import { useCity, useDay, useIsOffline, useLandMap, useMapServer, useRadarQuery, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
 import { lookupDate, openDay, loadRadar, loadThisDay, refreshCity, resourceKey } from './weatherSync';
 
 import type { ArchiveYear, DayData, ForecastEntry, LookupView, RadarView } from './types';
@@ -45,13 +46,16 @@ export function useLookupData(cityId: string, date: string): LookupView {
   return lookup;
 }
 
-export function useRadarData(cityId: string): RadarView {
-  const city = useCity(cityId);
-  const land = useLandMap(cityId);
-  const radar = useRadarSet(cityId);
-  const query = useRadarQuery(cityId);
+export function useRadarData(cityId: string, cell: number): RadarView {
   const server = useRadarServer();
+  const mapServer = useMapServer();
+  const key = radarKey(cityId, cell, sourceId(server, mapServer));
+  const city = useCity(cityId);
+  const land = useLandMap(key);
+  const radar = useRadarSet(key);
+  const query = useRadarQuery(key);
+  const offline = useIsOffline();
   const empty = land === undefined && radar === undefined;
-  use(city !== undefined && empty && server !== '' && query.status === 'idle' ? loadRadar(cityId) : lastSettled(resourceKey.radar(cityId)));
-  return { land, radar, query };
+  use(city !== undefined && empty && server !== '' && !offline && query.status === 'idle' ? loadRadar(cityId, cell) : lastSettled(resourceKey.radar(cityId, cell, key)));
+  return { key, land, radar, query };
 }

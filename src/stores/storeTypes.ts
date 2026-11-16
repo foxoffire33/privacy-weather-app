@@ -33,8 +33,8 @@ export interface RadarState {
   land: Partial<Record<string, LandMap>>;
   radar: Partial<Record<string, RadarSet>>;
   queries: QueryMap;
-  load: (city: City) => Promise<void>;
-  retry: (cityId: string) => void;
+  load: (city: City, cellMeters: number) => Promise<void>;
+  retry: (key: string) => void;
   drop: (cityId: string) => void;
   clear: () => void;
 }

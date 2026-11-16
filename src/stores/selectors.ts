@@ -34,10 +34,11 @@ export const useCityIndex = (cityId: string): number => useCityStore((s) => s.ci
 
 export const useForecast = (cityId: string): ForecastEntry | undefined => useForecastStore((s) => s.forecasts[cityId]);
 
-export const useLandMap = (cityId: string): LandMap | undefined => useRadarStore((s) => s.land[cityId]);
-export const useRadarSet = (cityId: string): RadarSet | undefined => useRadarStore((s) => s.radar[cityId]);
-export const useRadarQuery = (cityId: string): QueryState => useRadarStore((s) => s.queries[cityId] ?? IDLE_QUERY);
+export const useLandMap = (key: string): LandMap | undefined => useRadarStore((s) => s.land[key]);
+export const useRadarSet = (key: string): RadarSet | undefined => useRadarStore((s) => s.radar[key]);
+export const useRadarQuery = (key: string): QueryState => useRadarStore((s) => s.queries[key] ?? IDLE_QUERY);
 export const useRadarServer = (): string => useSettingsStore((s) => s.settings.radarServer);
+export const useMapServer = (): string => useSettingsStore((s) => s.settings.mapServer);
 export const useIsOffline = (): boolean => useSettingsStore((s) => s.settings.offline);
 
 export const useForecastQuery = (cityId: string): QueryState =>

@@ -1,7 +1,7 @@
 import type { ConfigListener, DataLayerConfig } from './types';
 
 function createDefaultConfig(): DataLayerConfig {
-  return { apiKey: '', server: '', radarServer: '', fetch: null, offline: false };
+  return { apiKey: '', server: '', radarServer: '', mapServer: '', fetch: null, offline: false };
 }
 
 export const OFFLINE = 'offline-mode';

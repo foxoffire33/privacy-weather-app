@@ -69,3 +69,13 @@ export interface MapTileLayers {
   earth: VectorTileLayer | undefined;
   water: VectorTileLayer | undefined;
 }
+
+export interface MapSource {
+  maxZoom: () => Promise<number>;
+  tile: (z: number, x: number, y: number) => Promise<ArrayBuffer | null>;
+}
+
+export interface TileJson {
+  tiles: string[];
+  maxzoom: number;
+}

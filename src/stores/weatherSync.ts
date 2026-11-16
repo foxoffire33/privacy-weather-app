@@ -5,9 +5,10 @@ import { once, READY } from './core/inflight';
 import { useDayStore } from './dayStore';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
+import { radarKey } from './factories/radar';
 import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
-import { useRadarStore } from './radarStore';
+import { currentRadarSource, useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { Pending } from './core/types';
@@ -21,13 +22,13 @@ export const resourceKey = {
   day: (cityId: string, date: string): string => `day:${cityId}:${date}`,
   lookup: (cityId: string, date: string): string => `lookup:${cityId}:${date}`,
   thisDay: (cityId: string, date: string): string => `thisDay:${cityId}:${date.slice(5)}`,
-  radar: (cityId: string): string => `radar:${cityId}`,
+  radar: (cityId: string, cell: number, key = radarKey(cityId, cell, currentRadarSource())): string => `radar:${key}`,
 };
 
-export function loadRadar(cityId: string): Pending {
-  return once(resourceKey.radar(cityId), async () => {
+export function loadRadar(cityId: string, cell: number): Pending {
+  return once(resourceKey.radar(cityId, cell), async () => {
     const city = entityCache.getOne('city', cityId);
-    if (city !== undefined) { await useRadarStore.getState().load(city); }
+    if (city !== undefined) { await useRadarStore.getState().load(city, cell); }
   });
 }
 

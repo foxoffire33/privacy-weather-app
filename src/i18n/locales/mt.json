@@ -559,7 +559,18 @@
     "openMeteoThirdParty": "Open-Meteo huwa servizz indipendenti ta’ parti terza, mhux immexxi mill-iżviluppatur ta’ Weather Log. Is-server tiegħu huwa b’kodiċi miftuħ (AGPL-3.0) u tista’ tospitah int stess.",
     "openMeteoSource": "Il-kodiċi sors ta’ Open-Meteo",
     "radarServer": "Server tar-radar",
-    "radarServerNote": "Is-server LibreWXR tiegħek fl-UE. Mingħajru r-radar huwa mitfi. Tintbagħat biss iż-żona tal-mappa madwar belt."
+    "radarServerNote": "Server LibreWXR għar-radar. Ħallih vojt biex titfi r-radar.",
+    "mapServer": "Server tal-mappa",
+    "mapServerNote": "OpenFreeMap jew indirizz TileJSON ieħor ta' OpenMapTiles, jew fajl .pmtiles, għall-art u l-ilma fuq il-mappa tar-radar.",
+    "libreWxrUse": "Radar tax-xita għall-aħħar sagħtejn u s-siegħa li ġejja.",
+    "libreWxrThirdParty": "LibreWXR huwa proġett open source indipendenti (AGPL-3.0), mhux immexxi mill-iżviluppatur ta' Weather Log. Is-server pubbliku tiegħu jgħid li ma jirreġistrax indirizzi IP jew dettalji tat-talbiet. Jirċievi l-madum tal-mappa madwar belt li tara.",
+    "libreWxrSource": "Kodiċi sors ta' LibreWXR",
+    "openFreeMapUse": "Art u ilma fuq il-mappa tar-radar, minn data ta' OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap huwa proġett open source indipendenti mmexxi mill-UE (l-Ungerija), mhux mill-iżviluppatur ta' Weather Log. L-ebda kont jew cookies. Jirċievi l-madum tal-mappa madwar belt li tara.",
+    "openFreeMapSource": "Kodiċi sors ta' OpenFreeMap",
+    "openFreeMapPrivacy": "Privatezza ta' OpenFreeMap",
+    "osmCopyright": "Drittijiet tal-awtur ta' OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Dan il-fajl mhux JSON validu.",
@@ -670,14 +681,17 @@
     "pause": "Pawża",
     "prev": "Qafas preċedenti",
     "next": "Qafas li jmiss",
-    "credit": "Radar EUMETNET OPERA · Mappa © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Radar tax-xita madwar il-belt",
     "waiting": "Qed nistennew id-data tar-radar",
     "offline": "Ir-radar mhuwiex disponibbli offline.",
     "failed": "Ir-radar ma setax jitgħabba.",
     "stale": "Ir-radar ma setax jiġġedded.",
     "retry": "Erġa' pprova",
-    "noServer": "Ir-radar jeħtieġ server tar-radar tiegħek fl-UE. Żid l-indirizz tiegħu fl-Issettjar.",
-    "openSettings": "Iftaħ l-issettjar"
+    "noServer": "Ir-radar huwa mitfi. Żid server tar-radar fl-Issettjar.",
+    "openSettings": "Iftaħ l-issettjar",
+    "zoomIn": "Kabbar",
+    "zoomOut": "Ċekken",
+    "area": "wiesa' {km} km"
   }
 }

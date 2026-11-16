@@ -5,6 +5,7 @@ const ICONS: Record<IconName, ReactNode> = {
   list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
   sliders: <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />,
   back: <path d="m12 19-7-7 7-7M19 12H5" />,
+  minus: <path d="M5 12h14" />,
   plus: <path d="M5 12h14M12 5v14" />,
   search: <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></>,
   pin: <><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></>,

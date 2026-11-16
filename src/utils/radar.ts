@@ -1,21 +1,27 @@
 import { t } from '../i18n';
 import { levelOf, rainRate } from '../stores';
 
+import { fmtNumber } from './format';
+
 import type { RadarFrame } from '../stores';
 
 const NEAR = 6;
 const LEVEL_LABEL = [() => t('radar.dry'), () => t('radar.light'), () => t('radar.moderate'), () => t('radar.heavy')] as const;
 const FIVE_MIN = 5 * 60;
 
-export function nowIndex(frames: readonly RadarFrame[]): number {
-  const past = frames.findLastIndex((f) => !f.forecast);
-  return past === -1 ? 0 : past;
+export function nowIndex(frames: readonly RadarFrame[], now: number): number {
+  let best = 0;
+  for (const [i, f] of frames.entries()) {
+    const current = frames.at(best);
+    if (current !== undefined && f.time <= now && Math.abs(f.time - now) < Math.abs(current.time - now)) { best = i; }
+  }
+  return best;
 }
 
-export function selectedIndex(frames: readonly RadarFrame[], time: number | null): number {
-  if (time === null) { return nowIndex(frames); }
+export function selectedIndex(frames: readonly RadarFrame[], time: number | null, now: number): number {
+  if (time === null) { return nowIndex(frames, now); }
   const found = frames.findIndex((f) => f.time === time);
-  return found === -1 ? nowIndex(frames) : found;
+  return found === -1 ? nowIndex(frames, now) : found;
 }
 
 export function rainNear(frame: RadarFrame, cols: number, rows: number): number {
@@ -39,12 +45,12 @@ export function relativeTime(frameTime: number, nowTime: number): string {
 export function hoursLabel(frameTime: number, nowTime: number): string {
   const hours = Math.round((frameTime - nowTime) / 360) / 10;
   if (hours === 0) { return t('radar.now'); }
-  return t('radar.hours', { n: `${hours > 0 ? '+' : '−'}${String(Math.abs(hours))}` });
+  return t('radar.hours', { n: `${hours > 0 ? '+' : '−'}${fmtNumber(Math.abs(hours), 1)}` });
 }
 
 export function rainLabel(frame: RadarFrame): string {
   const level = levelOf(frame.cityDbz);
   if (level === 0 || frame.cityDbz === null) { return t('radar.dry'); }
   const kind = frame.citySnow ? t('radar.snow') : LEVEL_LABEL[level]();
-  return `${kind} · ${t('radar.rate', { mm: rainRate(frame.cityDbz).toFixed(1) })}`;
+  return `${kind} · ${t('radar.rate', { mm: fmtNumber(rainRate(frame.cityDbz), 1, 1) })}`;
 }

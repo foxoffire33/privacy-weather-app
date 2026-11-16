@@ -20,6 +20,8 @@ export interface UiState {
   fullscreenChart: string | null;
   next48View: Next48View;
   radarFrame: number | null;
+  radarCell: number;
+  setRadarCell: (cell: number) => void;
   setNext48View: (view: Next48View) => void;
   setRadarFrame: (time: number | null) => void;
   setChartMetric: (m: string) => void;

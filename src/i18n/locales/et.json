@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Open-Meteo on sõltumatu kolmanda osapoole teenus, mida Weather Logi arendaja ei halda. Selle server on avatud lähtekoodiga (AGPL-3.0) ja seda saab ise majutada.",
     "openMeteoSource": "Open-Meteo lähtekood",
     "radarServer": "Radariserver",
-    "radarServerNote": "Sinu enda LibreWXR-server ELis. Ilma selleta on radar välja lülitatud. Saadetakse ainult linna ümbrus kaardil."
+    "radarServerNote": "LibreWXR-server radari jaoks. Jäta tühjaks, et radar välja lülitada.",
+    "mapServer": "Kaardiserver",
+    "mapServerNote": "OpenFreeMap või muu OpenMapTiles TileJSON-aadress või .pmtiles-fail radarikaardi maismaa ja vee jaoks.",
+    "libreWxrUse": "Sademeradar viimase 2 tunni ja järgmise tunni kohta.",
+    "libreWxrThirdParty": "LibreWXR on sõltumatu avatud lähtekoodiga projekt (AGPL-3.0), mida Weather Logi arendaja ei halda. Selle avalik server väidab, et ei salvesta IP-aadresse ega päringute andmeid. See saab vaadatava linna ümbruse kaardiruudud.",
+    "libreWxrSource": "LibreWXR-i lähtekood",
+    "openFreeMapUse": "Maismaa ja vesi radarikaardil OpenStreetMapi andmetest (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap on sõltumatu avatud lähtekoodiga projekt ELis (Ungari), mida Weather Logi arendaja ei halda. Kontosid ega küpsiseid pole. See saab vaadatava linna ümbruse kaardiruudud.",
+    "openFreeMapSource": "OpenFreeMapi lähtekood",
+    "openFreeMapPrivacy": "OpenFreeMapi privaatsus",
+    "osmCopyright": "OpenStreetMapi autoriõigus",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "See fail ei ole kehtiv JSON.",
@@ -652,14 +663,17 @@
     "pause": "Paus",
     "prev": "Eelmine kaader",
     "next": "Järgmine kaader",
-    "credit": "Radar EUMETNET OPERA · Kaart © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Sademeradar linna ümber",
     "waiting": "Ootan radariandmeid",
     "offline": "Radar pole võrguühenduseta saadaval.",
     "failed": "Radarit ei õnnestunud laadida.",
     "stale": "Radarit ei õnnestunud värskendada.",
     "retry": "Proovi uuesti",
-    "noServer": "Radar vajab sinu enda radariserverit ELis. Lisa selle aadress seadetes.",
-    "openSettings": "Ava seaded"
+    "noServer": "Radar on välja lülitatud. Lisa seadetes radariserver.",
+    "openSettings": "Ava seaded",
+    "zoomIn": "Suurenda",
+    "zoomOut": "Vähenda",
+    "area": "{km} km lai"
   }
 }

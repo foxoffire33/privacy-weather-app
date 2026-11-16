@@ -1,7 +1,7 @@
 import { Box, Button, PasswordInput, TextInput } from '@mantine/core';
 
 import { t } from '../i18n';
-import { refreshAll, useSettings, useUpdateSettings } from '../stores';
+import { PUBLIC_MAP_SERVER, PUBLIC_RADAR_SERVER, refreshAll, useSettings, useUpdateSettings } from '../stores';
 
 import type { ReactElement } from 'react';
 
@@ -22,9 +22,14 @@ export function SettingsDataSource(): ReactElement {
           onChange={(e) => { set({ server: e.currentTarget.value.trim() }); }} />
       </Box>
       <Box py={12} className="row">
-        <TextInput label={t('settings.radarServer')} placeholder="https://radar.example.eu" value={settings.radarServer}
+        <TextInput label={t('settings.radarServer')} placeholder={PUBLIC_RADAR_SERVER} value={settings.radarServer}
           description={t('settings.radarServerNote')} inputMode="url"
           onChange={(e) => { set({ radarServer: e.currentTarget.value.trim() }); }} />
+      </Box>
+      <Box py={12} className="row">
+        <TextInput label={t('settings.mapServer')} placeholder={PUBLIC_MAP_SERVER} value={settings.mapServer}
+          description={t('settings.mapServerNote')} inputMode="url"
+          onChange={(e) => { set({ mapServer: e.currentTarget.value.trim() }); }} />
       </Box>
       <Button variant="subtle" color="gray" mt={8} onClick={() => void refreshAll({ maxAgeMs: 0 })}>{t('settings.apply')}</Button>
     </>

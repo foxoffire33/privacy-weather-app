@@ -3,6 +3,8 @@ import type { CityRain, GridView, RadarCells, RadarGrid, RadarLevel, TileCover, 
 export const LAND_VERSION = 1;
 export const RADAR_GRID: RadarGrid = { cols: 46, rows: 40, cellMeters: 800 };
 export const SAMPLES = 4;
+export const RADAR_CELLS = [200, 400, 800, 1600, 3200] as const;
+export const DEFAULT_RADAR_CELL = 800;
 
 const TILE = 256;
 const EARTH_MPP = 156_543.034;
@@ -12,8 +14,18 @@ const HEAVY_DBZ = 40;
 const RAIN_TOP = 127;
 const SNOW_FROM = 129;
 
-export function gridView(lat: number, lon: number, grid: RadarGrid = RADAR_GRID): GridView {
-  return { ...grid, lat, lon };
+export function gridView(lat: number, lon: number, cellMeters: number = RADAR_GRID.cellMeters): GridView {
+  return { ...RADAR_GRID, cellMeters, lat, lon };
+}
+
+export function sourceId(radarServer: string, mapServer: string): string {
+  let hash = 5381;
+  for (const ch of `${radarServer.trim()}|${mapServer.trim()}`) { hash = Math.imul(hash, 33) ^ (ch.codePointAt(0) ?? 0); }
+  return (hash >>> 0).toString(36);
+}
+
+export function radarKey(cityId: string, cellMeters: number, source: string): string {
+  return `${cityId}:${String(cellMeters)}:${source}`;
 }
 
 function metersPerPixel(lat: number, zoom: number): number {

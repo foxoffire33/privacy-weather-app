@@ -4,7 +4,7 @@ import { responseGet, responsePut } from '../core/idb';
 import { sortedCopy } from '../core/sort';
 
 import type { QueryParams } from '../core/types';
-import type { CachedRead, EndpointKind } from './types';
+import type { CachedRead, EndpointKind, TaggedBytes } from './types';
 
 const RETRIES = 3;
 const UNREADABLE = Symbol('unreadable');
@@ -71,13 +71,13 @@ async function attempt(url: string, signal: AbortSignal): Promise<unknown> {
   throw new ApiError(reason, res.status >= 500 || res.status === 429);
 }
 
-async function attemptBytes(url: string, signal: AbortSignal, headers: HeadersInit): Promise<ArrayBuffer> {
+async function attemptBytes(url: string, signal: AbortSignal, headers: HeadersInit): Promise<TaggedBytes> {
   const doFetch = getConfig().fetch ?? fetch;
   const res = await doFetch(url, { signal, headers });
   if (!res.ok) { throw new ApiError(`HTTP ${String(res.status)}`, res.status >= 500 || res.status === 429); }
-  const body = await res.arrayBuffer();
+  const data = await res.arrayBuffer();
   signal.throwIfAborted();
-  return body;
+  return { data, etag: res.headers.get('etag') ?? undefined };
 }
 
 const retryable = (error: unknown) => (error instanceof ApiError ? error.retry : error instanceof TypeError);
@@ -105,10 +105,15 @@ export async function getUrlJson(url: string, signal?: AbortSignal): Promise<unk
   return withRetries(async () => attempt(url, live), live, 0);
 }
 
-export async function getBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<ArrayBuffer> {
+export async function getTaggedBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<TaggedBytes> {
   assertOnline();
   const live = onlineSignal(signal);
   return withRetries(async () => attemptBytes(url, live, headers), live, 0);
+}
+
+export async function getBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<ArrayBuffer> {
+  const { data } = await getTaggedBytes(url, headers, signal);
+  return data;
 }
 
 function fromCache<T>(body: unknown, build: (json: unknown) => T): { value: T } | null {

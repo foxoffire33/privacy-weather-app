@@ -553,7 +553,18 @@
     "openMeteoThirdParty": "Open-Meteo je nezávislá služba třetí strany, kterou neprovozuje vývojář Weather Log. Její server je open source (AGPL-3.0) a lze jej hostovat sám.",
     "openMeteoSource": "Zdrojový kód Open-Meteo",
     "radarServer": "Radarový server",
-    "radarServerNote": "Váš vlastní server LibreWXR v EU. Bez něj je radar vypnutý. Odesílá se jen oblast mapy kolem města."
+    "radarServerNote": "Server LibreWXR pro radar. Ponechte prázdné pro vypnutí radaru.",
+    "mapServer": "Mapový server",
+    "mapServerNote": "OpenFreeMap nebo jiná adresa TileJSON OpenMapTiles, případně soubor .pmtiles, pro pevninu a vodu na mapě radaru.",
+    "libreWxrUse": "Srážkový radar za poslední 2 hodiny a na další hodinu.",
+    "libreWxrThirdParty": "LibreWXR je nezávislý open-source projekt (AGPL-3.0), který neprovozuje vývojář Weather Log. Jeho veřejný server uvádí, že neukládá IP adresy ani podrobnosti požadavků. Dostává mapové dlaždice kolem zobrazeného města.",
+    "libreWxrSource": "Zdrojový kód LibreWXR",
+    "openFreeMapUse": "Pevnina a voda na mapě radaru z dat OpenStreetMap (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap je nezávislý open-source projekt provozovaný z EU (Maďarsko), ne vývojářem Weather Log. Žádné účty ani cookies. Dostává mapové dlaždice kolem zobrazeného města.",
+    "openFreeMapSource": "Zdrojový kód OpenFreeMap",
+    "openFreeMapPrivacy": "Ochrana soukromí OpenFreeMap",
+    "osmCopyright": "Autorská práva OpenStreetMap",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Tento soubor není platný JSON.",
@@ -664,14 +675,17 @@
     "pause": "Pozastavit",
     "prev": "Předchozí snímek",
     "next": "Další snímek",
-    "credit": "Radar EUMETNET OPERA · Mapa © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Srážkový radar kolem města",
     "waiting": "Čekání na data radaru",
     "offline": "Radar není dostupný offline.",
     "failed": "Radar se nepodařilo načíst.",
     "stale": "Radar se nepodařilo obnovit.",
     "retry": "Zkusit znovu",
-    "noServer": "Radar potřebuje vlastní radarový server v EU. Zadejte jeho adresu v Nastavení.",
-    "openSettings": "Otevřít nastavení"
+    "noServer": "Radar je vypnutý. Přidejte radarový server v Nastavení.",
+    "openSettings": "Otevřít nastavení",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit",
+    "area": "šířka {km} km"
   }
 }

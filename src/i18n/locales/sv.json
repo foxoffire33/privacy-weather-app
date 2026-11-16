@@ -541,7 +541,18 @@
     "openMeteoThirdParty": "Open-Meteo är en oberoende tredjepartstjänst som inte drivs av utvecklaren av Weather Log. Servern har öppen källkod (AGPL-3.0) och kan köras på egen server.",
     "openMeteoSource": "Källkod för Open-Meteo",
     "radarServer": "Radarserver",
-    "radarServerNote": "Din egen LibreWXR-server i EU. Utan den är radarn avstängd. Endast kartområdet runt en stad skickas."
+    "radarServerNote": "LibreWXR-server för radarn. Lämna tomt för att stänga av radarn.",
+    "mapServer": "Kartserver",
+    "mapServerNote": "OpenFreeMap eller en annan OpenMapTiles-TileJSON-adress, eller en .pmtiles-fil, för land och vatten på radarkartan.",
+    "libreWxrUse": "Regnradar för de senaste 2 timmarna och nästa timme.",
+    "libreWxrThirdParty": "LibreWXR är ett oberoende öppen källkod-projekt (AGPL-3.0) som inte drivs av utvecklaren av Weather Log. Dess offentliga server uppger att den inte sparar IP-adresser eller detaljer om förfrågningar. Den tar emot kartplattorna runt en stad du tittar på.",
+    "libreWxrSource": "Källkod för LibreWXR",
+    "openFreeMapUse": "Land och vatten på radarkartan, från OpenStreetMap-data (ODbL).",
+    "openFreeMapThirdParty": "OpenFreeMap är ett oberoende öppen källkod-projekt som drivs från EU (Ungern), inte av utvecklaren av Weather Log. Inga konton eller kakor. Det tar emot kartplattorna runt en stad du tittar på.",
+    "openFreeMapSource": "Källkod för OpenFreeMap",
+    "openFreeMapPrivacy": "OpenFreeMaps integritetspolicy",
+    "osmCopyright": "OpenStreetMaps upphovsrätt",
+    "attributionRadar": "Radar: LibreWXR, EUMETNET OPERA (CC BY 4.0) · Map: OpenFreeMap © OpenMapTiles © OpenStreetMap (ODbL)"
   },
   "backup": {
     "notJson": "Filen är inte giltig JSON.",
@@ -652,14 +663,17 @@
     "pause": "Paus",
     "prev": "Föregående bild",
     "next": "Nästa bild",
-    "credit": "Radar EUMETNET OPERA · Karta © OpenStreetMap",
+    "credit": "Radar: LibreWXR · EUMETNET OPERA · Map: OpenFreeMap © OpenStreetMap",
     "mapLabel": "Regnradar runt staden",
     "waiting": "Väntar på radardata",
     "offline": "Radarn är inte tillgänglig offline.",
     "failed": "Radarn kunde inte läsas in.",
     "stale": "Radarn kunde inte uppdateras.",
     "retry": "Försök igen",
-    "noServer": "Radarn kräver en egen radarserver i EU. Ange adressen under Inställningar.",
-    "openSettings": "Öppna inställningar"
+    "noServer": "Radarn är avstängd. Lägg till en radarserver under Inställningar.",
+    "openSettings": "Öppna inställningar",
+    "zoomIn": "Zooma in",
+    "zoomOut": "Zooma ut",
+    "area": "{km} km bred"
   }
 }
