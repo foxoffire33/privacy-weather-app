@@ -1,3 +1,8 @@
+import { noteStorageFault } from './bootStore';
+import { onRecordFault } from './core/recordSync';
+
+onRecordFault((error) => { noteStorageFault(error); });
+
 export { addDays, daysBetween, todayISO } from './core/time';
 export { errorMessage } from './core/errors';
 export { IDLE_QUERY } from './core/types';

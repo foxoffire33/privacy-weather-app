@@ -116,6 +116,17 @@ flush cannot resurrect a cleared key after the delete; writes submitted after th
 normal. A failed clear rejects with the typed `StorageError` (nothing is deleted) and the caller records
 it through `noteStorageFault`, so the app never claims a clear it could not perform.
 
+**14. The record flush retries on a budget, and its failures are state.** `recordSync` flushes the dirty
+record batch in one relaxed transaction, debounced at 250 ms. A failed flush requeues the batch (a newer
+write always wins, and entries covered by a clear in the same window are dropped), records the typed
+`StorageError`, and — for transient codes (`open-failed`, `blocked`, `transaction-aborted`, `write-failed`) —
+schedules a bounded exponential backoff with jitter (8 attempts, 250 ms base, 30 s cap); permanent codes
+(quota, unavailable, corrupt) stop auto-retry at once. `recordSyncStatus()` exposes the pending count, the
+attempt count and the last error; a successful flush clears them and a new write resets the retry budget.
+`flushRecords()` rejects when the batch it was asked to flush failed, and the `pagehide` / `visibilitychange`
+flush is best-effort — observed through the fault hook into `bootStore.storageError`, never treated as proof
+that the records are on disk.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

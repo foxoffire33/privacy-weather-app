@@ -1,6 +1,6 @@
 import { errorMessage } from './errors';
 import { isRecord } from './guards';
-import { idbDel, idbGet, idbSet, toStorageError } from './idb';
+import { idbDel, idbGet, idbSet, RETRYABLE_WRITE_CODES, toStorageError } from './idb';
 
 import type { StorageError, StorageErrorCode } from './idb';
 import type { HydratablePersist } from './types';
@@ -10,8 +10,6 @@ const WRITE_DEBOUNCE_MS = 250;
 const RETRY_BASE_MS = 250;
 const RETRY_MAX_MS = 30_000;
 const MAX_AUTO_RETRIES = 8;
-
-const RETRYABLE_WRITE_CODES: ReadonlySet<StorageError['code']> = new Set(['open-failed', 'blocked', 'transaction-aborted', 'write-failed']);
 
 interface PendingWriteState {
   revision: number;

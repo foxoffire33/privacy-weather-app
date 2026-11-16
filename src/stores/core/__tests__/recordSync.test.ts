@@ -25,6 +25,8 @@ async function tick(): Promise<void> {
   await new Promise((resolve) => { setTimeout(resolve, 0); });
 }
 
+const busy = () => { throw new DOMException('busy', 'AbortError'); };
+
 function heldGate(): { promise: Promise<void>; release: () => void } {
   let release: (() => void) | undefined;
   const promise = new Promise<void>((resolve) => { release = resolve; });
@@ -32,6 +34,7 @@ function heldGate(): { promise: Promise<void>; release: () => void } {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -98,5 +101,83 @@ describe('clearRecords ordering contract', () => {
     const second = m.clearRecords('b:');
     await Promise.all([first, second]);
     expect(log).toEqual(['delete a:', 'delete b:']);
+  });
+});
+
+describe('record flush retry policy', () => {
+  it('rejects when its batch fails and exposes the failure in the status', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(() => {
+      log.push('write failed');
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    m.putRecord('p:x', 1);
+    await expect(m.flushRecords()).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
+    const status = m.recordSyncStatus();
+    expect(status.pending).toBe(1);
+    expect(status.code).toBe('quota-exceeded');
+    expect(status.lastError).toBe('IndexedDB write failed: full');
+    await tick();
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries transient failures on bounded backoff and recovers', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(1);
+    vi.mocked(idb.recordsWrite)
+      .mockImplementationOnce(busy)
+      .mockImplementationOnce(busy)
+      .mockImplementationOnce(async () => { log.push('write'); await Promise.resolve(); });
+    m.putRecord('p:x', 1);
+    await expect(m.flushRecords()).rejects.toMatchObject({ name: 'StorageError', code: 'transaction-aborted' });
+    expect(m.recordSyncStatus().pending).toBe(1);
+    expect(m.recordSyncStatus().attempts).toBe(1);
+    await vi.advanceTimersByTimeAsync(250);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(3);
+    const healed = m.recordSyncStatus();
+    expect(healed.pending).toBe(0);
+    expect(healed.attempts).toBe(0);
+    expect(healed.lastError).toBeNull();
+  });
+
+  it('stops auto-retry on a permanent error and recovers on a manual flush', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(() => {
+      log.push('write failed');
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    m.putRecord('p:x', 1);
+    await expect(m.flushRecords()).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(1);
+    expect(m.recordSyncStatus().pending).toBe(1);
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => { log.push('write'); await Promise.resolve(); });
+    await m.flushRecords();
+    expect(m.recordSyncStatus().pending).toBe(0);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets a newer write win after a failure and resets the retry budget', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(() => {
+      log.push('write failed');
+      throw new DOMException('busy', 'AbortError');
+    });
+    m.putRecord('p:x', 1);
+    await expect(m.flushRecords()).rejects.toMatchObject({ name: 'StorageError', code: 'transaction-aborted' });
+    m.putRecord('p:x', 2);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenLastCalledWith([['p:x', 2]], []);
+    expect(m.recordSyncStatus().pending).toBe(0);
+    expect(m.recordSyncStatus().lastError).toBeNull();
   });
 });

@@ -1,9 +1,14 @@
-import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, toStorageError } from './idb';
+import { errorMessage } from './errors';
+import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, toStorageError } from './idb';
 import { measure } from './marks';
 
+import type { StorageError, StorageErrorCode } from './idb';
 import type { IdbEntry, MapStore } from './types';
 
 const FLUSH_MS = 250;
+const RETRY_BASE_MS = 250;
+const RETRY_MAX_MS = 30_000;
+const MAX_AUTO_RETRIES = 8;
 
 const puts = new Map<string, unknown>();
 const deletes = new Set<string>();
@@ -14,8 +19,41 @@ let chain: Promise<void> = Promise.resolve();
 const clearedPrefixes: string[] = [];
 const touched = new Set<string>();
 
-async function flushOnce(): Promise<void> {
-  if (puts.size === 0 && deletes.size === 0) { return; }
+let attempts = 0;
+let lastError: StorageError | null = null;
+let faultListener: ((error: StorageError) => void) | null = null;
+
+export function onRecordFault(listener: ((error: StorageError) => void) | null): void {
+  faultListener = listener;
+}
+
+export interface RecordSyncStatus {
+  pending: number;
+  attempts: number;
+  code: StorageErrorCode | null;
+  lastError: string | null;
+}
+
+export function recordSyncStatus(): RecordSyncStatus {
+  return {
+    pending: puts.size + deletes.size,
+    attempts,
+    code: lastError === null ? null : lastError.code,
+    lastError: lastError === null ? null : errorMessage(lastError),
+  };
+}
+
+function backoffDelay(count: number): number {
+  const base = Math.min(RETRY_BASE_MS * 2 ** (count - 1), RETRY_MAX_MS);
+  return base * (0.5 + Math.random() * 0.5);
+}
+
+function reportFault(error: StorageError): void {
+  faultListener?.(error);
+}
+
+async function flushOnce(): Promise<StorageError | null> {
+  if (puts.size === 0 && deletes.size === 0) { return null; }
   const batch: IdbEntry[] = [...puts];
   const gone = [...deletes];
   const clearMark = clearedPrefixes.length;
@@ -23,16 +61,34 @@ async function flushOnce(): Promise<void> {
   deletes.clear();
   try {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
-  } catch {
+  } catch (error) {
+    const storageError = toStorageError('write', error);
     requeue(batch, gone, clearedPrefixes.slice(clearMark));
+    lastError = storageError;
+    if (RETRYABLE_WRITE_CODES.has(storageError.code) && attempts < MAX_AUTO_RETRIES) {
+      attempts += 1;
+      timer ??= setTimeout(() => { timer = null; void flushRecords().catch(reportFault); }, backoffDelay(attempts));
+    }
+    return storageError;
   }
+  attempts = 0;
+  lastError = null;
+  return null;
 }
 
 export async function flushRecords(): Promise<void> {
   if (timer !== null) { clearTimeout(timer); }
   timer = null;
-  chain = chain.then(flushOnce, flushOnce);
-  return chain;
+  let outcome: StorageError | null;
+  chain = chain.then(
+    async () => { outcome = await flushOnce(); },
+    async () => { await flushOnce(); },
+  );
+  return chain.then(() => {
+    if (outcome !== null) {
+      throw outcome;
+    }
+  });
 }
 
 const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
@@ -41,17 +97,17 @@ function requeue(batch: readonly IdbEntry[], gone: readonly string[], clearedSin
   const keep = (key: string) => !newer(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
   for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
   for (const key of gone) { if (keep(key)) { deletes.add(key); } }
-  schedule();
 }
 
 
 function schedule(): void {
-  timer ??= setTimeout(() => { void flushRecords(); }, FLUSH_MS);
+  attempts = 0;
+  timer ??= setTimeout(() => { timer = null; void flushRecords().catch(reportFault); }, FLUSH_MS);
 }
 
 if (typeof document !== 'undefined') {
-  document.addEventListener('pagehide', () => { void flushRecords(); });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords(); } });
+  document.addEventListener('pagehide', () => { void flushRecords().catch(reportFault); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords().catch(reportFault); } });
 }
 
 export function changedSinceStart(key: string): boolean {

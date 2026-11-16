@@ -47,6 +47,8 @@ const OP_MESSAGE: Readonly<Record<'open' | 'read' | 'write', string>> = {
   write: 'IndexedDB write failed',
 };
 
+export const RETRYABLE_WRITE_CODES: ReadonlySet<StorageErrorCode> = new Set(['open-failed', 'blocked', 'transaction-aborted', 'write-failed']);
+
 export function toStorageError(operation: 'open' | 'read' | 'write', cause: unknown): StorageError {
   if (cause instanceof StorageError) { return cause; }
   const code: StorageErrorCode = cause instanceof DOMException && cause.name in DOM_CODE ? DOM_CODE[cause.name] : OP_CODE[operation];
