@@ -651,7 +651,6 @@
     "now": "Most",
     "inMin": "{n} perc múlva",
     "agoMin": "{n} perce",
-    "hours": "{n} óra",
     "dry": "Száraz",
     "light": "Gyenge eső",
     "moderate": "Mérsékelt eső",
@@ -674,6 +673,12 @@
     "openSettings": "Beállítások megnyitása",
     "zoomIn": "Nagyítás",
     "zoomOut": "Kicsinyítés",
-    "area": "{km} km széles"
+    "area": "{km} km széles",
+    "inH": "{h} óra múlva",
+    "agoH": "{h} órája",
+    "inHm": "{h} óra {m} perc múlva",
+    "agoHm": "{h} óra {m} perce",
+    "modelNote": "Ilyen messze nincs radar. A mutatott eső a város előrejelzése (Open-Meteo).",
+    "title": "Csapadékradar"
   }
 }

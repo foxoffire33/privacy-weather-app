@@ -669,7 +669,6 @@
     "now": "Anois",
     "inMin": "i gceann {n} nóim",
     "agoMin": "{n} nóim ó shin",
-    "hours": "{n} u",
     "dry": "Tirim",
     "light": "Báisteach éadrom",
     "moderate": "Báisteach mheasartha",
@@ -692,6 +691,12 @@
     "openSettings": "Oscail socruithe",
     "zoomIn": "Zúmáil isteach",
     "zoomOut": "Zúmáil amach",
-    "area": "{km} km ar leithead"
+    "area": "{km} km ar leithead",
+    "inH": "i gceann {h} u",
+    "agoH": "{h} u ó shin",
+    "inHm": "i gceann {h} u {m} nóim",
+    "agoHm": "{h} u {m} nóim ó shin",
+    "modelNote": "Níl radar chomh fada sin chun cinn. Is í an bháisteach a thaispeántar réamhaisnéis na cathrach féin (Open-Meteo).",
+    "title": "Radar báistí"
   }
 }

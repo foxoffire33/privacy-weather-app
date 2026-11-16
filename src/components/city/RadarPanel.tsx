@@ -1,21 +1,21 @@
 import { Box, Button, ColorSwatch, Group, SimpleGrid, Stack, Text, UnstyledButton } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { startTransition, useEffect, useState } from 'react';
+import { useInViewport, useMediaQuery } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { t } from '../../i18n';
-import { loadRadar, RADAR_CELLS, useIsOffline, useRadarData, useRadarServer, useRadarStore } from '../../stores';
+import { loadRadar, RADAR_CELLS, useIsOffline, VISIBLE_COLS, VISIBLE_ROWS, useRadarData, useRadarServer, useRadarStore } from '../../stores';
 import { useUiStore } from '../../stores/uiStore';
 import { useNowSeconds } from '../../utils/clock';
 import { clockAt } from '../../utils/format';
 import { paths } from '../../utils/paths';
-import { hoursLabel, nowIndex, rainLabel, rainNear, relativeTime, selectedIndex } from '../../utils/radar';
+import { buildTimeline, isWet, nowIndex, rainLabel, rainNear, relativeTime, selectedIndex } from '../../utils/radar';
 import { Icon } from '../Icon';
 
 import { RadarMap } from './RadarMap';
 
 import type { LandMap, RadarFrame } from '../../stores';
-import type { RadarControlsProps, RadarFramesProps, RadarNoticeProps, RadarPanelProps, RadarReadoutProps, RadarZoomProps } from '../../types';
+import type { RadarControlsProps, TimelineKind, RadarFramesProps, RadarNoticeProps, RadarPanelProps, RadarReadoutProps, RadarZoomProps } from '../../types';
 import type { ReactElement } from 'react';
 
 const REFRESH_MS = 5 * 60 * 1000;
@@ -25,7 +25,7 @@ const BAR_MIN = 3;
 const NO_FRAMES: RadarFrame[] = [];
 const CELLS: readonly number[] = RADAR_CELLS;
 const LANDSCAPE_MAP_H = 'calc(100dvh - 150px)';
-const EMPTY_LAND: LandMap = { version: 0, cols: 46, rows: 40, cells: '' };
+const EMPTY_LAND: LandMap = { version: 0, cols: VISIBLE_COLS * 2, rows: VISIBLE_ROWS * 2, cells: '' };
 
 function Notice({ text, action, onAction }: RadarNoticeProps): ReactElement {
   return (
@@ -36,9 +36,9 @@ function Notice({ text, action, onAction }: RadarNoticeProps): ReactElement {
   );
 }
 
-function barColor(selected: boolean, forecast: boolean): string {
+function barColor(selected: boolean, kind: TimelineKind): string {
   if (selected) { return 'signal.5'; }
-  return forecast ? 'dark.6' : 'dark.5';
+  return kind === 'radar' ? 'dark.5' : 'dark.6';
 }
 
 function RadarFrames({ frames, selected, cols, rows, onSelect }: RadarFramesProps): ReactElement {
@@ -55,14 +55,14 @@ function RadarFrames({ frames, selected, cols, rows, onSelect }: RadarFramesProp
           <UnstyledButton key={f.time} flex={1} h="100%" display="flex" style={{ alignItems: 'flex-end' }}
             aria-label={relativeTime(f.time, nowTime)} aria-pressed={i === selected} onClick={() => { onSelect(f.time); }}>
             <Box w="100%" h={Math.max(BAR_MIN, (amounts[i] ?? 0) / top * BAR_MAX)}
-              bg={barColor(i === selected, f.forecast)} />
+              bg={barColor(i === selected, f.kind)} opacity={f.kind === 'model' && i !== selected ? 0.7 : 1} />
           </UnstyledButton>
         ))}
       </Group>
       <Group justify="space-between" mt={4} fz={11} c="dimmed" wrap="nowrap">
-        <Text span inherit>{first === undefined ? '' : hoursLabel(first.time, nowTime)}</Text>
+        <Text span inherit>{first === undefined ? '' : relativeTime(first.time, nowTime)}</Text>
         <Text span inherit fw={800} c="white">{t('radar.now')}</Text>
-        <Text span inherit>{last === undefined || last === frames[now] ? '' : hoursLabel(last.time, nowTime)}</Text>
+        <Text span inherit>{last === undefined || last === frames[now] ? '' : relativeTime(last.time, nowTime)}</Text>
       </Group>
     </>
   );
@@ -74,7 +74,7 @@ function Readout({ frame, nowTime, timeZone }: RadarReadoutProps): ReactElement 
       {frame === undefined ? <Text span inherit c="dimmed">{t('radar.waiting')}</Text> : (
         <>
           <Text span inherit truncate="end"><Text span inherit fw={800} fz={13}>{clockAt(frame.time * 1000, timeZone)}</Text>{` · ${relativeTime(frame.time, nowTime)}`}</Text>
-          <Text span inherit fw={800} c={frame.cityDbz === null ? 'dimmed' : 'signal.3'} style={{ flex: 'none' }}>{rainLabel(frame)}</Text>
+          <Text span inherit fw={800} c={isWet(frame) ? 'signal.3' : 'dimmed'} style={{ flex: 'none' }}>{rainLabel(frame)}</Text>
         </>
       )}
     </Group>
@@ -95,28 +95,32 @@ function Legend(): ReactElement {
   );
 }
 
-function ZoomRow({ cell, fullscreenId, full }: RadarZoomProps): ReactElement {
+function zoomedCell(cell: number, by: number): number | undefined {
+  const at = CELLS.indexOf(cell) + by;
+  return at >= 0 ? CELLS.at(at) : undefined;
+}
+
+function ZoomRow({ cell }: RadarZoomProps): ReactElement {
   const setCell = useUiStore((s) => s.setRadarCell);
-  const openChart = useUiStore((s) => s.openChart);
   const at = CELLS.indexOf(cell);
   const zoom = (by: number) => {
-    const next = at + by >= 0 ? CELLS.at(at + by) : undefined;
-    if (next !== undefined) { startTransition(() => { setCell(next); }); }
+    const next = zoomedCell(cell, by);
+    if (next !== undefined) { setCell(next); }
   };
   return (
     <Group grow gap={4} mt={4} wrap="nowrap">
       <Button variant="default" aria-label={t('radar.zoomOut')} disabled={at >= CELLS.length - 1} onClick={() => { zoom(1); }}><Icon name="minus" size={18} /></Button>
       <Button variant="default" aria-label={t('radar.zoomIn')} disabled={at <= 0} onClick={() => { zoom(-1); }}><Icon name="plus" size={18} /></Button>
-      {!full && <Button variant="default" aria-label={t('chart.fullscreen')} onClick={() => { openChart(fullscreenId); }}><Icon name="expand" size={18} /></Button>}
     </Group>
   );
 }
 
-function RadarControls({ frames, index, cols, rows, cell, fullscreenId, full, stale, onRetry }: RadarControlsProps): ReactElement {
+function RadarControls({ frames, index, cols, rows, cell, stale, visible, onRetry }: RadarControlsProps): ReactElement {
   const setFrame = useUiStore((s) => s.setRadarFrame);
-  const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const playing = visible && !paused;
   const step = (by: number) => {
-    setPlaying(false);
+    setPaused(true);
     const next = frames.at((index + by) % Math.max(1, frames.length));
     if (next !== undefined) { setFrame(next.time); }
   };
@@ -136,32 +140,42 @@ function RadarControls({ frames, index, cols, rows, cell, fullscreenId, full, st
       )}
       {frames.length > 0 && (
         <>
-          <RadarFrames frames={frames} selected={index} cols={cols} rows={rows} onSelect={(time) => { setPlaying(false); setFrame(time); }} />
+          <RadarFrames frames={frames} selected={index} cols={cols} rows={rows} onSelect={(time) => { setPaused(true); setFrame(time); }} />
           <Group grow gap={4} mt={10} wrap="nowrap">
             <Button variant="default" aria-label={t('radar.prev')} onClick={() => { step(-1); }}><Icon name="prev" size={18} /></Button>
-            <Button variant="default" onClick={() => { setPlaying((p) => !p); }}>
+            <Button variant="default" onClick={() => { setPaused(playing); }}>
               <Group gap={8} wrap="nowrap"><Icon name={playing ? 'pause' : 'play'} size={16} />{playing ? t('radar.pause') : t('radar.play')}</Group>
             </Button>
             <Button variant="default" aria-label={t('radar.next')} onClick={() => { step(1); }}><Icon name="next" size={18} /></Button>
           </Group>
         </>
       )}
-      <ZoomRow cell={cell} fullscreenId={fullscreenId} full={full} />
+      <ZoomRow cell={cell} />
       <Legend />
     </>
   );
 }
 
-function RadarContent({ cityId, timeZone, height, fullscreenId }: RadarPanelProps): ReactElement {
+function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): ReactElement {
   const cell = useUiStore((s) => s.radarCell);
-  const { key, land, radar, query } = useRadarData(cityId, cell);
+  const setCell = useUiStore((s) => s.setRadarCell);
+  const { ref: viewportRef, inViewport } = useInViewport();
+  const { key, land, radar, query, shownCell } = useRadarData(cityId, cell);
   const offline = useIsOffline();
   const landscape = useMediaQuery('(orientation: landscape)');
   const retry = useRadarStore((s) => s.retry);
   const frameTime = useUiStore((s) => s.radarFrame);
-  const frames = radar?.frames ?? NO_FRAMES;
   const nowTime = useNowSeconds();
+  const frames = buildTimeline(radar?.frames ?? NO_FRAMES, forecast, nowTime);
   const index = selectedIndex(frames, frameTime, nowTime);
+  const selected = frames.at(index);
+  const pinchZoom = (ratio: number) => {
+    const at = Math.min(CELLS.length - 1, Math.max(0, CELLS.indexOf(cell) - Math.round(Math.log2(ratio))));
+    const next = CELLS.at(at);
+    if (next === undefined || next === cell) { return false; }
+    setCell(next);
+    return true;
+  };
   const reload = () => { retry(key); void loadRadar(cityId, cell); };
   useEffect(() => {
     if (offline) { return; }
@@ -175,19 +189,21 @@ function RadarContent({ cityId, timeZone, height, fullscreenId }: RadarPanelProp
   }
   const map = land ?? EMPTY_LAND;
   const side = height !== undefined && landscape;
-  const readout = <Readout frame={frames[index]} nowTime={nowTime} timeZone={timeZone} />;
+  const readout = <Readout frame={selected} nowTime={nowTime} timeZone={timeZone} />;
   const mapBox = (
-    <>
-      <RadarMap land={map} frame={frames[index]} height={side ? LANDSCAPE_MAP_H : height} />
+    <Box ref={viewportRef}>
+      <RadarMap land={map} frame={selected?.frame} height={side ? LANDSCAPE_MAP_H : height} visibleCols={VISIBLE_COLS} visibleRows={VISIBLE_ROWS}
+        baseScale={shownCell / cell} zoom={cell} onPinchZoom={pinchZoom} />
+      {selected?.kind === 'model' && <Text fz={11} c="dimmed" mt={4}>{t('radar.modelNote')}</Text>}
       <Group justify="space-between" wrap="nowrap" mt={4} fz={10} c="dimmed">
-        <Text span inherit style={{ flex: 'none' }}>{t('radar.area', { km: Math.round((map.cols * cell) / 1000) })}</Text>
+        <Text span inherit style={{ flex: 'none' }}>{t('radar.area', { km: Math.round((VISIBLE_COLS * cell) / 1000) })}</Text>
         <Text span inherit ta="right">{t('radar.credit')}</Text>
       </Group>
-    </>
+    </Box>
   );
   const controls = (
-    <RadarControls frames={frames} index={index} cols={map.cols} rows={map.rows} cell={cell} fullscreenId={fullscreenId}
-      full={height !== undefined} stale={query.status === 'error' && !offline} onRetry={reload} />
+    <RadarControls frames={frames} index={index} cols={map.cols} rows={map.rows} cell={cell} visible={inViewport}
+      stale={query.status === 'error' && !offline} onRetry={reload} />
   );
   if (side) {
     return <SimpleGrid cols={2} spacing={16}><Box>{mapBox}</Box><Box>{readout}{controls}</Box></SimpleGrid>;
@@ -195,11 +211,11 @@ function RadarContent({ cityId, timeZone, height, fullscreenId }: RadarPanelProp
   return <>{readout}<Box mt={8}>{mapBox}</Box>{controls}</>;
 }
 
-export function RadarPanel({ cityId, timeZone, height, fullscreenId }: RadarPanelProps): ReactElement {
+export function RadarPanel({ cityId, timeZone, forecast, height }: RadarPanelProps): ReactElement {
   const server = useRadarServer();
   const navigate = useNavigate();
   if (server.trim() === '') {
     return <Notice text={t('radar.noServer')} action={t('radar.openSettings')} onAction={() => { void navigate(paths.settings); }} />;
   }
-  return <RadarContent cityId={cityId} timeZone={timeZone} height={height} fullscreenId={fullscreenId} />;
+  return <RadarContent cityId={cityId} timeZone={timeZone} forecast={forecast} height={height} />;
 }

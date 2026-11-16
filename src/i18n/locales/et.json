@@ -651,7 +651,6 @@
     "now": "Praegu",
     "inMin": "{n} min pärast",
     "agoMin": "{n} min tagasi",
-    "hours": "{n} h",
     "dry": "Kuiv",
     "light": "Nõrk vihm",
     "moderate": "Mõõdukas vihm",
@@ -674,6 +673,12 @@
     "openSettings": "Ava seaded",
     "zoomIn": "Suurenda",
     "zoomOut": "Vähenda",
-    "area": "{km} km lai"
+    "area": "{km} km lai",
+    "inH": "{h} h pärast",
+    "agoH": "{h} h tagasi",
+    "inHm": "{h} h {m} min pärast",
+    "agoHm": "{h} h {m} min tagasi",
+    "modelNote": "Nii kaugele radarit pole. Näidatud vihm on linna enda prognoos (Open-Meteo).",
+    "title": "Sademeradar"
   }
 }

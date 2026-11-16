@@ -6,7 +6,7 @@ import { errorMessage } from './core/errors';
 import { afterGesture } from './core/gesture';
 import { isRecord, without } from './core/guards';
 import { clearRecords, persistMap, readRecord, restore } from './core/recordSync';
-import { LAND_VERSION, radarKey, sourceId } from './factories/radar';
+import { LAND_VERSION, RADAR_SET_VERSION, radarKey, sourceId } from './factories/radar';
 import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
 import type { QueryState } from './core/types';
@@ -20,7 +20,7 @@ const RADAR_FRESH_MS = 5 * 60 * 1000;
 export const currentRadarSource = (): string => sourceId(getConfig().radarServer, getConfig().mapServer);
 
 const isLand = (v: unknown): v is LandMap => isRecord(v) && v.version === LAND_VERSION && typeof v.cells === 'string';
-const isRadarSet = (v: unknown): v is RadarSet => isRecord(v) && typeof v.fetchedAt === 'number' && Array.isArray(v.frames);
+const isRadarSet = (v: unknown): v is RadarSet => isRecord(v) && v.version === RADAR_SET_VERSION && typeof v.fetchedAt === 'number' && Array.isArray(v.frames);
 
 const runs = new Map<string, number>();
 const runOf = (cityId: string): number => runs.get(cityId) ?? 0;
@@ -33,7 +33,8 @@ const ofCity = <V>(map: Partial<Record<string, V>>, cityId: string): Partial<Rec
 
 async function frames(city: City, cell: number, previous: RadarSet | undefined): Promise<RadarFrame[]> {
   const refs = await fetchRadarFrames();
-  const kept = new Map((previous?.frames ?? []).filter((f) => !f.forecast).map((f) => [f.time, f]));
+  const reusable = previous?.version === RADAR_SET_VERSION ? previous.frames : [];
+  const kept = new Map(reusable.filter((f) => !f.forecast).map((f) => [f.time, f]));
   return Promise.all(refs.map(async (ref) => {
     const cached = ref.forecast ? undefined : kept.get(ref.time);
     return cached ?? fetchRadarFrame(city, ref, cell);
@@ -64,8 +65,8 @@ export const useRadarStore = create<RadarState>()((set, get) => {
   async function loadFrames(city: City, cell: number, run: number, gen: number): Promise<void> {
     const key = radarKey(city.id, cell, currentRadarSource());
     const previous = get().radar[key];
-    if (previous !== undefined && Date.now() - previous.fetchedAt < RADAR_FRESH_MS) { return; }
-    const next: RadarSet = { fetchedAt: Date.now(), frames: await frames(city, cell, previous) };
+    if (previous?.version === RADAR_SET_VERSION && Date.now() - previous.fetchedAt < RADAR_FRESH_MS) { return; }
+    const next: RadarSet = { version: RADAR_SET_VERSION, fetchedAt: Date.now(), frames: await frames(city, cell, previous) };
     await afterGesture();
     if (current(city.id, run, gen)) { set((s) => ({ radar: { ...s.radar, [key]: next } })); }
   }

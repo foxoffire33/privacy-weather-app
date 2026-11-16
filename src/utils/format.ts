@@ -117,3 +117,21 @@ export function fmtNumber(value: number, maxDigits: number, minDigits = 0): stri
   }
   return format.format(value);
 }
+
+const zoneParts = new Map<string, Intl.DateTimeFormat>();
+
+function zoneOffsetMs(ms: number, timeZone: string): number {
+  let format = zoneParts.get(timeZone);
+  if (format === undefined) {
+    format = new Intl.DateTimeFormat('en-US', { timeZone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+    zoneParts.set(timeZone, format);
+  }
+  const part = (type: string) => Number(format.formatToParts(ms).find((p) => p.type === type)?.value ?? 0);
+  return Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second')) - ms;
+}
+
+export function zonedEpoch(iso: string, timeZone: string): number {
+  const asUtc = Date.parse(`${iso.length === 16 ? `${iso}:00` : iso}Z`);
+  const guess = asUtc - zoneOffsetMs(asUtc, timeZone);
+  return Math.round((asUtc - zoneOffsetMs(guess, timeZone)) / 1000);
+}

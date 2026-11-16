@@ -19,6 +19,7 @@ The app is about data: historic, present and future.
 - **Animation and gestures use Motion** (`motion/react`). Wrap Mantine components with `MotionBox` /
   `MotionButton` from `components/motionComponents.ts`; timings live in `MOTION` and `SCREEN_MOTION` in `theme.ts`.
   No CSS transitions or keyframes, no hand-written drag handlers. Mantine's own Modal/Drawer transitions stay.
+  The one exception: two-finger pinch on the radar map uses `usePinch` from `@use-gesture/react` (Motion has no pinch).
 - **No comments in source files.**
 
 ## Data

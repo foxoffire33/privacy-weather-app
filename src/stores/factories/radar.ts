@@ -1,7 +1,12 @@
+import { sortedCopy } from '../core/sort';
+
 import type { CityRain, GridView, RadarCells, RadarGrid, RadarLevel, TileCover, TilePlacement } from '../types';
 
-export const LAND_VERSION = 1;
-export const RADAR_GRID: RadarGrid = { cols: 46, rows: 40, cellMeters: 800 };
+export const LAND_VERSION = 2;
+export const RADAR_SET_VERSION = 2;
+export const VISIBLE_COLS = 46;
+export const VISIBLE_ROWS = 40;
+export const RADAR_GRID: RadarGrid = { cols: VISIBLE_COLS * 2, rows: VISIBLE_ROWS * 2, cellMeters: 800 };
 export const SAMPLES = 4;
 export const RADAR_CELLS = [200, 400, 800, 1600, 3200] as const;
 export const DEFAULT_RADAR_CELL = 800;
@@ -26,6 +31,15 @@ export function sourceId(radarServer: string, mapServer: string): string {
 
 export function radarKey(cityId: string, cellMeters: number, source: string): string {
   return `${cityId}:${String(cellMeters)}:${source}`;
+}
+
+export function cellOfKey(key: string, fallback: number): number {
+  const cell = Number(key.split(':').at(-2));
+  return Number.isFinite(cell) && cell > 0 ? cell : fallback;
+}
+
+export function nearestCells(cell: number): number[] {
+  return sortedCopy(RADAR_CELLS, (a, b) => Math.abs(Math.log(a / cell)) - Math.abs(Math.log(b / cell)));
 }
 
 function metersPerPixel(lat: number, zoom: number): number {

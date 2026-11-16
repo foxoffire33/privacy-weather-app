@@ -1,4 +1,4 @@
-import type { City, DayData, DayRecord, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
+import type { City, DayData, DayRecord, ForecastData, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
 import type { DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
@@ -411,24 +411,41 @@ export interface SettingsAboutProps {
 export interface RadarPanelProps {
   cityId: string;
   timeZone: string;
-  fullscreenId: string;
+  forecast: ForecastData;
   height?: ChartHeight;
 }
 
 export interface RadarZoomProps {
   cell: number;
-  fullscreenId: string;
-  full: boolean;
 }
 
 export interface RadarMapProps {
   land: LandMap;
   frame: RadarFrame | undefined;
+  visibleCols: number;
+  visibleRows: number;
+  baseScale: number;
+  zoom: number;
+  onPinchZoom: (ratio: number) => boolean;
   height?: ChartHeight;
 }
 
+export interface ModelPoint {
+  time: number;
+  mmPerHour: number;
+}
+
+export type TimelineKind = 'radar' | 'nowcast' | 'model';
+
+export interface TimelineFrame {
+  time: number;
+  kind: TimelineKind;
+  frame: RadarFrame | undefined;
+  mmPerHour: number | null;
+}
+
 export interface RadarFramesProps {
-  frames: readonly RadarFrame[];
+  frames: readonly TimelineFrame[];
   selected: number;
   cols: number;
   rows: number;
@@ -442,19 +459,18 @@ export interface RadarNoticeProps {
 }
 
 export interface RadarReadoutProps {
-  frame: RadarFrame | undefined;
+  frame: TimelineFrame | undefined;
   nowTime: number;
   timeZone: string;
 }
 
 export interface RadarControlsProps {
-  frames: readonly RadarFrame[];
+  frames: readonly TimelineFrame[];
   index: number;
   cols: number;
   rows: number;
   cell: number;
-  fullscreenId: string;
-  full: boolean;
   stale: boolean;
+  visible: boolean;
   onRetry: () => void;
 }
