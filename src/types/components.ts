@@ -330,6 +330,18 @@ export interface ScreenBoundaryState {
   failed: boolean;
 }
 
+export interface TabItem<T> {
+  value: T;
+  label: string;
+}
+
+export interface TabRowProps<T> {
+  className: string;
+  items: readonly TabItem<T>[];
+  active: T | undefined;
+  onChange: (value: T) => void;
+}
+
 export interface SpinProps {
   active: boolean;
   children: ReactNode;

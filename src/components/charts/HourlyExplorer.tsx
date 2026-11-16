@@ -1,5 +1,5 @@
 import { BarChart, CompositeChart, LineChart } from '@mantine/charts';
-import { Box, UnstyledButton } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
@@ -8,6 +8,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { convTemp, convWind, hourOf, weekday, windUnitLabel } from '../../utils/format';
 import { below } from '../../utils/scale';
 import { NO_HIDDEN, visibleSeries } from '../../utils/series';
+import { TabRow } from '../TabRow';
 
 import { INLINE_HEIGHT } from './FullscreenChart';
 import { SeriesLegend } from './SeriesToggle';
@@ -156,12 +157,8 @@ export function HourlyExplorer({ time, v, aqi, from = 0, to, height = INLINE_HEI
   const hidden = useUiStore((st) => st.hiddenSeries[scope] ?? NO_HIDDEN);
   return (
     <Box>
-      <Box className="metric-tabs" role="tablist">
-        {available.map(({ value, label }) => (
-          <UnstyledButton key={value} type="button" role="tab" aria-selected={value === active}
-            data-active={value === active || undefined} onClick={() => { s.setMetric(value); }}>{t(label)}</UnstyledButton>
-        ))}
-      </Box>
+      <TabRow className="metric-tabs" items={available.map(({ value, label }) => ({ value, label: t(label) }))}
+        active={active} onChange={s.setMetric} />
       <MetricChart metric={active} data={data} height={height} windUnit={units.wind} hasChance={has('precipitation_probability')} scope={scope} hidden={hidden} />
     </Box>
   );
