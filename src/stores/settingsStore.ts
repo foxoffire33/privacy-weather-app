@@ -7,9 +7,14 @@ import { idbStorage } from './core/persistStorage';
 import type { SettingsState } from './storeTypes';
 import type { Settings } from './types';
 
+export const PUBLIC_RADAR_SERVER = 'https://api.librewxr.net';
+export const PUBLIC_MAP_SERVER = 'https://tiles.openfreemap.org/planet';
+
 const defaultSettings: Settings = {
   apiKey: '',
   server: '',
+  radarServer: PUBLIC_RADAR_SERVER,
+  mapServer: PUBLIC_MAP_SERVER,
   tempUnit: 'C',
   windUnit: 'kmh',
   snapshotMinutes: 60,
@@ -31,6 +36,7 @@ export const useSettingsStore = create<SettingsState>()(
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      partialize: (s) => ({ settings: s.settings }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>;
         return { ...current, settings: { ...current.settings, ...p.settings } };
@@ -40,15 +46,15 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 function publishApiConfig(s: Settings): void {
-  configureDataLayer({ apiKey: s.apiKey, server: s.server, offline: s.offline });
+  configureDataLayer({ apiKey: s.apiKey, server: s.server, radarServer: s.radarServer, mapServer: s.mapServer, offline: s.offline });
 }
 
 publishApiConfig(useSettingsStore.getState().settings);
 
 let lastKey = '';
 useSettingsStore.subscribe((state) => {
-  const { apiKey, server, offline } = state.settings;
-  const key = `${apiKey}\u0000${server}\u0000${String(offline)}`;
+  const { apiKey, server, radarServer, mapServer, offline } = state.settings;
+  const key = [apiKey, server, radarServer, mapServer, String(offline)].join('\u0000');
   if (key === lastKey) {return;}
   lastKey = key;
   publishApiConfig(state.settings);

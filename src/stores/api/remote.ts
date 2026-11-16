@@ -5,6 +5,7 @@ import { onConfigure } from '../core/config';
 import * as direct from './openMeteo';
 import OpenMeteoWorker from './worker?worker';
 
+import type * as radar from './radar';
 import type { WorkerApi } from './worker';
 import type { Remote } from 'comlink';
 
@@ -27,8 +28,8 @@ function start(): Remote<WorkerApi> | null {
       }, { once: true });
     });
     failed.catch(() => null);
-    onConfigure(({ apiKey, server, offline }) => {
-      if (!broken) { void remote.configure({ apiKey, server, offline }).catch(() => null); }
+    onConfigure(({ apiKey, server, radarServer, mapServer, offline }) => {
+      if (!broken) { void remote.configure({ apiKey, server, radarServer, mapServer, offline }).catch(() => null); }
     });
     return remote;
   } catch {
@@ -54,3 +55,8 @@ export const fetchDailyRange: typeof direct.fetchDailyRange = async (...args) =>
 export const fetchArchive: typeof direct.fetchArchive = async (...args) => call(async (w) => w.fetchArchive(...args), async () => direct.fetchArchive(...args));
 export const fetchDay: typeof direct.fetchDay = async (...args) => call(async (w) => w.fetchDay(...args), async () => direct.fetchDay(...args));
 export const fetchAirDay: typeof direct.fetchAirDay = async (...args) => call(async (w) => w.fetchAirDay(...args), async () => direct.fetchAirDay(...args));
+const radarDirect = async (): Promise<typeof radar> => import('./radar');
+
+export const fetchRadarFrames: typeof radar.fetchRadarFrames = async () => call(async (w) => w.fetchRadarFrames(), async () => { const local = await radarDirect(); return local.fetchRadarFrames(); });
+export const fetchRadarFrame: typeof radar.fetchRadarFrame = async (...args) => call(async (w) => w.fetchRadarFrame(...args), async () => { const local = await radarDirect(); return local.fetchRadarFrame(...args); });
+export const fetchLandMap: typeof radar.fetchLandMap = async (...args) => call(async (w) => w.fetchLandMap(...args), async () => { const local = await radarDirect(); return local.fetchLandMap(...args); });

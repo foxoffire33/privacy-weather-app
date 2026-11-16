@@ -1,5 +1,6 @@
 import { CompositeChart } from '@mantine/charts';
-import { Box } from '@mantine/core';
+import { Box, Skeleton } from '@mantine/core';
+import { Suspense } from 'react';
 
 import { t } from '../../i18n';
 import { useUiStore } from '../../stores/uiStore';
@@ -9,8 +10,10 @@ import { visibleSeries, NO_HIDDEN } from '../../utils/series';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
 import { HourlyExplorer } from '../charts/HourlyExplorer';
 import { SeriesLegend } from '../charts/SeriesToggle';
+import { TabRow } from '../TabRow';
 
 import { Section } from './Parts';
+import { RadarPanel } from './RadarPanel';
 
 import type { ChartHeight, CityDataProps } from '../../types';
 import type { ReactElement } from 'react';
@@ -23,10 +26,22 @@ const weekSeries = () => [
 
 export function Next48Section({ city, entry }: CityDataProps): ReactElement {
   const { data, air } = entry;
+  const view = useUiStore((st) => st.next48View);
+  const setView = useUiStore((st) => st.setNext48View);
   const h0 = nowIndex(data);
   const airByTime = air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined;
   const chart = (height: ChartHeight) => (
-    <HourlyExplorer time={data.hourly.time} v={data.hourly.v} from={h0} to={h0 + 48} aqi={airByTime} height={height} />
+    <>
+      <TabRow className="tab-row" items={[{ value: 'radar', label: t('radar.tab') }, { value: 'charts', label: t('radar.charts') }]}
+        active={view} onChange={setView} />
+      {view === 'radar'
+        ? (
+          <Suspense fallback={<Skeleton h={typeof height === 'number' ? height + 120 : 360} />}>
+            <RadarPanel cityId={city.id} timeZone={data.timezone} fullscreenId={`next48:${city.id}`} height={typeof height === 'number' ? undefined : `calc(${height} - 190px)`} />
+          </Suspense>
+        )
+        : <HourlyExplorer time={data.hourly.time} v={data.hourly.v} from={h0} to={h0 + 48} aqi={airByTime} height={height} />}
+    </>
   );
   return (
     <Section title={t('city.next48')} action={<ExpandButton id={`next48:${city.id}`} />}>

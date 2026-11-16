@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { DEFAULT_RADAR_CELL } from './factories/radar';
+
 import type { UiState } from '../types';
 
 const LOG_PAGE = 50;
@@ -27,6 +29,12 @@ export const useUiStore = create<UiState>()(
       hiddenSeries: {},
       gestureHintSeen: legacyHintSeen(),
       fullscreenChart: null,
+      next48View: 'radar',
+      radarFrame: null,
+      radarCell: DEFAULT_RADAR_CELL,
+      setRadarCell: (radarCell) => set({ radarCell }),
+      setNext48View: (next48View) => set({ next48View }),
+      setRadarFrame: (radarFrame) => set({ radarFrame }),
       setChartMetric: (chartMetric) => set({ chartMetric }),
       setHistoryRange: (historyRange) => set({ historyRange }),
       setLookupDraft: (lookupDraft) => set({ lookupDraft }),
@@ -49,7 +57,7 @@ export const useUiStore = create<UiState>()(
     {
       name: 'wl2-ui',
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ gestureHintSeen: s.gestureHintSeen }),
+      partialize: (s) => ({ gestureHintSeen: s.gestureHintSeen, next48View: s.next48View, radarCell: s.radarCell }),
     },
   ),
 );

@@ -27,3 +27,8 @@ export interface CacheAges {
 export interface CachedRead<T> extends CacheAges {
   build: (json: unknown) => T;
 }
+
+export interface TaggedBytes {
+  data: ArrayBuffer;
+  etag: string | undefined;
+}

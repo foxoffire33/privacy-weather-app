@@ -1,0 +1,22 @@
+{$RADAR_DOMAIN} {
+	log {
+		output discard
+	}
+
+	header {
+		Access-Control-Allow-Origin "*"
+		Access-Control-Allow-Headers "Range"
+		Access-Control-Expose-Headers "Content-Range, ETag"
+		Referrer-Policy "no-referrer"
+	}
+
+	@preflight method OPTIONS
+	respond @preflight 204
+
+	handle_path /map/* {
+		root * /srv/map
+		file_server
+	}
+
+	reverse_proxy {$LIBREWXR_UPSTREAM}
+}

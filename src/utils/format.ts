@@ -93,3 +93,27 @@ export function hourLabel(time: string): string {
   const hour = hourOf(time);
   return hour === '00' ? weekday(time.slice(0, 10)) : hour;
 }
+
+const clocks = new Map<string, Intl.DateTimeFormat>();
+
+export function clockAt(ms: number, timeZone: string): string {
+  const key = `${currentLocale()}|${timeZone}`;
+  let format = clocks.get(key);
+  if (format === undefined) {
+    format = new Intl.DateTimeFormat(currentLocale(), { hour: '2-digit', minute: '2-digit', timeZone });
+    clocks.set(key, format);
+  }
+  return format.format(ms);
+}
+
+const numbers = new Map<string, Intl.NumberFormat>();
+
+export function fmtNumber(value: number, maxDigits: number, minDigits = 0): string {
+  const key = `${currentLocale()}|${String(minDigits)}|${String(maxDigits)}`;
+  let format = numbers.get(key);
+  if (format === undefined) {
+    format = new Intl.NumberFormat(currentLocale(), { minimumFractionDigits: minDigits, maximumFractionDigits: maxDigits });
+    numbers.set(key, format);
+  }
+  return format.format(value);
+}

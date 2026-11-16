@@ -10,10 +10,11 @@ import { useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
+import { useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { QueryState } from './core/types';
-import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LogNeighbours, LookupView, Settings, Units } from './types';
+import type { ArchiveYear, City, DayData, DayRecord, ForecastEntry, LandMap, LogNeighbours, LookupView, RadarSet, Settings, Units } from './types';
 
 export const useSettings = (): Settings => useSettingsStore((s) => s.settings);
 export const useUpdateSettings = (): ((patch: Partial<Settings>) => void) => useSettingsStore((s) => s.updateSettings);
@@ -32,6 +33,13 @@ export const useCity = (cityId: string): City | undefined => useEntityCache((s) 
 export const useCityIndex = (cityId: string): number => useCityStore((s) => s.cityIds.indexOf(cityId));
 
 export const useForecast = (cityId: string): ForecastEntry | undefined => useForecastStore((s) => s.forecasts[cityId]);
+
+export const useLandMap = (key: string): LandMap | undefined => useRadarStore((s) => s.land[key]);
+export const useRadarSet = (key: string): RadarSet | undefined => useRadarStore((s) => s.radar[key]);
+export const useRadarQuery = (key: string): QueryState => useRadarStore((s) => s.queries[key] ?? IDLE_QUERY);
+export const useRadarServer = (): string => useSettingsStore((s) => s.settings.radarServer);
+export const useMapServer = (): string => useSettingsStore((s) => s.settings.mapServer);
+export const useIsOffline = (): boolean => useSettingsStore((s) => s.settings.offline);
 
 export const useForecastQuery = (cityId: string): QueryState =>
   useForecastStore((s) => s.queries[cityId] ?? IDLE_QUERY);

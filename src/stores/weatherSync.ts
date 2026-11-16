@@ -5,8 +5,10 @@ import { once, READY } from './core/inflight';
 import { useDayStore } from './dayStore';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
+import { radarKey } from './factories/radar';
 import { useForecastStore } from './forecastStore';
 import { useLogStore } from './logStore';
+import { currentRadarSource, useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { Pending } from './core/types';
@@ -20,7 +22,15 @@ export const resourceKey = {
   day: (cityId: string, date: string): string => `day:${cityId}:${date}`,
   lookup: (cityId: string, date: string): string => `lookup:${cityId}:${date}`,
   thisDay: (cityId: string, date: string): string => `thisDay:${cityId}:${date.slice(5)}`,
+  radar: (cityId: string, cell: number, key = radarKey(cityId, cell, currentRadarSource())): string => `radar:${key}`,
 };
+
+export function loadRadar(cityId: string, cell: number): Pending {
+  return once(resourceKey.radar(cityId, cell), async () => {
+    const city = entityCache.getOne('city', cityId);
+    if (city !== undefined) { await useRadarStore.getState().load(city, cell); }
+  });
+}
 
 export function refreshCity(cityId: string, opts: RefreshOptions = {}): Pending {
   if (isOffline()) { return READY; }
@@ -52,6 +62,7 @@ export function followCity(geo: GeoResult): number {
 export function unfollowCity(cityId: string): void {
   useCityStore.getState().unfollow(cityId);
   useForecastStore.getState().drop(cityId);
+  useRadarStore.getState().drop(cityId);
 }
 
 export function openDay(cityId: string, date: string): Pending {

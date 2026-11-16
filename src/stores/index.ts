@@ -12,6 +12,8 @@ export * from './cityStore';
 export * from './forecastStore';
 export * from './logStore';
 export * from './dayStore';
+export * from './radarStore';
+export { DEFAULT_RADAR_CELL, levelOf, RADAR_CELLS, rainRate } from './factories/radar';
 export * from './almanacStore';
 export * from './searchStore';
 export * from './weatherSync';

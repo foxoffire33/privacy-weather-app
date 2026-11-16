@@ -5,6 +5,8 @@ export interface DateRange {
   to: string;
 }
 
+export type Next48View = 'radar' | 'charts';
+
 export interface UiState {
   pageIndex: number;
   expandedDay: Record<string, string | null>;
@@ -16,6 +18,12 @@ export interface UiState {
   hiddenSeries: Partial<Record<string, string[]>>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
+  next48View: Next48View;
+  radarFrame: number | null;
+  radarCell: number;
+  setRadarCell: (cell: number) => void;
+  setNext48View: (view: Next48View) => void;
+  setRadarFrame: (time: number | null) => void;
   setChartMetric: (m: string) => void;
   setHistoryRange: (d: number) => void;
   setLookupDraft: (date: string) => void;

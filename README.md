@@ -4,6 +4,7 @@ Open-source, privacy-first weather app that uses [Open-Meteo](https://open-meteo
 
 - **No location access, no account, no trackers, no Google services.** Everything stays on the device. See [PRIVACY.md](PRIVACY.md).
 - **Online mode (default):** forecasts, air quality, pollen, marine data and the historical archive from Open-Meteo, logged day by day.
+- **Radar:** rain radar for the past 2 hours and the next hour on a dot map of the city, with zoom and full screen. Radar frames from the public [LibreWXR](https://librewxr.net) server (open source, EUMETNET OPERA data), land and water from [OpenFreeMap](https://openfreemap.org) (open source, OpenStreetMap data). Both can be replaced by your own server, see [deploy/radar](deploy/radar/README.md).
 - **Offline mode:** a switch on the setup screen and in Settings. The app makes no network requests; you add cities by name and coordinates and log the weather yourself. In online mode without a connection the same manual entry is offered.
 - 24 languages, backup and restore, charts that open full screen.
 
@@ -105,4 +106,4 @@ Developer: [delaparra-services.nl](https://delaparra-services.nl) · info@delapa
 
 GPL-3.0-or-later, see [LICENSE](LICENSE). If you distribute a modified version, you must publish its source under the same license.
 
-Weather data by Open-Meteo.com (CC BY 4.0).
+Weather data by Open-Meteo.com (CC BY 4.0). Radar data EUMETNET OPERA via LibreWXR (CC BY 4.0). Map: OpenFreeMap © OpenMapTiles, data © OpenStreetMap contributors (ODbL).
