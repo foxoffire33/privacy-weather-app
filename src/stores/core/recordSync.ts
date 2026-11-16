@@ -1,7 +1,7 @@
 import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite } from './idb';
 import { measure } from './marks';
 
-import type { IdbEntry, MapStore, SeedWatch } from './types';
+import type { IdbEntry, MapStore } from './types';
 
 const FLUSH_MS = 250;
 
@@ -12,7 +12,7 @@ let restoring = 0;
 
 let chain: Promise<void> = Promise.resolve();
 const clearedPrefixes: string[] = [];
-const seeds = new Set<SeedWatch>();
+const touched = new Set<string>();
 
 async function flushOnce(): Promise<void> {
   if (puts.size === 0 && deletes.size === 0) { return; }
@@ -25,9 +25,7 @@ async function flushOnce(): Promise<void> {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
   } catch {
     requeue(batch, gone, clearedPrefixes.slice(clearMark));
-    return;
   }
-  written([...batch.map(([key]) => key), ...gone]);
 }
 
 export async function flushRecords(): Promise<void> {
@@ -46,25 +44,6 @@ function requeue(batch: readonly IdbEntry[], gone: readonly string[], clearedSin
   schedule();
 }
 
-function written(keys: readonly string[]): void {
-  for (const seed of seeds) {
-    for (const key of keys) { seed.remaining.delete(key); }
-    if (seed.remaining.size === 0) {
-      seeds.delete(seed);
-      seed.done();
-    }
-  }
-}
-
-export async function seedRecords(entries: readonly IdbEntry[]): Promise<void> {
-  const fresh = entries.filter(([key]) => !newer(key));
-  if (fresh.length === 0) { return; }
-  await new Promise<void>((resolve) => {
-    seeds.add({ remaining: new Set(fresh.map(([key]) => key)), done: resolve });
-    for (const [key, value] of fresh) { puts.set(key, value); }
-    schedule();
-  });
-}
 
 function schedule(): void {
   timer ??= setTimeout(() => { void flushRecords(); }, FLUSH_MS);
@@ -75,8 +54,13 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords(); } });
 }
 
+export function changedSinceStart(key: string): boolean {
+  return touched.has(key) || clearedPrefixes.some((prefix) => key.startsWith(prefix));
+}
+
 export function putRecord(key: string, value: unknown): void {
   if (restoring > 0) { return; }
+  touched.add(key);
   deletes.delete(key);
   puts.set(key, value);
   schedule();
@@ -84,6 +68,7 @@ export function putRecord(key: string, value: unknown): void {
 
 export function deleteRecord(key: string): void {
   if (restoring > 0) { return; }
+  touched.add(key);
   puts.delete(key);
   deletes.add(key);
   schedule();
@@ -91,9 +76,6 @@ export function deleteRecord(key: string): void {
 
 export async function clearRecords(prefix: string): Promise<void> {
   clearedPrefixes.push(prefix);
-  for (const seed of seeds) {
-    for (const key of seed.remaining) { if (key.startsWith(prefix)) { seed.remaining.delete(key); } }
-  }
   for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
   for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
   await recordsDeletePrefix(prefix).catch(() => null);

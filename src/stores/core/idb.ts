@@ -104,11 +104,6 @@ export async function recordsWrite(puts: readonly IdbEntry[], deletes: readonly 
   });
 }
 
-export async function recordKeys(): Promise<string[]> {
-  const keys = await read(RECORDS, (s) => s.getAllKeys());
-  return (keys ?? []).filter((key): key is string => typeof key === 'string');
-}
-
 export async function recordsWriteMissing(entries: readonly IdbEntry[]): Promise<void> {
   if (entries.length === 0) { return; }
   await write(RECORDS, (s) => {

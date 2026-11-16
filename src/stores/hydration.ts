@@ -2,12 +2,12 @@ import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
 import { inSequence, isRecord } from './core/guards';
-import { idbDel, idbGet, onUpgradeBlocked, recordKeys, recordsWriteMissing } from './core/idb';
+import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
 import { waitForHydration } from './core/persistStorage';
-import { readRange, restore, seedRecords } from './core/recordSync';
+import { changedSinceStart, readRange, restore } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
@@ -35,6 +35,8 @@ let history: Promise<void> | null = null;
 let historyDone = false;
 let unmigrated: IdbEntry[] = [];
 
+const MIGRATE_RETRY_MS = 5000;
+const MIGRATE_RETRY_MAX = 12;
 const LEGACY_KEYS = ['wl2-entities', 'wl2-forecasts', 'wl2-log', 'wl2-days'];
 
 const isCity = (v: unknown): v is City => isRecord(v) && typeof v.id === 'string' && typeof v.lat === 'number';
@@ -70,12 +72,19 @@ async function migrateKvToRecords(): Promise<void> {
   try {
     await recordsWriteMissing(entries);
   } catch {
-    const stored = new Set(await recordKeys().catch(() => []));
-    unmigrated = entries.filter(([key]) => !stored.has(key));
-    void seedRecords(unmigrated).then(dropLegacy);
+    unmigrated = entries;
+    retryMigration(1);
     return;
   }
   await dropLegacy();
+}
+
+function retryMigration(round: number): void {
+  setTimeout(() => {
+    void recordsWriteMissing(unmigrated.filter(([key]) => !changedSinceStart(key)))
+      .then(dropLegacy)
+      .catch(() => { retryMigration(Math.min(round + 1, MIGRATE_RETRY_MAX)); });
+  }, MIGRATE_RETRY_MS * round);
 }
 
 async function dropLegacy(): Promise<void> {
