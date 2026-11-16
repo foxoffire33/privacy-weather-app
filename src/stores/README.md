@@ -92,8 +92,10 @@ discards the newest value: transient errors retry with bounded exponential backo
 permanent errors (quota, unavailable, corrupt) stop auto-retrying and keep the value queued with a
 persistent error. A key whose hydration read failed does not write at all until a read succeeds, so
 defaults can never be persisted over the user's stored state. Operations that need durable state —
-the backup export, tests — must `await flushPersistedState()`; the `pagehide` flush is best-effort and
-never the only guarantee.
+the backup export, tests — must `await flushPersistedState()`; it resolves only once the key is
+persisted and rejects with the recorded `StorageError` otherwise. `retryPersistedState()` clears the
+recorded error and re-flushes the queued value — the manual recovery path after a permanent failure.
+The `pagehide` flush is best-effort and never the only guarantee.
 
 **12. A storage failure is never "no data".** `core/idb` rejects every open/read/write failure with a
 typed `StorageError` (codes `unavailable`, `blocked`, `read-failed`, `write-failed`, `quota-exceeded`, …)

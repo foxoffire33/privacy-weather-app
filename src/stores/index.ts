@@ -25,7 +25,7 @@ export * from './suspense';
 export { lastSettled, latest, once } from './core/inflight';
 export { gestureEnd, gestureStart } from './core/gesture';
 export { flushRecords } from './core/recordSync';
-export { flushPersistedState, persistenceStatus } from './core/persistStorage';
+export { flushPersistedState, persistenceStatus, retryPersistedState } from './core/persistStorage';
 export { onMeasure, whenIdle } from './core/marks';
 export { whenHistoryReady } from './hydration';
 

@@ -81,7 +81,20 @@ function hasIndexedDb(): boolean {
 
 async function openDb(): Promise<IDBDatabase> {
   dbPromise ??= new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    let request: IDBOpenDBRequest;
+    try {
+      request = indexedDB.open(DB_NAME, DB_VERSION);
+    } catch (error) {
+      reject(toStorageError('open', error));
+      return;
+    }
+    const openError = (): DOMException | null => {
+      try {
+        return request.error;
+      } catch {
+        return null;
+      }
+    };
     request.addEventListener('upgradeneeded', () => {
       const db = request.result;
       for (const name of [KV, RECORDS, RESPONSES]) {
@@ -90,13 +103,13 @@ async function openDb(): Promise<IDBDatabase> {
     });
     request.addEventListener('blocked', () => {
       blockedListener?.(true);
-      reject(new StorageError('blocked', 'IndexedDB upgrade is blocked by another tab', { cause: request.error }));
+      reject(new StorageError('blocked', 'IndexedDB upgrade is blocked by another tab', { cause: openError() }));
     });
     request.addEventListener('success', () => {
       blockedListener?.(false);
       resolve(manage(request.result));
     });
-    request.addEventListener('error', () => { reject(toStorageError('open', request.error ?? new Error('IndexedDB open failed'))); });
+    request.addEventListener('error', () => { reject(toStorageError('open', openError() ?? new Error('IndexedDB open failed'))); });
   });
   return dbPromise.catch((error: unknown) => {
     dbPromise = null;

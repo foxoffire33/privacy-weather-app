@@ -2,7 +2,7 @@ import { errorMessage } from './errors';
 import { isRecord } from './guards';
 import { idbDel, idbGet, idbSet, toStorageError } from './idb';
 
-import type { StorageError } from './idb';
+import type { StorageError, StorageErrorCode } from './idb';
 import type { HydratablePersist } from './types';
 import type { PersistStorage, StorageValue } from 'zustand/middleware';
 
@@ -25,6 +25,7 @@ interface PendingWriteState {
 
 export interface PersistenceStatus {
   pending: boolean;
+  code: StorageErrorCode | null;
   lastError: string | null;
   lastSuccessfulWriteAt: number | null;
 }
@@ -137,20 +138,37 @@ export async function flushPersistedState(name?: string): Promise<void> {
   }
 }
 
+export function retryPersistedState(name?: string): void {
+  const keys = name === undefined ? [...pending.keys()] : [name];
+  for (const key of keys) {
+    const state = pending.get(key);
+    if (state === undefined) { continue; }
+    state.lastError = null;
+    state.attempts = 0;
+    if (state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
+    flush(key);
+  }
+}
+
 export function persistenceStatus(name?: string): PersistenceStatus {
   if (name !== undefined) {
     const state = pending.get(name);
     return {
       pending: state !== undefined,
+      code: state !== undefined && state.lastError !== null ? state.lastError.code : null,
       lastError: state !== undefined && state.lastError !== null ? errorMessage(state.lastError) : null,
       lastSuccessfulWriteAt: state === undefined ? null : state.lastSuccessfulWriteAt,
     };
   }
+  let code: StorageErrorCode | null = null;
   let lastError: string | null = null;
   for (const state of pending.values()) {
-    if (lastError === null && state.lastError !== null) { lastError = errorMessage(state.lastError); }
+    if (lastError === null && state.lastError !== null) {
+      code = state.lastError.code;
+      lastError = errorMessage(state.lastError);
+    }
   }
-  return { pending: pending.size > 0, lastError, lastSuccessfulWriteAt };
+  return { pending: pending.size > 0, code, lastError, lastSuccessfulWriteAt };
 }
 
 export async function waitForHydration(store: HydratablePersist): Promise<void> {

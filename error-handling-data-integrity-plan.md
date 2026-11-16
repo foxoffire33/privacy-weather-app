@@ -35,13 +35,13 @@
 
 | Field | Value |
 |---|---|
-| Status | **Milestone 1 nearly done — T1.7 (exit-gate tests) next** |
-| Completed tasks | **6 / 26** (T1.1–T1.6) |
+| Status | **Milestone 1 complete** — P0 exit gate passed (15 tests) |
+| Completed tasks | **7 / 26** (T1.1–T1.7) |
 | In progress | none |
-| Next task | **T1.7** |
-| Last session | 3 — 2026-11-16, see session log |
+| Next task | **T2.1** |
+| Last session | 4 — 2026-11-17, see session log |
 
-*All of Milestone 1's code is in. T1.7 builds the test infrastructure (vitest + fake-indexeddb) and the P0 test suite, including the 5 `clearRecords` scheduling tests from T1.6's acceptance criteria.*
+*Milestone 2 starts with T2.1: bounded, observable record flush retries in `recordSync.ts` (attempt counts, jittered backoff, stop-on-permanent, `flushRecords()` must reject on batch failure, best-effort pagehide flush).*
 
 ---
 
@@ -87,7 +87,7 @@ Exit gate: P0 tests pass; no critical write or clear can fail silently.
   - Remove the `.catch(() => null)` swallow on `recordsDeletePrefix`.
   - **Done when:** all 5 scheduling tests pass — (1) put→clear→flush absent; (2) flush begins→clear→flush completes→clear completes → absent; (3) clear→new put→clear completes→put flushes → new record exists; (4) clear fails → error surfaced, UI does not claim cleared; (5) multiple prefix clears don't interfere.
 
-- [ ] **T1.7 — Milestone 1 exit-gate tests (fake-indexeddb)** *(report §3, §5, §14)*
+- [x] **T1.7 — Milestone 1 exit-gate tests (fake-indexeddb)** *(report §3, §5, §14)*
   - Deterministic tests with `fake-indexeddb` + fake timers covering: DB open failure → explicit storage error; blocked upgrade → observable blocked state, no false success; missing key → explicit not-found; transaction abort → rejected read/write; quota exceeded → pending value retained + quota error exposed; put→clear ordering schedules from T1.6.
   - **Gate:** all P0 cases pass. No critical write or clear fails silently.
 
