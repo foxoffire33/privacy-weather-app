@@ -120,17 +120,29 @@ async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest
   });
 }
 
-async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
-  if (!hasIndexedDb()) { return; }
-  const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite', RELAXED);
-    const fail = () => { reject(tx.error ?? new Error('IndexedDB write failed')); };
-    tx.addEventListener('complete', () => { resolve(); });
-    tx.addEventListener('error', fail);
-    tx.addEventListener('abort', fail);
-    change(tx.objectStore(store));
+async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBObjectStore) => void, options?: IDBTransactionOptions): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    let tx: IDBTransaction | undefined;
+    let settled = false;
+    try {
+      tx = db.transaction(store, 'readwrite', options);
+      const fail = (): void => { if (!settled) { settled = true; reject(toStorageError('write', tx?.error)); } };
+      tx.addEventListener('complete', () => { if (!settled) { settled = true; resolve(); } });
+      tx.addEventListener('error', fail);
+      tx.addEventListener('abort', fail);
+      change(tx.objectStore(store));
+    } catch (error) {
+      settled = true;
+      tx?.abort();
+      reject(toStorageError('write', error));
+    }
   });
+}
+
+async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
+  if (!hasIndexedDb()) { throw new StorageError('unavailable', 'IndexedDB is not available in this environment'); }
+  const db = await openDb();
+  await withTransaction(db, store, change, RELAXED);
 }
 
 export async function idbGet(key: string): Promise<unknown> {
