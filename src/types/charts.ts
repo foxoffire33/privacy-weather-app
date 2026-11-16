@@ -136,4 +136,10 @@ export interface TrendChartsProps {
   names: TrendNames;
   data: Record<string, string | number | null>[];
   windUnit: WindUnit;
+  back: number;
 }
+
+export type ChartRow = Record<string, string | number | null>;
+
+export type Aggregate = 'sum' | 'mean';
+

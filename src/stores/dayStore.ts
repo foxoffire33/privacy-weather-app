@@ -1,47 +1,73 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-import { fetchAirDay, fetchDay } from './api/openMeteo';
+import { fetchAirDay, fetchDay } from './api/remote';
+import { isOffline } from './core/config';
 import { errorMessage } from './core/errors';
-import { idbStorage } from './core/persistStorage';
+import { afterGesture } from './core/gesture';
+import { isRecord } from './core/guards';
+import { clearRecords, persistMap, readRecord, restore } from './core/recordSync';
 import { daysBetween, todayISO } from './core/time';
 import { dayKey } from './entities/schema';
+import { FACTORY_VERSION } from './factories/weather';
 import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
 import type { DayState } from './storeTypes';
-import type { DayData } from './types';
+import type { City, DayData } from './types';
 
-export const useDayStore = create<DayState>()(
-  persist(
-    (set, get) => ({
-      days: {},
-      queries: {},
-      load: async (city, date) => {
-        const key = dayKey(city.id, date);
-        if (get().days[key] !== undefined || isLoading(get().queries[key])) { return null; }
-        set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
-        try {
-          const recent = daysBetween(date, todayISO()) <= 90;
-          const [day, air] = await Promise.all([
-            fetchDay(city, date, recent),
-            fetchAirDay(city, date).catch(() => null),
-          ]);
-          const full: DayData = { ...day, air };
-          set((s) => ({ days: { ...s.days, [key]: full }, queries: setQuery(s.queries, key, succeed()) }));
-          return full;
-        } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
-          return null;
-        }
-      },
-      clear: () => { set({ days: {}, queries: {} }); },
-    }),
-    {
-      name: 'wl2-days',
-      version: 1,
-      storage: idbStorage(),
-      skipHydration: true,
-      partialize: (s) => ({ days: s.days }),
-    },
-  ),
-);
+export const DAY_PREFIX = 'day:';
+
+function isDayData(value: unknown): value is DayData {
+  return isRecord(value) && typeof value.date === 'string' && isRecord(value.hourly) && isRecord(value.daily);
+}
+
+async function download(city: City, date: string): Promise<DayData> {
+  const recent = daysBetween(date, todayISO()) <= 90;
+  const [day, air] = await Promise.all([
+    fetchDay(city, date, recent),
+    fetchAirDay(city, date).catch(() => null),
+  ]);
+  return { ...day, air };
+}
+
+let generation = 0;
+
+export const useDayStore = create<DayState>()((set, get) => ({
+  days: {},
+  queries: {},
+  load: async (city, date) => {
+    const key = dayKey(city.id, date);
+    if (get().days[key] !== undefined || isLoading(get().queries[key])) { return null; }
+    set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
+    const epoch = generation;
+    const stored = await readRecord(DAY_PREFIX + key);
+    if (epoch !== generation) { return null; }
+    if (isDayData(stored)) {
+      restore(() => { set((s) => ({ days: { ...s.days, [key]: stored }, queries: setQuery(s.queries, key, succeed()) })); });
+      if (stored.version !== FACTORY_VERSION && !isOffline()) {
+        void download(city, date).then(async (fresh) => {
+          await afterGesture();
+          if (epoch !== generation) { return; }
+          set((s) => ({ days: { ...s.days, [key]: fresh } }));
+        }).catch(() => null);
+      }
+      return stored;
+    }
+    try {
+      const full = await download(city, date);
+      if (epoch !== generation) { return null; }
+      set((s) => ({ days: { ...s.days, [key]: full }, queries: setQuery(s.queries, key, succeed()) }));
+      return full;
+    } catch (error) {
+      if (epoch !== generation) { return null; }
+      set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+      return null;
+    }
+  },
+  clear: () => {
+    generation += 1;
+    restore(() => { set({ days: {}, queries: {} }); });
+    void clearRecords(DAY_PREFIX);
+  },
+}));
+
+persistMap(useDayStore, (s) => s.days, DAY_PREFIX);

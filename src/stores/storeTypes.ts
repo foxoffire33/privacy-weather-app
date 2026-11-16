@@ -79,4 +79,22 @@ export interface DateSpan {
 
 export interface BootState {
   hydrated: boolean;
+  historyReady: boolean;
+  storageBlocked: boolean;
 }
+
+export interface DiagnosticEntry {
+  kind: 'frame' | 'measure';
+  name: string;
+  at: number;
+  duration: number;
+  blocking: number;
+  route: string;
+}
+
+export interface DiagnosticsState {
+  entries: DiagnosticEntry[];
+  add: (entry: DiagnosticEntry) => void;
+  clear: () => void;
+}
+

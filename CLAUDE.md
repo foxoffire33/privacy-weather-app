@@ -26,6 +26,8 @@ The app is about data: historic, present and future.
 - `src/stores` is the data layer; its `README.md` holds the rules (single source of truth per entity,
   pure `api/`, fold semantics, persistence registered in `hydration.ts`, no app imports).
 - **IndexedDB is the source of truth.** Read from the stores first; download only what is not cached.
+  Open-Meteo JSON is cached raw (`responses`) and turned into our objects by `src/stores/factories`.
+  Storage is per record; see `src/stores/README.md` rules 2, 5 and 5a.
 - **Loading uses React Suspense with Mantine `Skeleton` fallbacks**, and only when the data is not cached at
   all. Refreshing cached data happens in the background and never replaces content with a skeleton.
 - Pass `use()` a stable promise: `latest(key)` (running, then settled, then `READY`) when the view may wait,

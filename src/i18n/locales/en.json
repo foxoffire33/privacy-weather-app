@@ -619,6 +619,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Loading"
+    "loading": "Loading",
+    "blocked": "Weather Log is open in another tab. Close it to finish updating your data."
+  },
+  "diagnostics": {
+    "title": "Diagnostics",
+    "link": "Performance diagnostics",
+    "note": "Slow frames and data timings from this session. Nothing leaves your device unless you copy it.",
+    "summary": "{count} slow frames · slowest {ms} ms",
+    "copy": "Copy report",
+    "copied": "Copied",
+    "clear": "Clear",
+    "empty": "No slow frames recorded yet."
   }
 }

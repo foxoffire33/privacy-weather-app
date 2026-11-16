@@ -18,6 +18,7 @@ export interface EntityCacheState {
   tables: CacheTables;
   upsert: <N extends EntityName>(name: N, entity: EntityTypeMap[N]) => void;
   upsertMany: <N extends EntityName>(name: N, entities: EntityTypeMap[N][]) => void;
+  hydrate: <N extends EntityName>(name: N, entities: EntityTypeMap[N][]) => void;
   merge: <N extends EntityName>(name: N, id: string, patch: Partial<EntityTypeMap[N]>) => void;
   remove: (name: EntityName, id: string) => void;
   removeMany: (name: EntityName, ids: readonly string[]) => void;

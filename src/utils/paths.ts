@@ -3,6 +3,7 @@ export const paths = {
   cities: '/cities',
   search: '/search',
   settings: '/settings',
+  diagnostics: '/diagnostics',
   history: (cityId: string): string => `/city/${encodeURIComponent(cityId)}/history`,
   hourly: (cityId: string): string => `/city/${encodeURIComponent(cityId)}/hourly`,
   day: (cityId: string, date: string): string => `/city/${encodeURIComponent(cityId)}/day/${date}`,

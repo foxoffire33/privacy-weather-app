@@ -619,6 +619,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Laadimine"
+    "loading": "Laadimine",
+    "blocked": "Weather Log on avatud teisel vahekaardil. Sulge see, et andmete uuendamine lõpule viia."
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Jõudluse diagnostika",
+    "note": "Selle seansi aeglased kaadrid ja andmete ajad. Midagi ei lahku seadmest, kui sa seda ei kopeeri.",
+    "summary": "{count} aeglast kaadrit · aeglaseim {ms} ms",
+    "copy": "Kopeeri aruanne",
+    "copied": "Kopeeritud",
+    "clear": "Tühjenda",
+    "empty": "Aeglasi kaadreid pole veel salvestatud."
   }
 }

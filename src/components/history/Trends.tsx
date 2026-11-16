@@ -1,12 +1,13 @@
 import { BarChart, LineChart } from '@mantine/charts';
 import { Box, Button, Checkbox, Drawer, Group, Modal, Text, TextInput, UnstyledButton } from '@mantine/core';
-import { Suspense, use, useEffect, useEffectEvent, useState } from 'react';
+import { Suspense, use, useDeferredValue, useEffect, useEffectEvent, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
 import { addDays, daysBetween, lastSettled, latest, useLogStore } from '../../stores';
 import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
 import { useUiStore } from '../../stores/uiStore';
+import { decimate } from '../../utils/decimate';
 import { convTemp, convWind, shortDate, windUnitLabel } from '../../utils/format';
 import { NO_HIDDEN, visibleSeries } from '../../utils/series';
 import { ExpandButton, FullscreenChart, INLINE_HEIGHT } from '../charts/FullscreenChart';
@@ -18,6 +19,7 @@ import type { TempUnit } from '../../stores';
 import type {
   ChartHeight, GroupChartProps, RangeSheetProps, SheetCloseProps, TrendAttr, TrendChartsProps, TrendControlsProps, TrendGroup, TrendGroupDef,
   TrendNames, TrendRangeInput, TrendRowInput, TrendsFillProps, TrendsProps, TrendsSheet, TrendWindow,
+  ChartRow,
 } from '../../types';
 import type { ReactElement } from 'react';
 
@@ -83,9 +85,11 @@ function trendNames(back: number, to: string): TrendNames {
   };
 }
 
-function trendRows({ range, back, attrs, names, log, normals, units }: TrendRowInput): Record<string, string | number | null>[] {
-  const rows: Record<string, string | number | null>[] = [];
+function trendRows({ range, back, attrs, names, log, normals, units }: TrendRowInput): ChartRow[] {
+  const rows: ChartRow[] = [];
+  const dates: string[] = [];
   for (let d = range.from; d <= range.to; d = addDays(d, 1)) {
+    dates.push(d);
     const row: Record<string, string | number | null> = { label: shortDate(d) };
     const dayB = shiftYears(d, back);
     for (const a of attrs) {
@@ -94,7 +98,8 @@ function trendRows({ range, back, attrs, names, log, normals, units }: TrendRowI
     }
     rows.push(row);
   }
-  return rows;
+  const summed = new Set(attrs.filter((a) => GROUPS.find((g) => g.key === a.group)?.bars === true).flatMap((a) => [names.a(a), names.b(a)]));
+  return decimate(rows, dates, (key) => (summed.has(key) ? 'sum' : 'mean'));
 }
 
 function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
@@ -122,9 +127,9 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
   );
 }
 
-function TrendCharts({ cityId, range, attrs, names, data, windUnit }: TrendChartsProps): ReactElement {
-  const { back, download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
-    back: st.back, download: st.download, failed: st.failed, retryFailed: st.retryFailed,
+function TrendCharts({ cityId, range, attrs, names, data, windUnit, back }: TrendChartsProps): ReactElement {
+  const { download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
+    download: st.download, failed: st.failed, retryFailed: st.retryFailed,
   })));
   const failedHere = range.windows.some((w) => failed.includes(windowKey(cityId, w)));
   const error = failedHere ? download.error : null;
@@ -165,7 +170,9 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const range = trendWindow({ len, custom, back, today, followedAt, earliest });
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const names = trendNames(back, range.to);
-  const data = trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } });
+  const chart = useDeferredValue({
+    range, attrs, names, windUnit, back, data: trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } }),
+  });
   return (
     <Box px={20}>
       <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
@@ -180,7 +187,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         </>
       )}>
         <TrendsFill cityId={cityId} windows={range.windows} ensureWindows={ensureWindows}>
-          <TrendCharts cityId={cityId} range={range} attrs={attrs} names={names} data={data} windUnit={windUnit} />
+          <TrendCharts cityId={cityId} range={chart.range} attrs={chart.attrs} names={chart.names} data={chart.data} windUnit={chart.windUnit} back={chart.back} />
         </TrendsFill>
       </Suspense>
 

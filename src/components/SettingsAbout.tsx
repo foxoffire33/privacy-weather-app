@@ -1,7 +1,9 @@
 import { Anchor, Box, Button, Stack, Text } from '@mantine/core';
+import { Link } from 'react-router';
 
 import { t } from '../i18n';
 import { LINKS } from '../utils/links';
+import { paths } from '../utils/paths';
 
 import { Icon } from './Icon';
 
@@ -38,6 +40,7 @@ export function SettingsAbout({ version }: SettingsAboutProps): ReactElement {
       <Stack gap={4} py={12}>
         <Text fz={13} c="dimmed">{t('settings.license', { version })}</Text>
         <Text fz={13} c="dimmed">{t('settings.attribution')}</Text>
+        <Anchor component={Link} to={paths.diagnostics} fz={13}>{t('diagnostics.link')}</Anchor>
       </Stack>
     </>
   );

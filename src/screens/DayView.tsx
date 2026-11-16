@@ -11,9 +11,10 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useScreenSettled } from '../components/screenSettled';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
+import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useHistoryReady, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
 import { MOTION } from '../theme';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
+import { GESTURE } from '../utils/gesture';
 import { paths, SWIPE_NEXT_STATE, SWIPE_PREV_STATE } from '../utils/paths';
 import { conditionLabel } from '../utils/weatherCodes';
 
@@ -92,6 +93,7 @@ function heroValues(day: DayData | undefined, record: DayRecord | undefined): Da
 }
 
 function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
+  useHistoryReady();
   const units = useUnits();
   const record = useDayRecord(cityId, date);
   const day = useDayData(cityId, date, record === undefined);
@@ -105,6 +107,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   const controls = useDragControls();
   const axis = useRef<'x' | 'y' | null>(null);
   const onDragEnd = (event: PointerEvent, info: PanInfo) => {
+    GESTURE.end();
     const locked = axis.current;
     axis.current = null;
     if (event.type === 'pointercancel' || locked !== 'x') { return; }
@@ -116,7 +119,7 @@ function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
   return (
     <MotionBox drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin dragMomentum={false}
       dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: next === undefined ? EDGE_ELASTIC : 1, right: prev === undefined ? EDGE_ELASTIC : 1 }}
-      dragTransition={MOTION.settle} onDirectionLock={(a) => { axis.current = a; }} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' }}>
+      dragTransition={MOTION.settle} onDirectionLock={(a) => { axis.current = a; }} onDragStart={GESTURE.start} onDragEnd={onDragEnd} style={{ touchAction: 'pan-y' }}>
       <Box className="hero" onPointerDown={(e) => { controls.start(e); }} style={{ paddingTop: 8, touchAction: 'pan-y' }}>
         <Box ml={-12} mb={8} c="white"><ScreenHeader /></Box>
         <Group gap={8}>

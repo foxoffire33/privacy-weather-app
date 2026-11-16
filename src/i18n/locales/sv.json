@@ -619,6 +619,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Laddar"
+    "loading": "Laddar",
+    "blocked": "Weather Log är öppen i en annan flik. Stäng den för att slutföra uppdateringen av dina data."
+  },
+  "diagnostics": {
+    "title": "Diagnostik",
+    "link": "Prestandadiagnostik",
+    "note": "Långsamma bildrutor och datatider från den här sessionen. Inget lämnar enheten om du inte kopierar det.",
+    "summary": "{count} långsamma bildrutor · långsammast {ms} ms",
+    "copy": "Kopiera rapport",
+    "copied": "Kopierad",
+    "clear": "Rensa",
+    "empty": "Inga långsamma bildrutor registrerade än."
   }
 }

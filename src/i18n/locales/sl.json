@@ -631,6 +631,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Nalaganje"
+    "loading": "Nalaganje",
+    "blocked": "Weather Log je odprt v drugem zavihku. Zaprite ga, da se posodobitev podatkov zaključi."
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Diagnostika zmogljivosti",
+    "note": "Počasne sličice in časi podatkov iz te seje. Nič ne zapusti naprave, razen če to kopirate.",
+    "summary": "{count} počasnih sličic · najpočasnejša {ms} ms",
+    "copy": "Kopiraj poročilo",
+    "copied": "Kopirano",
+    "clear": "Počisti",
+    "empty": "Počasne sličice še niso bile zabeležene."
   }
 }

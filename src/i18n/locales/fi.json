@@ -619,6 +619,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Ladataan"
+    "loading": "Ladataan",
+    "blocked": "Weather Log on auki toisessa välilehdessä. Sulje se, jotta tietojen päivitys valmistuu."
+  },
+  "diagnostics": {
+    "title": "Diagnostiikka",
+    "link": "Suorituskyvyn diagnostiikka",
+    "note": "Tämän istunnon hitaat kehykset ja tietojen ajat. Mitään ei lähde laitteelta, ellet kopioi sitä.",
+    "summary": "{count} hidasta kehystä · hitain {ms} ms",
+    "copy": "Kopioi raportti",
+    "copied": "Kopioitu",
+    "clear": "Tyhjennä",
+    "empty": "Hitaita kehyksiä ei ole vielä kirjattu."
   }
 }

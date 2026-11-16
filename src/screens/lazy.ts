@@ -3,6 +3,7 @@ import { lazy } from 'react';
 const loaders = {
   cities: async () => import('./Cities'),
   dayView: async () => import('./DayView'),
+  diagnostics: async () => import('./Diagnostics'),
   history: async () => import('./History'),
   home: async () => import('./Home'),
   hourly: async () => import('./Hourly'),
@@ -13,6 +14,10 @@ const loaders = {
 
 export const Cities = lazy(async () => {
   const { Cities: screen } = await loaders.cities();
+  return { default: screen };
+});
+export const Diagnostics = lazy(async () => {
+  const { Diagnostics: screen } = await loaders.diagnostics();
   return { default: screen };
 });
 export const DayView = lazy(async () => {

@@ -1,18 +1,19 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './api/dayRecord';
-import { fetchDailyRange } from './api/openMeteo';
+import { fetchDailyRange } from './api/remote';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
+import { afterGesture } from './core/gesture';
 import { inSequence } from './core/guards';
-import { idbStorage } from './core/persistStorage';
+import { persistMap, restore } from './core/recordSync';
 import { sortedCopy } from './core/sort';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
+import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './factories/dayRecord';
 import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
+import type { RangeRows } from './api/types';
 import type { DateSpan, ImportCounts, LogState, SourceSpan } from './storeTypes';
 import type { DayRecord } from './types';
 
@@ -31,9 +32,24 @@ function sources(start: string, end: string): SourceSpan[] {
   return parts;
 }
 
-export const useLogStore = create<LogState>()(
-  persist(
-    (set, get) => ({
+function collect(cityId: string, fetched: readonly RangeRows[]): { counts: ImportCounts; records: DayRecord[] } {
+  const counts: ImportCounts = { added: 0, updated: 0, kept: 0 };
+  const records: DayRecord[] = [];
+  for (const rows of fetched) {
+    for (const i of rows.time.keys()) {
+      const record = fromRangeRow(cityId, rows, i);
+      if (isEmptyRecord(record)) { continue; }
+      const prev = entityCache.getOne('dayRecord', record.id);
+      if (prev?.source === 'log') { counts.kept++; }
+      else if (prev) { counts.updated++; }
+      else { counts.added++; }
+      records.push(record);
+    }
+  }
+  return { counts, records };
+}
+
+export const useLogStore = create<LogState>()((set, get) => ({
       dates: {},
       queries: {},
       gapDays: (cityId) => {
@@ -88,19 +104,8 @@ export const useLogStore = create<LogState>()(
           const fetched = await Promise.all(parts.map(async (p) => fetchDailyRange(
             city, p, p.recent ? LOG_FORECAST_VARS : LOG_ARCHIVE_VARS, p.recent ? 'forecast' : 'archive',
           )));
-          const counts: ImportCounts = { added: 0, updated: 0, kept: 0 };
-          const records: DayRecord[] = [];
-          for (const rows of fetched) {
-            for (const i of rows.time.keys()) {
-              const record = fromRangeRow(city.id, rows, i);
-              if (isEmptyRecord(record)) { continue; }
-              const prev = entityCache.getOne('dayRecord', record.id);
-              if (prev?.source === 'log') { counts.kept++; }
-              else if (prev) { counts.updated++; }
-              else { counts.added++; }
-              records.push(record);
-            }
-          }
+          const { counts, records } = collect(city.id, fetched);
+          await afterGesture();
           entityCache.upsertMany('dayRecord', records);
           set((s) => ({
             dates: { ...s.dates, [city.id]: sortedUnion(s.dates[city.id] ?? [], records.map((r) => r.date)) },
@@ -182,13 +187,13 @@ export const useLogStore = create<LogState>()(
         }
         set({ dates: {}, queries: {} });
       },
-    }),
-    {
-      name: 'wl2-log',
-      version: 1,
-      storage: idbStorage(),
-      skipHydration: true,
-      partialize: (s) => ({ dates: s.dates }),
-    },
-  ),
-);
+    }));
+
+export const LOG_PREFIX = 'log:';
+
+persistMap(useLogStore, (s) => s.dates, LOG_PREFIX);
+
+export function restoreLog(dates: LogState['dates']): void {
+  restore(() => { useLogStore.setState((s) => ({ dates: { ...dates, ...s.dates } })); });
+}
+

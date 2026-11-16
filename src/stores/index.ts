@@ -16,10 +16,15 @@ export * from './almanacStore';
 export * from './searchStore';
 export * from './weatherSync';
 export * from './bootStore';
+export * from './diagnosticsStore';
 export type * from './storeTypes';
 export * from './selectors';
 export * from './suspense';
 export { lastSettled, latest, once } from './core/inflight';
+export { gestureEnd, gestureStart } from './core/gesture';
+export { flushRecords } from './core/recordSync';
+export { onMeasure, whenIdle } from './core/marks';
+export { whenHistoryReady } from './hydration';
 
 export type * from './types';
 export type * from './api/types';

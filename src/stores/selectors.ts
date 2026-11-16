@@ -88,3 +88,4 @@ export const useThisDay = (cityId: string, date: string): ArchiveYear[] | undefi
   useAlmanacStore((s) => s.thisDay[`${cityId}:${date.slice(5)}`]);
 
 export const useIsHydrated = (): boolean => useBootStore((s) => s.hydrated);
+export const useStorageBlocked = (): boolean => useBootStore((s) => s.storageBlocked);

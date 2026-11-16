@@ -625,6 +625,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Učitavanje"
+    "loading": "Učitavanje",
+    "blocked": "Weather Log je otvoren u drugoj kartici. Zatvorite je kako bi se dovršilo ažuriranje podataka."
+  },
+  "diagnostics": {
+    "title": "Dijagnostika",
+    "link": "Dijagnostika performansi",
+    "note": "Spori okviri i vremena podataka iz ove sesije. Ništa ne napušta uređaj osim ako to ne kopirate.",
+    "summary": "{count} sporih okvira · najsporiji {ms} ms",
+    "copy": "Kopiraj izvješće",
+    "copied": "Kopirano",
+    "clear": "Očisti",
+    "empty": "Još nisu zabilježeni spori okviri."
   }
 }

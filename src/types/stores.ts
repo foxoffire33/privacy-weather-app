@@ -74,7 +74,7 @@ export interface BackupState {
   setPart: (part: keyof BackupParts, on: boolean) => void;
   confirm: () => void;
   cancel: () => void;
-  exportFile: () => void;
+  exportFile: () => Promise<void>;
 }
 
 export type TrendsSheet = 'attrs' | 'range' | null;

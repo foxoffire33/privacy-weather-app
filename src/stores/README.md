@@ -32,8 +32,14 @@ persisted to IndexedDB, fed by typed Open-Meteo endpoint functions.
 download, opening that day in full — `upsert`s into `entities/cache` keyed `${cityId}:${date}`.
 Stores keep **ids and status only**; `selectors.ts` joins them back to live entities.
 
-**2. `api/*` is pure.** Endpoint functions fetch, normalize and return. They never write to the
-cache: the store that called them owns the upsert.
+**2. `api/*` never touches the entity cache.** Endpoint functions fetch Open-Meteo JSON
+(`api/client.ts`), validate it with Zod (`api/schemas.ts`) and build our objects with the pure
+factories in `factories/`. They may read and write the raw response cache (`responses` object
+store, keyed by the request without the API key, each kind with its own age), never the entity
+cache: the store that called them owns the upsert. They run in a worker (`api/worker.ts` via
+Comlink, `api/remote.ts` picks worker or direct); stores import `api/remote`, never `api/openMeteo`.
+A factory change that alters the objects bumps `FACTORY_VERSION`; stored objects with an older
+version are shown, then rebuilt in the background.
 
 **3. A mapper omits what its source cannot measure.** The cache folds an incoming record over
 the stored one and skips `undefined`, so a field the source has no instrument for must be left
@@ -44,10 +50,19 @@ the recent end of it: ERA5 has no UV at all, so `fromRangeRow` leaves it `undefi
 **4. A logged day outranks a downloaded one.** `FOLD_RULES.dayRecord` never lets `source` fall
 from `log` back to `filled`. The log is the app's own record of what it saw.
 
-**5. Persistence.** Persist via `idbStorage` under `wl2-<domain>`, **and** add the store to
-`PERSISTED` in `hydration.ts`. A persisted store that is not registered is a silent bug: the UI
-reads it empty on first paint. Every store sets `skipHydration` — `hydrateAll()` starts the
-rehydrate, after the legacy migration has run.
+**5. Persistence is per record.** Anything that grows with use (entities, forecasts, log dates,
+day data) lives as one IndexedDB record per key in the `records` store (`entity:dayRecord:<city>:<date>`,
+`forecast:<city>`, `log:<city>`, `day:<city>:<date>`). Changes go through `core/recordSync.ts`:
+`putRecord` / `deleteRecord` (or `persistMap` for a keyed map in a store) mark keys dirty, and one
+relaxed transaction writes only those keys every 250 ms and on `pagehide`. Never write a whole
+growing store as one value: IndexedDB clones it on the main thread. Small settings-like stores
+keep Zustand `persist` with `idbStorage`, registered in `PERSISTED` in `hydration.ts`.
+
+**5a. Hydration has two phases.** `hydrateAll()` (the splash waits for it) restores settings,
+cities, forecasts, log dates and the last 120 days. `whenHistoryReady()` restores older days in
+decade chunks, yielding between reads, and commits them in one update; the app starts it after
+first paint, and screens that need old days (`History`, `DayView`) suspend on `useHistoryReady()`.
+Restores run inside `restore()` so they are not written back.
 
 **6. Loading and error state goes through `factory/query-state`** — `begin` / `succeed` /
 `fail`, read with `isLoading` / `isFresh`. No per-store loading booleans.
@@ -75,8 +90,8 @@ that order, in one readable place.
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.
 - **No optimistic writes.** Every write is local — there is no server to roll back against.
 - **No pagination factory.** Nothing here is a cursor list; the log is a sorted date array.
-- **No HTTP client.** The official `openmeteo` SDK speaks FlatBuffers and handles retries;
-  only the geocoding call is plain JSON, and it goes through `getConfig().fetch ?? fetch`.
+- **No HTTP library.** `api/client.ts` is a small `fetch` wrapper with retries and backoff; every
+  call goes through `getConfig().fetch ?? fetch` and the offline `AbortSignal`.
 
 ## Privacy
 

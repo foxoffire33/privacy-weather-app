@@ -71,3 +71,12 @@ same class of mistake is not made again. Add to this list when a review finds so
 11. **Never mount heavy views while a swipe animates.** Animate screens with `transform`/`opacity` (compositor),
     defer chart-heavy sections (`useDeferredValue`) and mount pager neighbours after the animation completes.
     *From day and city swipes stuttering on Android.*
+
+12. **No `content-visibility` inside the horizontal pager.** Off-screen city pages are skipped, so a
+    swipe pays their whole layout and paint at the moment they slide in. Use it only on vertical lists
+    (log rows). *From measuring the pager with and without it.*
+
+13. **Libraries flagged `react-hooks/incompatible-library` are out.** The React Compiler lint refuses
+    TanStack Virtual's `useVirtualizer`, and suppression is not allowed. Prefer memoized rows plus
+    `content-visibility` on rows, or hand-written windowing.
+

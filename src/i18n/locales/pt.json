@@ -625,6 +625,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "A carregar"
+    "loading": "A carregar",
+    "blocked": "O Weather Log está aberto noutro separador. Feche-o para concluir a atualização dos seus dados."
+  },
+  "diagnostics": {
+    "title": "Diagnóstico",
+    "link": "Diagnóstico de desempenho",
+    "note": "Fotogramas lentos e tempos de dados desta sessão. Nada sai do seu dispositivo, a menos que o copie.",
+    "summary": "{count} fotogramas lentos · o mais lento {ms} ms",
+    "copy": "Copiar relatório",
+    "copied": "Copiado",
+    "clear": "Limpar",
+    "empty": "Ainda não foram registados fotogramas lentos."
   }
 }

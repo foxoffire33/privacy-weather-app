@@ -625,6 +625,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "blocked": "Weather Log est ouvert dans un autre onglet. Fermez-le pour terminer la mise à jour de vos données."
+  },
+  "diagnostics": {
+    "title": "Diagnostic",
+    "link": "Diagnostic des performances",
+    "note": "Images lentes et temps de données de cette session. Rien ne quitte votre appareil, sauf si vous le copiez.",
+    "summary": "{count} images lentes · la plus lente {ms} ms",
+    "copy": "Copier le rapport",
+    "copied": "Copié",
+    "clear": "Effacer",
+    "empty": "Aucune image lente enregistrée pour l’instant."
   }
 }

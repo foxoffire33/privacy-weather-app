@@ -631,6 +631,17 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Načítání"
+    "loading": "Načítání",
+    "blocked": "Weather Log je otevřený v jiné kartě. Zavřete ji, aby se dokončila aktualizace dat."
+  },
+  "diagnostics": {
+    "title": "Diagnostika",
+    "link": "Diagnostika výkonu",
+    "note": "Pomalé snímky a časy dat z této relace. Nic neopustí zařízení, pokud to nezkopírujete.",
+    "summary": "{count} pomalých snímků · nejpomalejší {ms} ms",
+    "copy": "Kopírovat zprávu",
+    "copied": "Zkopírováno",
+    "clear": "Vymazat",
+    "empty": "Zatím nebyly zaznamenány žádné pomalé snímky."
   }
 }
