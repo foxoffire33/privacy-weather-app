@@ -62,3 +62,7 @@ export interface MapStore<S> {
 
 export type MarkListener = (name: string, start: number, duration: number) => void;
 
+export type ConfigListener = (config: DataLayerConfig) => void;
+
+export type WorkerConfig = Pick<DataLayerConfig, 'apiKey' | 'server' | 'offline'>;
+

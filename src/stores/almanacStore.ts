@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { fetchArchive } from './api/openMeteo';
+import { fetchArchive } from './api/remote';
 import { errorMessage } from './core/errors';
 import { idbStorage } from './core/persistStorage';
 import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';

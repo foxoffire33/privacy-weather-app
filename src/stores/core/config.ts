@@ -1,4 +1,4 @@
-import type { DataLayerConfig } from './types';
+import type { ConfigListener, DataLayerConfig } from './types';
 
 function createDefaultConfig(): DataLayerConfig {
   return { apiKey: '', server: '', fetch: null, offline: false };
@@ -8,6 +8,7 @@ export const OFFLINE = 'offline-mode';
 
 let current: DataLayerConfig = createDefaultConfig();
 let online = new AbortController();
+const listeners = new Set<ConfigListener>();
 
 export function configureDataLayer(partial: Partial<DataLayerConfig>): void {
   const wasOffline = current.offline;
@@ -16,6 +17,13 @@ export function configureDataLayer(partial: Partial<DataLayerConfig>): void {
     online.abort(new Error(OFFLINE));
     online = new AbortController();
   }
+  for (const listener of listeners) { listener(current); }
+}
+
+export function onConfigure(listener: ConfigListener): () => void {
+  listeners.add(listener);
+  listener(current);
+  return () => { listeners.delete(listener); };
 }
 
 export function onlineSignal(signal?: AbortSignal): AbortSignal {

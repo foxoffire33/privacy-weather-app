@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 
-import { fetchAirQuality, fetchForecast, fetchMarine } from './api/openMeteo';
+import { fetchAirQuality, fetchForecast, fetchMarine } from './api/remote';
 import { errorMessage } from './core/errors';
+import { afterGesture } from './core/gesture';
 import { without } from './core/guards';
 import { persistMap, restore } from './core/recordSync';
 import { FACTORY_VERSION } from './factories/weather';
@@ -34,6 +35,7 @@ export const useForecastStore = create<ForecastState>()((set, get) => ({
             fetchMarine(city, maxAgeMs).catch(() => null),
           ]);
           const entry: ForecastEntry = { data, air, marine, pastDays, fetchedAt: Date.now(), version: FACTORY_VERSION };
+          await afterGesture();
           set((s) => ({
             forecasts: { ...s.forecasts, [city.id]: entry },
             queries: setQuery(s.queries, city.id, succeed()),

@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 
-import { fetchAirDay, fetchDay } from './api/openMeteo';
+import { fetchAirDay, fetchDay } from './api/remote';
 import { isOffline } from './core/config';
 import { errorMessage } from './core/errors';
+import { afterGesture } from './core/gesture';
 import { isRecord } from './core/guards';
 import { clearRecords, persistMap, readRecord, restore } from './core/recordSync';
 import { daysBetween, todayISO } from './core/time';
@@ -39,7 +40,10 @@ export const useDayStore = create<DayState>()((set, get) => ({
     if (isDayData(stored)) {
       restore(() => { set((s) => ({ days: { ...s.days, [key]: stored }, queries: setQuery(s.queries, key, succeed()) })); });
       if (stored.version !== FACTORY_VERSION && !isOffline()) {
-        void download(city, date).then((fresh) => { set((s) => ({ days: { ...s.days, [key]: fresh } })); }).catch(() => null);
+        void download(city, date).then(async (fresh) => {
+          await afterGesture();
+          set((s) => ({ days: { ...s.days, [key]: fresh } }));
+        }).catch(() => null);
       }
       return stored;
     }

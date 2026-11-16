@@ -12,6 +12,7 @@ import { t } from '../i18n';
 import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { MOTION } from '../theme';
+import { GESTURE } from '../utils/gesture';
 import { paths } from '../utils/paths';
 
 import { CityPage } from './CityPage';
@@ -79,6 +80,7 @@ export function Home(): ReactElement {
     controls.start(e);
   };
   const onDragEnd = (event: globalThis.PointerEvent, info: PanInfo) => {
+    GESTURE.end();
     const locked = axis.current;
     axis.current = null;
     if (event.type === 'pointercancel' || locked !== 'x') { return; }
@@ -92,7 +94,7 @@ export function Home(): ReactElement {
         <MotionBox className="pager-track" drag="x" dragListener={false} dragControls={controls} dragDirectionLock dragSnapToOrigin
           dragMomentum={false} dragConstraints={{ left: 0, right: 0 }} dragTransition={MOTION.settle}
           dragElastic={{ left: idx < n - 1 ? 1 : EDGE_ELASTIC, right: idx > 0 ? 1 : EDGE_ELASTIC }}
-          onPointerDown={onDown} onDirectionLock={(a) => { axis.current = a; }} onDragStart={() => { justDragged.current = true; }} onDragEnd={onDragEnd}
+          onPointerDown={onDown} onDirectionLock={(a) => { axis.current = a; }} onDragStart={() => { justDragged.current = true; GESTURE.start(); }} onDragEnd={onDragEnd}
           onClickCapture={(e) => { if (justDragged.current) { e.stopPropagation(); justDragged.current = false; } }}>
           {cities.map((c, i) => (i === idx || Math.abs(i - mountIdx) <= 1
             ? <CityPage key={c.id} city={c} isDefault={i === 0} />

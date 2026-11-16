@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 import { t } from '../i18n';
 import { MOTION } from '../theme';
+import { GESTURE } from '../utils/gesture';
 
 import { MotionBox, MotionButton, useMotionPreset } from './motionComponents';
 
@@ -53,6 +54,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label
     setRemoving(true);
   };
   const onDragEnd = (event: PointerEvent, info: PanInfo) => {
+    GESTURE.end();
     const width = root.current?.offsetWidth ?? 420;
     const at = x.get() + info.velocity.x * 0.1;
     if (event.type !== 'pointercancel' && at < -actionsW - DELETE_OVERDRAG && at < -width * DELETE_AT) { remove(); return; }
@@ -93,7 +95,7 @@ export function SwipeRow({ open, onOpenChange, onDelete, onEdit, disabled, label
       )}
       <MotionBox drag={disabled === true || removing ? false : 'x'} dragDirectionLock dragMomentum={false}
         dragConstraints={{ left: -actionsW, right: 0 }} dragElastic={{ left: OVERDRAG, right: 0 }}
-        onDragStart={() => { swallowClick.current = true; }} onDragEnd={onDragEnd}
+        onDragStart={() => { swallowClick.current = true; GESTURE.start(); }} onDragEnd={onDragEnd}
         style={{ x, position: 'relative', background: 'var(--mantine-color-body)', touchAction: 'pan-y' }}>
         {children}
       </MotionBox>

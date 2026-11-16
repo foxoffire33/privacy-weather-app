@@ -20,6 +20,9 @@ export type * from './storeTypes';
 export * from './selectors';
 export * from './suspense';
 export { lastSettled, latest, once } from './core/inflight';
+export { gestureEnd, gestureStart } from './core/gesture';
+export { flushRecords } from './core/recordSync';
+export { onMeasure } from './core/marks';
 
 export type * from './types';
 export type * from './api/types';
