@@ -43,3 +43,22 @@ export interface RehydrateHandle {
 }
 
 export type Pending = PromiseLike<void>;
+
+export type IdbEntry = [string, unknown];
+
+export interface ResponseRecord {
+  fetchedAt: number;
+  expiresAt: number;
+  body: unknown;
+}
+
+export type QueryValue = string | number | boolean | readonly string[] | undefined;
+
+export type QueryParams = Readonly<Record<string, QueryValue>>;
+
+export interface MapStore<S> {
+  subscribe: (listener: (state: S, prev: S) => void) => () => void;
+}
+
+export type MarkListener = (name: string, start: number, duration: number) => void;
+

@@ -79,4 +79,5 @@ export interface DateSpan {
 
 export interface BootState {
   hydrated: boolean;
+  historyReady: boolean;
 }

@@ -1,6 +1,13 @@
+import { sortedCopy } from './sort';
+
+import type { IdbEntry, ResponseRecord } from './types';
+
 const DB_NAME = 'wl-storesv2';
-const DB_VERSION = 1;
-const STORE_NAME = 'kv';
+const DB_VERSION = 2;
+const KV = 'kv';
+const RECORDS = 'records';
+const RESPONSES = 'responses';
+const RELAXED: IDBTransactionOptions = { durability: 'relaxed' };
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -13,7 +20,9 @@ async function openDb(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.addEventListener('upgradeneeded', () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) { db.createObjectStore(STORE_NAME); }
+      for (const name of [KV, RECORDS, RESPONSES]) {
+        if (!db.objectStoreNames.contains(name)) { db.createObjectStore(name); }
+      }
     });
     request.addEventListener('success', () => { resolve(request.result); });
     request.addEventListener('error', () => { reject(request.error ?? new Error('IndexedDB open failed')); });
@@ -29,39 +38,97 @@ async function database(): Promise<IDBDatabase | null> {
   return openDb().catch(() => null);
 }
 
-async function read<T>(request: (store: IDBObjectStore) => IDBRequest<T>): Promise<T | null> {
+async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest<T>): Promise<T | null> {
   const db = await database();
   if (db === null) { return null; }
   return new Promise<T | null>((resolve) => {
-    const req = request(db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME));
+    const req = request(db.transaction(store, 'readonly').objectStore(store));
     req.addEventListener('success', () => { resolve(req.result); });
     req.addEventListener('error', () => { resolve(null); });
   }).catch(() => null);
 }
 
-async function write(change: (store: IDBObjectStore) => void): Promise<void> {
+async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
   if (!hasIndexedDb()) { return; }
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const tx = db.transaction(store, 'readwrite', RELAXED);
     const fail = () => { reject(tx.error ?? new Error('IndexedDB write failed')); };
     tx.addEventListener('complete', () => { resolve(); });
     tx.addEventListener('error', fail);
     tx.addEventListener('abort', fail);
-    change(tx.objectStore(STORE_NAME));
+    change(tx.objectStore(store));
   });
 }
 
 export async function idbGet(key: string): Promise<unknown> {
-  const value: unknown = await read((store) => store.get(key));
+  const value: unknown = await read(KV, (s) => s.get(key));
   return value ?? null;
 }
 
 export async function idbSet(key: string, value: unknown): Promise<void> {
-  await write((store) => { store.put(value, key); });
+  await write(KV, (s) => { s.put(value, key); });
 }
 
 export async function idbDel(key: string): Promise<void> {
-  await write((store) => { store.delete(key); });
+  await write(KV, (s) => { s.delete(key); });
 }
 
+export async function recordGet(key: string): Promise<unknown> {
+  const value: unknown = await read(RECORDS, (s) => s.get(key));
+  return value ?? null;
+}
+
+export async function recordsWrite(puts: readonly IdbEntry[], deletes: readonly string[]): Promise<void> {
+  if (puts.length === 0 && deletes.length === 0) { return; }
+  await write(RECORDS, (s) => {
+    for (const key of deletes) { s.delete(key); }
+    for (const [key, value] of puts) { s.put(value, key); }
+  });
+}
+
+export async function recordsDeletePrefix(prefix: string): Promise<void> {
+  await write(RECORDS, (s) => { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); });
+}
+
+export async function recordsRange(lower: string, upper: string): Promise<IdbEntry[]> {
+  const range = IDBKeyRange.bound(lower, upper);
+  const [keys, values] = await Promise.all([
+    read(RECORDS, (s) => s.getAllKeys(range)),
+    read(RECORDS, (s) => s.getAll(range)),
+  ]);
+  if (keys?.length !== values?.length || keys === null || values === null) { return []; }
+  const out: IdbEntry[] = [];
+  for (const [i, key] of keys.entries()) {
+    if (typeof key === 'string') { out.push([key, values[i]]); }
+  }
+  return out;
+}
+
+export async function responseGet(key: string): Promise<ResponseRecord | null> {
+  const value: unknown = await read(RESPONSES, (s) => s.get(key));
+  return isResponseRecord(value) ? value : null;
+}
+
+export async function responsePut(key: string, record: ResponseRecord): Promise<void> {
+  await write(RESPONSES, (s) => { s.put(record, key); });
+}
+
+export async function responsesPrune(now: number, keep: number): Promise<void> {
+  const all = await read(RESPONSES, (s) => s.getAll());
+  const keys = await read(RESPONSES, (s) => s.getAllKeys());
+  if (all?.length !== keys?.length || all === null || keys === null) { return; }
+  const rows = keys.flatMap((key, i) => {
+    const value: unknown = all[i];
+    return typeof key === 'string' && isResponseRecord(value) ? [{ key, value }] : [];
+  });
+  const fresh = rows.filter((r) => r.value.expiresAt > now);
+  const keepKeys = new Set(sortedCopy(fresh, (a, b) => b.value.fetchedAt - a.value.fetchedAt).slice(0, keep).map((r) => r.key));
+  const drop = rows.filter((r) => !keepKeys.has(r.key)).map((r) => r.key);
+  if (drop.length === 0) { return; }
+  await write(RESPONSES, (s) => { for (const key of drop) { s.delete(key); } });
+}
+
+function isResponseRecord(value: unknown): value is ResponseRecord {
+  return typeof value === 'object' && value !== null && 'fetchedAt' in value && 'expiresAt' in value && 'body' in value;
+}

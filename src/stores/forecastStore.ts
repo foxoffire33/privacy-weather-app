@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 import { fetchAirQuality, fetchForecast, fetchMarine } from './api/openMeteo';
 import { errorMessage } from './core/errors';
 import { without } from './core/guards';
-import { idbStorage } from './core/persistStorage';
+import { persistMap, restore } from './core/recordSync';
+import { FACTORY_VERSION } from './factories/weather';
 import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
 import type { QueryMap } from './core/types';
@@ -19,13 +19,7 @@ function loadedQueries(forecasts: ForecastState['forecasts']): QueryMap {
   return queries;
 }
 
-function markLoaded(state: ForecastState | undefined): void {
-  if (state !== undefined) { useForecastStore.setState({ queries: loadedQueries(state.forecasts) }); }
-}
-
-export const useForecastStore = create<ForecastState>()(
-  persist(
-    (set, get) => ({
+export const useForecastStore = create<ForecastState>()((set, get) => ({
       forecasts: {},
       queries: {},
       refresh: async (city, { pastDays = 1, maxAgeMs } = {}) => {
@@ -35,11 +29,11 @@ export const useForecastStore = create<ForecastState>()(
         set((s) => ({ queries: setQuery(s.queries, city.id, begin(q)) }));
         try {
           const [data, air, marine] = await Promise.all([
-            fetchForecast(city, pastDays),
-            fetchAirQuality(city).catch(() => null),
-            fetchMarine(city).catch(() => null),
+            fetchForecast(city, pastDays, maxAgeMs),
+            fetchAirQuality(city, maxAgeMs).catch(() => null),
+            fetchMarine(city, maxAgeMs).catch(() => null),
           ]);
-          const entry: ForecastEntry = { data, air, marine, pastDays, fetchedAt: Date.now() };
+          const entry: ForecastEntry = { data, air, marine, pastDays, fetchedAt: Date.now(), version: FACTORY_VERSION };
           set((s) => ({
             forecasts: { ...s.forecasts, [city.id]: entry },
             queries: setQuery(s.queries, city.id, succeed()),
@@ -52,14 +46,22 @@ export const useForecastStore = create<ForecastState>()(
       },
       drop: (cityId) => { set((s) => ({ forecasts: without(s.forecasts, [cityId]), queries: without(s.queries, [cityId]) })); },
       clear: () => { set({ forecasts: {}, queries: {} }); },
-    }),
-    {
-      name: 'wl2-forecasts',
-      version: 1,
-      storage: idbStorage(),
-      skipHydration: true,
-      partialize: (s) => ({ forecasts: s.forecasts }),
-      onRehydrateStorage: () => markLoaded,
-    },
-  ),
-);
+    }));
+
+export const FORECAST_PREFIX = 'forecast:';
+
+persistMap(useForecastStore, (s) => s.forecasts, FORECAST_PREFIX);
+
+export function restoreForecasts(forecasts: ForecastState['forecasts']): void {
+  restore(() => {
+    useForecastStore.setState((s) => {
+      const merged = { ...forecasts, ...s.forecasts };
+      const queries = loadedQueries(merged);
+      for (const [cityId, entry] of Object.entries(merged)) {
+        if (entry?.version !== FACTORY_VERSION) { queries[cityId] = { status: 'success', error: null, lastLoadedAt: 0 }; }
+      }
+      return { forecasts: merged, queries: { ...queries, ...s.queries } };
+    });
+  });
+}
+

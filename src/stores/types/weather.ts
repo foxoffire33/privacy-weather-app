@@ -26,6 +26,7 @@ export interface DayData {
   hourly: { time: string[]; v: Partial<Series<HourlyVar>> };
   daily: { sunrise?: string; sunset?: string; v: Partial<Record<DailyVar, number | null>> };
   air: { time: string[]; v: Partial<Series<AirVar>> } | null;
+  version?: number;
 }
 
 export interface ForecastEntry {
@@ -34,4 +35,5 @@ export interface ForecastEntry {
   marine: MarineData | null;
   pastDays: number;
   fetchedAt: number;
+  version?: number;
 }

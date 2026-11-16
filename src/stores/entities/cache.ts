@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 import { definedOnly, isRecord, without } from '../core/guards';
-import { idbStorage } from '../core/persistStorage';
+import { clearRecords, deleteRecord, putRecord } from '../core/recordSync';
 
 import { FOLD_RULES } from './schema';
 
@@ -31,68 +30,91 @@ function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, ne
   return rule === undefined ? folded : { ...folded, ...rule(prev, next) };
 }
 
-const ENTITIES_VERSION = 1;
+const key = (name: EntityName, id: string) => `${name}:${id}`;
 
-function migrateEntities(persisted: unknown): PersistedEntities {
-  return hasTables(persisted) ? persisted : { tables: emptyTables() };
+export const ENTITY_PREFIX = 'entity:';
+
+function save(name: EntityName, entity: { id: string }): void {
+  putRecord(ENTITY_PREFIX + key(name, entity.id), entity);
 }
 
-export const useEntityCache = create<EntityCacheState>()(
-  persist(
-    (set, get) => ({
-      tables: emptyTables(),
-      upsert: (name, entity) => set((s) => ({
-        tables: { ...s.tables, [name]: { ...s.tables[name], [entity.id]: foldEntity(s.tables[name][entity.id], entity, name) } },
-      })),
-      upsertMany: (name, entities) => set((s) => {
-        if (entities.length === 0) {return s;}
-        const table: Table<typeof name> = { ...s.tables[name] };
-        for (const entity of entities) {table[entity.id] = foldEntity(table[entity.id], entity, name);}
-        return { tables: { ...s.tables, [name]: table } };
-      }),
-      merge: (name, id, patch) => set((s) => {
-        const existing = s.tables[name][id];
-        if (existing === undefined) {return s;}
-        return { tables: { ...s.tables, [name]: { ...s.tables[name], [id]: { ...existing, ...patch } } } };
-      }),
-      remove: (name, id) => set((s) => {
-        if (s.tables[name][id] === undefined) { return s; }
-        return { tables: dropFrom(s.tables, name, [id]) };
-      }),
-      removeMany: (name, ids) => set((s) => {
-        const present = ids.filter((id) => s.tables[name][id] !== undefined);
-        return present.length === 0 ? s : { tables: dropFrom(s.tables, name, present) };
-      }),
-      getOne: (name, id) => get().tables[name][id],
-      getMany: (name, ids) => {
-        const table = get().tables[name];
-        const out: EntityTypeMap[typeof name][] = [];
-        for (const id of ids) {
-          const entity = table[id];
-          if (entity !== undefined) {out.push(entity);}
+function drop(name: EntityName, id: string): void {
+  deleteRecord(ENTITY_PREFIX + key(name, id));
+}
+
+export const useEntityCache = create<EntityCacheState>()((set, get) => ({
+  tables: emptyTables(),
+  upsert: (name, entity) => {
+    const next = foldEntity(get().tables[name][entity.id], entity, name);
+    set((s) => ({ tables: { ...s.tables, [name]: { ...s.tables[name], [entity.id]: next } } }));
+    save(name, next);
+  },
+  upsertMany: (name, entities) => {
+    if (entities.length === 0) { return; }
+    const table: Table<typeof name> = { ...get().tables[name] };
+    for (const entity of entities) {
+      const next = foldEntity(table[entity.id], entity, name);
+      table[entity.id] = next;
+      save(name, next);
+    }
+    set((s) => ({ tables: { ...s.tables, [name]: table } }));
+  },
+  hydrate: (name, entities) => {
+    if (entities.length === 0) { return; }
+    set((s) => {
+      const table: Table<typeof name> = { ...s.tables[name] };
+      let added = 0;
+      for (const entity of entities) {
+        if (table[entity.id] === undefined) {
+          table[entity.id] = entity;
+          added++;
         }
-        return out;
-      },
-      clearEntities: () => { set({ tables: emptyTables() }); },
-    }),
-    {
-      name: 'wl2-entities',
-      version: ENTITIES_VERSION,
-      migrate: migrateEntities,
-      storage: idbStorage(),
-      skipHydration: true,
-      partialize: (s) => ({ tables: s.tables }),
-      merge: (persisted, current) => {
-        if (Object.keys(current.tables.dayRecord).length > 0 || !hasTables(persisted)) { return current; }
-        return { ...current, tables: persisted.tables };
-      },
-    },
-  ),
-);
+      }
+      return added === 0 ? s : { tables: { ...s.tables, [name]: table } };
+    });
+  },
+  merge: (name, id, patch) => {
+    const existing = get().tables[name][id];
+    if (existing === undefined) { return; }
+    const next = { ...existing, ...patch };
+    set((s) => ({ tables: { ...s.tables, [name]: { ...s.tables[name], [id]: next } } }));
+    save(name, next);
+  },
+  remove: (name, id) => {
+    if (get().tables[name][id] === undefined) { return; }
+    set((s) => ({ tables: dropFrom(s.tables, name, [id]) }));
+    drop(name, id);
+  },
+  removeMany: (name, ids) => {
+    const present = ids.filter((id) => get().tables[name][id] !== undefined);
+    if (present.length === 0) { return; }
+    set((s) => ({ tables: dropFrom(s.tables, name, present) }));
+    for (const id of present) { drop(name, id); }
+  },
+  getOne: (name, id) => get().tables[name][id],
+  getMany: (name, ids) => {
+    const table = get().tables[name];
+    const out: EntityTypeMap[typeof name][] = [];
+    for (const id of ids) {
+      const entity = table[id];
+      if (entity !== undefined) {out.push(entity);}
+    }
+    return out;
+  },
+  clearEntities: () => {
+    set({ tables: emptyTables() });
+    void clearRecords(ENTITY_PREFIX);
+  },
+}));
+
+export function isPersistedEntities(value: unknown): value is PersistedEntities {
+  return hasTables(value);
+}
 
 export const entityCache = {
   upsert: <N extends EntityName>(name: N, entity: EntityTypeMap[N]): void => { useEntityCache.getState().upsert(name, entity); },
   upsertMany: <N extends EntityName>(name: N, entities: EntityTypeMap[N][]): void => { useEntityCache.getState().upsertMany(name, entities); },
+  hydrate: <N extends EntityName>(name: N, entities: EntityTypeMap[N][]): void => { useEntityCache.getState().hydrate(name, entities); },
   merge: <N extends EntityName>(name: N, id: string, patch: Partial<EntityTypeMap[N]>): void => { useEntityCache.getState().merge(name, id, patch); },
   remove: (name: EntityName, id: string): void => { useEntityCache.getState().remove(name, id); },
   removeMany: (name: EntityName, ids: readonly string[]): void => { useEntityCache.getState().removeMany(name, ids); },

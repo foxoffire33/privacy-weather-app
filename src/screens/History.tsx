@@ -13,7 +13,7 @@ import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import {
   addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
-  useCityIndex, useCityLog, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useSettings, useThisDayData, useUnits,
+  useCityIndex, useCityLog, useHistoryReady, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useSettings, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
 import { sortedCopy } from '../stores/core/sort';
@@ -33,6 +33,7 @@ function importResultText(result: AddDatesResult | null): string | null {
 }
 
 export function History({ cityId }: CityScreenProps): ReactElement {
+  useHistoryReady();
   const city = useCity(cityId);
   const entry = useForecast(cityId);
   const units = useUnits();

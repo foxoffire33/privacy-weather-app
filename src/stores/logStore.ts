@@ -1,16 +1,15 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './api/dayRecord';
 import { fetchDailyRange } from './api/openMeteo';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
 import { errorMessage } from './core/errors';
 import { inSequence } from './core/guards';
-import { idbStorage } from './core/persistStorage';
+import { persistMap, restore } from './core/recordSync';
 import { sortedCopy } from './core/sort';
 import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
+import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './factories/dayRecord';
 import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
 
 import type { DateSpan, ImportCounts, LogState, SourceSpan } from './storeTypes';
@@ -31,9 +30,7 @@ function sources(start: string, end: string): SourceSpan[] {
   return parts;
 }
 
-export const useLogStore = create<LogState>()(
-  persist(
-    (set, get) => ({
+export const useLogStore = create<LogState>()((set, get) => ({
       dates: {},
       queries: {},
       gapDays: (cityId) => {
@@ -182,13 +179,13 @@ export const useLogStore = create<LogState>()(
         }
         set({ dates: {}, queries: {} });
       },
-    }),
-    {
-      name: 'wl2-log',
-      version: 1,
-      storage: idbStorage(),
-      skipHydration: true,
-      partialize: (s) => ({ dates: s.dates }),
-    },
-  ),
-);
+    }));
+
+export const LOG_PREFIX = 'log:';
+
+persistMap(useLogStore, (s) => s.dates, LOG_PREFIX);
+
+export function restoreLog(dates: LogState['dates']): void {
+  restore(() => { useLogStore.setState((s) => ({ dates: { ...dates, ...s.dates } })); });
+}
+

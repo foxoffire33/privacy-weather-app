@@ -1,7 +1,7 @@
 import { use } from 'react';
 
 import { lastSettled } from './core/inflight';
-import { hydrateAll } from './hydration';
+import { hydrateAll, whenHistoryReady } from './hydration';
 import { useCity, useDay, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
 import { lookupDate, openDay, loadThisDay, refreshCity, resourceKey } from './weatherSync';
 
@@ -9,6 +9,10 @@ import type { ArchiveYear, DayData, ForecastEntry, LookupView } from './types';
 
 export function useHydration(): void {
   use(hydrateAll());
+}
+
+export function useHistoryReady(): void {
+  use(whenHistoryReady());
 }
 
 export function useForecastData(cityId: string): ForecastEntry | undefined {

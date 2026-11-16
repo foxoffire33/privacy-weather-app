@@ -11,7 +11,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useScreenSettled } from '../components/screenSettled';
 import { ChartSk, SectionSk, Sk } from '../components/Skeletons';
 import { t } from '../i18n';
-import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
+import { openDay, useCity, useDayData, useDayQuery, useDayRecord, useHistoryReady, useLogNeighbours, useNormals, useSettings, useUnits } from '../stores';
 import { MOTION } from '../theme';
 import { fmtDelta, fmtTemp, fullDate } from '../utils/format';
 import { paths, SWIPE_NEXT_STATE, SWIPE_PREV_STATE } from '../utils/paths';
@@ -92,6 +92,7 @@ function heroValues(day: DayData | undefined, record: DayRecord | undefined): Da
 }
 
 function DayBody({ cityId, date, cityName }: DayBodyProps): ReactElement {
+  useHistoryReady();
   const units = useUnits();
   const record = useDayRecord(cityId, date);
   const day = useDayData(cityId, date, record === undefined);
