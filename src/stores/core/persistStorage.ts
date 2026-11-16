@@ -118,6 +118,25 @@ export function idbStorage<S>(): PersistStorage<S> {
   };
 }
 
+async function awaitKey(name: string): Promise<void> {
+  const state = pending.get(name);
+  if (state === undefined) { return; }
+  if (state.lastError !== null) { throw state.lastError; }
+  flush(name);
+  await state.chain;
+  return awaitKey(name);
+}
+
+export async function flushPersistedState(name?: string): Promise<void> {
+  if (name === undefined) {
+    const keys = [...pending.keys()];
+    for (const key of keys) { flush(key); }
+    await Promise.all(keys.map(async (key) => { await awaitKey(key); }));
+  } else {
+    await awaitKey(name);
+  }
+}
+
 export function persistenceStatus(name?: string): PersistenceStatus {
   if (name !== undefined) {
     const state = pending.get(name);

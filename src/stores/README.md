@@ -85,7 +85,17 @@ and the host override — the host pushes in through `configureDataLayer` (`core
 A refresh measures the gap, fetches, logs what came back and makes sure the normals exist — in
 that order, in one readable place.
 
-**11. A storage failure is never "no data".** `core/idb` rejects every open/read/write failure with a
+**11. `idbStorage.setItem` queues; it does not commit.** Zustand `persist` calls it on every state
+change, and the per-key coordinator in `core/persistStorage.ts` debounces, serializes and retries the
+actual IndexedDB write, publishing failures through `persistenceStatus()`. A write failure never
+discards the newest value: transient errors retry with bounded exponential backoff and jitter,
+permanent errors (quota, unavailable, corrupt) stop auto-retrying and keep the value queued with a
+persistent error. A key whose hydration read failed does not write at all until a read succeeds, so
+defaults can never be persisted over the user's stored state. Operations that need durable state —
+the backup export, tests — must `await flushPersistedState()`; the `pagehide` flush is best-effort and
+never the only guarantee.
+
+**12. A storage failure is never "no data".** `core/idb` rejects every open/read/write failure with a
 typed `StorageError` (codes `unavailable`, `blocked`, `read-failed`, `write-failed`, `quota-exceeded`, …)
 and keeps the "absent" result exclusive: `get` yields `undefined` only for a key that genuinely does not
 exist, `range` yields `[]` only for a successful transaction with zero rows. Each reader declares its own

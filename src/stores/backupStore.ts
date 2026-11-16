@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { countDays, parseBackup } from '../backup/backup';
 import { downloadFile } from '../utils/format';
 
-import { errorMessage, exportSnapshot, importBackup, whenHistoryReady } from '.';
+import { errorMessage, exportSnapshot, flushPersistedState, importBackup, whenHistoryReady } from '.';
 
 import type { BackupState } from '../types';
 
@@ -41,6 +41,7 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
 
   exportFile: async () => {
     await whenHistoryReady();
+    await flushPersistedState();
     const { cities, history, settings } = exportSnapshot();
     const { apiKey: _omit, ...safeSettings } = settings;
     const file = { version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history };
