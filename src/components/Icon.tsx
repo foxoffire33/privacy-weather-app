@@ -21,6 +21,7 @@ const ICONS: Record<IconName, ReactNode> = {
   next: <path d="m9 18 6-6-6-6" />,
   play: <path d="M7 4v16l13-8Z" />,
   pause: <path d="M7 4v16M17 4v16" />,
+  reorder: <path d="M4 7h11M4 12h11M4 17h11M19 5v14M16.5 7.5 19 5l2.5 2.5M16.5 16.5 19 19l2.5-2.5" />,
   expand: <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />,
   heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
   lock: <><rect x="4" y="11" width="16" height="10" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,

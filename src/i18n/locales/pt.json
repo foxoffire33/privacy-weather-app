@@ -350,6 +350,13 @@
       "ofDaylight": "de {d} de luz",
       "sunrise": "Nascer do sol",
       "solarEnergy": "Energia solar"
+    },
+    "order": {
+      "title": "Ordem das secções",
+      "hint": "Arraste uma secção pela pega para a mover. Prima longamente a página da cidade para abrir esta lista outra vez.",
+      "reset": "Repor",
+      "done": "Concluído",
+      "move": "Mover {name}"
     }
   },
   "chart": {

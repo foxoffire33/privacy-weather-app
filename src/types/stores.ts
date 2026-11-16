@@ -7,6 +7,8 @@ export interface DateRange {
 
 export type Next48View = 'radar' | 'charts';
 
+export type CitySectionId = 'overview' | 'next48' | 'next7' | 'feels' | 'sun' | 'precip' | 'wind' | 'air' | 'pollen' | 'sky' | 'atmosphere' | 'sea';
+
 export interface UiState {
   pageIndex: number;
   expandedDay: Record<string, string | null>;
@@ -18,6 +20,11 @@ export interface UiState {
   hiddenSeries: Partial<Record<string, string[]>>;
   gestureHintSeen: boolean;
   fullscreenChart: string | null;
+  sectionOrder: CitySectionId[];
+  sectionOrderOpen: boolean;
+  setSectionOrderOpen: (open: boolean) => void;
+  setSectionOrder: (order: CitySectionId[]) => void;
+  resetSectionOrder: () => void;
   next48View: Next48View;
   radarFrame: number | null;
   radarCell: number;

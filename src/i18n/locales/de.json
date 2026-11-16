@@ -347,6 +347,13 @@
       "ofDaylight": "von {d} Tageslicht",
       "sunrise": "Sonnenaufgang",
       "solarEnergy": "Sonnenenergie"
+    },
+    "order": {
+      "title": "Bereiche anordnen",
+      "hint": "Ziehe einen Bereich am Griff, um ihn zu verschieben. Lange auf die Stadtseite drücken, um diese Liste wieder zu öffnen.",
+      "reset": "Zurücksetzen",
+      "done": "Fertig",
+      "move": "{name} verschieben"
     }
   },
   "chart": {

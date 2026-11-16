@@ -350,6 +350,13 @@
       "ofDaylight": "su {d} di luce",
       "sunrise": "Alba",
       "solarEnergy": "Energia solare"
+    },
+    "order": {
+      "title": "Ordine delle sezioni",
+      "hint": "Trascina una sezione dalla maniglia per spostarla. Tieni premuto sulla pagina della città per riaprire questo elenco.",
+      "reset": "Ripristina",
+      "done": "Fatto",
+      "move": "Sposta {name}"
     }
   },
   "chart": {

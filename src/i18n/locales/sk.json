@@ -353,6 +353,13 @@
       "ofDaylight": "z {d} svetla",
       "sunrise": "Východ slnka",
       "solarEnergy": "Slnečná energia"
+    },
+    "order": {
+      "title": "Poradie sekcií",
+      "hint": "Sekciu presuniete ťahaním za úchyt. Dlhým stlačením stránky mesta tento zoznam znova otvoríte.",
+      "reset": "Obnoviť",
+      "done": "Hotovo",
+      "move": "Presunúť {name}"
     }
   },
   "chart": {

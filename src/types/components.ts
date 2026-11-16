@@ -1,12 +1,12 @@
-import type { City, DayData, DayRecord, ForecastData, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
-import type { DateRange } from './stores';
+import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
+import type { CitySectionId, DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
 import type { CSSProperties, ReactElement, ReactNode, Ref } from 'react';
 
 export type IconName =
   | 'list' | 'sliders' | 'back' | 'plus' | 'search' | 'pin' | 'download' | 'up' | 'down'
-  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
+  | 'grip' | 'x' | 'refresh' | 'arrow' | 'arrowUp' | 'lock' | 'heart' | 'expand' | 'reorder' | 'prev' | 'next' | 'play' | 'pause' | 'minus';
 
 export interface IconProps {
   name: IconName;
@@ -97,7 +97,6 @@ export interface CityPageProps {
   city: City;
   isDefault: boolean;
 }
-
 
 export interface CityScreenProps {
   cityId: string;
@@ -314,11 +313,17 @@ export type MotionBoxBase = BoxProps & ElementProps<'div'> & { component?: 'span
 
 export type MotionButtonBase = UnstyledButtonProps & ElementProps<'button'> & { ref?: Ref<HTMLButtonElement> };
 
-export interface CityRowProps {
+export interface ReorderListProps<T extends string> {
+  values: T[];
+  onReorder: (values: T[]) => void;
+  children: ReactNode;
+}
+
+export interface ReorderRowProps {
   value: string;
   label: string;
-  onGrab: () => void;
-  onDrop: () => void;
+  onGrab?: () => void;
+  onDrop?: () => void;
   children: ReactNode;
 }
 
@@ -408,69 +413,14 @@ export interface SettingsAboutProps {
   version: string;
 }
 
-export interface RadarPanelProps {
-  cityId: string;
-  timeZone: string;
-  forecast: ForecastData;
-  height?: ChartHeight;
+export interface CitySectionProps extends CityDataProps {
+  id: CitySectionId;
+  liveEntry: ForecastEntry;
+  expanded: string | null;
+  first: boolean;
 }
 
-export interface RadarZoomProps {
-  cell: number;
-}
-
-export interface RadarMapProps {
-  land: LandMap;
-  frame: RadarFrame | undefined;
-  visibleCols: number;
-  visibleRows: number;
-  baseScale: number;
-  zoom: number;
-  onPinchZoom: (ratio: number) => boolean;
-  height?: ChartHeight;
-}
-
-export interface ModelPoint {
-  time: number;
-  mmPerHour: number;
-}
-
-export type TimelineKind = 'radar' | 'nowcast' | 'model';
-
-export interface TimelineFrame {
-  time: number;
-  kind: TimelineKind;
-  frame: RadarFrame | undefined;
-  mmPerHour: number | null;
-}
-
-export interface RadarFramesProps {
-  frames: readonly TimelineFrame[];
-  selected: number;
-  cols: number;
-  rows: number;
-  onSelect: (time: number) => void;
-}
-
-export interface RadarNoticeProps {
-  text: string;
-  action?: string;
-  onAction?: () => void;
-}
-
-export interface RadarReadoutProps {
-  frame: TimelineFrame | undefined;
-  nowTime: number;
-  timeZone: string;
-}
-
-export interface RadarControlsProps {
-  frames: readonly TimelineFrame[];
-  index: number;
-  cols: number;
-  rows: number;
-  cell: number;
-  stale: boolean;
-  visible: boolean;
-  onRetry: () => void;
+export interface OverviewCardProps extends CityDataProps {
+  expanded: string | null;
+  first: boolean;
 }

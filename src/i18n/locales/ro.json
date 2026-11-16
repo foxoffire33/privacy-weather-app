@@ -350,6 +350,13 @@
       "ofDaylight": "din {d} de lumină",
       "sunrise": "Răsărit",
       "solarEnergy": "Energie solară"
+    },
+    "order": {
+      "title": "Ordinea secțiunilor",
+      "hint": "Trage o secțiune de mâner pentru a o muta. Apasă lung pe pagina orașului pentru a redeschide această listă.",
+      "reset": "Resetează",
+      "done": "Gata",
+      "move": "Mută {name}"
     }
   },
   "chart": {

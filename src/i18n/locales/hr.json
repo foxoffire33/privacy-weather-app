@@ -350,6 +350,13 @@
       "ofDaylight": "od {d} dnevnog svjetla",
       "sunrise": "Izlazak sunca",
       "solarEnergy": "Sunčeva energija"
+    },
+    "order": {
+      "title": "Redoslijed odjeljaka",
+      "hint": "Povucite odjeljak za ručku da ga premjestite. Dugo pritisnite stranicu grada da ponovno otvorite ovaj popis.",
+      "reset": "Vrati",
+      "done": "Gotovo",
+      "move": "Premjesti {name}"
     }
   },
   "chart": {

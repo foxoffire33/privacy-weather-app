@@ -6,3 +6,4 @@ export type * from './native';
 export type * from './hooks';
 export type * from './insights';
 export type * from './diagnostics';
+export type * from './radar';

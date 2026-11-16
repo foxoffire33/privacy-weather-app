@@ -356,6 +356,13 @@
       "ofDaylight": "as {d} de sholas an lae",
       "sunrise": "Éirí gréine",
       "solarEnergy": "Fuinneamh gréine"
+    },
+    "order": {
+      "title": "Ord na rannán",
+      "hint": "Tarraing rannán ar a hanla chun é a bhogadh. Brúigh go fada ar leathanach na cathrach chun an liosta seo a oscailt arís.",
+      "reset": "Athshocraigh",
+      "done": "Déanta",
+      "move": "Bog {name}"
     }
   },
   "chart": {

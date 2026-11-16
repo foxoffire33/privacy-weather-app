@@ -347,6 +347,13 @@
       "ofDaylight": "{d} päevavalgusest",
       "sunrise": "Päikesetõus",
       "solarEnergy": "Päikeseenergia"
+    },
+    "order": {
+      "title": "Jaotiste järjekord",
+      "hint": "Jaotise teisaldamiseks lohista seda pidemest. Selle loendi uuesti avamiseks vajuta pikalt linna lehel.",
+      "reset": "Lähtesta",
+      "done": "Valmis",
+      "move": "Teisalda {name}"
     }
   },
   "chart": {

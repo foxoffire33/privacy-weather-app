@@ -5,11 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 
+import { SectionOrder } from '../components/city/SectionOrder';
 import { Icon } from '../components/Icon';
 import { MotionBox, MotionButton } from '../components/motionComponents';
-import { Spin } from '../components/Spin';
 import { t } from '../i18n';
-import { refreshAll, refreshCity, useAnyForecastLoading, useCities } from '../stores';
+import { refreshCity, useCities } from '../stores';
 import { useUiStore } from '../stores/uiStore';
 import { MOTION } from '../theme';
 import { GESTURE } from '../utils/gesture';
@@ -53,7 +53,7 @@ function settlePage(moved: number, idx: number, n: number): number {
 
 export function Home(): ReactElement {
   const cities = useCities();
-  const updating = useAnyForecastLoading();
+  const openOrder = useUiStore((s) => s.setSectionOrderOpen);
   const navigate = useNavigate();
   const { pageIndex, setPage } = useUiStore(useShallow((s) => ({
     pageIndex: s.pageIndex, setPage: s.setPage,
@@ -102,6 +102,7 @@ export function Home(): ReactElement {
         </MotionBox>
       </MotionBox>
       <GestureHint multiple={n > 1} />
+      <SectionOrder />
       <Box className="overlay">
         <ActionIcon variant="transparent" c="white" aria-label={t('home.cities')} onClick={() => { void navigate(paths.cities); }}>
           <Icon name="list" />
@@ -114,9 +115,8 @@ export function Home(): ReactElement {
           ))}
         </Group>
         <Group gap={0} wrap="nowrap">
-          <ActionIcon variant="transparent" c="white" aria-label={updating ? t('common.updating') : t('home.refreshAll')} aria-busy={updating || undefined}
-            onClick={() => { void refreshAll({ maxAgeMs: 0 }); }}>
-            <Spin active={updating}><Icon name="refresh" size={20} /></Spin>
+          <ActionIcon variant="transparent" c="white" aria-label={t('city.order.title')} onClick={() => { openOrder(true); }}>
+            <Icon name="reorder" size={20} />
           </ActionIcon>
           <ActionIcon variant="transparent" c="white" aria-label={t('home.settings')} onClick={() => { void navigate(paths.settings); }}>
             <Icon name="sliders" />
