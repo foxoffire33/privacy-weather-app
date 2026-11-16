@@ -664,7 +664,6 @@
     "now": "Ora",
     "inMin": "tra {n} min",
     "agoMin": "{n} min fa",
-    "hours": "{n} h",
     "dry": "Asciutto",
     "light": "Pioggia debole",
     "moderate": "Pioggia moderata",
@@ -687,6 +686,12 @@
     "openSettings": "Apri impostazioni",
     "zoomIn": "Ingrandisci",
     "zoomOut": "Riduci",
-    "area": "{km} km di larghezza"
+    "area": "{km} km di larghezza",
+    "inH": "tra {h} h",
+    "agoH": "{h} h fa",
+    "inHm": "tra {h} h {m} min",
+    "agoHm": "{h} h {m} min fa",
+    "modelNote": "Nessun radar così avanti. La pioggia mostrata è la previsione per la città stessa (Open-Meteo).",
+    "title": "Radar della pioggia"
   }
 }

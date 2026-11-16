@@ -17,6 +17,7 @@ export interface RadarFrame {
 }
 
 export interface RadarSet {
+  version: number;
   fetchedAt: number;
   frames: RadarFrame[];
 }

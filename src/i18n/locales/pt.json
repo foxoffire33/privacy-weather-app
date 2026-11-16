@@ -664,7 +664,6 @@
     "now": "Agora",
     "inMin": "daqui a {n} min",
     "agoMin": "há {n} min",
-    "hours": "{n} h",
     "dry": "Seco",
     "light": "Chuva fraca",
     "moderate": "Chuva moderada",
@@ -687,6 +686,12 @@
     "openSettings": "Abrir definições",
     "zoomIn": "Aproximar",
     "zoomOut": "Afastar",
-    "area": "{km} km de largura"
+    "area": "{km} km de largura",
+    "inH": "daqui a {h} h",
+    "agoH": "há {h} h",
+    "inHm": "daqui a {h} h {m} min",
+    "agoHm": "há {h} h {m} min",
+    "modelNote": "Não há radar tão à frente. A chuva mostrada é a previsão para a própria cidade (Open-Meteo).",
+    "title": "Radar de chuva"
   }
 }

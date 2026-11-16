@@ -1,4 +1,4 @@
-import type { City, DayData, DayRecord, ForecastEntry, LandMap, RadarFrame, TempUnit, Units, WindUnit } from '../stores';
+import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { CitySectionId, DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
@@ -97,7 +97,6 @@ export interface CityPageProps {
   city: City;
   isDefault: boolean;
 }
-
 
 export interface CityScreenProps {
   cityId: string;
@@ -412,57 +411,6 @@ export interface ManualCityFormProps {
 
 export interface SettingsAboutProps {
   version: string;
-}
-
-export interface RadarPanelProps {
-  cityId: string;
-  timeZone: string;
-  fullscreenId: string;
-  height?: ChartHeight;
-}
-
-export interface RadarZoomProps {
-  cell: number;
-  fullscreenId: string;
-  full: boolean;
-}
-
-export interface RadarMapProps {
-  land: LandMap;
-  frame: RadarFrame | undefined;
-  height?: ChartHeight;
-}
-
-export interface RadarFramesProps {
-  frames: readonly RadarFrame[];
-  selected: number;
-  cols: number;
-  rows: number;
-  onSelect: (time: number) => void;
-}
-
-export interface RadarNoticeProps {
-  text: string;
-  action?: string;
-  onAction?: () => void;
-}
-
-export interface RadarReadoutProps {
-  frame: RadarFrame | undefined;
-  nowTime: number;
-  timeZone: string;
-}
-
-export interface RadarControlsProps {
-  frames: readonly RadarFrame[];
-  index: number;
-  cols: number;
-  rows: number;
-  cell: number;
-  fullscreenId: string;
-  full: boolean;
-  stale: boolean;
-  onRetry: () => void;
 }
 
 export interface CitySectionProps extends CityDataProps {

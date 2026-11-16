@@ -28,6 +28,7 @@ export function Next48Section({ city, entry }: CityDataProps): ReactElement {
   const { data, air } = entry;
   const view = useUiStore((st) => st.next48View);
   const setView = useUiStore((st) => st.setNext48View);
+  const title = view === 'radar' ? t('radar.title') : t('city.next48');
   const h0 = nowIndex(data);
   const airByTime = air ? Object.fromEntries(air.hourly.time.map((tm, i) => [tm, air.hourly.aqi[i]])) : undefined;
   const chart = (height: ChartHeight) => (
@@ -37,16 +38,16 @@ export function Next48Section({ city, entry }: CityDataProps): ReactElement {
       {view === 'radar'
         ? (
           <Suspense fallback={<Skeleton h={typeof height === 'number' ? height + 120 : 360} />}>
-            <RadarPanel cityId={city.id} timeZone={data.timezone} fullscreenId={`next48:${city.id}`} height={typeof height === 'number' ? undefined : `calc(${height} - 190px)`} />
+            <RadarPanel cityId={city.id} timeZone={data.timezone} forecast={data} height={typeof height === 'number' ? undefined : `calc(${height} - 190px)`} />
           </Suspense>
         )
         : <HourlyExplorer time={data.hourly.time} v={data.hourly.v} from={h0} to={h0 + 48} aqi={airByTime} height={height} />}
     </>
   );
   return (
-    <Section title={t('city.next48')} action={<ExpandButton id={`next48:${city.id}`} />}>
+    <Section title={title} action={<ExpandButton id={`next48:${city.id}`} />}>
       <Box pt={12}>{chart(INLINE_HEIGHT)}</Box>
-      <FullscreenChart id={`next48:${city.id}`} title={t('city.next48')} render={chart} />
+      <FullscreenChart id={`next48:${city.id}`} title={title} render={chart} />
     </Section>
   );
 }

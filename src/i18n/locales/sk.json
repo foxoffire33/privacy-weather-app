@@ -670,7 +670,6 @@
     "now": "Teraz",
     "inMin": "o {n} min",
     "agoMin": "pred {n} min",
-    "hours": "{n} h",
     "dry": "Sucho",
     "light": "Slabý dážď",
     "moderate": "Mierny dážď",
@@ -693,6 +692,12 @@
     "openSettings": "Otvoriť nastavenia",
     "zoomIn": "Priblížiť",
     "zoomOut": "Oddialiť",
-    "area": "šírka {km} km"
+    "area": "šírka {km} km",
+    "inH": "o {h} h",
+    "agoH": "pred {h} h",
+    "inHm": "o {h} h {m} min",
+    "agoHm": "pred {h} h {m} min",
+    "modelNote": "Tak ďaleko radar nie je. Zobrazený dážď je predpoveď pre samotné mesto (Open-Meteo).",
+    "title": "Zrážkový radar"
   }
 }

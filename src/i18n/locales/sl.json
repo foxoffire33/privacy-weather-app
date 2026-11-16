@@ -670,7 +670,6 @@
     "now": "Zdaj",
     "inMin": "čez {n} min",
     "agoMin": "pred {n} min",
-    "hours": "{n} h",
     "dry": "Suho",
     "light": "Rahel dež",
     "moderate": "Zmeren dež",
@@ -693,6 +692,12 @@
     "openSettings": "Odpri nastavitve",
     "zoomIn": "Povečaj",
     "zoomOut": "Pomanjšaj",
-    "area": "širina {km} km"
+    "area": "širina {km} km",
+    "inH": "čez {h} h",
+    "agoH": "pred {h} h",
+    "inHm": "čez {h} h {m} min",
+    "agoHm": "pred {h} h {m} min",
+    "modelNote": "Tako daleč naprej radarja ni. Prikazan dež je napoved za samo mesto (Open-Meteo).",
+    "title": "Padavinski radar"
   }
 }

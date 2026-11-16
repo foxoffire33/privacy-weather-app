@@ -27,7 +27,7 @@ export async function fetchForecast(city: City, pastDays = 1, maxAgeMs = 0): Pro
     hourly: HOURLY_VARS,
     daily: DAILY_VARS,
     minutely_15: ['precipitation'],
-    forecast_minutely_15: 8,
+    forecast_minutely_15: 13,
   }, { maxAgeMs, keepMs: 30 * MINUTE, build: (json) => createForecast(parseWeather(json), { current: CURRENT_VARS, hourly: HOURLY_VARS, daily: DAILY_VARS }) });
 }
 

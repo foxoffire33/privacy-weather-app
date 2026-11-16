@@ -658,7 +658,6 @@
     "now": "Nyt",
     "inMin": "{n} min päästä",
     "agoMin": "{n} min sitten",
-    "hours": "{n} t",
     "dry": "Poutaa",
     "light": "Heikkoa sadetta",
     "moderate": "Kohtalaista sadetta",
@@ -681,6 +680,12 @@
     "openSettings": "Avaa asetukset",
     "zoomIn": "Lähennä",
     "zoomOut": "Loitonna",
-    "area": "{km} km leveä"
+    "area": "{km} km leveä",
+    "inH": "{h} t päästä",
+    "agoH": "{h} t sitten",
+    "inHm": "{h} t {m} min päästä",
+    "agoHm": "{h} t {m} min sitten",
+    "modelNote": "Näin pitkälle ei ole tutkaa. Näytetty sade on kaupungin oma ennuste (Open-Meteo).",
+    "title": "Sadetutka"
   }
 }

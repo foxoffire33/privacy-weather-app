@@ -13,7 +13,7 @@ export * from './forecastStore';
 export * from './logStore';
 export * from './dayStore';
 export * from './radarStore';
-export { DEFAULT_RADAR_CELL, levelOf, RADAR_CELLS, rainRate } from './factories/radar';
+export { DEFAULT_RADAR_CELL, levelOf, RADAR_CELLS, rainRate, VISIBLE_COLS, VISIBLE_ROWS } from './factories/radar';
 export * from './almanacStore';
 export * from './searchStore';
 export * from './weatherSync';

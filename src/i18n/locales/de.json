@@ -658,7 +658,6 @@
     "now": "Jetzt",
     "inMin": "in {n} Min.",
     "agoMin": "vor {n} Min.",
-    "hours": "{n} Std.",
     "dry": "Trocken",
     "light": "Leichter Regen",
     "moderate": "Mäßiger Regen",
@@ -681,6 +680,12 @@
     "openSettings": "Einstellungen öffnen",
     "zoomIn": "Vergrößern",
     "zoomOut": "Verkleinern",
-    "area": "{km} km breit"
+    "area": "{km} km breit",
+    "inH": "in {h} Std.",
+    "agoH": "vor {h} Std.",
+    "inHm": "in {h} Std. {m} Min.",
+    "agoHm": "vor {h} Std. {m} Min.",
+    "modelNote": "So weit voraus gibt es kein Radar. Der angezeigte Regen ist die Vorhersage für die Stadt selbst (Open-Meteo).",
+    "title": "Regenradar"
   }
 }

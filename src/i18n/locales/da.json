@@ -658,7 +658,6 @@
     "now": "Nu",
     "inMin": "om {n} min",
     "agoMin": "for {n} min siden",
-    "hours": "{n} t",
     "dry": "Tørt",
     "light": "Let regn",
     "moderate": "Moderat regn",
@@ -681,6 +680,12 @@
     "openSettings": "Åbn indstillinger",
     "zoomIn": "Zoom ind",
     "zoomOut": "Zoom ud",
-    "area": "{km} km bred"
+    "area": "{km} km bred",
+    "inH": "om {h} t",
+    "agoH": "for {h} t siden",
+    "inHm": "om {h} t {m} min",
+    "agoHm": "for {h} t {m} min siden",
+    "modelNote": "Ingen radar så langt frem. Den viste regn er prognosen for selve byen (Open-Meteo).",
+    "title": "Regnradar"
   }
 }
