@@ -53,9 +53,11 @@ const chartBase = {
   withLegend: true,
   legendProps: { verticalAlign: 'bottom' as const, height: 28 },
   tooltipAnimationDuration: 100,
-  tooltipProps: { content: CompactTooltip, cursor: cursorBand, position: { x: 0, y: -26 }, wrapperStyle: { width: '100%', pointerEvents: 'none' as const, visibility: 'visible' as const }, allowEscapeViewBox: { x: false, y: true }, isAnimationActive: false },
+  tooltipProps: { content: CompactTooltip, cursor: cursorBand, position: { x: 0, y: 0 }, wrapperStyle: { width: '100%', pointerEvents: 'none' as const, visibility: 'visible' as const }, allowEscapeViewBox: { x: false, y: false }, isAnimationActive: false },
   yAxisProps: { width: 34 },
 };
+const READOUT = 60;
+const chartMargin = { top: READOUT, right: 4, bottom: 0, left: 0 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
 
 const channel = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
@@ -162,9 +164,9 @@ export const buildTheme = (accent: Accent, accentColor = '#178a4a'): MantineThem
     Select: Select.extend({ defaultProps: { radius: 0 } }),
     SegmentedControl: SegmentedControl.extend({ defaultProps: { radius: 0 } }),
     Switch: Switch.extend({ defaultProps: { radius: 0, color: 'signal' } }),
-    LineChart: LineChart.extend({ defaultProps: lineBase, styles: chartStyles }),
-    BarChart: BarChart.extend({ defaultProps: { ...chartBase, tooltipProps: { ...chartBase.tooltipProps, cursor: barCursor }, maxBarWidth: 14 }, styles: chartStyles }),
-    CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, maxBarWidth: 14 }, styles: chartStyles }),
+    LineChart: LineChart.extend({ defaultProps: { ...lineBase, lineChartProps: { margin: chartMargin } }, styles: chartStyles }),
+    BarChart: BarChart.extend({ defaultProps: { ...chartBase, barChartProps: { margin: chartMargin }, tooltipProps: { ...chartBase.tooltipProps, cursor: barCursor }, maxBarWidth: 14 }, styles: chartStyles }),
+    CompositeChart: CompositeChart.extend({ defaultProps: { ...lineBase, composedChartProps: { margin: chartMargin }, maxBarWidth: 14 }, styles: chartStyles }),
   },
 });
 
