@@ -651,7 +651,6 @@
     "now": "Nu",
     "inMin": "over {n} min",
     "agoMin": "{n} min geleden",
-    "hours": "{n} u",
     "dry": "Droog",
     "light": "Lichte regen",
     "moderate": "Matige regen",
@@ -674,6 +673,11 @@
     "openSettings": "Instellingen openen",
     "zoomIn": "Inzoomen",
     "zoomOut": "Uitzoomen",
-    "area": "{km} km breed"
+    "area": "{km} km breed",
+    "inH": "over {h} u",
+    "agoH": "{h} u geleden",
+    "inHm": "over {h} u {m} min",
+    "agoHm": "{h} u {m} min geleden",
+    "modelNote": "Zo ver vooruit is er geen radar. De getoonde regen is de verwachting voor de stad zelf (Open-Meteo)."
   }
 }

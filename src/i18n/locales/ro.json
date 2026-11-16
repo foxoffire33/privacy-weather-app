@@ -657,7 +657,6 @@
     "now": "Acum",
     "inMin": "peste {n} min",
     "agoMin": "acum {n} min",
-    "hours": "{n} h",
     "dry": "Uscat",
     "light": "Ploaie slabă",
     "moderate": "Ploaie moderată",
@@ -680,6 +679,11 @@
     "openSettings": "Deschide setările",
     "zoomIn": "Mărește",
     "zoomOut": "Micșorează",
-    "area": "{km} km lățime"
+    "area": "{km} km lățime",
+    "inH": "peste {h} h",
+    "agoH": "acum {h} h",
+    "inHm": "peste {h} h {m} min",
+    "agoHm": "acum {h} h {m} min",
+    "modelNote": "Nu există radar atât de departe. Ploaia afișată este prognoza pentru oraș (Open-Meteo)."
   }
 }

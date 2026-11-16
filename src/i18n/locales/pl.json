@@ -663,7 +663,6 @@
     "now": "Teraz",
     "inMin": "za {n} min",
     "agoMin": "{n} min temu",
-    "hours": "{n} h",
     "dry": "Sucho",
     "light": "Lekki deszcz",
     "moderate": "Umiarkowany deszcz",
@@ -686,6 +685,11 @@
     "openSettings": "Otwórz ustawienia",
     "zoomIn": "Przybliż",
     "zoomOut": "Oddal",
-    "area": "{km} km szerokości"
+    "area": "{km} km szerokości",
+    "inH": "za {h} h",
+    "agoH": "{h} h temu",
+    "inHm": "za {h} h {m} min",
+    "agoHm": "{h} h {m} min temu",
+    "modelNote": "Tak daleko nie ma radaru. Pokazany deszcz to prognoza dla samego miasta (Open-Meteo)."
   }
 }

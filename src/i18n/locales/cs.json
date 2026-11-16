@@ -663,7 +663,6 @@
     "now": "Teď",
     "inMin": "za {n} min",
     "agoMin": "před {n} min",
-    "hours": "{n} h",
     "dry": "Sucho",
     "light": "Slabý déšť",
     "moderate": "Mírný déšť",
@@ -686,6 +685,11 @@
     "openSettings": "Otevřít nastavení",
     "zoomIn": "Přiblížit",
     "zoomOut": "Oddálit",
-    "area": "šířka {km} km"
+    "area": "šířka {km} km",
+    "inH": "za {h} h",
+    "agoH": "před {h} h",
+    "inHm": "za {h} h {m} min",
+    "agoHm": "před {h} h {m} min",
+    "modelNote": "Tak daleko radar není. Zobrazený déšť je předpověď pro samotné město (Open-Meteo)."
   }
 }

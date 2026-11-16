@@ -37,7 +37,7 @@ export function Next48Section({ city, entry }: CityDataProps): ReactElement {
       {view === 'radar'
         ? (
           <Suspense fallback={<Skeleton h={typeof height === 'number' ? height + 120 : 360} />}>
-            <RadarPanel cityId={city.id} timeZone={data.timezone} fullscreenId={`next48:${city.id}`} height={typeof height === 'number' ? undefined : `calc(${height} - 190px)`} />
+            <RadarPanel cityId={city.id} timeZone={data.timezone} forecast={data} fullscreenId={`next48:${city.id}`} height={typeof height === 'number' ? undefined : `calc(${height} - 190px)`} />
           </Suspense>
         )
         : <HourlyExplorer time={data.hourly.time} v={data.hourly.v} from={h0} to={h0 + 48} aqi={airByTime} height={height} />}

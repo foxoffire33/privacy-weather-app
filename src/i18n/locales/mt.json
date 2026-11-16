@@ -669,7 +669,6 @@
     "now": "Issa",
     "inMin": "fi {n} min",
     "agoMin": "{n} min ilu",
-    "hours": "{n} siegħa",
     "dry": "Niexef",
     "light": "Xita ħafifa",
     "moderate": "Xita moderata",
@@ -692,6 +691,11 @@
     "openSettings": "Iftaħ l-issettjar",
     "zoomIn": "Kabbar",
     "zoomOut": "Ċekken",
-    "area": "wiesa' {km} km"
+    "area": "wiesa' {km} km",
+    "inH": "fi {h} siegħa",
+    "agoH": "{h} siegħa ilu",
+    "inHm": "fi {h} siegħa {m} min",
+    "agoHm": "{h} siegħa {m} min ilu",
+    "modelNote": "M'hemmx radar daqshekk 'il quddiem. Ix-xita murija hija t-tbassir għall-belt innifisha (Open-Meteo)."
   }
 }

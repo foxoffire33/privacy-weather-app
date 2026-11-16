@@ -10,6 +10,7 @@ export interface Units {
 
 export interface RadarView {
   key: string;
+  shownCell: number;
   land: LandMap | undefined;
   radar: RadarSet | undefined;
   query: QueryState;

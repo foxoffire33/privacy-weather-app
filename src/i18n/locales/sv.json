@@ -651,7 +651,6 @@
     "now": "Nu",
     "inMin": "om {n} min",
     "agoMin": "för {n} min sedan",
-    "hours": "{n} h",
     "dry": "Torrt",
     "light": "Lätt regn",
     "moderate": "Måttligt regn",
@@ -674,6 +673,11 @@
     "openSettings": "Öppna inställningar",
     "zoomIn": "Zooma in",
     "zoomOut": "Zooma ut",
-    "area": "{km} km bred"
+    "area": "{km} km bred",
+    "inH": "om {h} h",
+    "agoH": "för {h} h sedan",
+    "inHm": "om {h} h {m} min",
+    "agoHm": "för {h} h {m} min sedan",
+    "modelNote": "Ingen radar så långt fram. Regnet som visas är prognosen för själva staden (Open-Meteo)."
   }
 }

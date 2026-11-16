@@ -663,7 +663,6 @@
     "now": "Dabar",
     "inMin": "po {n} min",
     "agoMin": "prieš {n} min",
-    "hours": "{n} val.",
     "dry": "Sausa",
     "light": "Silpnas lietus",
     "moderate": "Vidutinis lietus",
@@ -686,6 +685,11 @@
     "openSettings": "Atidaryti nustatymus",
     "zoomIn": "Priartinti",
     "zoomOut": "Nutolinti",
-    "area": "{km} km pločio"
+    "area": "{km} km pločio",
+    "inH": "po {h} val.",
+    "agoH": "prieš {h} val.",
+    "inHm": "po {h} val. {m} min",
+    "agoHm": "prieš {h} val. {m} min",
+    "modelNote": "Taip toli radaro nėra. Rodomas lietus yra paties miesto prognozė (Open-Meteo)."
   }
 }

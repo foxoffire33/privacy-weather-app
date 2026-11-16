@@ -651,7 +651,6 @@
     "now": "Now",
     "inMin": "in {n} min",
     "agoMin": "{n} min ago",
-    "hours": "{n} h",
     "dry": "Dry",
     "light": "Light rain",
     "moderate": "Moderate rain",
@@ -674,6 +673,11 @@
     "openSettings": "Open settings",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
-    "area": "{km} km wide"
+    "area": "{km} km wide",
+    "inH": "in {h} h",
+    "agoH": "{h} h ago",
+    "inHm": "in {h} h {m} min",
+    "agoHm": "{h} h {m} min ago",
+    "modelNote": "No radar this far ahead. The rain shown is the forecast for the city itself (Open-Meteo)."
   }
 }
