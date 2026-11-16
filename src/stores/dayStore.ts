@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { fetchAirDay, fetchDay } from './api/remote';
+import { noteStorageFault } from './bootStore';
 import { isOffline } from './core/config';
 import { errorMessage } from './core/errors';
 import { afterGesture } from './core/gesture';
@@ -66,7 +67,7 @@ export const useDayStore = create<DayState>()((set, get) => ({
   clear: () => {
     generation += 1;
     restore(() => { set({ days: {}, queries: {} }); });
-    void clearRecords(DAY_PREFIX);
+    void clearRecords(DAY_PREFIX).catch(noteStorageFault);
   },
 }));
 

@@ -1,4 +1,4 @@
-import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite } from './idb';
+import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, toStorageError } from './idb';
 import { measure } from './marks';
 
 import type { IdbEntry, MapStore } from './types';
@@ -78,7 +78,19 @@ export async function clearRecords(prefix: string): Promise<void> {
   clearedPrefixes.push(prefix);
   for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
   for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
-  await recordsDeletePrefix(prefix).catch(() => null);
+  return new Promise<void>((resolve, reject) => {
+    chain = chain.then(
+      async () => {
+        try {
+          await recordsDeletePrefix(prefix);
+          resolve();
+        } catch (error) {
+          reject(toStorageError('write', error));
+        }
+      },
+      (error: unknown) => { reject(toStorageError('write', error)); },
+    );
+  });
 }
 
 export function restore(apply: () => void): void {

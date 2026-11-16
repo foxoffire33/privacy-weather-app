@@ -106,6 +106,14 @@ an empty history. Boot degrades instead of hanging: `hydrateAll` records the fir
 `bootStore.storageError`, keeps the app usable in memory, and leaves retry/reporting to the persistence
 layer, so a failed read can never lead to defaults being written over the user's stored state.
 
+**13. A prefix clear is a queued mutation, ordered with the record puts.** `recordSync.clearRecords(prefix)`
+runs the prefix deletion through the same serialized chain as the debounced record writes, in one
+read-write transaction that resolves only on completion. Writes submitted before the clear are dropped
+from the pending batch; the deletion commits after every earlier mutation in the chain, so an in-flight
+flush cannot resurrect a cleared key after the delete; writes submitted after the clear persist as
+normal. A failed clear rejects with the typed `StorageError` (nothing is deleted) and the caller records
+it through `noteStorageFault`, so the app never claims a clear it could not perform.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

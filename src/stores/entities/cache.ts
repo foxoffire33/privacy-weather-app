@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { noteStorageFault } from '../bootStore';
 import { definedOnly, isRecord, without } from '../core/guards';
 import { clearRecords, deleteRecord, putRecord } from '../core/recordSync';
 
@@ -103,7 +104,7 @@ export const useEntityCache = create<EntityCacheState>()((set, get) => ({
   },
   clearEntities: () => {
     set({ tables: emptyTables() });
-    void clearRecords(ENTITY_PREFIX);
+    void clearRecords(ENTITY_PREFIX).catch(noteStorageFault);
   },
 }));
 

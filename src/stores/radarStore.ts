@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { fetchLandMap, fetchModelRain, fetchRadarFrame, fetchRadarFrames } from './api/remote';
+import { noteStorageFault } from './bootStore';
 import { getConfig, isOffline } from './core/config';
 import { errorMessage } from './core/errors';
 import { afterGesture } from './core/gesture';
@@ -123,9 +124,9 @@ export const useRadarStore = create<RadarState>()((set, get) => {
     clear: () => {
       generation += 1;
       restore(() => { set({ land: {}, radar: {}, model: {}, queries: {} }); });
-      void clearRecords(LAND_PREFIX);
-      void clearRecords(RADAR_PREFIX);
-      void clearRecords(MODEL_PREFIX);
+      void clearRecords(LAND_PREFIX).catch(noteStorageFault);
+      void clearRecords(RADAR_PREFIX).catch(noteStorageFault);
+      void clearRecords(MODEL_PREFIX).catch(noteStorageFault);
     },
   };
 });
