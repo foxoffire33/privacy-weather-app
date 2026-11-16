@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Indlæser"
+    "loading": "Indlæser",
+    "blocked": "Weather Log er åben i en anden fane. Luk den for at gøre opdateringen af dine data færdig."
   },
   "diagnostics": {
     "title": "Diagnostik",

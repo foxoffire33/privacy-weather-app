@@ -15,12 +15,14 @@ import { startWidgetSync } from './native/widgets';
 import { Cities, DayView, Diagnostics, History, Home, Hourly, Onboarding, preloadScreens, Search, Settings } from './screens/lazy';
 import { refreshAll, useCityStore, useHydration, useIsHydrated, useSettings, whenHistoryReady, whenIdle } from './stores';
 import { useUiStore } from './stores/uiStore';
+import { noteRoute } from './utils/diagnostics';
 import { BACK_STATE, paths } from './utils/paths';
 
 import type { CityRouteProps, FrameProps } from './types';
 import type { ReactElement } from 'react';
 
 const PRELOAD_DELAY = 1500;
+const SETUP_PATHS: ReadonlySet<string> = new Set([paths.search, paths.settings, paths.diagnostics]);
 
 export default function App(): ReactElement {
   return (
@@ -36,7 +38,7 @@ export default function App(): ReactElement {
 
 function onTopAccent(pathname: string, hydrated: boolean, hasCities: boolean): boolean {
   if (!hydrated || pathname === paths.home) { return true; }
-  return !hasCities && pathname !== paths.search && pathname !== paths.settings;
+  return !hasCities && !SETUP_PATHS.has(pathname);
 }
 
 function Frame({ children }: FrameProps) {
@@ -58,6 +60,7 @@ function Frame({ children }: FrameProps) {
     const sub = CapApp.addListener('backButton', () => { onBack(); });
     return () => { void sub.then(async (h) => h.remove()); };
   }, []);
+  useEffect(() => { noteRoute(pathname); }, [pathname]);
   return (
     <Box className="stage">
       <Box className="device" data-accent={accent} data-top={onTopAccent(pathname, hydrated, hasCities) ? 'accent' : undefined}>{children}</Box>
@@ -98,7 +101,7 @@ function Screens() {
       whenIdle(() => { void whenHistoryReady(); });
     }, PRELOAD_DELAY);
   }, []);
-  const onboarding = !hasCities && location.pathname !== paths.search && location.pathname !== paths.settings;
+  const onboarding = !hasCities && !SETUP_PATHS.has(location.pathname);
   return (
     <Fragment key={lang}>
       {onboarding ? <Onboarding /> : (

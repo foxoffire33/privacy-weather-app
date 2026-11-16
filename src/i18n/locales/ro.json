@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Se încarcă"
+    "loading": "Se încarcă",
+    "blocked": "Weather Log este deschis într-o altă filă. Închide-o pentru a finaliza actualizarea datelor."
   },
   "diagnostics": {
     "title": "Diagnostic",

@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Зареждане"
+    "loading": "Зареждане",
+    "blocked": "Weather Log е отворен в друг раздел. Затворете го, за да завърши обновяването на данните."
   },
   "diagnostics": {
     "title": "Диагностика",

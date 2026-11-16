@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Chargement"
+    "loading": "Chargement",
+    "blocked": "Weather Log est ouvert dans un autre onglet. Fermez-le pour terminer la mise à jour de vos données."
   },
   "diagnostics": {
     "title": "Diagnostic",

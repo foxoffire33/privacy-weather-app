@@ -631,7 +631,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Nalaganje"
+    "loading": "Nalaganje",
+    "blocked": "Weather Log je odprt v drugem zavihku. Zaprite ga, da se posodobitev podatkov zaključi."
   },
   "diagnostics": {
     "title": "Diagnostika",

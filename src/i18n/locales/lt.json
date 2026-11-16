@@ -631,7 +631,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Įkeliama"
+    "loading": "Įkeliama",
+    "blocked": "Weather Log atidarytas kitame skirtuke. Uždarykite jį, kad būtų baigtas duomenų atnaujinimas."
   },
   "diagnostics": {
     "title": "Diagnostika",

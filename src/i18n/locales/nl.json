@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Laden"
+    "loading": "Laden",
+    "blocked": "Weather Log is geopend in een ander tabblad. Sluit dat om het bijwerken van je gegevens af te ronden."
   },
   "diagnostics": {
     "title": "Diagnose",

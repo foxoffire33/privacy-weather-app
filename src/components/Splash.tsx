@@ -1,10 +1,12 @@
 import { Box, Loader, Stack, Text } from '@mantine/core';
 
 import { t } from '../i18n';
+import { useStorageBlocked } from '../stores';
 
 import type { ReactElement } from 'react';
 
 export function Splash(): ReactElement {
+  const blocked = useStorageBlocked();
   return (
     <Box className="screen accent-field splash" role="status" aria-label={t('splash.loading')}>
       <Stack align="center" justify="center" gap="md" style={{ flex: 1 }}>
@@ -14,6 +16,7 @@ export function Splash(): ReactElement {
         </Box>
         <Text fz={28} fw={800}>{t('splash.name')}</Text>
         <Loader color="white" size="sm" type="dots" />
+        {blocked && <Text fz={14} ta="center" maw={280} role="alert">{t('splash.blocked')}</Text>}
       </Stack>
     </Box>
   );

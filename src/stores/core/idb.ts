@@ -1,6 +1,6 @@
 import { sortedCopy } from './sort';
 
-import type { IdbEntry, ResponseRecord } from './types';
+import type { BlockedListener, IdbEntry, ResponseRecord } from './types';
 
 const DB_NAME = 'wl-storesv2';
 const DB_VERSION = 2;
@@ -10,6 +10,19 @@ const RESPONSES = 'responses';
 const RELAXED: IDBTransactionOptions = { durability: 'relaxed' };
 
 let dbPromise: Promise<IDBDatabase> | null = null;
+let blockedListener: BlockedListener | null = null;
+
+export function onUpgradeBlocked(listener: BlockedListener | null): void {
+  blockedListener = listener;
+}
+
+function manage(db: IDBDatabase): IDBDatabase {
+  db.addEventListener('versionchange', () => {
+    db.close();
+    dbPromise = null;
+  });
+  return db;
+}
 
 function hasIndexedDb(): boolean {
   return typeof indexedDB !== 'undefined';
@@ -24,7 +37,11 @@ async function openDb(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains(name)) { db.createObjectStore(name); }
       }
     });
-    request.addEventListener('success', () => { resolve(request.result); });
+    request.addEventListener('blocked', () => { blockedListener?.(true); });
+    request.addEventListener('success', () => {
+      blockedListener?.(false);
+      resolve(manage(request.result));
+    });
     request.addEventListener('error', () => { reject(request.error ?? new Error('IndexedDB open failed')); });
   });
   return dbPromise.catch((error: unknown) => {
@@ -92,17 +109,24 @@ export async function recordsDeletePrefix(prefix: string): Promise<void> {
 }
 
 export async function recordsRange(lower: string, upper: string): Promise<IdbEntry[]> {
-  const range = IDBKeyRange.bound(lower, upper);
-  const [keys, values] = await Promise.all([
-    read(RECORDS, (s) => s.getAllKeys(range)),
-    read(RECORDS, (s) => s.getAll(range)),
-  ]);
-  if (keys?.length !== values?.length || keys === null || values === null) { return []; }
-  const out: IdbEntry[] = [];
-  for (const [i, key] of keys.entries()) {
-    if (typeof key === 'string') { out.push([key, values[i]]); }
-  }
-  return out;
+  const db = await database();
+  if (db === null) { return []; }
+  return new Promise<IdbEntry[]>((resolve) => {
+    const tx = db.transaction(RECORDS, 'readonly');
+    const store = tx.objectStore(RECORDS);
+    const range = IDBKeyRange.bound(lower, upper);
+    const keys = store.getAllKeys(range);
+    const values = store.getAll(range);
+    tx.addEventListener('complete', () => {
+      const out: IdbEntry[] = [];
+      for (const [i, key] of keys.result.entries()) {
+        if (typeof key === 'string') { out.push([key, values.result[i]]); }
+      }
+      resolve(out);
+    });
+    tx.addEventListener('error', () => { resolve([]); });
+    tx.addEventListener('abort', () => { resolve([]); });
+  });
 }
 
 export async function responseGet(key: string): Promise<ResponseRecord | null> {

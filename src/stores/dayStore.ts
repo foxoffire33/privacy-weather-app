@@ -29,6 +29,8 @@ async function download(city: City, date: string): Promise<DayData> {
   return { ...day, air };
 }
 
+let generation = 0;
+
 export const useDayStore = create<DayState>()((set, get) => ({
   days: {},
   queries: {},
@@ -36,12 +38,15 @@ export const useDayStore = create<DayState>()((set, get) => ({
     const key = dayKey(city.id, date);
     if (get().days[key] !== undefined || isLoading(get().queries[key])) { return null; }
     set((s) => ({ queries: setQuery(s.queries, key, begin(queryAt(s.queries, key))) }));
+    const epoch = generation;
     const stored = await readRecord(DAY_PREFIX + key);
+    if (epoch !== generation) { return null; }
     if (isDayData(stored)) {
       restore(() => { set((s) => ({ days: { ...s.days, [key]: stored }, queries: setQuery(s.queries, key, succeed()) })); });
       if (stored.version !== FACTORY_VERSION && !isOffline()) {
         void download(city, date).then(async (fresh) => {
           await afterGesture();
+          if (epoch !== generation) { return; }
           set((s) => ({ days: { ...s.days, [key]: fresh } }));
         }).catch(() => null);
       }
@@ -49,14 +54,17 @@ export const useDayStore = create<DayState>()((set, get) => ({
     }
     try {
       const full = await download(city, date);
+      if (epoch !== generation) { return null; }
       set((s) => ({ days: { ...s.days, [key]: full }, queries: setQuery(s.queries, key, succeed()) }));
       return full;
     } catch (error) {
+      if (epoch !== generation) { return null; }
       set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
       return null;
     }
   },
   clear: () => {
+    generation += 1;
     restore(() => { set({ days: {}, queries: {} }); });
     void clearRecords(DAY_PREFIX);
   },

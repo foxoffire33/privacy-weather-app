@@ -2,7 +2,7 @@ import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
 import { inSequence, isRecord } from './core/guards';
-import { idbDel, idbGet, recordsWrite } from './core/idb';
+import { idbDel, idbGet, onUpgradeBlocked, recordsWrite } from './core/idb';
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
@@ -26,11 +26,16 @@ const PERSISTED: Rehydratable[] = [
 ];
 
 const RECENT_DAYS = 120;
+
+onUpgradeBlocked((blocked) => { useBootStore.setState({ storageBlocked: blocked }); });
 const FIRST_DECADE = 1940;
 
 let booting: Promise<void> | null = null;
 let history: Promise<void> | null = null;
 let historyDone = false;
+let unmigrated: IdbEntry[] = [];
+
+const LEGACY_KEYS = ['wl2-entities', 'wl2-forecasts', 'wl2-log', 'wl2-days'];
 
 const isCity = (v: unknown): v is City => isRecord(v) && typeof v.id === 'string' && typeof v.lat === 'number';
 const isDay = (v: unknown): v is DayRecord => isRecord(v) && typeof v.id === 'string' && typeof v.date === 'string';
@@ -54,24 +59,42 @@ function entityEntries(envelope: unknown): IdbEntry[] {
 }
 
 async function migrateKvToRecords(): Promise<void> {
-  const [entities, forecasts, log, days] = await Promise.all(['wl2-entities', 'wl2-forecasts', 'wl2-log', 'wl2-days'].map(async (k) => idbGet(k)));
+  const [entities, forecasts, log, days] = await Promise.all(LEGACY_KEYS.map(async (k) => idbGet(k)));
   if (entities === null && forecasts === null && log === null && days === null) { return; }
-  await recordsWrite([
+  const entries = [
     ...entityEntries(entities),
     ...prefixed(FORECAST_PREFIX, stateOf(forecasts, 'forecasts')),
     ...prefixed(LOG_PREFIX, stateOf(log, 'dates')),
     ...prefixed(DAY_PREFIX, stateOf(days, 'days')),
-  ], []);
-  await Promise.all(['wl2-entities', 'wl2-forecasts', 'wl2-log', 'wl2-days'].map(async (k) => idbDel(k)));
+  ];
+  try {
+    await recordsWrite(entries, []);
+  } catch {
+    unmigrated = entries;
+    return;
+  }
+  await Promise.all(LEGACY_KEYS.map(async (k) => idbDel(k)));
+}
+
+async function range(prefix: string, from = '', to = '\uFFFF'): Promise<IdbEntry[]> {
+  const rows = await readRange(prefix, from, to);
+  if (unmigrated.length === 0) { return rows; }
+  const stored = new Set(rows.map(([key]) => key));
+  const legacy = unmigrated.flatMap(([key, value]): IdbEntry[] => {
+    if (!key.startsWith(prefix)) { return []; }
+    const id = key.slice(prefix.length);
+    return id >= from && id <= to && !stored.has(id) ? [[id, value]] : [];
+  });
+  return [...rows, ...legacy];
 }
 
 const values = <T>(rows: IdbEntry[], guard: (v: unknown) => v is T): T[] => rows.flatMap(([, v]) => (guard(v) ? [v] : []));
 
 async function restoreCore(): Promise<void> {
   const [cities, forecasts, logs] = await Promise.all([
-    readRange(`${ENTITY_PREFIX}city:`),
-    readRange(FORECAST_PREFIX),
-    readRange(LOG_PREFIX),
+    range(`${ENTITY_PREFIX}city:`),
+    range(FORECAST_PREFIX),
+    range(LOG_PREFIX),
   ]);
   restore(() => { useEntityCache.getState().hydrate('city', values(cities, isCity)); });
   restoreForecasts(Object.fromEntries(forecasts.flatMap(([k, v]): [string, ForecastEntry][] => (isForecast(v) ? [[k, v]] : []))));
@@ -79,7 +102,7 @@ async function restoreCore(): Promise<void> {
 }
 
 async function restoreDays(cityId: string, from: string, to: string): Promise<void> {
-  const rows = await readRange(`${ENTITY_PREFIX}dayRecord:${cityId}:`, from, to);
+  const rows = await range(`${ENTITY_PREFIX}dayRecord:${cityId}:`, from, to);
   restore(() => { useEntityCache.getState().hydrate('dayRecord', values(rows, isDay)); });
 }
 
@@ -97,7 +120,7 @@ async function restoreHistory(): Promise<void> {
   )));
   const found: DayRecord[] = [];
   await inSequence(chunks, async ({ id, from, to }) => {
-    const rows = await readRange(`${ENTITY_PREFIX}dayRecord:${id}:`, from, to);
+    const rows = await range(`${ENTITY_PREFIX}dayRecord:${id}:`, from, to);
     found.push(...values(rows, isDay));
     await yieldToMain();
   });

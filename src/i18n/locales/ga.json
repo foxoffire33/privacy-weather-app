@@ -637,7 +637,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Á lódáil"
+    "loading": "Á lódáil",
+    "blocked": "Tá Weather Log oscailte i gcluaisín eile. Dún é chun nuashonrú do chuid sonraí a chríochnú."
   },
   "diagnostics": {
     "title": "Diagnóisic",

@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Učitavanje"
+    "loading": "Učitavanje",
+    "blocked": "Weather Log je otvoren u drugoj kartici. Zatvorite je kako bi se dovršilo ažuriranje podataka."
   },
   "diagnostics": {
     "title": "Dijagnostika",

@@ -631,7 +631,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Načítava sa"
+    "loading": "Načítava sa",
+    "blocked": "Weather Log je otvorený na inej karte. Zatvorte ju, aby sa dokončila aktualizácia údajov."
   },
   "diagnostics": {
     "title": "Diagnostika",

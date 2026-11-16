@@ -4,9 +4,10 @@ import { responseGet, responsePut } from '../core/idb';
 import { sortedCopy } from '../core/sort';
 
 import type { QueryParams } from '../core/types';
-import type { CacheAges, EndpointKind } from './types';
+import type { CachedRead, EndpointKind } from './types';
 
 const RETRIES = 3;
+const UNREADABLE = Symbol('unreadable');
 const BACKOFF_MS = 200;
 const BACKOFF_MAX_MS = 2000;
 
@@ -62,7 +63,9 @@ const sleep = async (ms: number, signal: AbortSignal) => new Promise<void>((reso
 async function attempt(url: string, signal: AbortSignal): Promise<unknown> {
   const doFetch = getConfig().fetch ?? fetch;
   const res = await doFetch(url, { signal });
-  const body: unknown = await res.json().catch(() => null);
+  const body: unknown = await res.json().catch(() => UNREADABLE);
+  signal.throwIfAborted();
+  if (res.ok && body === UNREADABLE) { throw new ApiError('Invalid JSON response', true); }
   if (res.ok && !(isRecord(body) && body.error === true)) { return body; }
   const reason = isRecord(body) && typeof body.reason === 'string' && body.reason !== '' ? body.reason : `HTTP ${String(res.status)}`;
   throw new ApiError(reason, res.status >= 500 || res.status === 429);
@@ -85,15 +88,25 @@ export async function getJson(kind: EndpointKind, path: string, params: QueryPar
   return withRetries(requestUrl(kind, path, params), onlineSignal(signal), 0);
 }
 
-export async function cachedJson(kind: EndpointKind, path: string, params: QueryParams, ages: CacheAges): Promise<unknown> {
-  const { maxAgeMs, keepMs = maxAgeMs } = ages;
+function fromCache<T>(body: unknown, build: (json: unknown) => T): { value: T } | null {
+  try {
+    return { value: build(body) };
+  } catch {
+    return null;
+  }
+}
+
+export async function cachedJson<T>(kind: EndpointKind, path: string, params: QueryParams, read: CachedRead<T>): Promise<T> {
+  const { maxAgeMs, keepMs = maxAgeMs, build } = read;
   const key = cacheKey(kind, path, params);
   const now = Date.now();
   if (maxAgeMs > 0) {
     const hit = await responseGet(key).catch(() => null);
-    if (hit !== null && now - hit.fetchedAt <= maxAgeMs) { return hit.body; }
+    const cached = hit !== null && now - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
+    if (cached !== null) { return cached.value; }
   }
   const body = await getJson(kind, path, params);
+  const value = build(body);
   void responsePut(key, { fetchedAt: now, expiresAt: now + Math.max(keepMs, maxAgeMs), body }).catch(() => null);
-  return body;
+  return value;
 }

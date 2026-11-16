@@ -637,7 +637,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Qed jillowdja"
+    "loading": "Qed jillowdja",
+    "blocked": "Weather Log huwa miftuħ f'tab ieħor. Agħlqu biex jitlesta l-aġġornament tad-data tiegħek."
   },
   "diagnostics": {
     "title": "Dijanjostika",

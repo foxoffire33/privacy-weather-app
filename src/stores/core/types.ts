@@ -60,6 +60,7 @@ export interface MapStore<S> {
   subscribe: (listener: (state: S, prev: S) => void) => () => void;
 }
 
+export type BlockedListener = (blocked: boolean) => void;
 export type MarkListener = (name: string, start: number, duration: number) => void;
 
 export type ConfigListener = (config: DataLayerConfig) => void;

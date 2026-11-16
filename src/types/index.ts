@@ -5,3 +5,4 @@ export type * from './i18n';
 export type * from './native';
 export type * from './hooks';
 export type * from './insights';
+export type * from './diagnostics';

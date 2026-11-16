@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Laadimine"
+    "loading": "Laadimine",
+    "blocked": "Weather Log on avatud teisel vahekaardil. Sulge see, et andmete uuendamine lõpule viia."
   },
   "diagnostics": {
     "title": "Diagnostika",

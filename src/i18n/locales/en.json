@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Loading"
+    "loading": "Loading",
+    "blocked": "Weather Log is open in another tab. Close it to finish updating your data."
   },
   "diagnostics": {
     "title": "Diagnostics",

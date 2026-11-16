@@ -1,15 +1,29 @@
 import { onMeasure, useDiagnosticsStore } from '../stores';
 
 import type { DiagnosticEntry } from '../stores';
+import type { RouteVisit } from '../types';
 
-function route(): string {
+const KEEP_ROUTES = 100;
+const visits: RouteVisit[] = [];
+
+function currentRoute(): string {
   if (typeof location === 'undefined') { return ''; }
-  const hash = location.hash.replace(/^#/, '');
+  const hash = location.hash.replace(/^#/, '').split('?', 1)[0] ?? '';
   return hash === '' ? '/' : hash;
 }
 
+export function noteRoute(route: string): void {
+  if (visits.at(-1)?.route === route) { return; }
+  visits.push({ at: performance.now(), route });
+  if (visits.length > KEEP_ROUTES) { visits.shift(); }
+}
+
+function routeAt(at: number): string {
+  return visits.findLast((v) => v.at <= at)?.route ?? visits.at(0)?.route ?? currentRoute();
+}
+
 function record(entry: Omit<DiagnosticEntry, 'route'>): void {
-  useDiagnosticsStore.getState().add({ ...entry, route: route() });
+  useDiagnosticsStore.getState().add({ ...entry, route: routeAt(entry.at) });
 }
 
 function frameName(entry: PerformanceEntry): string {
@@ -24,6 +38,7 @@ function frameName(entry: PerformanceEntry): string {
 }
 
 export function startDiagnostics(): void {
+  if (visits.length === 0) { visits.push({ at: 0, route: currentRoute() }); }
   onMeasure((name, at, duration) => { record({ kind: 'measure', name, at, duration, blocking: 0 }); });
   if (typeof PerformanceObserver === 'undefined') { return; }
   const types = PerformanceObserver.supportedEntryTypes;

@@ -80,6 +80,7 @@ export interface DateSpan {
 export interface BootState {
   hydrated: boolean;
   historyReady: boolean;
+  storageBlocked: boolean;
 }
 
 export interface DiagnosticEntry {

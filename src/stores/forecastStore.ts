@@ -20,6 +20,10 @@ function loadedQueries(forecasts: ForecastState['forecasts']): QueryMap {
   return queries;
 }
 
+const drops = new Map<string, number>();
+let cleared = 0;
+const epochOf = (cityId: string) => `${String(cleared)}:${String(drops.get(cityId) ?? 0)}`;
+
 export const useForecastStore = create<ForecastState>()((set, get) => ({
       forecasts: {},
       queries: {},
@@ -28,6 +32,7 @@ export const useForecastStore = create<ForecastState>()((set, get) => ({
         if (isLoading(q)) { return null; }
         if (isFresh(q, maxAgeMs) && get().forecasts[city.id] !== undefined) { return null; }
         set((s) => ({ queries: setQuery(s.queries, city.id, begin(q)) }));
+        const epoch = epochOf(city.id);
         try {
           const [data, air, marine] = await Promise.all([
             fetchForecast(city, pastDays, maxAgeMs),
@@ -36,18 +41,26 @@ export const useForecastStore = create<ForecastState>()((set, get) => ({
           ]);
           const entry: ForecastEntry = { data, air, marine, pastDays, fetchedAt: Date.now(), version: FACTORY_VERSION };
           await afterGesture();
+          if (epochOf(city.id) !== epoch) { return null; }
           set((s) => ({
             forecasts: { ...s.forecasts, [city.id]: entry },
             queries: setQuery(s.queries, city.id, succeed()),
           }));
           return entry;
         } catch (error) {
+          if (epochOf(city.id) !== epoch) { return null; }
           set((s) => ({ queries: setQuery(s.queries, city.id, fail(queryAt(s.queries, city.id), errorMessage(error))) }));
           return null;
         }
       },
-      drop: (cityId) => { set((s) => ({ forecasts: without(s.forecasts, [cityId]), queries: without(s.queries, [cityId]) })); },
-      clear: () => { set({ forecasts: {}, queries: {} }); },
+      drop: (cityId) => {
+        drops.set(cityId, (drops.get(cityId) ?? 0) + 1);
+        set((s) => ({ forecasts: without(s.forecasts, [cityId]), queries: without(s.queries, [cityId]) }));
+      },
+      clear: () => {
+        cleared += 1;
+        set({ forecasts: {}, queries: {} });
+      },
     }));
 
 export const FORECAST_PREFIX = 'forecast:';

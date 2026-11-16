@@ -631,7 +631,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Ładowanie"
+    "loading": "Ładowanie",
+    "blocked": "Weather Log jest otwarty w innej karcie. Zamknij ją, aby dokończyć aktualizację danych."
   },
   "diagnostics": {
     "title": "Diagnostyka",

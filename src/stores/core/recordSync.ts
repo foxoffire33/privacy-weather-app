@@ -18,7 +18,19 @@ export async function flushRecords(): Promise<void> {
   const gone = [...deletes];
   puts.clear();
   deletes.clear();
-  await measure('persist-flush', async () => recordsWrite(batch, gone)).catch(() => null);
+  try {
+    await measure('persist-flush', async () => recordsWrite(batch, gone));
+  } catch {
+    requeue(batch, gone);
+  }
+}
+
+const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
+
+function requeue(batch: readonly IdbEntry[], gone: readonly string[]): void {
+  for (const [key, value] of batch) { if (!newer(key)) { puts.set(key, value); } }
+  for (const key of gone) { if (!newer(key)) { deletes.add(key); } }
+  schedule();
 }
 
 function schedule(): void {

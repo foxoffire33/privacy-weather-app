@@ -180,7 +180,9 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
   const range = trendWindow({ len, custom, back, today, followedAt, earliest });
   const attrs = ATTRS.filter((a) => picked.includes(a.key));
   const names = trendNames(back, range.to);
-  const data = useDeferredValue(trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } }));
+  const chart = useDeferredValue({
+    range, attrs, names, windUnit, data: trendRows({ range, back, attrs, names, log, normals, units: { temp: tempUnit, wind: windUnit } }),
+  });
   return (
     <Box px={20}>
       <Box className="kicker" style={{ paddingBottom: 8 }}>{t('history.trends')}</Box>
@@ -195,7 +197,7 @@ export function Trends({ cityId, log, normals, today, followedAt, tempUnit, wind
         </>
       )}>
         <TrendsFill cityId={cityId} windows={range.windows} ensureWindows={ensureWindows}>
-          <TrendCharts cityId={cityId} range={range} attrs={attrs} names={names} data={data} windUnit={windUnit} />
+          <TrendCharts cityId={cityId} range={chart.range} attrs={chart.attrs} names={chart.names} data={chart.data} windUnit={chart.windUnit} />
         </TrendsFill>
       </Suspense>
 

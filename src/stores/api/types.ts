@@ -23,3 +23,7 @@ export interface CacheAges {
   maxAgeMs: number;
   keepMs?: number;
 }
+
+export interface CachedRead<T> extends CacheAges {
+  build: (json: unknown) => T;
+}

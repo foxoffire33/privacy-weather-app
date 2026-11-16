@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "A carregar"
+    "loading": "A carregar",
+    "blocked": "O Weather Log está aberto noutro separador. Feche-o para concluir a atualização dos seus dados."
   },
   "diagnostics": {
     "title": "Diagnóstico",

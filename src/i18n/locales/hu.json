@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Betöltés"
+    "loading": "Betöltés",
+    "blocked": "A Weather Log egy másik lapon is meg van nyitva. Zárd be, hogy befejeződjön az adatok frissítése."
   },
   "diagnostics": {
     "title": "Diagnosztika",

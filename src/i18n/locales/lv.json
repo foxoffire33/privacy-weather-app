@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Ielādē"
+    "loading": "Ielādē",
+    "blocked": "Weather Log ir atvērts citā cilnē. Aizveriet to, lai pabeigtu datu atjaunināšanu."
   },
   "diagnostics": {
     "title": "Diagnostika",

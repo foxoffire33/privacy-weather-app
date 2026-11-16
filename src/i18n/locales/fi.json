@@ -619,7 +619,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Ladataan"
+    "loading": "Ladataan",
+    "blocked": "Weather Log on auki toisessa välilehdessä. Sulje se, jotta tietojen päivitys valmistuu."
   },
   "diagnostics": {
     "title": "Diagnostiikka",

@@ -625,7 +625,8 @@
   },
   "splash": {
     "name": "Weather Log",
-    "loading": "Caricamento"
+    "loading": "Caricamento",
+    "blocked": "Weather Log è aperto in un'altra scheda. Chiudila per completare l'aggiornamento dei tuoi dati."
   },
   "diagnostics": {
     "title": "Diagnostica",
