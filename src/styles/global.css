@@ -72,13 +72,13 @@ body { font-variant-numeric: tabular-nums; }
   color: var(--mantine-color-dark-2); background: transparent;
   border: 2px solid var(--rule-soft); border-radius: 0; cursor: pointer;
 }
-.metric-tabs button, .tab-row button { position: relative; }
+.metric-tabs button, .tab-row button { position: relative; overflow: visible; }
 .metric-tabs button[data-active], .tab-row button[data-active], .tab-button[data-active] {
   color: #fff; background: var(--mantine-color-signal-5); border-color: var(--mantine-color-signal-5);
 }
 .metric-tabs button[role=tab][data-active], .tab-row button[role=tab][data-active] { background: transparent; }
 .tab-highlight { position: absolute; inset: -2px; background: var(--mantine-color-signal-5); }
-.tab-label { position: relative; }
+.tab-label { position: relative; display: block; overflow: hidden; text-overflow: ellipsis; }
 [data-accent=off] .metric-tabs button[data-active], [data-accent=off] .tab-row button[data-active],
 [data-accent=off] .tab-button[data-active] { color: #000; background: #fff; border-color: #fff; }
 [data-accent=off] .metric-tabs button[role=tab][data-active], [data-accent=off] .tab-row button[role=tab][data-active] { background: transparent; }

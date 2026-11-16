@@ -56,7 +56,7 @@ const chartBase = {
   tooltipProps: { content: CompactTooltip, cursor: cursorBand, position: { x: 0, y: 0 }, wrapperStyle: { width: '100%', pointerEvents: 'none' as const, visibility: 'visible' as const }, allowEscapeViewBox: { x: false, y: false }, isAnimationActive: false },
   yAxisProps: { width: 34 },
 };
-const READOUT = 34;
+const READOUT = 60;
 const chartMargin = { top: READOUT, right: 4, bottom: 0, left: 0 };
 const lineBase = { ...chartBase, curveType: 'monotone' as const, withDots: false, strokeWidth: 2.5, activeDotProps: { r: 5, strokeWidth: 2 } };
 
