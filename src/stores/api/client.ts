@@ -96,19 +96,31 @@ export async function getJson(kind: EndpointKind, path: string, params: QueryPar
   assertOnline();
   const url = requestUrl(kind, path, params);
   const live = onlineSignal(signal);
-  return withRetries(async () => attempt(url, live), live, 0);
+  try {
+    return await withRetries(async () => attempt(url, live.signal), live.signal, 0);
+  } finally {
+    live.dispose();
+  }
 }
 
 export async function getUrlJson(url: string, signal?: AbortSignal): Promise<unknown> {
   assertOnline();
   const live = onlineSignal(signal);
-  return withRetries(async () => attempt(url, live), live, 0);
+  try {
+    return await withRetries(async () => attempt(url, live.signal), live.signal, 0);
+  } finally {
+    live.dispose();
+  }
 }
 
 export async function getTaggedBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<TaggedBytes> {
   assertOnline();
   const live = onlineSignal(signal);
-  return withRetries(async () => attemptBytes(url, live, headers), live, 0);
+  try {
+    return await withRetries(async () => attemptBytes(url, live.signal, headers), live.signal, 0);
+  } finally {
+    live.dispose();
+  }
 }
 
 export async function getBytes(url: string, headers: HeadersInit = {}, signal?: AbortSignal): Promise<ArrayBuffer> {
