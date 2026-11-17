@@ -33,7 +33,7 @@ function isStorageValue<S>(value: unknown): value is StorageValue<S> {
 }
 
 const pending = new Map<string, PendingWriteState>();
-const readState = new Map<string, 'ok' | 'failed'>();
+const readErrors = new Map<string, StorageError>();
 let lastSuccessfulWriteAt: number | null = null;
 
 function backoffDelay(attempts: number): number {
@@ -88,10 +88,10 @@ export function idbStorage<S>(): PersistStorage<S> {
       try {
         value = await idbGet(name);
       } catch (error) {
-        readState.set(name, 'failed');
+        readErrors.set(name, toStorageError('read', error));
         throw error;
       }
-      readState.set(name, 'ok');
+      readErrors.delete(name);
       if (pending.has(name)) { flush(name); }
       return isStorageValue<S>(value) ? value : null;
     },
@@ -102,7 +102,7 @@ export function idbStorage<S>(): PersistStorage<S> {
       state.attempts = 0;
       if (state.timer !== null) { clearTimeout(state.timer); }
       pending.set(name, state);
-      if (readState.get(name) === 'failed') { return; }
+      if (readErrors.has(name)) { return; }
       state.timer = setTimeout(() => { state.timer = null; flush(name); }, WRITE_DEBOUNCE_MS);
     },
     removeItem: async (name) => {
@@ -169,10 +169,30 @@ export function persistenceStatus(name?: string): PersistenceStatus {
   return { pending: pending.size > 0, code, lastError, lastSuccessfulWriteAt };
 }
 
-export async function waitForHydration(store: HydratablePersist): Promise<void> {
-  if (store.persist.hasHydrated()) { return; }
+export function hydrationError(name: string): string | null {
+  const error = readErrors.get(name);
+  return error === undefined ? null : errorMessage(error);
+}
+
+export function trackRehydration(name: string): (state: unknown) => (state?: unknown, error?: unknown) => void {
+  return () => (_state, error) => {
+    if (error === undefined) { readErrors.delete(name); } else { readErrors.set(name, toStorageError('read', error)); }
+  };
+}
+
+export function mergePreservingEdits<S extends object>(initial: Partial<S>): (persisted: unknown, current: S) => S {
+  const keys = Object.keys(initial);
+  const edited = (state: S): boolean => keys.some((key) => JSON.stringify(Reflect.get(state, key)) !== JSON.stringify(Reflect.get(initial, key)));
+  return (persisted, current) => (edited(current) || !isRecord(persisted) ? current : { ...current, ...persisted });
+}
+
+export type HydrationResult = { status: 'hydrated' } | { status: 'timeout' };
+
+export async function waitForHydration(store: HydratablePersist, timeoutMs = 3000): Promise<HydrationResult> {
+  if (store.persist.hasHydrated()) { return { status: 'hydrated' }; }
   await new Promise<void>((resolve) => {
-    const unsub = store.persist.onFinishHydration(() => { unsub(); resolve(); });
-    setTimeout(() => { unsub(); resolve(); }, 3000);
+    const timer = setTimeout(() => { unsub(); resolve(); }, timeoutMs);
+    const unsub = store.persist.onFinishHydration(() => { clearTimeout(timer); unsub(); resolve(); });
   });
+  return store.persist.hasHydrated() ? { status: 'hydrated' } : { status: 'timeout' };
 }

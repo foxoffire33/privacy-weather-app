@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { idbStorage } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
 import { todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 
 import type { CityState } from './storeTypes';
 import type { City } from './types';
+
+const NAME = 'wl2-cities';
 
 export const useCityStore = create<CityState>()(
   persist(
@@ -48,11 +50,13 @@ export const useCityStore = create<CityState>()(
       },
     }),
     {
-      name: 'wl2-cities',
+      name: NAME,
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      onRehydrateStorage: trackRehydration(NAME),
       partialize: (s) => ({ cityIds: s.cityIds, onboarded: s.onboarded }),
+      merge: mergePreservingEdits<CityState>({ cityIds: [], onboarded: false }),
     },
   ),
 );

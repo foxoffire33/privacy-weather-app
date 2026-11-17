@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { configureDataLayer } from './core/config';
-import { idbStorage } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
 
 import type { SettingsState } from './storeTypes';
 import type { Settings } from './types';
@@ -25,6 +25,8 @@ const defaultSettings: Settings = {
   offline: false,
 };
 
+const NAME = 'wl2-settings';
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -32,15 +34,13 @@ export const useSettingsStore = create<SettingsState>()(
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
     }),
     {
-      name: 'wl2-settings',
+      name: NAME,
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      onRehydrateStorage: trackRehydration(NAME),
       partialize: (s) => ({ settings: s.settings }),
-      merge: (persisted, current) => {
-        const p = (persisted ?? {}) as Partial<SettingsState>;
-        return { ...current, settings: { ...current.settings, ...p.settings } };
-      },
+      merge: mergePreservingEdits<SettingsState>({ settings: defaultSettings }),
     },
   ),
 );

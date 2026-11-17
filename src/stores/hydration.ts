@@ -7,7 +7,7 @@ import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/id
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
-import { waitForHydration } from './core/persistStorage';
+import { hydrationError, waitForHydration } from './core/persistStorage';
 import { changedSinceStart, readRange, restore } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
@@ -20,10 +20,10 @@ import { useSettingsStore } from './settingsStore';
 import type { IdbEntry, Pending, Rehydratable } from './core/types';
 import type { City, DayRecord, ForecastEntry } from './types';
 
-const PERSISTED: Rehydratable[] = [
-  useSettingsStore,
-  useCityStore,
-  useAlmanacStore,
+const PERSISTED: [Rehydratable, string][] = [
+  [useSettingsStore, 'wl2-settings'],
+  [useCityStore, 'wl2-cities'],
+  [useAlmanacStore, 'wl2-almanac'],
 ];
 
 const RECENT_DAYS = 120;
@@ -170,10 +170,16 @@ async function bootStep(run: () => Pending, note: (error: unknown) => void): Pro
 }
 
 async function rehydrateStores(): Promise<void> {
-  await Promise.all(PERSISTED.map(async (store) => {
+  const failures: string[] = [];
+  await Promise.all(PERSISTED.map(async ([store, name]) => {
     await store.persist.rehydrate();
-    await waitForHydration(store);
+    const result = await waitForHydration(store);
+    if (result.status === 'timeout') {
+      const error = hydrationError(name);
+      if (error !== null) { failures.push(error); }
+    }
   }));
+  if (failures.length > 0) { throw new Error(failures.join('; ')); }
   await restoreCore();
 }
 
