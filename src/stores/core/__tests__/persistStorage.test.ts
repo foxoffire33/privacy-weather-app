@@ -52,6 +52,17 @@ describe('persistStorage write coordinator', () => {
     expect(vi.mocked(idb.idbSet)).toHaveBeenLastCalledWith('app', VALUE);
   });
 
+  it('reports a failed write through the fault listener', async () => {
+    const { m, idb } = await fresh();
+    const faults: string[] = [];
+    m.onPersistFault((error) => { faults.push(error.code); });
+    vi.mocked(idb.idbSet).mockRejectedValue(QUOTA);
+    const storage = m.idbStorage<{ n: number }>();
+    storage.setItem('app', VALUE);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(faults).toEqual(['quota-exceeded']);
+  });
+
   it('rejects flushPersistedState while a write cannot complete', async () => {
     const { m, idb } = await fresh();
     vi.mocked(idb.idbSet).mockRejectedValue(QUOTA);

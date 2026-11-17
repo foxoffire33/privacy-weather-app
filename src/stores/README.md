@@ -148,6 +148,16 @@ both carry the fulfilled marker, so a hook suspended on a load re-renders as soo
 update lands, without suspending again. The shared promise never rejects: a wrapper swallows a failed
 run, and the failure surfaces through the `QueryState` (rule 6), not as a throw into a Suspense boundary.
 
+**17. Cache faults are best-effort; user-data faults are surfaced.** The response cache is
+reproducible, so `cachedJson` in `api/client` treats a read or write failure there as best-effort:
+it records a diagnostic entry (`noteFailure`) and continues — a read failure falls through to the
+network, a write failure still returns the valid response. `fetchedAt` is stamped after the response
+has been fetched and validated, so cache age reflects the actual fetch completion. User-owned writes
+take the other path: `recordSync` and `persistStorage` retry with backoff, requeue what they could
+not write, and report the fault to `bootStore.storageError`, which the `StorageWarning` banner shows
+app-wide. A cache fault must never surface as a user-data fault, and a user-data fault must never be
+silent.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

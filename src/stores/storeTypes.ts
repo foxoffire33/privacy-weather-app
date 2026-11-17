@@ -96,11 +96,12 @@ export interface BootState {
 }
 
 export interface DiagnosticEntry {
-  kind: 'frame' | 'measure';
+  kind: 'frame' | 'measure' | 'failure';
   name: string;
   at: number;
   duration: number;
   blocking: number;
+  detail: string;
   route: string;
 }
 

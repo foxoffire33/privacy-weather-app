@@ -35,6 +35,11 @@ function isStorageValue<S>(value: unknown): value is StorageValue<S> {
 const pending = new Map<string, PendingWriteState>();
 const readErrors = new Map<string, StorageError>();
 let lastSuccessfulWriteAt: number | null = null;
+let faultListener: ((error: StorageError) => void) | null = null;
+
+export function onPersistFault(listener: ((error: StorageError) => void) | null): void {
+  faultListener = listener;
+}
 
 function backoffDelay(attempts: number): number {
   const base = Math.min(RETRY_BASE_MS * 2 ** (attempts - 1), RETRY_MAX_MS);
@@ -56,6 +61,7 @@ async function runFlushOnce(name: string): Promise<void> {
     if (state.attempts <= MAX_AUTO_RETRIES && RETRYABLE_WRITE_CODES.has(storageError.code)) {
       state.timer = setTimeout(() => { state.timer = null; flush(name); }, backoffDelay(state.attempts));
     }
+    faultListener?.(storageError);
     return;
   }
   if (state.revision !== revision) { return; }

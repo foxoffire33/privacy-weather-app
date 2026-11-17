@@ -18,6 +18,10 @@ export function noteRoute(route: string): void {
   if (visits.length > KEEP_ROUTES) { visits.shift(); }
 }
 
+export function noteFailure(name: string, detail: string): void {
+  record({ kind: 'failure', name, detail, at: performance.now(), duration: 0, blocking: 0 });
+}
+
 function routeAt(at: number): string {
   return visits.findLast((v) => v.at <= at)?.route ?? visits.at(0)?.route ?? currentRoute();
 }
@@ -39,7 +43,7 @@ function frameName(entry: PerformanceEntry): string {
 
 export function startDiagnostics(): void {
   if (visits.length === 0) { visits.push({ at: 0, route: currentRoute() }); }
-  onMeasure((name, at, duration) => { record({ kind: 'measure', name, at, duration, blocking: 0 }); });
+  onMeasure((name, at, duration) => { record({ kind: 'measure', name, at, duration, blocking: 0, detail: '' }); });
   if (typeof PerformanceObserver === 'undefined') { return; }
   const types = PerformanceObserver.supportedEntryTypes;
   const type = types.includes('long-animation-frame') ? 'long-animation-frame' : 'longtask';
@@ -47,13 +51,13 @@ export function startDiagnostics(): void {
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       const blocking: unknown = Reflect.get(entry, 'blockingDuration');
-      record({ kind: 'frame', name: frameName(entry), at: entry.startTime, duration: entry.duration, blocking: typeof blocking === 'number' ? blocking : 0 });
+      record({ kind: 'frame', name: frameName(entry), at: entry.startTime, duration: entry.duration, blocking: typeof blocking === 'number' ? blocking : 0, detail: '' });
     }
   });
   observer.observe({ type, buffered: true });
 }
 
 export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string): string {
-  const lines = entries.map((e) => [e.kind, e.name, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), e.route].join('\t'));
-  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tat ms\tduration ms\tblocking ms\troute', ...lines].join('\n');
+  const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), e.route].join('\t'));
+  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines].join('\n');
 }

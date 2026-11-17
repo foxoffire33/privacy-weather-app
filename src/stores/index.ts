@@ -1,7 +1,9 @@
 import { noteStorageFault } from './bootStore';
+import { onPersistFault } from './core/persistStorage';
 import { onRecordFault } from './core/recordSync';
 
 onRecordFault((error) => { noteStorageFault(error); });
+onPersistFault((error) => { noteStorageFault(error); });
 
 export { addDays, daysBetween, todayISO } from './core/time';
 export { errorMessage } from './core/errors';

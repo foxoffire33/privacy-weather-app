@@ -23,7 +23,8 @@
       "other": "{count} days logged"
     },
     "touchChart": "Touch the chart for details",
-    "screenFailed": "This screen could not be loaded."
+    "screenFailed": "This screen could not be loaded.",
+    "storageFault": "Saving to local storage failed: {error}. Your changes may be lost — the app keeps trying in the background."
   },
   "ago": {
     "never": "never",

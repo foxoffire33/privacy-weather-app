@@ -37,7 +37,9 @@ export function Diagnostics(): ReactElement {
               <Text fz={13} fw={700} truncate>{e.name}</Text>
               <Text fz={12} c="dimmed" truncate>{e.route} · {ms(e.at)} ms</Text>
             </Box>
-            <Text fz={14} fw={800} c={e.duration >= 50 ? 'signal.3' : undefined} style={{ flex: 'none' }}>{ms(e.duration)} ms</Text>
+            {e.kind === 'failure'
+              ? <Text fz={14} fw={800} c="signal.3" truncate style={{ flex: 'none', maxWidth: '55%' }}>{e.detail}</Text>
+              : <Text fz={14} fw={800} c={e.duration >= 50 ? 'signal.3' : undefined} style={{ flex: 'none' }}>{ms(e.duration)} ms</Text>}
           </Group>
         ))}
       </Stack>

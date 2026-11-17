@@ -1,5 +1,7 @@
+import { noteFailure } from '../../utils/diagnostics';
 import { assertOnline, getConfig, onlineSignal } from '../core/config';
-import { isAbsent, isRecord } from '../core/guards';
+import { errorMessage } from '../core/errors';
+import { isRecord } from '../core/guards';
 import { responseGet, responsePut } from '../core/idb';
 import { sortedCopy } from '../core/sort';
 
@@ -200,14 +202,14 @@ function fromCache<T>(body: unknown, build: (json: unknown) => T): { value: T } 
 export async function cachedJson<T>(kind: EndpointKind, path: string, params: QueryParams, read: CachedRead<T>): Promise<T> {
   const { maxAgeMs, keepMs = maxAgeMs, build } = read;
   const key = cacheKey(kind, path, params);
-  const now = Date.now();
   if (maxAgeMs > 0) {
-    const hit = await responseGet(key).catch(() => null);
-    const cached = !isAbsent(hit) && now - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
+    const hit = await responseGet(key).catch((error: unknown) => { noteFailure('response-cache read', errorMessage(error)); });
+    const cached = hit !== undefined && Date.now() - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
     if (cached !== null) { return cached.value; }
   }
   const body = await getJson(kind, path, params);
   const value = build(body);
-  void responsePut(key, { fetchedAt: now, expiresAt: now + Math.max(keepMs, maxAgeMs), body }).catch(() => null);
+  const fetchedAt = Date.now();
+  void responsePut(key, { fetchedAt, expiresAt: fetchedAt + Math.max(keepMs, maxAgeMs), body }).catch((error: unknown) => { noteFailure('response-cache write', errorMessage(error)); });
   return value;
 }

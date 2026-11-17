@@ -1,14 +1,52 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { configureDataLayer } from '../../core/config';
-import { ApiError, TimeoutError, getJson } from '../client';
+import { isRecord } from '../../core/guards';
+import { responseGet, responsePut } from '../../core/idb';
+import { useDiagnosticsStore } from '../../diagnosticsStore';
+import { ApiError, TimeoutError, cachedJson, getJson } from '../client';
+
+import type * as Idb from '../../core/idb';
+import type { ResponseRecord } from '../../core/types';
+
+vi.mock('../../core/idb', async (importOriginal) => {
+  const actual = await importOriginal<typeof Idb>();
+  return { ...actual, responseGet: vi.fn(), responsePut: vi.fn() };
+});
 
 function json(body: unknown, status: number, headers: Record<string, string> = {}): Response {
   return Response.json(body, { status, headers });
 }
 
+function temp(body: unknown): number {
+  if (isRecord(body) && typeof body.temperature === 'number') { return body.temperature; }
+  throw new Error('invalid forecast');
+}
+
+async function miss(): Promise<ResponseRecord | undefined> {
+  await Promise.resolve();
+  return undefined;
+}
+
+function fresh(): void {
+  vi.mocked(responseGet).mockImplementation(miss);
+  vi.mocked(responsePut).mockResolvedValue();
+}
+
+function fetchOk(): void {
+  configureDataLayer({
+    fetch: async () => {
+      await Promise.resolve();
+      return json({ temperature: 5 }, 200);
+    },
+  });
+}
+
 afterEach(() => {
   configureDataLayer({ fetch: null });
+  vi.mocked(responseGet).mockReset();
+  vi.mocked(responsePut).mockReset();
+  useDiagnosticsStore.getState().clear();
   vi.useRealTimers();
 });
 
@@ -181,5 +219,66 @@ describe('getJson cancellation', () => {
     const caught: unknown = await getJson('forecast', '/v1/forecast', {}, caller.signal).catch((error: unknown) => error);
     expect(caught).toBe(caller.signal.reason);
     expect(calls).toBe(1);
+  });
+});
+
+describe('cachedJson', () => {
+  it('serves a fresh cache hit without a network call', async () => {
+    fresh();
+    vi.mocked(responseGet).mockResolvedValue({ fetchedAt: Date.now(), expiresAt: Date.now() + 60_000, body: { temperature: 7 } });
+    let calls = 0;
+    configureDataLayer({
+      fetch: async () => {
+        calls += 1;
+        await Promise.resolve();
+        return json({ temperature: 5 }, 200);
+      },
+    });
+    await expect(cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 60_000, build: temp })).resolves.toBe(7);
+    expect(calls).toBe(0);
+  });
+
+  it('falls back to the network and records a diagnostic when the cache read fails', async () => {
+    fresh();
+    vi.mocked(responseGet).mockRejectedValue(new DOMException('gone', 'AbortError'));
+    fetchOk();
+    await expect(cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 60_000, build: temp })).resolves.toBe(5);
+    const entry = useDiagnosticsStore.getState().entries.at(-1);
+    expect(entry).toMatchObject({ kind: 'failure', name: 'response-cache read' });
+  });
+
+  it('returns the network value and records a diagnostic when the cache write fails', async () => {
+    fresh();
+    vi.mocked(responsePut).mockRejectedValue(new DOMException('full', 'QuotaExceededError'));
+    fetchOk();
+    await expect(cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 60_000, build: temp })).resolves.toBe(5);
+    const entry = useDiagnosticsStore.getState().entries.at(-1);
+    expect(entry).toMatchObject({ kind: 'failure', name: 'response-cache write' });
+  });
+
+  it('stamps fetchedAt after the network response is fetched', async () => {
+    vi.useFakeTimers();
+    const start = 1_700_000_000_000;
+    vi.setSystemTime(start);
+    fresh();
+    configureDataLayer({
+      fetch: async () => {
+        await new Promise<void>((resolve) => { setTimeout(resolve, 5000); });
+        return json({ temperature: 5 }, 200);
+      },
+    });
+    const settled = cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 60_000, build: temp });
+    await vi.advanceTimersByTimeAsync(5000);
+    await expect(settled).resolves.toBe(5);
+    expect(vi.mocked(responsePut)).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ fetchedAt: start + 5000 }));
+  });
+
+  it('skips the cache read on a forced refresh', async () => {
+    vi.mocked(responseGet).mockRejectedValue(new DOMException('boom', 'AbortError'));
+    vi.mocked(responsePut).mockResolvedValue();
+    fetchOk();
+    await expect(cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 0, build: temp })).resolves.toBe(5);
+    expect(vi.mocked(responseGet)).not.toHaveBeenCalled();
+    expect(useDiagnosticsStore.getState().entries).toEqual([]);
   });
 });
