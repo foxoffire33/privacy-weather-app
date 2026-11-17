@@ -180,10 +180,13 @@ export function trackRehydration(name: string): (state: unknown) => (state?: unk
   };
 }
 
-export function mergePreservingEdits<S extends object>(initial: Partial<S>): (persisted: unknown, current: S) => S {
+export function stateEdited<S extends object>(initial: Partial<S>, current: S): boolean {
   const keys = Object.keys(initial);
-  const edited = (state: S): boolean => keys.some((key) => JSON.stringify(Reflect.get(state, key)) !== JSON.stringify(Reflect.get(initial, key)));
-  return (persisted, current) => (edited(current) || !isRecord(persisted) ? current : { ...current, ...persisted });
+  return keys.some((key) => JSON.stringify(Reflect.get(current, key)) !== JSON.stringify(Reflect.get(initial, key)));
+}
+
+export function mergePreservingEdits<S extends object>(initial: Partial<S>): (persisted: unknown, current: S) => S {
+  return (persisted, current) => (stateEdited(initial, current) || !isRecord(persisted) ? current : { ...current, ...persisted });
 }
 
 export type HydrationResult = { status: 'hydrated' } | { status: 'timeout' };

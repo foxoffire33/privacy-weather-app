@@ -2,30 +2,32 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { configureDataLayer } from './core/config';
-import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
+import { isRecord } from './core/guards';
+import { idbStorage, stateEdited, trackRehydration } from './core/persistStorage';
+import { defaultSettings, validatePersistedSettings } from './settingsSchema';
 
 import type { SettingsState } from './storeTypes';
 import type { Settings } from './types';
 
-export const PUBLIC_RADAR_SERVER = 'https://api.librewxr.net';
-export const PUBLIC_MAP_SERVER = 'https://tiles.openfreemap.org/planet';
-
-const defaultSettings: Settings = {
-  apiKey: '',
-  server: '',
-  radarServer: PUBLIC_RADAR_SERVER,
-  mapServer: PUBLIC_MAP_SERVER,
-  tempUnit: 'C',
-  windUnit: 'kmh',
-  snapshotMinutes: 60,
-  backfill: true,
-  accent: 'green',
-  accentColor: '#178a4a',
-  language: 'system',
-  offline: false,
-};
-
 const NAME = 'wl2-settings';
+
+let validationIssues: string[] = [];
+
+export function settingsValidationIssues(): string[] {
+  return validationIssues;
+}
+
+function mergePersisted(persisted: unknown, current: SettingsState): SettingsState {
+  if (stateEdited({ settings: defaultSettings }, current)) {
+    return current;
+  }
+  if (!isRecord(persisted)) {
+    return current;
+  }
+  const { value, issues } = validatePersistedSettings(persisted.settings);
+  validationIssues = issues;
+  return { ...current, settings: value };
+}
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
@@ -40,7 +42,7 @@ export const useSettingsStore = create<SettingsState>()(
       skipHydration: true,
       onRehydrateStorage: trackRehydration(NAME),
       partialize: (s) => ({ settings: s.settings }),
-      merge: mergePreservingEdits<SettingsState>({ settings: defaultSettings }),
+      merge: mergePersisted,
     },
   ),
 );

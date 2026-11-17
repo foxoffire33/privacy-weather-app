@@ -12,6 +12,7 @@ export { begin, fail, succeed } from './factory/queryState';
 
 export { useEntityCache } from './entities/cache';
 
+export * from './settingsSchema';
 export * from './settingsStore';
 export * from './cityStore';
 export * from './forecastStore';
