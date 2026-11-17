@@ -2,15 +2,15 @@ import { create } from 'zustand';
 
 import { fetchAirDay, fetchDay } from './api/remote';
 import { noteStorageFault } from './bootStore';
+import { classify } from './core/appError';
 import { isOffline } from './core/config';
-import { errorMessage } from './core/errors';
 import { afterGesture } from './core/gesture';
 import { isRecord } from './core/guards';
 import { clearRecords, persistMap, readRecord, restore } from './core/recordSync';
 import { daysBetween, todayISO } from './core/time';
 import { dayKey } from './entities/schema';
 import { FACTORY_VERSION } from './factories/weather';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { begin, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { DayState } from './storeTypes';
 import type { City, DayData } from './types';
@@ -60,7 +60,8 @@ export const useDayStore = create<DayState>()((set, get) => ({
       return full;
     } catch (error) {
       if (epoch !== generation) { return null; }
-      set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+      const appError = classify(error, key);
+      set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
       return null;
     }
   },

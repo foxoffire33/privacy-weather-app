@@ -1,3 +1,4 @@
+import type { AppError } from './core/appError';
 import type { QueryMap, QueryState } from './core/types';
 import type { ArchiveYear, City, DayData, DayEntry, ForecastData, ForecastEntry, GeoResult, LandMap, ModelSet, RadarSet, Settings } from './types';
 
@@ -92,7 +93,7 @@ export interface BootState {
   hydrated: boolean;
   historyReady: boolean;
   storageBlocked: boolean;
-  storageError: string | null;
+  storageError: AppError | null;
 }
 
 export interface DiagnosticEntry {

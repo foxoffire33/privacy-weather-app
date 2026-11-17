@@ -2,9 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { fetchArchive } from './api/remote';
-import { errorMessage } from './core/errors';
+import { classify } from './core/appError';
 import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { begin, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { AlmanacState } from './storeTypes';
 import type { ArchiveYear } from './types';
@@ -37,7 +37,8 @@ export const useAlmanacStore = create<AlmanacState>()(
           for (const [md, total] of totals) { means[md] = Number((total.sum / total.n).toFixed(2)); }
           set((s) => ({ normals: { ...s.normals, [city.id]: means }, queries: setQuery(s.queries, key, succeed()) }));
         } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          const appError = classify(error, key);
+          set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
         }
       },
       ensureThisDay: async (city, date) => {

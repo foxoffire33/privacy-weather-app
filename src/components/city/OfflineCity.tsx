@@ -33,7 +33,7 @@ export function OfflineCity({ city, isDefault, error }: CityErrorProps): ReactEl
         {error !== null && (
           <>
             <Text fz={16} fw={800} mt={12}>{t('city.couldNotLoad')}</Text>
-            <Text fz={13} fw={600}>{error}</Text>
+            <Text fz={13} fw={600}>{t(error.messageKey)}</Text>
             <Button mt={12} variant="white" fullWidth onClick={() => void refreshCity(city.id, { maxAgeMs: 0 })}>{t('common.tryAgain')}</Button>
           </>
         )}

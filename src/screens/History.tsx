@@ -12,7 +12,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { Sk } from '../components/Skeletons';
 import { t } from '../i18n';
 import {
-  addDayToLog, addDays, daysBetween, lookupDate, NO_ARCHIVE_DATA, todayISO, useCity,
+  addDayToLog, addDays, daysBetween, lookupDate, todayISO, useCity,
   useCityIndex, useCityLog, useHistoryReady, useForecast, useImportQuery, useLogStore, useLookupData, useNormals, useSettings, useThisDayData, useUnits,
 } from '../stores';
 import { useAddDatesStore } from '../stores/addDatesStore';
@@ -28,7 +28,7 @@ import type { ReactElement } from 'react';
 
 function importResultText(result: AddDatesResult | null): string | null {
   if (result === null) { return null; }
-  if (!result.ok) { return t('history.downloadFailed', { error: result.error }); }
+  if (!result.ok) { return t(result.error); }
   return t(result.kept === 0 ? 'history.added' : 'history.addedKept', { count: result.added, updated: result.updated, kept: result.kept });
 }
 
@@ -163,11 +163,11 @@ function LookupCard({ cityId, date, onOpen }: LookupCardProps) {
   const units = useUnits();
   const T = (c?: number | null) => fmtTemp(c, units.temp);
   if (record === undefined) {
-    const error = query.error === NO_ARCHIVE_DATA ? t('history.noArchive') : query.error;
+    const noArchive = query.error !== null && query.error.messageKey === 'history.noArchive';
     return (
       <Box mt={12} p={14} style={{ border: '2px solid var(--rule)' }}>
-        <Text fz={13} c="signal.3">{error}</Text>
-        {query.error !== NO_ARCHIVE_DATA && (
+        <Text fz={13} c="signal.3">{query.error === null ? '' : t(query.error.messageKey)}</Text>
+        {!noArchive && (
           <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void lookupDate(cityId, date)}>
             {t('common.tryAgain')}
           </Button>

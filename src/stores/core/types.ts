@@ -1,9 +1,10 @@
+import type { AppError } from './appError';
 
 export type QueryStatus = 'idle' | 'loading' | 'success' | 'partial' | 'error';
 
 export interface QueryState {
   status: QueryStatus;
-  error: string | null;
+  error: AppError | null;
   lastLoadedAt: number | null;
 }
 

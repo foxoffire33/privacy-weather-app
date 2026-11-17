@@ -1,13 +1,13 @@
 import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
-import { errorMessage } from './core/errors';
+import { classify } from './core/appError';
 import { inSequence, isAbsent, isRecord } from './core/guards';
 import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
-import { hydrationError, waitForHydration } from './core/persistStorage';
+import { hydrationFault, waitForHydration } from './core/persistStorage';
 import { changedSinceStart, readRange, restore, trackChanges } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
@@ -17,6 +17,7 @@ import { LOG_PREFIX, restoreLog, useLogStore } from './logStore';
 import { importLegacyStore } from './migrateLegacy';
 import { useSettingsStore } from './settingsStore';
 
+import type { AppError } from './core/appError';
 import type { IdbEntry, Pending, Rehydratable } from './core/types';
 import type { City, DayRecord, ForecastEntry } from './types';
 
@@ -178,23 +179,23 @@ async function bootStep(run: () => Pending, note: (error: unknown) => void): Pro
 }
 
 async function rehydrateStores(): Promise<void> {
-  const failures: string[] = [];
+  const failures: AppError[] = [];
   await Promise.all(PERSISTED.map(async ([store, name]) => {
     await store.persist.rehydrate();
     const result = await waitForHydration(store);
     if (result.status === 'timeout') {
-      const error = hydrationError(name);
-      if (error !== null) { failures.push(error); }
+      const fault = hydrationFault(name);
+      if (fault !== null) { failures.push(fault); }
     }
   }));
-  if (failures.length > 0) { throw new Error(failures.join('; ')); }
+  if (failures.length > 0) { throw failures[0]; }
   await restoreCore();
 }
 
 export function hydrateAll(): Pending {
   booting ??= measure('hydrate', async () => {
-    let firstError: string | undefined;
-    const note = (error: unknown): void => { firstError ??= errorMessage(error); };
+    let firstError: AppError | undefined;
+    const note = (error: unknown): void => { firstError ??= classify(error); };
     await bootStep(async () => { await importLegacyStore(); }, note);
     await bootStep(migrateKvToRecords, note);
     await bootStep(rehydrateStores, note);

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { fetchDailyRange } from './api/remote';
 import { LOG_ARCHIVE_VARS, LOG_FORECAST_VARS } from './api/variables';
-import { errorMessage } from './core/errors';
+import { AppError, classify } from './core/appError';
 import { afterGesture } from './core/gesture';
 import { inSequence } from './core/guards';
 import { persistMap, restore } from './core/recordSync';
@@ -11,7 +11,7 @@ import { addDays, daysBetween, todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { fromDayData, fromForecastDaily, fromRangeRow, isEmptyRecord } from './factories/dayRecord';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { begin, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { RangeRows } from './api/types';
 import type { DateSpan, ImportCounts, LogState, SourceSpan } from './storeTypes';
@@ -19,7 +19,8 @@ import type { DayRecord } from './types';
 
 const FORECAST_PAST_DAYS = 92;
 
-export const NO_ARCHIVE_DATA = 'no-archive-data';
+const NO_ARCHIVE_DATA = 'no-archive-data';
+const NO_ARCHIVE_ERROR = new AppError({ code: 'unknown', messageKey: 'history.noArchive', retryable: false });
 
 const sortedUnion = (existing: readonly string[], added: readonly string[]): string[] =>
   sortedCopy(new Set([...existing, ...added]), (a, b) => a.localeCompare(b));
@@ -93,7 +94,8 @@ export const useLogStore = create<LogState>()((set, get) => ({
           entityCache.upsert('dayRecord', record);
           set((s) => ({ queries: setQuery(s.queries, key, succeed()) }));
         } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          const appError = error instanceof Error && error.message === NO_ARCHIVE_DATA ? NO_ARCHIVE_ERROR : classify(error, key);
+          set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
         }
       },
       addRange: async (city, start, end) => {
@@ -113,7 +115,8 @@ export const useLogStore = create<LogState>()((set, get) => ({
           }));
           return counts;
         } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          const appError = classify(error, key);
+          set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
           throw error;
         }
       },
@@ -167,7 +170,8 @@ export const useLogStore = create<LogState>()((set, get) => ({
             queries: setQuery(s.queries, key, succeed()),
           }));
         } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          const appError = error instanceof Error && error.message === NO_ARCHIVE_DATA ? NO_ARCHIVE_ERROR : classify(error, key);
+          set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
         }
       },
       removeDay: (cityId, date) => {

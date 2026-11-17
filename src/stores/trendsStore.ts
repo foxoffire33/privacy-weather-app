@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 
+import { classify } from './core/appError';
 import { isOffline } from './core/config';
 import { inSequence } from './core/guards';
 import { READY } from './core/inflight';
 
-import { addDays, begin, errorMessage, fail, fillRange, IDLE_QUERY, once, succeed, useLogStore } from '.';
+import { addDays, begin, fail, fillRange, IDLE_QUERY, once, succeed, useLogStore } from '.';
 
 import type { DateRange, TrendsState } from '../types';
+import type { AppError } from './core/appError';
 
 const DEFAULT_ATTRS = ['hi', 'lo', 'normal'];
 
@@ -50,7 +52,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
     const wanted = windows.filter((w) => hasGap(loggedDates(cityId), w) && !tried.has(windowKey(cityId, w)));
     if (wanted.length === 0) { return; }
     set((s) => ({ download: begin(s.download), attempted: [...s.attempted, ...wanted.map((w) => windowKey(cityId, w))] }));
-    let error: string | null = null;
+    let error: AppError | null = null;
     const failed: string[] = [];
     const skipped = new Set<string>();
     await inSequence(wanted, async (w) => {
@@ -60,7 +62,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
         await fillRange(cityId, w.from, w.to);
       } catch (error_) {
         if (isOffline()) { skipped.add(key); return; }
-        error = errorMessage(error_);
+        error = classify(error_, key);
         failed.push(key);
       }
     });

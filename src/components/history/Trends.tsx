@@ -138,9 +138,9 @@ function TrendCharts({ cityId, range, attrs, names, data, windUnit, back }: Tren
   return (
     <>
       {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-      {error !== null && error !== '' && (
+      {error !== null && (
         <Box py={8}>
-          <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
+          <Text fz={12} c="signal.3" role="status">{t(error.messageKey)}</Text>
           <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, range.windows)}>
             {t('common.tryAgain')}
           </Button>

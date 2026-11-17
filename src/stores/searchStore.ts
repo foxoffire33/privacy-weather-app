@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 
 import { searchCities } from './api/openMeteo';
-import { errorMessage, isAbort } from './core/errors';
+import { classify } from './core/appError';
+import { isAbort } from './core/errors';
 import { initialQueryState } from './core/types';
-import { begin, fail, succeed } from './factory/queryState';
+import { begin, settleError, succeed } from './factory/queryState';
 
 import type { SearchState } from './storeTypes';
 
@@ -30,7 +31,8 @@ export const useSearchStore = create<SearchState>()((set) => ({
       set({ results, request: succeed() });
     } catch (error) {
       if (isAbort(error)) { return; }
-      set((s) => ({ request: fail(s.request, errorMessage(error)) }));
+      const appError = classify(error, 'search');
+      set((s) => ({ request: settleError(s.request, appError) }));
     }
   },
 }));

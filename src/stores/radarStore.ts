@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { fetchLandMap, fetchModelRain, fetchRadarFrame, fetchRadarFrames } from './api/remote';
 import { noteStorageFault } from './bootStore';
+import { AppError } from './core/appError';
 import { getConfig, isOffline } from './core/config';
 import { afterGesture } from './core/gesture';
 import { isRecord, without } from './core/guards';
@@ -17,7 +18,7 @@ import type { City, LandMap, ModelSet, RadarFrame, RadarSet } from './types';
 export const RADAR_PREFIX = 'radar:';
 export const LAND_PREFIX = 'radarland:';
 export const MODEL_PREFIX = 'radarmodel:';
-export const NO_RADAR_SERVER = 'NO_RADAR_SERVER';
+const NO_RADAR_ERROR = new AppError({ code: 'unknown', messageKey: 'radar.noServer', retryable: false });
 const RADAR_FRESH_MS = 5 * 60 * 1000;
 const MODEL_FRESH_MS = 15 * 60 * 1000;
 export const currentRadarSource = (): string => sourceId(getConfig().radarServer, getConfig().mapServer);
@@ -110,7 +111,7 @@ export const useRadarStore = create<RadarState>()((set, get) => {
       await restoreKey(city.id, key, run, gen);
       if (!current(city.id, run, gen)) { return; }
       if (getConfig().radarServer.trim() === '') {
-        set((s) => ({ queries: setQuery(s.queries, key, fail(q, NO_RADAR_SERVER)) }));
+        set((s) => ({ queries: setQuery(s.queries, key, fail(q, NO_RADAR_ERROR)) }));
         return;
       }
       if (isOffline()) {

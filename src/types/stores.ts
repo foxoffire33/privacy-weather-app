@@ -1,4 +1,5 @@
 import type { Backup, BackupParts, QueryState } from '../stores';
+import type { MessageKey } from './i18n';
 
 export interface DateRange {
   from: string;
@@ -65,7 +66,7 @@ export interface TrendsState {
 
 export type AddDatesResult =
   | { ok: true; added: number; updated: number; kept: number }
-  | { ok: false; error: string };
+  | { ok: false; error: MessageKey };
 
 export interface AddDatesState {
   draft: DateRange;

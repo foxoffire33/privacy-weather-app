@@ -16,7 +16,7 @@ import { Icon } from '../Icon';
 
 import { RadarMap } from './RadarMap';
 
-import type { LandMap, ModelFrame, QueryState, RadarFrame } from '../../stores';
+import type { AppError, LandMap, ModelFrame, QueryState, RadarFrame } from '../../stores';
 import type { ToggleSeries, RadarControlsProps, TimelineKind, RadarFramesProps, RadarMapNotesProps, RadarNoticeProps, RadarPanelProps, RadarReadoutProps } from '../../types';
 import type { ReactElement } from 'react';
 
@@ -106,7 +106,7 @@ function RadarControls({ frames, index, cols, rows, stale, staleNote, visible, o
     <>
       {stale && (
         <Group justify="space-between" wrap="nowrap" mt={4}>
-          <Text fz={12} c="dimmed">{staleNote ?? t('radar.stale')}</Text>
+          <Text fz={12} c="dimmed">{staleNote !== undefined && staleNote !== null ? t(staleNote.messageKey) : t('radar.stale')}</Text>
           <UnstyledButton fz={12} fw={800} c="signal.3" onClick={onRetry}>{t('radar.retry')}</UnstyledButton>
         </Group>
       )}
@@ -137,7 +137,7 @@ function MapNotes({ frame, cell }: RadarMapNotesProps): ReactElement {
   );
 }
 
-function staleState(query: QueryState, offline: boolean): { stale: boolean; note: string | null } {
+function staleState(query: QueryState, offline: boolean): { stale: boolean; note: AppError | null } {
   const failed = query.status === 'error' || query.status === 'partial';
   return { stale: failed && !offline, note: query.status === 'partial' ? query.error : null };
 }
@@ -172,7 +172,7 @@ function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): 
   }, [cityId, cell, offline]);
   if (land === undefined && radar === undefined) {
     if (offline) { return <Notice text={t('radar.offline')} />; }
-    return <Notice text={query.error ?? t('radar.failed')} action={t('radar.retry')} onAction={reload} />;
+    return <Notice text={query.error === null ? t('radar.failed') : t(query.error.messageKey)} action={t('radar.retry')} onAction={reload} />;
   }
   const map = land ?? EMPTY_LAND;
   const side = height !== undefined && landscape;

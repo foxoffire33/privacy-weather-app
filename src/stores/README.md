@@ -158,6 +158,18 @@ not write, and report the fault to `bootStore.storageError`, which the `StorageW
 app-wide. A cache fault must never surface as a user-data fault, and a user-data fault must never be
 silent.
 
+**18. Every failure goes through the app-wide error model.** `core/appError.ts` owns the
+`AppErrorCode` taxonomy and the `AppError` class: a stable `code`, a safe `messageKey` (an i18n key,
+never a raw exception string), `retryable`, and optional HTTP `status`, storage `op`, and
+correlation `id`, with the original error retained as `cause`. Every failure boundary — store
+catches, boot faults, the radar settle — passes the raw error through `classify`, and
+`QueryState.error` is that `AppError` (or null). Screens render `t(error.messageKey)` only. A
+cancellation (`operation.cancelled`) is not a failure: `settleError` restores the last good state
+(or idle) and shows nothing. Sentinel states (no archive data, no radar server) are `AppError`
+constants whose `messageKey` is their identity. `bootStore.storageError` keeps the session's first
+classified fault, and the `StorageWarning` banner renders its message and offers a retry — plus a
+cache clear when the code is `storage.quota-exceeded`.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

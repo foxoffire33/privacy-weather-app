@@ -1,4 +1,4 @@
-import type { City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
+import type { AppError, City, DayData, DayRecord, ForecastEntry, TempUnit, Units, WindUnit } from '../stores';
 import type { CitySectionId, DateRange } from './stores';
 import type { BoxProps, ElementProps, UnstyledButtonProps } from '@mantine/core';
 import type { TargetAndTransition, Transition } from 'motion/react';
@@ -205,7 +205,7 @@ export interface CityHeroProps extends CityDataProps {
 }
 
 export interface CityErrorProps extends CityPageProps {
-  error: string | null;
+  error: AppError | null;
 }
 
 export interface ExpandableProps extends CityDataProps {

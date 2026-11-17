@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ApiError, TimeoutError } from '../../core/appError';
 import { configureDataLayer } from '../../core/config';
 import { isRecord } from '../../core/guards';
 import { responseGet, responsePut } from '../../core/idb';
 import { useDiagnosticsStore } from '../../diagnosticsStore';
-import { ApiError, TimeoutError, cachedJson, getJson } from '../client';
+import { cachedJson, getJson } from '../client';
 
 import type * as Idb from '../../core/idb';
 import type { ResponseRecord } from '../../core/types';

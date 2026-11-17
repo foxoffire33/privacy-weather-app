@@ -185,19 +185,19 @@ describe('hydration outcomes', () => {
     vi.mocked(idb.idbGet).mockRejectedValueOnce(new DOMException('gone', 'AbortError'));
     const storage = m.idbStorage<{ n: number }>();
     await expect(storage.getItem('app')).rejects.toMatchObject({ name: 'AbortError' });
-    expect(m.hydrationError('app')).not.toBeNull();
+    expect(m.hydrationFault('app')).not.toBeNull();
     vi.mocked(idb.idbGet).mockResolvedValue(null);
     await storage.getItem('app');
-    expect(m.hydrationError('app')).toBeNull();
+    expect(m.hydrationFault('app')).toBeNull();
   });
 
   it('preserves the error the persist middleware reports and clears it on success', async () => {
     const { m } = await fresh();
     const track = m.trackRehydration('app');
     track({ n: 1 })({ n: 1 }, new DOMException('corrupt', 'DataError'));
-    expect(m.hydrationError('app')).not.toBeNull();
+    expect(m.hydrationFault('app')).not.toBeNull();
     track({ n: 1 })({ n: 1 });
-    expect(m.hydrationError('app')).toBeNull();
+    expect(m.hydrationFault('app')).toBeNull();
   });
 });
 

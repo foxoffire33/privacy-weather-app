@@ -24,7 +24,23 @@
     },
     "touchChart": "Touch the chart for details",
     "screenFailed": "This screen could not be loaded.",
-    "storageFault": "Saving to local storage failed: {error}. Your changes may be lost — the app keeps trying in the background."
+    "storageFault": "Not saved: local storage is failing. The app keeps trying in the background.",
+    "retrySave": "Retry saving"
+  },
+  "errors": {
+    "offline": "You are offline, so no new data could be loaded.",
+    "timeout": "The request timed out.",
+    "rateLimited": "The weather service is temporarily rate-limited. The app retries automatically.",
+    "server": "The weather service is unavailable right now.",
+    "client": "The weather request could not be completed.",
+    "invalidResponse": "The weather service returned data the app could not read.",
+    "storageUnavailable": "Local saving is unavailable in this browser.",
+    "quota": "Local storage is full, so changes may not be saved.",
+    "storageRead": "Saved data could not be read.",
+    "storageWrite": "Changes could not be saved locally.",
+    "storageAborted": "Saving was interrupted.",
+    "cancelled": "The request was cancelled.",
+    "unknown": "Something went wrong."
   },
   "ago": {
     "never": "never",
@@ -426,8 +442,7 @@
     "edit": "Edit",
     "addToLog": "Add to log",
     "restore": "Restore",
-    "restoreConfirm": "Replace this day with archive data? Your edits will be lost.",
-    "restoreFailed": "Restore failed: {error}"
+    "restoreConfirm": "Replace this day with archive data? Your edits will be lost."
   },
   "history": {
     "title": "This day,\nother years.",
@@ -478,7 +493,6 @@
       "one": "Added {count} day, updated {updated}, kept {kept} the app logged itself.",
       "other": "Added {count} days, updated {updated}, kept {kept} the app logged itself."
     },
-    "downloadFailed": "Could not download: {error}",
     "edited": "Edited",
     "addManual": "Add a day by hand",
     "lenDays": "{n}d",

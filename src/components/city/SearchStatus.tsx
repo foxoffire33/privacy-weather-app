@@ -16,11 +16,11 @@ export function SearchStatus({ onAdded }: ManualCityFormProps): ReactElement {
     searching: st.request.status === 'loading',
     error: st.request.error,
   })));
-  const failed = s.error !== null && s.error !== '';
+  const failed = s.error !== null;
   const noMatch = !failed && !s.searching && s.query.length >= 2 && s.count === 0;
   return (
     <>
-      {failed && <Text py={12} fz={13} c="signal.3">{s.error}</Text>}
+      {s.error !== null && <Text py={12} fz={13} c="signal.3">{t(s.error.messageKey)}</Text>}
       {!failed && s.query.length < 2 && <Text py={12} fz={13} c="dimmed">{t('search.typeMore')}</Text>}
       {noMatch && <Text py={12} fz={13} c="dimmed">{t('search.noMatch', { query: s.query })}</Text>}
       {(failed || noMatch) && (

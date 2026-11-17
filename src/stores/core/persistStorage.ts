@@ -1,7 +1,9 @@
+import { classify } from './appError';
 import { errorMessage } from './errors';
 import { isRecord } from './guards';
 import { idbDel, idbGet, idbSet, RETRYABLE_WRITE_CODES, toStorageError } from './idb';
 
+import type { AppError } from './appError';
 import type { StorageError, StorageErrorCode } from './idb';
 import type { HydratablePersist } from './types';
 import type { PersistStorage, StorageValue } from 'zustand/middleware';
@@ -175,9 +177,9 @@ export function persistenceStatus(name?: string): PersistenceStatus {
   return { pending: pending.size > 0, code, lastError, lastSuccessfulWriteAt };
 }
 
-export function hydrationError(name: string): string | null {
+export function hydrationFault(name: string): AppError | null {
   const error = readErrors.get(name);
-  return error === undefined ? null : errorMessage(error);
+  return error === undefined ? null : classify(error);
 }
 
 export function trackRehydration(name: string): (state: unknown) => (state?: unknown, error?: unknown) => void {

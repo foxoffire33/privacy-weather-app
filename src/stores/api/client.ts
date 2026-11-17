@@ -1,4 +1,5 @@
 import { noteFailure } from '../../utils/diagnostics';
+import { ApiError, TimeoutError } from '../core/appError';
 import { assertOnline, getConfig, onlineSignal } from '../core/config';
 import { errorMessage } from '../core/errors';
 import { isRecord } from '../core/guards';
@@ -23,24 +24,6 @@ const HOSTS: Record<EndpointKind, [string, string]> = {
   marine: ['https://marine-api.open-meteo.com', 'https://customer-marine-api.open-meteo.com'],
   geo: ['https://geocoding-api.open-meteo.com', 'https://customer-geocoding-api.open-meteo.com'],
 };
-
-export class ApiError extends Error {
-  readonly retry: boolean;
-  readonly status: number;
-  readonly delayMs: number;
-  constructor(message: string, status: number, retry: boolean, delayMs: number) {
-    super(message);
-    this.status = status;
-    this.retry = retry;
-    this.delayMs = delayMs;
-  }
-}
-
-export class TimeoutError extends Error {
-  constructor() {
-    super('Request timed out');
-  }
-}
 
 function base(kind: EndpointKind): string {
   const { apiKey, server } = getConfig();

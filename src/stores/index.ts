@@ -7,6 +7,7 @@ onPersistFault((error) => { noteStorageFault(error); });
 
 export { addDays, daysBetween, todayISO } from './core/time';
 export { errorMessage } from './core/errors';
+export type { AppError } from './core/appError';
 export { IDLE_QUERY } from './core/types';
 export type { QueryState } from './core/types';
 
