@@ -181,3 +181,62 @@ describe('record flush retry policy', () => {
     expect(m.recordSyncStatus().lastError).toBeNull();
   });
 });
+
+describe('change bookkeeping', () => {
+  it('records nothing while tracking is off', async () => {
+    const { m } = await fresh([]);
+    m.putRecord('p:x', 1);
+    m.deleteRecord('p:y');
+    await m.clearRecords('q:');
+    await m.flushRecords();
+    expect(m.changedSinceStart('p:x')).toBe(false);
+    expect(m.changedSinceStart('p:y')).toBe(false);
+    expect(m.changedSinceStart('q:z')).toBe(false);
+  });
+
+  it('records puts, deletes and cleared prefixes while tracking', async () => {
+    const { m } = await fresh([]);
+    m.trackChanges(true);
+    m.putRecord('p:x', 1);
+    m.deleteRecord('p:y');
+    await m.clearRecords('q:');
+    expect(m.changedSinceStart('p:x')).toBe(true);
+    expect(m.changedSinceStart('p:y')).toBe(true);
+    expect(m.changedSinceStart('q:z')).toBe(true);
+    expect(m.changedSinceStart('p:other')).toBe(false);
+  });
+
+  it('forgets the bookkeeping when tracking ends', async () => {
+    const { m } = await fresh([]);
+    m.trackChanges(true);
+    m.putRecord('p:x', 1);
+    await m.clearRecords('q:');
+    m.trackChanges(false);
+    expect(m.changedSinceStart('p:x')).toBe(false);
+    expect(m.changedSinceStart('q:z')).toBe(false);
+  });
+
+  it('does not record restores even while tracking', async () => {
+    const { m } = await fresh([]);
+    m.trackChanges(true);
+    m.restore(() => { m.putRecord('p:x', 1); });
+    m.restore(() => { m.deleteRecord('p:y'); });
+    expect(m.changedSinceStart('p:x')).toBe(false);
+    expect(m.changedSinceStart('p:y')).toBe(false);
+  });
+
+  it('drops a requeued put covered by a clear that landed after the failed flush', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(busy);
+    m.putRecord('p:x', 1);
+    const failing = m.flushRecords();
+    const rejected = expect(failing).rejects.toMatchObject({ name: 'StorageError', code: 'transaction-aborted' });
+    await vi.waitFor(() => { expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(1); });
+    await m.clearRecords('p:');
+    await rejected;
+    expect(m.recordSyncStatus().pending).toBe(0);
+    await m.flushRecords();
+    expect(idb.recordsWrite).toHaveBeenCalledTimes(1);
+  });
+});

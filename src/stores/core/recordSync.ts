@@ -16,8 +16,11 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 let restoring = 0;
 
 let chain: Promise<void> = Promise.resolve();
-const clearedPrefixes: string[] = [];
+const cleared: { prefix: string; seq: number }[] = [];
+let clearSeq = 0;
+let inFlightMark: number | null = null;
 const touched = new Set<string>();
+let tracking = false;
 
 let attempts = 0;
 let lastError: StorageError | null = null;
@@ -52,28 +55,38 @@ function reportFault(error: StorageError): void {
   faultListener?.(error);
 }
 
+function pruneCleared(): void {
+  if (tracking) { return; }
+  if (inFlightMark === null) { cleared.length = 0; return; }
+  while (cleared.length > 0 && cleared[0].seq < inFlightMark) { cleared.shift(); }
+}
+
 async function flushOnce(): Promise<StorageError | null> {
   if (puts.size === 0 && deletes.size === 0) { return null; }
   const batch: IdbEntry[] = [...puts];
   const gone = [...deletes];
-  const clearMark = clearedPrefixes.length;
+  const clearMark = clearSeq;
+  inFlightMark = clearMark;
   puts.clear();
   deletes.clear();
   try {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
+    attempts = 0;
+    lastError = null;
+    return null;
   } catch (error) {
     const storageError = toStorageError('write', error);
-    requeue(batch, gone, clearedPrefixes.slice(clearMark));
+    requeue(batch, gone, clearMark);
     lastError = storageError;
     if (RETRYABLE_WRITE_CODES.has(storageError.code) && attempts < MAX_AUTO_RETRIES) {
       attempts += 1;
       timer ??= setTimeout(() => { timer = null; void flushRecords().catch(reportFault); }, backoffDelay(attempts));
     }
     return storageError;
+  } finally {
+    inFlightMark = null;
+    pruneCleared();
   }
-  attempts = 0;
-  lastError = null;
-  return null;
 }
 
 export async function flushRecords(): Promise<void> {
@@ -93,7 +106,8 @@ export async function flushRecords(): Promise<void> {
 
 const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
 
-function requeue(batch: readonly IdbEntry[], gone: readonly string[], clearedSince: readonly string[]): void {
+function requeue(batch: readonly IdbEntry[], gone: readonly string[], sinceSeq: number): void {
+  const clearedSince = cleared.filter((e) => e.seq >= sinceSeq).map((e) => e.prefix);
   const keep = (key: string) => !newer(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
   for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
   for (const key of gone) { if (keep(key)) { deletes.add(key); } }
@@ -110,13 +124,21 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords().catch(reportFault); } });
 }
 
+export function trackChanges(on: boolean): void {
+  tracking = on;
+  if (!on) {
+    touched.clear();
+    pruneCleared();
+  }
+}
+
 export function changedSinceStart(key: string): boolean {
-  return touched.has(key) || clearedPrefixes.some((prefix) => key.startsWith(prefix));
+  return touched.has(key) || cleared.some((e) => key.startsWith(e.prefix));
 }
 
 export function putRecord(key: string, value: unknown): void {
   if (restoring > 0) { return; }
-  touched.add(key);
+  if (tracking) { touched.add(key); }
   deletes.delete(key);
   puts.set(key, value);
   schedule();
@@ -124,14 +146,15 @@ export function putRecord(key: string, value: unknown): void {
 
 export function deleteRecord(key: string): void {
   if (restoring > 0) { return; }
-  touched.add(key);
+  if (tracking) { touched.add(key); }
   puts.delete(key);
   deletes.add(key);
   schedule();
 }
 
 export async function clearRecords(prefix: string): Promise<void> {
-  clearedPrefixes.push(prefix);
+  cleared.push({ prefix, seq: clearSeq });
+  clearSeq += 1;
   for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
   for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
   return new Promise<void>((resolve, reject) => {

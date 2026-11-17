@@ -8,7 +8,7 @@ import { READY } from './core/inflight';
 import { yieldToMain, measure } from './core/marks';
 import { requestPersistentStorage } from './core/persistence';
 import { hydrationError, waitForHydration } from './core/persistStorage';
-import { changedSinceStart, readRange, restore } from './core/recordSync';
+import { changedSinceStart, readRange, restore, trackChanges } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
@@ -74,17 +74,25 @@ async function migrateKvToRecords(): Promise<void> {
     await recordsWriteMissing(entries);
   } catch {
     unmigrated = entries;
+    trackChanges(true);
     retryMigration(1);
     return;
   }
   await dropLegacy();
 }
 
+async function retryAttempt(): Promise<void> {
+  await recordsWriteMissing(unmigrated.filter(([key]) => !changedSinceStart(key)));
+  await dropLegacy();
+}
+
 function retryMigration(round: number): void {
   setTimeout(() => {
-    void recordsWriteMissing(unmigrated.filter(([key]) => !changedSinceStart(key)))
-      .then(dropLegacy)
-      .catch(() => { retryMigration(Math.min(round + 1, MIGRATE_RETRY_MAX)); });
+    void retryAttempt()
+      .then(() => { trackChanges(false); })
+      .catch(() => {
+        if (round < MIGRATE_RETRY_MAX) { retryMigration(round + 1); } else { trackChanges(false); }
+      });
   }, MIGRATE_RETRY_MS * round);
 }
 
