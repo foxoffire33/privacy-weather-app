@@ -1,6 +1,7 @@
 import { IDBFactory } from 'fake-indexeddb';
 import { describe, expect, it, vi } from 'vitest';
 
+import { MAX_BACKUP_BYTES } from '../../backup/backup';
 import { dayKey } from '../entities/schema';
 
 import type * as Backup from '../backupStore';
@@ -61,6 +62,32 @@ describe('backup import version gate', () => {
     expect(state.pending).not.toBeNull();
     expect(state.result).toBeNull();
     expect(city.useCityStore.getState().cityIds).toEqual([]);
+  });
+});
+
+describe('backup import corrupted input', () => {
+  it('rejects a file over the size limit without mutating live state', async () => {
+    const { backup, cache, city } = await fresh();
+    seedCity(city, cache, 'a');
+    const before = city.useCityStore.getState();
+    const file = new File(['x'.repeat(MAX_BACKUP_BYTES + 1)], 'weather-log.json');
+    await backup.useBackupStore.getState().pick(file);
+    const state = backup.useBackupStore.getState();
+    expect(state.pending).toBeNull();
+    expect(state.result).toMatchObject({ ok: false });
+    expect(city.useCityStore.getState()).toEqual(before);
+  });
+
+  it('rejects a file that is not JSON without mutating live state', async () => {
+    const { backup, cache, city } = await fresh();
+    seedCity(city, cache, 'a');
+    const before = city.useCityStore.getState();
+    const file = new File(['not json at all'], 'weather-log.json');
+    await backup.useBackupStore.getState().pick(file);
+    const state = backup.useBackupStore.getState();
+    expect(state.pending).toBeNull();
+    expect(state.result).toMatchObject({ ok: false });
+    expect(city.useCityStore.getState()).toEqual(before);
   });
 });
 
