@@ -28,7 +28,7 @@ export * from './diagnosticsStore';
 export type * from './storeTypes';
 export * from './selectors';
 export * from './suspense';
-export { lastSettled, latest, once } from './core/inflight';
+export { latest, once, READY } from './core/inflight';
 export { gestureEnd, gestureStart } from './core/gesture';
 export { flushRecords } from './core/recordSync';
 export { flushPersistedState, persistenceStatus, retryPersistedState } from './core/persistStorage';

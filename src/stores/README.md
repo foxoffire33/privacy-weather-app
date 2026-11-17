@@ -140,6 +140,14 @@ settings screen shows the honest note that local storage can still be lost and t
 when headroom is low — a `clearResponseCache()` action that prunes the response cache to zero without ever
 touching the user's data.
 
+**16. Requests dedupe while in flight, and nothing is retained once they settle.** `core/inflight`
+`once(key, run)` hands every caller the same promise while the request is running and forgets the key
+the moment it settles — `latest(key)` reports the running promise or the shared `READY` when nothing
+is in flight. React's `use()` reads `thenable.status` synchronously, and a settled promise and `READY`
+both carry the fulfilled marker, so a hook suspended on a load re-renders as soon as the load's state
+update lands, without suspending again. The shared promise never rejects: a wrapper swallows a failed
+run, and the failure surfaces through the `QueryState` (rule 6), not as a throw into a Suspense boundary.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

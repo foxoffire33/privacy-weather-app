@@ -4,7 +4,7 @@ import { Suspense, use, useDeferredValue, useEffect, useEffectEvent, useState } 
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
-import { addDays, daysBetween, lastSettled, latest, useLogStore } from '../../stores';
+import { addDays, daysBetween, latest, READY, useLogStore } from '../../stores';
 import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
 import { useUiStore } from '../../stores/uiStore';
 import { decimate } from '../../utils/decimate';
@@ -61,7 +61,7 @@ function lenLabel(len: number): string {
 }
 
 function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => PromiseLike<void>): PromiseLike<void> {
-  if (cached) { return lastSettled(key); }
+  if (cached) { return READY; }
   return missing ? download() : latest(key);
 }
 
