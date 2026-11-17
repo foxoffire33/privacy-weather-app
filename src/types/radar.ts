@@ -61,6 +61,7 @@ export interface RadarControlsProps {
   cols: number;
   rows: number;
   stale: boolean;
+  staleNote?: string | null;
   visible: boolean;
   onRetry: () => void;
 }

@@ -16,7 +16,7 @@ import { Icon } from '../Icon';
 
 import { RadarMap } from './RadarMap';
 
-import type { LandMap, ModelFrame, RadarFrame } from '../../stores';
+import type { LandMap, ModelFrame, QueryState, RadarFrame } from '../../stores';
 import type { ToggleSeries, RadarControlsProps, TimelineKind, RadarFramesProps, RadarMapNotesProps, RadarNoticeProps, RadarPanelProps, RadarReadoutProps } from '../../types';
 import type { ReactElement } from 'react';
 
@@ -92,7 +92,7 @@ const legendSeries = (): ToggleSeries[] => [
   { name: 'city', label: t('radar.city'), color: 'white' },
 ];
 
-function RadarControls({ frames, index, cols, rows, stale, visible, onRetry }: RadarControlsProps): ReactElement {
+function RadarControls({ frames, index, cols, rows, stale, staleNote, visible, onRetry }: RadarControlsProps): ReactElement {
   const setFrame = useUiStore((s) => s.setRadarFrame);
   const [paused, setPaused] = useState(false);
   const playing = visible && !paused;
@@ -106,7 +106,7 @@ function RadarControls({ frames, index, cols, rows, stale, visible, onRetry }: R
     <>
       {stale && (
         <Group justify="space-between" wrap="nowrap" mt={4}>
-          <Text fz={12} c="dimmed">{t('radar.stale')}</Text>
+          <Text fz={12} c="dimmed">{staleNote ?? t('radar.stale')}</Text>
           <UnstyledButton fz={12} fw={800} c="signal.3" onClick={onRetry}>{t('radar.retry')}</UnstyledButton>
         </Group>
       )}
@@ -135,6 +135,11 @@ function MapNotes({ frame, cell }: RadarMapNotesProps): ReactElement {
       </Group>
     </>
   );
+}
+
+function staleState(query: QueryState, offline: boolean): { stale: boolean; note: string | null } {
+  const failed = query.status === 'error' || query.status === 'partial';
+  return { stale: failed && !offline, note: query.status === 'partial' ? query.error : null };
 }
 
 function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): ReactElement {
@@ -179,9 +184,10 @@ function RadarContent({ cityId, timeZone, forecast, height }: RadarPanelProps): 
       <MapNotes frame={selected} cell={cell} />
     </Box>
   );
+  const staleInfo = staleState(query, offline);
   const controls = (
     <RadarControls frames={frames} index={index} cols={map.cols} rows={map.rows} visible={inViewport}
-      stale={query.status === 'error' && !offline} onRetry={reload} />
+      stale={staleInfo.stale} staleNote={staleInfo.note} onRetry={reload} />
   );
   if (side) {
     return <SimpleGrid cols={2} spacing={16}><Box>{mapBox}</Box><Box>{readout}{controls}</Box></SimpleGrid>;

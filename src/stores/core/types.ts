@@ -1,5 +1,5 @@
 
-export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
+export type QueryStatus = 'idle' | 'loading' | 'success' | 'partial' | 'error';
 
 export interface QueryState {
   status: QueryStatus;
