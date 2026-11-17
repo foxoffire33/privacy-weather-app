@@ -676,8 +676,12 @@
   "diagnostics": {
     "title": "Diagnostics",
     "link": "Performance diagnostics",
-    "note": "Slow frames and data timings from this session. Nothing leaves your device unless you copy it.",
+    "note": "Slow frames, data timings, and failure codes from this session. Local only: nothing leaves your device unless you copy it, and no personal data is recorded.",
     "summary": "{count} slow frames · slowest {ms} ms",
+    "metrics": "data loads {loads} · cache hits {cacheHits} · record writes {recordFlushes} ({recordFlushFailures} failed) · setting saves {kvFlushes} ({kvFlushFailures} failed) · hydration faults {hydrationFailures}",
+    "storageLow": "storage: {used} MB used — low headroom, export your data regularly",
+    "storageOk": "storage: {used} MB of {quota} MB used",
+    "storageUnknown": "storage usage unknown on this device",
     "copy": "Copy report",
     "copied": "Copied",
     "clear": "Clear",

@@ -170,6 +170,17 @@ constants whose `messageKey` is their identity. `bootStore.storageError` keeps t
 classified fault, and the `StorageWarning` banner renders its message and offers a retry — plus a
 cache clear when the code is `storage.quota-exceeded`.
 
+**19. Diagnostics are local, personal-data-free, and copy-only.** `diagnosticsStore` is in-memory
+and session-scoped (entries capped at 200, route visits at 100) and holds slow-frame and measure
+timings, classified failure entries (operation name + stable error code), and numeric metrics
+(loads, cache hits, record/kv flush successes and failures, hydration faults). Nothing is persisted
+or transmitted — the only egress is the user-triggered report copy on the Diagnostics screen, which
+adds just the numeric storage estimate and the user agent. Entries never contain city names, log
+content, API keys, cache keys, URLs, or stored values. A critical persistence failure is never
+silent: the fault listeners wired in the barrel land a failed record flush or kv write in BOTH
+`bootStore.storageError` (the app-wide banner) and a `failure` diagnostic entry (the report), and
+`flushRecords` reports every failed flush itself, so callers cannot drop the fault.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.

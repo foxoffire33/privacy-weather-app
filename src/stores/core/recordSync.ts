@@ -1,3 +1,5 @@
+import { useDiagnosticsStore } from '../diagnosticsStore';
+
 import { errorMessage } from './errors';
 import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, toStorageError } from './idb';
 import { measure } from './marks';
@@ -73,6 +75,7 @@ async function flushOnce(): Promise<StorageError | null> {
     await measure('persist-flush', async () => recordsWrite(batch, gone));
     attempts = 0;
     lastError = null;
+    useDiagnosticsStore.getState().bump('recordFlushes');
     return null;
   } catch (error) {
     const storageError = toStorageError('write', error);
@@ -80,7 +83,7 @@ async function flushOnce(): Promise<StorageError | null> {
     lastError = storageError;
     if (RETRYABLE_WRITE_CODES.has(storageError.code) && attempts < MAX_AUTO_RETRIES) {
       attempts += 1;
-      timer ??= setTimeout(() => { timer = null; void flushRecords().catch(reportFault); }, backoffDelay(attempts));
+      timer ??= setTimeout(() => { timer = null; void flushRecords().catch(() => null); }, backoffDelay(attempts));
     }
     return storageError;
   } finally {
@@ -99,6 +102,7 @@ export async function flushRecords(): Promise<void> {
   );
   return chain.then(() => {
     if (outcome !== null) {
+      reportFault(outcome);
       throw outcome;
     }
   });
@@ -116,12 +120,12 @@ function requeue(batch: readonly IdbEntry[], gone: readonly string[], sinceSeq: 
 
 function schedule(): void {
   attempts = 0;
-  timer ??= setTimeout(() => { timer = null; void flushRecords().catch(reportFault); }, FLUSH_MS);
+  timer ??= setTimeout(() => { timer = null; void flushRecords().catch(() => null); }, FLUSH_MS);
 }
 
 if (typeof document !== 'undefined') {
-  document.addEventListener('pagehide', () => { void flushRecords().catch(reportFault); });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords().catch(reportFault); } });
+  document.addEventListener('pagehide', () => { void flushRecords().catch(() => null); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { void flushRecords().catch(() => null); } });
 }
 
 export function trackChanges(on: boolean): void {

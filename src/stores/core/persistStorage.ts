@@ -1,3 +1,5 @@
+import { useDiagnosticsStore } from '../diagnosticsStore';
+
 import { classify } from './appError';
 import { errorMessage } from './errors';
 import { isRecord } from './guards';
@@ -71,6 +73,7 @@ async function runFlushOnce(name: string): Promise<void> {
   state.attempts = 0;
   state.lastSuccessfulWriteAt = Date.now();
   lastSuccessfulWriteAt = state.lastSuccessfulWriteAt;
+  useDiagnosticsStore.getState().bump('kvFlushes');
   pending.delete(name);
 }
 

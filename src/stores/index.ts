@@ -1,9 +1,20 @@
+import { noteFailure } from '../utils/diagnostics';
+
 import { noteStorageFault } from './bootStore';
 import { onPersistFault } from './core/persistStorage';
 import { onRecordFault } from './core/recordSync';
+import { useDiagnosticsStore } from './diagnosticsStore';
 
-onRecordFault((error) => { noteStorageFault(error); });
-onPersistFault((error) => { noteStorageFault(error); });
+onRecordFault((error) => {
+  noteStorageFault(error);
+  noteFailure('record-flush', error.code);
+  useDiagnosticsStore.getState().bump('recordFlushFailures');
+});
+onPersistFault((error) => {
+  noteStorageFault(error);
+  noteFailure('kv-flush', error.code);
+  useDiagnosticsStore.getState().bump('kvFlushFailures');
+});
 
 export { addDays, daysBetween, todayISO } from './core/time';
 export { errorMessage } from './core/errors';

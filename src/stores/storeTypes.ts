@@ -106,9 +106,21 @@ export interface DiagnosticEntry {
   route: string;
 }
 
+export interface DiagnosticMetrics {
+  loads: number;
+  cacheHits: number;
+  recordFlushes: number;
+  recordFlushFailures: number;
+  kvFlushes: number;
+  kvFlushFailures: number;
+  hydrationFailures: number;
+}
+
 export interface DiagnosticsState {
   entries: DiagnosticEntry[];
+  metrics: DiagnosticMetrics;
   add: (entry: DiagnosticEntry) => void;
+  bump: (key: keyof DiagnosticMetrics) => void;
   clear: () => void;
 }
 

@@ -1,29 +1,45 @@
 import { Box, Button, CopyButton, Group, Stack, Text, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ScreenHeader } from '../components/ScreenHeader';
 import { t } from '../i18n';
 import { useDiagnosticsStore } from '../stores';
+import { estimateStorage } from '../stores/core/persistence';
 import { diagnosticsReport } from '../utils/diagnostics';
 
+import type { StorageEstimate } from '../stores/core/persistence';
 import type { ReactElement } from 'react';
 
 const ms = (v: number) => String(Math.round(v));
+const mb = (bytes: number) => Math.round((bytes / 1e6) * 10) / 10;
 
 export function Diagnostics(): ReactElement {
-  const { entries, clear } = useDiagnosticsStore(useShallow((s) => ({ entries: s.entries, clear: s.clear })));
+  const { entries, clear, metrics } = useDiagnosticsStore(useShallow((s) => ({ entries: s.entries, clear: s.clear, metrics: s.metrics })));
+  const [storage, setStorage] = useState<StorageEstimate | null>(null);
+  useEffect(() => { void estimateStorage().then(setStorage); }, []);
   const frames = entries.filter((e) => e.kind === 'frame');
   let worst = 0;
 
   for (const e of frames) { worst = Math.max(worst, e.duration); }
-  const report = diagnosticsReport(entries, navigator.userAgent);
+  const report = diagnosticsReport(entries, navigator.userAgent, metrics, storage);
+  let storageText: string;
+  if (storage === null) {
+    storageText = t('diagnostics.storageUnknown');
+  } else if (storage.low) {
+    storageText = t('diagnostics.storageLow', { used: mb(storage.usage) });
+  } else {
+    storageText = t('diagnostics.storageOk', { used: mb(storage.usage), quota: mb(storage.quota) });
+  }
   return (
     <Box className="screen">
       <ScreenHeader />
       <Title className="display display-sm">{t('diagnostics.title')}</Title>
       <Stack gap={0} px={20} pb={24}>
         <Text fz={13} c="dimmed" py={12}>{t('diagnostics.note')}</Text>
-        <Text fz={14} fw={700} pb={12}>{t('diagnostics.summary', { count: frames.length, ms: ms(worst) })}</Text>
+        <Text fz={14} fw={700} pb={8}>{t('diagnostics.summary', { count: frames.length, ms: ms(worst) })}</Text>
+        <Text fz={13} c="dimmed" py={4}>{t('diagnostics.metrics', { loads: metrics.loads, cacheHits: metrics.cacheHits, recordFlushes: metrics.recordFlushes, recordFlushFailures: metrics.recordFlushFailures, kvFlushes: metrics.kvFlushes, kvFlushFailures: metrics.kvFlushFailures, hydrationFailures: metrics.hydrationFailures })}</Text>
+        <Text fz={13} c="dimmed" py={4} pb={12}>{storageText}</Text>
         <Group grow wrap="nowrap" gap={8} pb={12}>
           <CopyButton value={report}>
             {({ copied, copy }) => <Button onClick={copy}>{copied ? t('diagnostics.copied') : t('diagnostics.copy')}</Button>}

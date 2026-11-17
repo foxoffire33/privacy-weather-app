@@ -5,6 +5,7 @@ import { errorMessage } from '../core/errors';
 import { isRecord } from '../core/guards';
 import { responseGet, responsePut } from '../core/idb';
 import { sortedCopy } from '../core/sort';
+import { useDiagnosticsStore } from '../diagnosticsStore';
 
 import type { CombinedSignal } from '../core/config';
 import type { QueryParams } from '../core/types';
@@ -185,10 +186,14 @@ function fromCache<T>(body: unknown, build: (json: unknown) => T): { value: T } 
 export async function cachedJson<T>(kind: EndpointKind, path: string, params: QueryParams, read: CachedRead<T>): Promise<T> {
   const { maxAgeMs, keepMs = maxAgeMs, build } = read;
   const key = cacheKey(kind, path, params);
+  useDiagnosticsStore.getState().bump('loads');
   if (maxAgeMs > 0) {
     const hit = await responseGet(key).catch((error: unknown) => { noteFailure('response-cache read', errorMessage(error)); });
     const cached = hit !== undefined && Date.now() - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
-    if (cached !== null) { return cached.value; }
+    if (cached !== null) {
+      useDiagnosticsStore.getState().bump('cacheHits');
+      return cached.value;
+    }
   }
   const body = await getJson(kind, path, params);
   const value = build(body);

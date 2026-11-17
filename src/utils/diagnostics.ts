@@ -1,6 +1,8 @@
-import { onMeasure, useDiagnosticsStore } from '../stores';
+import { onMeasure } from '../stores/core/marks';
+import { useDiagnosticsStore } from '../stores/diagnosticsStore';
 
-import type { DiagnosticEntry } from '../stores';
+import type { DiagnosticEntry, DiagnosticMetrics } from '../stores';
+import type { StorageEstimate } from '../stores/core/persistence';
 import type { RouteVisit } from '../types';
 
 const KEEP_ROUTES = 100;
@@ -57,7 +59,21 @@ export function startDiagnostics(): void {
   observer.observe({ type, buffered: true });
 }
 
-export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string): string {
+const mb = (bytes: number): number => Math.round((bytes / 1e6) * 10) / 10;
+
+export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string, metrics: DiagnosticMetrics, storage: StorageEstimate | null): string {
   const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), e.route].join('\t'));
-  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines].join('\n');
+  const metricLines = [
+    `metrics\tloads\t${String(metrics.loads)}`,
+    `metrics\tcacheHits\t${String(metrics.cacheHits)}`,
+    `metrics\trecordFlushes\t${String(metrics.recordFlushes)}`,
+    `metrics\trecordFlushFailures\t${String(metrics.recordFlushFailures)}`,
+    `metrics\tkvFlushes\t${String(metrics.kvFlushes)}`,
+    `metrics\tkvFlushFailures\t${String(metrics.kvFlushFailures)}`,
+    `metrics\thydrationFailures\t${String(metrics.hydrationFailures)}`,
+  ];
+  const storageLine = storage === null
+    ? 'storage\tunknown\tunknown\tno'
+    : `storage\t${String(mb(storage.usage))}\t${String(mb(storage.quota))}\t${storage.low ? 'yes' : 'no'}`;
+  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines, ...metricLines, storageLine].join('\n');
 }

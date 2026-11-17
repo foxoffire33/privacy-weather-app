@@ -1,3 +1,5 @@
+import { noteFailure } from '../utils/diagnostics';
+
 import { useAlmanacStore } from './almanacStore';
 import { useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
@@ -11,6 +13,7 @@ import { hydrationFault, waitForHydration } from './core/persistStorage';
 import { changedSinceStart, readRange, restore, trackChanges } from './core/recordSync';
 import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
+import { useDiagnosticsStore } from './diagnosticsStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
 import { FORECAST_PREFIX, restoreForecasts } from './forecastStore';
 import { LOG_PREFIX, restoreLog, useLogStore } from './logStore';
@@ -185,7 +188,11 @@ async function rehydrateStores(): Promise<void> {
     const result = await waitForHydration(store);
     if (result.status === 'timeout') {
       const fault = hydrationFault(name);
-      if (fault !== null) { failures.push(fault); }
+      if (fault !== null) {
+        failures.push(fault);
+        noteFailure('hydrate', fault.code);
+        useDiagnosticsStore.getState().bump('hydrationFailures');
+      }
     }
   }));
   if (failures.length > 0) { throw failures[0]; }

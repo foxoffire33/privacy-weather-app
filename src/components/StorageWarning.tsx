@@ -8,7 +8,7 @@ import type { ReactElement } from 'react';
 
 function retrySaves(): void {
   retryPersistedState();
-  void flushRecords();
+  void flushRecords().catch(() => null);
 }
 
 function clearCached(): void {

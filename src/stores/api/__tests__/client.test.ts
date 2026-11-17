@@ -235,8 +235,12 @@ describe('cachedJson', () => {
         return json({ temperature: 5 }, 200);
       },
     });
+    const before = useDiagnosticsStore.getState().metrics;
     await expect(cachedJson('forecast', '/v1/forecast', {}, { maxAgeMs: 60_000, build: temp })).resolves.toBe(7);
     expect(calls).toBe(0);
+    const { metrics } = useDiagnosticsStore.getState();
+    expect(metrics.loads).toBe(before.loads + 1);
+    expect(metrics.cacheHits).toBe(before.cacheHits + 1);
   });
 
   it('falls back to the network and records a diagnostic when the cache read fails', async () => {
