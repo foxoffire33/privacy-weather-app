@@ -4,9 +4,11 @@ import { onConfigure } from '../core/config';
 
 import * as direct from './openMeteo';
 import OpenMeteoWorker from './worker?worker';
+import { restoreError } from './workerResult';
 
 import type * as radar from './radar';
 import type { WorkerApi } from './worker';
+import type { ApiResult } from './workerResult';
 import type { Remote } from 'comlink';
 
 let proxy: Remote<WorkerApi> | null | undefined;
@@ -37,11 +39,13 @@ function start(): Remote<WorkerApi> | null {
   }
 }
 
-async function call<T>(viaWorker: (api: Remote<WorkerApi>) => Promise<T>, viaDirect: () => Promise<T>): Promise<T> {
+async function call<T>(viaWorker: (api: Remote<WorkerApi>) => Promise<ApiResult<T>>, viaDirect: () => Promise<T>): Promise<T> {
   if (proxy === undefined) { proxy = start(); }
   if (proxy === null || failed === null) { return viaDirect(); }
   try {
-    return await Promise.race([viaWorker(proxy), failed]);
+    const result = await Promise.race([viaWorker(proxy), failed]);
+    if (result.ok) { return result.value; }
+    throw restoreError(result.error);
   } catch (error) {
     if (!broken) { throw error; }
     return viaDirect();

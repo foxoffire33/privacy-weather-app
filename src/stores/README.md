@@ -181,6 +181,15 @@ silent: the fault listeners wired in the barrel land a failed record flush or kv
 `bootStore.storageError` (the app-wide banner) and a `failure` diagnostic entry (the report), and
 `flushRecords` reports every failed flush itself, so callers cannot drop the fault.
 
+**20. Worker failures cross the boundary as data, not as thrown errors.** Comlink's default
+error transfer keeps only `name`, `message`, and `stack`, so an `ApiError` would lose its
+`status`/`retry`/`delayMs` and a `TimeoutError` its identity before `classify` ever saw it
+(the UI would show "unknown" for every rate limit and 5xx). Instead, each worker function is
+wrapped in `guard` (`api/workerResult.ts`): a failure is returned as `{ ok: false, error }`
+where `error` is a plain, cloneable payload (typed kind + the fields `classify` needs);
+`api/remote.ts` rehydrates it into the real class before the store's `catch` runs. Untyped
+throws keep their `name` and `message` (offline and abort stay classifiable).
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.
