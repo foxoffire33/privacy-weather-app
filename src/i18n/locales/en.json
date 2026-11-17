@@ -564,6 +564,8 @@
   "backup": {
     "notJson": "This file is not valid JSON.",
     "notBackup": "This is not a Weather Log backup.",
+    "version": "This backup file does not state a supported version.",
+    "futureVersion": "This backup was created by a newer version of the app. Update the app and try again.",
     "empty": "No cities, history or settings found in this file."
   },
   "widgets": {

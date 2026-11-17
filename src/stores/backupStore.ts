@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { countDays, parseBackup } from '../backup/backup';
+import { BACKUP_VERSION, countDays, parseBackup } from '../backup/backup';
 import { downloadFile } from '../utils/format';
 
 import { errorMessage, exportSnapshot, flushPersistedState, importBackup, whenHistoryReady } from '.';
@@ -44,7 +44,7 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
     await flushPersistedState();
     const { cities, history, settings } = exportSnapshot();
     const { apiKey: _omit, ...safeSettings } = settings;
-    const file = { version: 1, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history };
+    const file = { version: BACKUP_VERSION, exportedAt: new Date().toISOString(), settings: safeSettings, cities, history };
     void downloadFile('weather-log.json', JSON.stringify(file, null, 2), 'application/json');
   },
 }));

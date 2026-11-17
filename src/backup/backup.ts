@@ -2,9 +2,12 @@ import { t } from '../i18n';
 
 import type { Accent, Backup, BackupDay, City, WindUnit } from '../stores';
 
+export const BACKUP_VERSION = 1;
+
 const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
 const isStr = (x: unknown): x is string => typeof x === 'string';
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
+const isVersion = (x: unknown): x is number => isNum(x) && Number.isInteger(x);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const ACCENT_VALUES: ReadonlySet<string> = new Set<Accent>(['green', 'red', 'blue', 'off', 'custom']);
 const DAY_FIELDS = ['hi', 'lo', 'feelsHi', 'feelsLo', 'mm', 'snow', 'wind', 'gust', 'sunshine', 'uv', 'code'] as const;
@@ -61,15 +64,40 @@ function parseSettings(raw: unknown): Backup['settings'] {
   return settings;
 }
 
+interface Migration {
+  from: number;
+  run: (raw: Record<string, unknown>) => Record<string, unknown>;
+}
+
+const MIGRATIONS: readonly Migration[] = [];
+
+function migrateBackup(raw: Record<string, unknown>, from: number): Record<string, unknown> {
+  let current = raw;
+  let version = from;
+  while (version < BACKUP_VERSION) {
+    const source = version;
+    const step = MIGRATIONS.find((m) => m.from === source);
+    if (step === undefined) {
+      throw new Error(t('backup.version'));
+    }
+    current = step.run(current);
+    version += 1;
+  }
+  return current;
+}
+
 export function parseBackup(text: string): Backup {
   let raw: unknown;
   try { raw = JSON.parse(text); } catch { throw new Error(t('backup.notJson')); }
   if (!isObj(raw)) { throw new Error(t('backup.notBackup')); }
-  const cities = (Array.isArray(raw.cities) ? raw.cities : []).map((c) => toCity(c)).filter((c) => c !== null);
-  const history = parseHistory(raw.history);
-  const settings = parseSettings(raw.settings);
+  if (!isVersion(raw.version) || raw.version < 1) { throw new Error(t('backup.version')); }
+  if (raw.version > BACKUP_VERSION) { throw new Error(t('backup.futureVersion')); }
+  const migrated = migrateBackup(raw, raw.version);
+  const cities = (Array.isArray(migrated.cities) ? migrated.cities : []).map((c) => toCity(c)).filter((c) => c !== null);
+  const history = parseHistory(migrated.history);
+  const settings = parseSettings(migrated.settings);
   if (cities.length === 0 && Object.keys(history).length === 0 && Object.keys(settings).length === 0) { throw new Error(t('backup.empty')); }
-  return { version: 1, exportedAt: isStr(raw.exportedAt) ? raw.exportedAt : '', settings, cities, history };
+  return { version: BACKUP_VERSION, exportedAt: isStr(migrated.exportedAt) ? migrated.exportedAt : '', settings, cities, history };
 }
 
 export const countDays = (b: Backup): number => Object.values(b.history).reduce((n, log) => n + Object.keys(log).length, 0);
