@@ -61,6 +61,7 @@ const KV = 'kv';
 const RECORDS = 'records';
 const RESPONSES = 'responses';
 const RELAXED: IDBTransactionOptions = { durability: 'relaxed' };
+const STRICT: IDBTransactionOptions = { durability: 'strict' };
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 let blockedListener: BlockedListener | null = null;
@@ -157,7 +158,7 @@ async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBOb
 async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
   if (!hasIndexedDb()) { throw new StorageError('unavailable', 'IndexedDB is not available in this environment'); }
   const db = await openDb();
-  await withTransaction(db, store, change, RELAXED);
+  await withTransaction(db, store, change, store === RESPONSES ? RELAXED : STRICT);
 }
 
 export async function idbGet(key: string): Promise<unknown> {
@@ -233,10 +234,10 @@ export async function responsePut(key: string, record: ResponseRecord): Promise<
   await write(RESPONSES, (s) => { s.put(record, key); });
 }
 
-export async function responsesPrune(now: number, keep: number): Promise<void> {
+export async function responsesPrune(now: number, keep: number): Promise<number> {
   const all = (await read(RESPONSES, (s) => s.getAll())) ?? [];
   const keys = (await read(RESPONSES, (s) => s.getAllKeys())) ?? [];
-  if (all.length !== keys.length) { return; }
+  if (all.length !== keys.length) { return 0; }
   const rows = keys.flatMap((key, i) => {
     const value: unknown = all[i];
     return typeof key === 'string' && isResponseRecord(value) ? [{ key, value }] : [];
@@ -244,8 +245,9 @@ export async function responsesPrune(now: number, keep: number): Promise<void> {
   const fresh = rows.filter((r) => r.value.expiresAt > now);
   const keepKeys = new Set(sortedCopy(fresh, (a, b) => b.value.fetchedAt - a.value.fetchedAt).slice(0, keep).map((r) => r.key));
   const drop = rows.filter((r) => !keepKeys.has(r.key)).map((r) => r.key);
-  if (drop.length === 0) { return; }
+  if (drop.length === 0) { return 0; }
   await write(RESPONSES, (s) => { for (const key of drop) { s.delete(key); } });
+  return drop.length;
 }
 
 function isResponseRecord(value: unknown): value is ResponseRecord {

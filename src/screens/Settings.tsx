@@ -8,6 +8,7 @@ import { countDays } from '../backup/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SettingsAbout } from '../components/SettingsAbout';
 import { SettingsDataSource } from '../components/SettingsDataSource';
+import { SettingsStorage } from '../components/SettingsStorage';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { clearHistory, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
@@ -131,6 +132,7 @@ export function Settings(): ReactElement {
             </FileButton>
           </Group>
         </Group>
+        <SettingsStorage />
         {pending && (
           <Box py={12} className="row">
             <Text fz={14} fw={600}>{t('settings.importTitle')}</Text>

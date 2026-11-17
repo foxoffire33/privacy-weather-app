@@ -65,3 +65,27 @@ describe('idb error semantics', () => {
     await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
   });
 });
+
+describe('response cache pruning', () => {
+  it('prunes to the newest fresh records and reports the dropped count', async () => {
+    const { m } = await fresh();
+    const now = Date.now();
+    await m.responsePut('expired', { fetchedAt: now - 1000, expiresAt: now - 500, body: { a: 1 } });
+    await m.responsePut('older', { fetchedAt: now - 900, expiresAt: now + 5000, body: { b: 2 } });
+    await m.responsePut('newer', { fetchedAt: now - 100, expiresAt: now + 5000, body: { c: 3 } });
+    await expect(m.responsesPrune(now, 1)).resolves.toBe(2);
+    await expect(m.responseGet('newer')).resolves.toMatchObject({ fetchedAt: now - 100 });
+    await expect(m.responseGet('older')).resolves.toBeUndefined();
+    await expect(m.responseGet('expired')).resolves.toBeUndefined();
+  });
+
+  it('drops every record when nothing is kept', async () => {
+    const { m } = await fresh();
+    const now = Date.now();
+    await m.responsePut('one', { fetchedAt: now, expiresAt: now + 5000, body: { a: 1 } });
+    await m.responsePut('two', { fetchedAt: now, expiresAt: now + 5000, body: { b: 2 } });
+    await expect(m.responsesPrune(now, 0)).resolves.toBe(2);
+    await expect(m.responseGet('one')).resolves.toBeUndefined();
+    await expect(m.responseGet('two')).resolves.toBeUndefined();
+  });
+});

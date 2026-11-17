@@ -54,7 +54,7 @@ from `log` back to `filled`. The log is the app's own record of what it saw.
 day data) lives as one IndexedDB record per key in the `records` store (`entity:dayRecord:<city>:<date>`,
 `forecast:<city>`, `log:<city>`, `day:<city>:<date>`). Changes go through `core/recordSync.ts`:
 `putRecord` / `deleteRecord` (or `persistMap` for a keyed map in a store) mark keys dirty, and one
-relaxed transaction writes only those keys every 250 ms and on `pagehide`. Never write a whole
+strict transaction (see 15) writes only those keys every 250 ms and on `pagehide`. Never write a whole
 growing store as one value: IndexedDB clones it on the main thread. Small settings-like stores
 keep Zustand `persist` with `idbStorage`, registered in `PERSISTED` in `hydration.ts`.
 
@@ -117,7 +117,7 @@ normal. A failed clear rejects with the typed `StorageError` (nothing is deleted
 it through `noteStorageFault`, so the app never claims a clear it could not perform.
 
 **14. The record flush retries on a budget, and its failures are state.** `recordSync` flushes the dirty
-record batch in one relaxed transaction, debounced at 250 ms. A failed flush requeues the batch (a newer
+record batch in one strict transaction (see 15), debounced at 250 ms. A failed flush requeues the batch (a newer
 write always wins, and entries covered by a clear in the same window are dropped), records the typed
 `StorageError`, and — for transient codes (`open-failed`, `blocked`, `transaction-aborted`, `write-failed`) —
 schedules a bounded exponential backoff with jitter (8 attempts, 250 ms base, 30 s cap); permanent codes
@@ -126,6 +126,19 @@ attempt count and the last error; a successful flush clears them and a new write
 `flushRecords()` rejects when the batch it was asked to flush failed, and the `pagehide` / `visibilitychange`
 flush is best-effort — observed through the fault hook into `bootStore.storageError`, never treated as proof
 that the records are on disk.
+
+**15. Durability is per store: strict for user data, relaxed for the cache, and the browser is told the truth.**
+`core/idb` opens every write transaction with `durability: 'strict'` for the `kv` and `records` stores —
+settings, cities, log dates, day records: irreplaceable user data — and with `durability: 'relaxed'` for
+`responses`, the re-fetchable API response cache, so a power loss can drop the disposable cache while the
+user's log is forced to disk. Browsers that ignore the option treat it as relaxed. `core/persistence.ts`
+requests `navigator.storage.persist()` once — only when the user actually has log data, via `keepStorage`
+in `hydration.ts` — and treats denial as a normal outcome; the permission lowers eviction risk but does not
+protect against the user clearing site data or device failure. `estimateStorage()` classifies less than 10 MB
+of headroom as low (an unknown quota never warns, and a failing estimate resolves to `null`), and the
+settings screen shows the honest note that local storage can still be lost and to export regularly, plus —
+when headroom is low — a `clearResponseCache()` action that prunes the response cache to zero without ever
+touching the user's data.
 
 ## What this layer deliberately does not have
 
