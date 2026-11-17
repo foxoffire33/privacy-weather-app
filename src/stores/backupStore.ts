@@ -33,8 +33,12 @@ export const useBackupStore = create<BackupState>()((set, get) => ({
   confirm: () => {
     const { pending, parts } = get();
     if (pending === null) { return; }
-    const counts = importBackup(pending, parts);
-    set({ pending: null, result: { ok: true, ...counts } });
+    try {
+      const counts = importBackup(pending, parts);
+      set({ pending: null, result: { ok: true, ...counts } });
+    } catch (error) {
+      set({ pending: null, result: { ok: false, error: errorMessage(error) } });
+    }
   },
 
   cancel: () => { set({ pending: null }); },

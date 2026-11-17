@@ -3,7 +3,7 @@ import { followedCities, useCityStore } from './cityStore';
 import { isOffline } from './core/config';
 import { once, READY } from './core/inflight';
 import { useDayStore } from './dayStore';
-import { entityCache } from './entities/cache';
+import { entityCache, useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { radarKey } from './factories/radar';
 import { useForecastStore } from './forecastStore';
@@ -12,8 +12,8 @@ import { currentRadarSource, useRadarStore } from './radarStore';
 import { useSettingsStore } from './settingsStore';
 
 import type { Pending } from './core/types';
-import type { ImportCounts } from './storeTypes';
-import type { Backup, BackupDay, BackupParts, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Snapshot, StoredCounts,  } from './types';
+import type { ImportCounts, LogState } from './storeTypes';
+import type { Backup, BackupDay, BackupParts, DayRecord, GeoResult, ImportedCounts, RefreshOptions, Settings, Snapshot, StoredCounts, } from './types';
 
 const TEN_MIN = 10 * 60 * 1000;
 
@@ -121,7 +121,43 @@ export async function fillRange(cityId: string, start: string, end: string): Pro
   await useLogStore.getState().fillMissing(city, start, end);
 }
 
-export function importBackup(backup: Backup, parts: BackupParts): ImportedCounts {
+interface ImportSnapshot {
+  cityIds: string[];
+  onboarded: boolean;
+  dates: LogState['dates'];
+  settings: Settings;
+  restored: DayRecord[];
+  removed: string[];
+}
+
+function captureImportSnapshot(backup: Backup, parts: BackupParts): ImportSnapshot {
+  const cityState = useCityStore.getState();
+  const followed = parts.cities
+    ? new Set([...cityState.cityIds, ...backup.cities.map((c) => c.id)])
+    : new Set(cityState.cityIds);
+  const restored: DayRecord[] = [];
+  const removed: string[] = [];
+  if (parts.history) {
+    for (const [cityId, byDate] of Object.entries(backup.history)) {
+      if (!followed.has(cityId)) { continue; }
+      for (const date of Object.keys(byDate)) {
+        const existing = entityCache.getOne('dayRecord', dayKey(cityId, date));
+        if (existing === undefined) { removed.push(dayKey(cityId, date)); }
+        else { restored.push(existing); }
+      }
+    }
+  }
+  return {
+    cityIds: [...cityState.cityIds],
+    onboarded: cityState.onboarded,
+    dates: { ...useLogStore.getState().dates },
+    settings: useSettingsStore.getState().settings,
+    restored,
+    removed,
+  };
+}
+
+function commitImport(backup: Backup, parts: BackupParts): ImportedCounts {
   const addedIds = parts.cities ? useCityStore.getState().addMany(backup.cities) : [];
   let days = 0;
   if (parts.history) {
@@ -140,6 +176,27 @@ export function importBackup(backup: Backup, parts: BackupParts): ImportedCounts
   if (parts.settings) { useSettingsStore.getState().updateSettings(backup.settings); }
   for (const id of addedIds) {void refreshCity(id, { maxAgeMs: 0 });}
   return { cities: addedIds.length, days };
+}
+
+function restoreImportSnapshot(snap: ImportSnapshot): void {
+  if (snap.restored.length > 0) { entityCache.upsertMany('dayRecord', snap.restored); }
+  if (snap.removed.length > 0) { entityCache.removeMany('dayRecord', snap.removed); }
+  const keep = new Set(snap.cityIds);
+  const orphans = Object.keys(useEntityCache.getState().tables.city).filter((id) => !keep.has(id));
+  if (orphans.length > 0) { entityCache.removeMany('city', orphans); }
+  useLogStore.setState({ dates: snap.dates });
+  useCityStore.setState({ cityIds: snap.cityIds, onboarded: snap.onboarded });
+  useSettingsStore.setState({ settings: snap.settings });
+}
+
+export function importBackup(backup: Backup, parts: BackupParts): ImportedCounts {
+  const snapshot = captureImportSnapshot(backup, parts);
+  try {
+    return commitImport(backup, parts);
+  } catch (error) {
+    restoreImportSnapshot(snapshot);
+    throw error;
+  }
 }
 
 export function exportSnapshot(): Snapshot {
