@@ -3,7 +3,7 @@ import { noteFailure } from '../utils/diagnostics';
 import { useAlmanacStore } from './almanacStore';
 import { noteStorageFault, useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
-import { classify } from './core/appError';
+import { AppError, classify } from './core/appError';
 import { inSequence, isAbsent, isRecord } from './core/guards';
 import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
@@ -20,7 +20,6 @@ import { LOG_PREFIX, restoreLog, useLogStore } from './logStore';
 import { importLegacyStore } from './migrateLegacy';
 import { useSettingsStore } from './settingsStore';
 
-import type { AppError } from './core/appError';
 import type { IdbEntry, Pending, Rehydratable } from './core/types';
 import type { City, DayRecord, ForecastEntry } from './types';
 
@@ -195,12 +194,10 @@ async function rehydrateStores(): Promise<void> {
     void Promise.resolve(store.persist.rehydrate()).catch(() => null);
     const result = await waitForHydration(store);
     if (result.status === 'timeout') {
-      const fault = hydrationFault(name);
-      if (fault !== null) {
-        failures.push(fault);
-        noteFailure('hydrate', fault.code);
-        useDiagnosticsStore.getState().bump('hydrationFailures');
-      }
+      const fault = hydrationFault(name) ?? new AppError({ code: 'storage.read-failed', messageKey: 'errors.storageRead', retryable: true, op: 'hydrate-timeout' });
+      failures.push(fault);
+      noteFailure('hydrate', fault.code);
+      useDiagnosticsStore.getState().bump('hydrationFailures');
     }
   }));
   if (failures.length > 0) { throw failures[0]; }
@@ -216,7 +213,7 @@ export function hydrateAll(): Pending {
     await bootStep(restoreCore, note);
     await bootStep(restoreRecent, note);
     if (firstError !== undefined) { noteStorageFault(firstError); }
-    useBootStore.setState({ hydrated: true });
+    useBootStore.setState({ hydrated: true, phase: firstError === undefined ? 'ready' : 'degraded' });
     keepStorage();
   });
   return booting;
