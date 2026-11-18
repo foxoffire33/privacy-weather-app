@@ -8,15 +8,22 @@ import { countDays } from '../backup/backup';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SettingsAbout } from '../components/SettingsAbout';
 import { SettingsDataSource } from '../components/SettingsDataSource';
+import { SettingsStorage } from '../components/SettingsStorage';
 import { LANGUAGES, systemLanguage, t } from '../i18n';
 import { clearHistory, storedCounts, useSettings, useUpdateSettings } from '../stores';
 import { useBackupStore } from '../stores/backupStore';
+import { settingsValidationIssues } from '../stores/settingsStore';
 import { ACCENT_NAMES, ACCENTS } from '../theme';
 
 import type { BackupResult, StatusMessage } from '../types';
 import type { ReactElement } from 'react';
 
 const ACCENT_KEYS = { green: 'settings.accentGreen', red: 'settings.accentRed', blue: 'settings.accentBlue', off: 'settings.accentOff' } as const;
+
+function SettingsIssues(): ReactElement | null {
+  const fields = settingsValidationIssues().map((issue) => issue.split(':', 1)[0]);
+  return fields.length === 0 ? null : <Text fz={12} c="signal.3" role="alert">{t('settings.reviewPersisted', { fields: fields.join(', ') })}</Text>;
+}
 
 function backupResultMessage(result: BackupResult | null): StatusMessage | null {
   if (result === null) { return null; }
@@ -30,8 +37,8 @@ export function Settings(): ReactElement {
   const counts = storedCounts();
   const s = { settings };
   const resetFile = useRef<() => void>(null);
-  const { pending, parts, result, pick, setPart, confirm, cancel, exportFile } = useBackupStore(useShallow((st) => ({
-    pending: st.pending, parts: st.parts, result: st.result,
+  const { pending, importing, exportParts, parts, result, pick, setPart, confirm, cancel, exportFile } = useBackupStore(useShallow((st) => ({
+    pending: st.pending, importing: st.importing, exportParts: st.exportParts, parts: st.parts, result: st.result,
     pick: st.pick, setPart: st.setPart, confirm: st.confirm, cancel: st.cancel, exportFile: st.exportFile,
   })));
   const onFile = async (file: File | null) => {
@@ -44,6 +51,7 @@ export function Settings(): ReactElement {
       <ScreenHeader />
       <Title className="display display-sm">{t('settings.title')}</Title>
       <Stack gap={0} px={20} pb={24}>
+        <SettingsIssues />
         <Box className="kicker">{t('settings.language')}</Box>
         <Box py={12} className="row">
           <Select label={t('settings.language')} description={t('settings.languageNote')} allowDeselect={false} searchable={false}
@@ -131,12 +139,22 @@ export function Settings(): ReactElement {
             </FileButton>
           </Group>
         </Group>
+        <SettingsStorage />
+        {exportParts > 1 && <Text fz={12} c="signal.3" role="status">{t('backup.exportParts', { count: exportParts })}</Text>}
         {pending && (
           <Box py={12} className="row">
             <Text fz={14} fw={600}>{t('settings.importTitle')}</Text>
             <Text fz={12} c="dimmed" mb={8}>
               {pending.exportedAt === '' ? '' : t('settings.exported', { date: pending.exportedAt.slice(0, 10) })}{t('settings.importNote')}
             </Text>
+            {pending.skipped.length > 0 && (
+              <Stack gap={4} mb={8}>
+                <Text fz={12} c="signal.3">{t('backup.skippedCount', { count: pending.skipped.length })}</Text>
+                {pending.skipped.map((item) => (
+                  <Text key={`${item.path}:${item.reason}`} fz={12} c="dimmed">{item.path}: {item.reason}</Text>
+                ))}
+              </Stack>
+            )}
             <Stack gap={10}>
               <Switch label={t('settings.importCities', { n: pending.cities.length })} description={t('settings.importCitiesNote')}
                 disabled={pending.cities.length === 0} checked={parts.cities} onChange={(e) => { setPart('cities', e.currentTarget.checked); }} />
@@ -146,8 +164,8 @@ export function Settings(): ReactElement {
                 disabled={Object.keys(pending.settings).length === 0} checked={parts.settings} onChange={(e) => { setPart('settings', e.currentTarget.checked); }} />
             </Stack>
             <Group mt={12} gap={8}>
-              <Button disabled={!parts.cities && !parts.history && !parts.settings} onClick={confirm}>{t('settings.importSelected')}</Button>
-              <Button variant="subtle" color="gray" onClick={cancel}>{t('common.cancel')}</Button>
+              <Button loading={importing} disabled={!parts.cities && !parts.history && !parts.settings} onClick={() => void confirm()}>{t('settings.importSelected')}</Button>
+              <Button variant="subtle" color="gray" disabled={importing} onClick={cancel}>{t('common.cancel')}</Button>
             </Group>
           </Box>
         )}

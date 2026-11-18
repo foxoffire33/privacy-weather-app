@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
-import { addDateRange, addDays, errorMessage } from '.';
+import { classify } from './core/appError';
+
+import { addDateRange, addDays } from '.';
 
 import type { AddDatesState } from '../types';
 
@@ -20,7 +22,7 @@ export const useAddDatesStore = create<AddDatesState>()((set, get) => ({
       const counts = await addDateRange(cityId, from, to);
       if (get().runId === id) {set({ result: { ok: true, ...counts } });}
     } catch (error) {
-      if (get().runId === id) {set({ result: { ok: false, error: errorMessage(error) } });}
+      if (get().runId === id) {set({ result: { ok: false, error: classify(error).messageKey } });}
     }
   },
 }));

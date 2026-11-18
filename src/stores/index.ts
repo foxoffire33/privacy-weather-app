@@ -1,5 +1,24 @@
+import { noteFailure } from '../utils/diagnostics';
+
+import { noteStorageFault } from './bootStore';
+import { onPersistFault } from './core/persistStorage';
+import { onRecordFault } from './core/recordSync';
+import { useDiagnosticsStore } from './diagnosticsStore';
+
+onRecordFault((error) => {
+  noteStorageFault(error);
+  noteFailure('record-flush', error.code);
+  useDiagnosticsStore.getState().bump('recordFlushFailures');
+});
+onPersistFault((error) => {
+  noteStorageFault(error);
+  noteFailure('kv-flush', error.code);
+  useDiagnosticsStore.getState().bump('kvFlushFailures');
+});
+
 export { addDays, daysBetween, todayISO } from './core/time';
 export { errorMessage } from './core/errors';
+export type { AppError } from './core/appError';
 export { IDLE_QUERY } from './core/types';
 export type { QueryState } from './core/types';
 
@@ -7,6 +26,7 @@ export { begin, fail, succeed } from './factory/queryState';
 
 export { useEntityCache } from './entities/cache';
 
+export * from './settingsSchema';
 export * from './settingsStore';
 export * from './cityStore';
 export * from './forecastStore';
@@ -22,9 +42,10 @@ export * from './diagnosticsStore';
 export type * from './storeTypes';
 export * from './selectors';
 export * from './suspense';
-export { lastSettled, latest, once } from './core/inflight';
+export { latest, once, READY } from './core/inflight';
 export { gestureEnd, gestureStart } from './core/gesture';
 export { flushRecords } from './core/recordSync';
+export { flushPersistedState, persistenceStatus, retryPersistedState } from './core/persistStorage';
 export { onMeasure, whenIdle } from './core/marks';
 export { whenHistoryReady } from './hydration';
 

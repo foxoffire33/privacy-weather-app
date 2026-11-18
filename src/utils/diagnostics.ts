@@ -1,10 +1,14 @@
-import { onMeasure, useDiagnosticsStore } from '../stores';
+import { onMeasure } from '../stores/core/marks';
+import { useDiagnosticsStore } from '../stores/diagnosticsStore';
 
-import type { DiagnosticEntry } from '../stores';
+import type { DiagnosticEntry, DiagnosticMetrics } from '../stores';
+import type { StorageEstimate } from '../stores/core/persistence';
 import type { RouteVisit } from '../types';
 
 const KEEP_ROUTES = 100;
 const visits: RouteVisit[] = [];
+const safeRoute = (route: string): string => route.replace(/^\/city\/[^/]+\/(history|hourly|day\/[^/]+)$/, (_match, tail: string) =>
+  `/city/:cityId/${tail.startsWith('day/') ? 'day/:date' : tail}`);
 
 function currentRoute(): string {
   if (typeof location === 'undefined') { return ''; }
@@ -13,9 +17,14 @@ function currentRoute(): string {
 }
 
 export function noteRoute(route: string): void {
-  if (visits.at(-1)?.route === route) { return; }
-  visits.push({ at: performance.now(), route });
+  const safe = safeRoute(route);
+  if (visits.at(-1)?.route === safe) { return; }
+  visits.push({ at: performance.now(), route: safe });
   if (visits.length > KEEP_ROUTES) { visits.shift(); }
+}
+
+export function noteFailure(name: string, detail: string): void {
+  record({ kind: 'failure', name, detail, at: performance.now(), duration: 0, blocking: 0 });
 }
 
 function routeAt(at: number): string {
@@ -39,7 +48,7 @@ function frameName(entry: PerformanceEntry): string {
 
 export function startDiagnostics(): void {
   if (visits.length === 0) { visits.push({ at: 0, route: currentRoute() }); }
-  onMeasure((name, at, duration) => { record({ kind: 'measure', name, at, duration, blocking: 0 }); });
+  onMeasure((name, at, duration) => { record({ kind: 'measure', name, at, duration, blocking: 0, detail: '' }); });
   if (typeof PerformanceObserver === 'undefined') { return; }
   const types = PerformanceObserver.supportedEntryTypes;
   const type = types.includes('long-animation-frame') ? 'long-animation-frame' : 'longtask';
@@ -47,13 +56,27 @@ export function startDiagnostics(): void {
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       const blocking: unknown = Reflect.get(entry, 'blockingDuration');
-      record({ kind: 'frame', name: frameName(entry), at: entry.startTime, duration: entry.duration, blocking: typeof blocking === 'number' ? blocking : 0 });
+      record({ kind: 'frame', name: frameName(entry), at: entry.startTime, duration: entry.duration, blocking: typeof blocking === 'number' ? blocking : 0, detail: '' });
     }
   });
   observer.observe({ type, buffered: true });
 }
 
-export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string): string {
-  const lines = entries.map((e) => [e.kind, e.name, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), e.route].join('\t'));
-  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tat ms\tduration ms\tblocking ms\troute', ...lines].join('\n');
+const mb = (bytes: number): number => Math.round((bytes / 1e6) * 10) / 10;
+
+export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string, metrics: DiagnosticMetrics, storage: StorageEstimate | null): string {
+  const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), safeRoute(e.route)].join('\t'));
+  const metricLines = [
+    `metrics\tloads\t${String(metrics.loads)}`,
+    `metrics\tcacheHits\t${String(metrics.cacheHits)}`,
+    `metrics\trecordFlushes\t${String(metrics.recordFlushes)}`,
+    `metrics\trecordFlushFailures\t${String(metrics.recordFlushFailures)}`,
+    `metrics\tkvFlushes\t${String(metrics.kvFlushes)}`,
+    `metrics\tkvFlushFailures\t${String(metrics.kvFlushFailures)}`,
+    `metrics\thydrationFailures\t${String(metrics.hydrationFailures)}`,
+  ];
+  const storageLine = storage === null
+    ? 'storage\tunknown\tunknown\tno'
+    : `storage\t${String(mb(storage.usage))}\t${String(mb(storage.quota))}\t${storage.low ? 'yes' : 'no'}`;
+  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines, ...metricLines, storageLine].join('\n');
 }

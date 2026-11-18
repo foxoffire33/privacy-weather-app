@@ -2,6 +2,10 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+export function isAbsent(value: unknown): value is null | undefined {
+  return value === null || value === undefined;
+}
+
 function isKeyOf<T extends object>(obj: T, key: PropertyKey): key is keyof T {
   return key in obj;
 }

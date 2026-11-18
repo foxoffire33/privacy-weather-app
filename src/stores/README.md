@@ -54,7 +54,7 @@ from `log` back to `filled`. The log is the app's own record of what it saw.
 day data) lives as one IndexedDB record per key in the `records` store (`entity:dayRecord:<city>:<date>`,
 `forecast:<city>`, `log:<city>`, `day:<city>:<date>`). Changes go through `core/recordSync.ts`:
 `putRecord` / `deleteRecord` (or `persistMap` for a keyed map in a store) mark keys dirty, and one
-relaxed transaction writes only those keys every 250 ms and on `pagehide`. Never write a whole
+strict transaction (see 15) writes only those keys every 250 ms and on `pagehide`. Never write a whole
 growing store as one value: IndexedDB clones it on the main thread. Small settings-like stores
 keep Zustand `persist` with `idbStorage`, registered in `PERSISTED` in `hydration.ts`.
 
@@ -85,6 +85,171 @@ and the host override — the host pushes in through `configureDataLayer` (`core
 A refresh measures the gap, fetches, logs what came back and makes sure the normals exist — in
 that order, in one readable place.
 
+**11. `idbStorage.setItem` queues; it does not commit.** Zustand `persist` calls it on every state
+change, and the per-key coordinator in `core/persistStorage.ts` debounces, serializes and retries the
+actual IndexedDB write, publishing failures through `persistenceStatus()`. A write failure never
+discards the newest value: transient errors retry with bounded exponential backoff and jitter,
+permanent errors (quota, unavailable, corrupt) stop auto-retrying and keep the value queued with a
+persistent error. A key whose hydration read failed does not write at all until a read succeeds, so
+defaults can never be persisted over the user's stored state. Operations that need durable state —
+the backup export, tests — must `await flushPersistedState()`; it resolves only once the key is
+persisted and rejects with the recorded `StorageError` otherwise. `retryPersistedState()` clears the
+recorded error and re-flushes the queued value — the manual recovery path after a permanent failure.
+The `pagehide` flush is best-effort and never the only guarantee.
+
+**12. A storage failure is never "no data".** `core/idb` rejects every open/read/write failure with a
+typed `StorageError` (codes `unavailable`, `blocked`, `read-failed`, `write-failed`, `quota-exceeded`, …)
+and keeps the "absent" result exclusive: `get` yields `undefined` only for a key that genuinely does not
+exist, `range` yields `[]` only for a successful transaction with zero rows. Each reader declares its own
+policy: `recordSync.readRecord` is a best-effort cache read — day and radar records are re-fetchable, so
+a failed read degrades to "not cached" and triggers a network re-fetch — while `recordSync.readRange` is
+strict, because the hydration restores read user-owned data and a failure must surface, not masquerade as
+an empty history. Boot degrades instead of hanging: `hydrateAll` records the first storage failure in
+`bootStore.storageError`, keeps the app usable in memory, and leaves retry/reporting to the persistence
+layer, so a failed read can never lead to defaults being written over the user's stored state.
+
+**13. A prefix clear is a queued mutation, ordered with the record puts.** `recordSync.clearRecords(prefix)`
+runs the prefix deletion through the same serialized chain as the debounced record writes, in one
+read-write transaction that resolves only on completion. Writes submitted before the clear are dropped
+from the pending batch; the deletion commits after every earlier mutation in the chain, so an in-flight
+flush cannot resurrect a cleared key after the delete; writes submitted after the clear persist as
+normal. A failed clear rejects with the typed `StorageError` (nothing is deleted) and the caller records
+it through `noteStorageFault`, so the app never claims a clear it could not perform.
+
+**14. The record flush retries on a budget, and its failures are state.** `recordSync` flushes the dirty
+record batch in one strict transaction (see 15), debounced at 250 ms. A failed flush requeues the batch (a newer
+write always wins, and entries covered by a clear in the same window are dropped), records the typed
+`StorageError`, and — for transient codes (`open-failed`, `blocked`, `transaction-aborted`, `write-failed`) —
+schedules a bounded exponential backoff with jitter (8 attempts, 250 ms base, 30 s cap); permanent codes
+(quota, unavailable, corrupt) stop auto-retry at once. `recordSyncStatus()` exposes the pending count, the
+attempt count and the last error; a successful flush clears them and a new write resets the retry budget.
+`flushRecords()` rejects when the batch it was asked to flush failed, and the `pagehide` / `visibilitychange`
+flush is best-effort — observed through the fault hook into `bootStore.storageError`, never treated as proof
+that the records are on disk.
+
+**15. Durability is per store: strict for user data, relaxed for the cache, and the browser is told the truth.**
+`core/idb` opens every write transaction with `durability: 'strict'` for the `kv` and `records` stores —
+settings, cities, log dates, day records: irreplaceable user data — and with `durability: 'relaxed'` for
+`responses`, the re-fetchable API response cache, so a power loss can drop the disposable cache while the
+user's log is forced to disk. Browsers that ignore the option treat it as relaxed. `core/persistence.ts`
+requests `navigator.storage.persist()` once — only when the user actually has log data, via `keepStorage`
+in `hydration.ts` — and treats denial as a normal outcome; the permission lowers eviction risk but does not
+protect against the user clearing site data or device failure. `estimateStorage()` classifies less than 10 MB
+of headroom as low (an unknown quota never warns, and a failing estimate resolves to `null`), and the
+settings screen shows the honest note that local storage can still be lost and to export regularly, plus —
+when headroom is low — a `clearResponseCache()` action that prunes the response cache to zero without ever
+touching the user's data.
+
+**16. Requests dedupe while in flight, and nothing is retained once they settle.** `core/inflight`
+`once(key, run)` hands every caller the same promise while the request is running and forgets the key
+the moment it settles — `latest(key)` reports the running promise or the shared `READY` when nothing
+is in flight. React's `use()` reads `thenable.status` synchronously, and a settled promise and `READY`
+both carry the fulfilled marker, so a hook suspended on a load re-renders as soon as the load's state
+update lands, without suspending again. The shared promise never rejects: a wrapper swallows a failed
+run, and the failure surfaces through the `QueryState` (rule 6), not as a throw into a Suspense boundary.
+
+**17. Cache faults are best-effort; user-data faults are surfaced.** The response cache is
+reproducible, so `cachedJson` in `api/client` treats a read or write failure there as best-effort:
+it records a diagnostic entry (`noteFailure`) and continues — a read failure falls through to the
+network, a write failure still returns the valid response. `fetchedAt` is stamped after the response
+has been fetched and validated, so cache age reflects the actual fetch completion. User-owned writes
+take the other path: `recordSync` and `persistStorage` retry with backoff, requeue what they could
+not write, and report the fault to `bootStore.storageError`, which the `StorageWarning` banner shows
+app-wide. A cache fault must never surface as a user-data fault, and a user-data fault must never be
+silent.
+
+**18. Every failure goes through the app-wide error model.** `core/appError.ts` owns the
+`AppErrorCode` taxonomy and the `AppError` class: a stable `code`, a safe `messageKey` (an i18n key,
+never a raw exception string), `retryable`, and optional HTTP `status`, storage `op`, and
+correlation `id`, with the original error retained as `cause`. Every failure boundary — store
+catches, boot faults, the radar settle — passes the raw error through `classify`, and
+`QueryState.error` is that `AppError` (or null). Screens render `t(error.messageKey)` only. A
+cancellation (`operation.cancelled`) is not a failure: `settleError` restores the last good state
+(or idle) and shows nothing. Sentinel states (no archive data, no radar server) are `AppError`
+constants whose `messageKey` is their identity. `bootStore.storageError` keeps the session's first
+classified fault, and the `StorageWarning` banner renders its message and offers a retry — plus a
+cache clear when the code is `storage.quota-exceeded`.
+
+**19. Diagnostics are local, personal-data-free, and copy-only.** `diagnosticsStore` is in-memory
+and session-scoped (entries capped at 200, route visits at 100) and holds slow-frame and measure
+timings, classified failure entries (operation name + stable error code), and numeric metrics
+(loads, cache hits, record/kv flush successes and failures, hydration faults). Nothing is persisted
+or transmitted — the only egress is the user-triggered report copy on the Diagnostics screen, which
+adds just the numeric storage estimate and the user agent. Entries never contain city names, log
+content, API keys, cache keys, URLs, or stored values. A critical persistence failure is never
+silent: the fault listeners wired in the barrel land a failed record flush or kv write in BOTH
+`bootStore.storageError` (the app-wide banner) and a `failure` diagnostic entry (the report), and
+`flushRecords` reports every failed flush itself, so callers cannot drop the fault.
+
+**20. Worker failures cross the boundary as data, not as thrown errors.** Comlink's default
+error transfer keeps only `name`, `message`, and `stack`, so an `ApiError` would lose its
+`status`/`retry`/`delayMs` and a `TimeoutError` its identity before `classify` ever saw it
+(the UI would show "unknown" for every rate limit and 5xx). Instead, each worker function is
+wrapped in `guard` (`api/workerResult.ts`): a failure is returned as `{ ok: false, error }`
+where `error` is a plain, cloneable payload (typed kind + the fields `classify` needs);
+`api/remote.ts` rehydrates it into the real class before the store's `catch` runs. Untyped
+throws keep their `name` and `message` (offline and abort stay classifiable).
+
+## Guarantees and recovery
+
+**What is stored, and what is re-fetchable.** Two classes of data live on the device.
+*User-owned* — followed cities, log dates, logged days (the app's own record, `source: 'log'`),
+settings — is irreplaceable; every write to it runs in a strict-durability IndexedDB transaction
+(rule 15). *Reconstructable* — forecasts, filled days, normals, the response cache, radar frames
+and land maps — is re-fetchable: losing it degrades to a network fetch, never to a loss of the
+user's data.
+
+**No failed critical write is silently discarded.** Writes are queued, debounced, serialized and —
+on failure — kept, never dropped (rules 11, 13, 14). Transient storage failures (open failed,
+blocked upgrade, aborted transaction, write failure) retry with bounded exponential backoff and
+jitter — 8 attempts, 250 ms base, 30 s cap — and the budget resets on every new change. Permanent
+failures (quota, unavailable, corrupt data) stop the auto-retry at once, keep the value queued,
+and publish a persistent error: the app-wide "Not saved" banner (rule 18) and a diagnostics entry
+(rule 19). A write resolves only after its transaction completes, and the UI never claims a save
+that has not committed.
+
+**Recovery paths.** Automated tests cover the coordinator paths; device coverage and its open
+gaps are recorded in [`MANUAL-TEST-CHECKLIST.md`](../../MANUAL-TEST-CHECKLIST.md):
+
+- **Automatic retry.** A transient failure clears itself: while the budget runs, the backoff
+  re-flushes the queued value with no user action (device-verified: a full-disk storm that frees
+  within the ~61 s window recovers on its own).
+- **Manual retry.** The banner's "Retry saving" re-flushes the queued settings and record batches
+  (device-verified: a storm that outlives the budget recovers in full — every pending write lands,
+  and the next launch starts clean with the banner cleared).
+- **Quota recovery.** Free storage and use "Retry saving" while the app remains open; verify that
+  the pending writes commit before closing or relaunching. An uncommitted queue is memory-only and
+  cannot be recovered after a forced restart.
+- **Quota.** When the fault is a full disk, the banner also offers "Clear cached data": it prunes
+  the reconstructable response cache to zero and never touches user-owned data (rule 15), after
+  which the retry paths above apply.
+- **Export and restore.** Exports carry followed cities, every logged day and importable settings,
+  but never API keys or custom server URLs. When the data exceeds the 5 MB or 3,660-days-per-city
+  import limit, the exporter creates numbered parts; keep all parts and import each file in order.
+  Import validates each whole file before mutation (size, version, calendar dates, coordinates,
+  record limits, duplicate ids) and lists any skipped records. Its `kv` and `records` changes
+  commit together in one transaction before the visible state is updated. Single-file restore was
+  device-verified (export → `pm clear` → import → cities survive relaunch); numbered-part restore
+  is covered by automated tests and still requires device verification.
+- **Re-fetch.** Every reconstructable record rebuilds itself: a failed cache read degrades to
+  "not cached" and triggers a network fetch (rule 12), a failed optional radar layer re-fetches on
+  the 5-minute refresh, and a factory-version mismatch rebuilds stored objects in the background
+  (rule 2).
+- **Boot.** A failed storage read at boot degrades instead of hanging: the app stays usable in
+  memory, the fault is reported through the banner and the diagnostics, and a key whose read
+  failed cannot be written until a read succeeds — defaults can never be persisted over the
+  user's stored state (rules 11, 12).
+
+**Honest limits.** Local storage can still be lost, and the settings screen says so. No app can
+promise against the user clearing site or app data, a device loss, or an OS-level wipe. A hard
+kill (crash, power loss, OS process kill) can lose the in-memory edits of the last ~250 ms
+debounce window that never reached a flush — the `pagehide` / `visibilitychange` flush is
+best-effort and is never the only guarantee. A disk that stays full past the retry budget keeps
+the app fully functional in memory, with the queued writes waiting on the manual retry or a new
+change. And some WebViews cache the `navigator.storage.estimate()` result, so the low-headroom
+warning can lag a real disk condition until the next launch. Export regularly, especially before
+device changes or OS upgrades.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.
@@ -107,3 +272,30 @@ factory version changes) and the last radar frames (`radar:…`, refreshed after
 `api/radar.ts` reads the frame list from the radar server, draws each frame's tiles onto an `OffscreenCanvas`
 in the worker and turns them into a 46 × 40 grid of levels (`factories/radar.ts`); the map comes from vector tiles (an
 OpenMapTiles TileJSON such as OpenFreeMap, or a `.pmtiles` file), with land and water rasterised the same way. Past frames are never downloaded twice.
+
+## Release scorecard (report §17)
+
+The release gate from the error-handling & data-integrity report: a dimension counts on
+**evidence, not implementation**, and data integrity as a whole is not called 10/10 until the P0
+items are fixed, every data-integrity invariant is automated, and real-browser/device tests cover
+storage failure and concurrency. A green TypeScript build or a happy-path UI test is not
+sufficient evidence.
+
+| Dimension | Acceptance standard | Evidence |
+| --- | --- | --- |
+| Error visibility | Every critical failure has a stable code, safe message and observable state | `core/appError.ts` (rule 18): the 13-code taxonomy, `AppError` with a safe i18n `messageKey` and `classify` at every failure boundary; screens render only the translated key; boot faults land in `bootStore.storageError` and the banner. `core/__tests__/appError.test.ts`. |
+| Persistence | No failed critical write is silently discarded | Failed writes stay queued with bounded backoff (rules 11, 14); a failed flush reports itself into the banner and the diagnostics, so no caller can drop the fault (rule 19); newest-wins supersession. `persistStorage.test.ts`, `recordSync.test.ts`, `diagnosticsWiring.test.ts`; device-verified on a 100 %-full disk (checklist S1). |
+| Ordering | Concurrent writes/deletes have documented, tested semantics | The per-key serialized chain orders `clearRecords` with the record puts (rules 5, 13); a newer write always wins; a requeue drops the puts a covering clear landed. The five put/clear scheduling tests plus the change-bookkeeping suite in `recordSync.test.ts`, on real fake-indexeddb transactions. |
+| Atomicity | Multi-record operations either commit fully or fail without partial state | One IDB transaction per write batch — a write resolves only on `complete`. Backup import validates before mutation, commits affected `kv` and `records` entries in one transaction, then applies to memory. `backupRoundTrip.test.ts` and the failure-injection tests. |
+| Recovery | Retry, export/restore and user-facing recovery paths are tested | Automatic in-budget retry, "Retry saving", "Clear cached data", export→import round trip, re-fetch and boot degradation — unit-tested; both real-disk recovery paths (in-budget auto-retry, manual retry after budget exhaustion) plus the wipe+import round trip device-verified (checklist S1, S3). |
+| Validation | All external and persisted data is runtime-validated | Zod on every Open-Meteo response (`api/schemas.ts`); Zod on persisted settings with per-field issues and values kept out of diagnostics; backup version + field validation (size, calendar dates, coordinates, record limits, duplicates) with skipped-record reporting; `FACTORY_VERSION` rebuild on shape change (rule 2). |
+| Cancellation | No unwanted retry after abort; listeners/timers are cleaned up | Scoped `CombinedSignal` disposed in `finally` around the complete request, guarded `sleep`, user cancellation never retried, and inflight dedupe retaining nothing once settled (rule 16). E2E: the superseded search aborts on the wire (`ERR_ABORTED`). |
+| Resilience | Retries are bounded, classified and respect server guidance | Bounded jittered backoff with caps on both the API (200 ms base, 2 s cap) and the storage (250 ms base, 30 s cap, 8 attempts) side; `Retry-After` as a floor on the delay; request timeout distinct from cancellation; permanent vs transient classified at the source. E2E: 429 + `retry-after` honored; persistent 429 → rate-limit message. |
+| Testing | Failure-path, concurrency and invariant tests run in CI | Unit and headless-Chromium e2e suites cover the automated paths; the manual checklist records the real-disk scenarios, including S2 and S8 not run and S5 only partially covered. Lint + unit + e2e + build run in CI. |
+| Operations | Storage/quota/hydration failures are diagnosable without leaking private data | Local, session-scoped, personal-data-free diagnostics with stable codes, numeric metrics and a storage line (rule 19); every persistence fault lands in both the banner and a diagnostics entry; the copy report adds only the numeric storage estimate and the user agent. `diagnosticsWiring.test.ts` asserts the fault-visibility invariant. |
+
+**Verdict (2026-11-18).** The automated evidence and the S1 real-disk recovery checks are
+encouraging, but the release gate remains **open**. S2 (blocked upgrade with an existing legacy
+database) and S8 (vendor background restrictions) were not run. S5's low-headroom warning and
+cache-clear flow were not exercised on the device. These open scenarios must be verified, or
+explicitly accepted as release exceptions, before claiming a 10/10 data-integrity score.

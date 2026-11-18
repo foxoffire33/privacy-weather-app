@@ -3,7 +3,7 @@ import { modals } from '@mantine/modals';
 import { useState } from 'react';
 
 import { t } from '../../i18n';
-import { NO_ARCHIVE_DATA, restoreDay, useRestoreQuery, useSettings } from '../../stores';
+import { restoreDay, useRestoreQuery, useSettings } from '../../stores';
 
 import { DayEntryForm } from './DayEntryForm';
 
@@ -34,7 +34,7 @@ export function DayActions({ cityId, date, record }: DayActionsProps): ReactElem
       </Group>
       {restore.status === 'error' && (
         <Text fz={12} c="signal.3" mt={6} role="status">
-          {restore.error === NO_ARCHIVE_DATA ? t('history.noArchive') : t('dayView.restoreFailed', { error: restore.error ?? '' })}
+          {restore.error === null ? '' : t(restore.error.messageKey)}
         </Text>
       )}
       <DayEntryForm cityId={cityId} date={date} opened={editing} onClose={() => { setEditing(false); }} />

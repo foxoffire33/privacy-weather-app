@@ -1,5 +1,6 @@
 import { del as legacyDel, get as legacyGet } from 'idb-keyval';
 
+import { isAbsent } from './core/guards';
 import { idbGet, idbSet } from './core/idb';
 import { sortedCopy } from './core/sort';
 
@@ -45,7 +46,7 @@ async function writeStores(old: LegacyState, version: number): Promise<void> {
 export async function importLegacyStore(): Promise<boolean> {
   const stored = await legacyGet<LegacyEnvelope>(LEGACY_KEY);
   if (stored?.state === undefined) { return false; }
-  if ((await idbGet('wl2-cities')) !== null) {
+  if (!isAbsent(await idbGet('wl2-cities'))) {
     await legacyDel(LEGACY_KEY);
     return false;
   }

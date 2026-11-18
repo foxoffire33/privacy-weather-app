@@ -1,10 +1,10 @@
 import { use } from 'react';
 
-import { lastSettled } from './core/inflight';
+import { READY } from './core/inflight';
 import { cellOfKey, radarKey, sourceId } from './factories/radar';
 import { hydrateAll, whenHistoryReady } from './hydration';
 import { useCity, useDay, useIsOffline, useLandMap, useMapServer, useModelSet, useRadarQuery, useRadarShownKey, useRadarServer, useRadarSet, useDayQuery, useForecast, useForecastQuery, useLookup, useThisDay } from './selectors';
-import { lookupDate, openDay, loadRadar, loadThisDay, refreshCity, resourceKey } from './weatherSync';
+import { lookupDate, openDay, loadRadar, loadThisDay, refreshCity } from './weatherSync';
 
 import type { ArchiveYear, DayData, ForecastEntry, LookupView, RadarView } from './types';
 
@@ -20,7 +20,7 @@ export function useForecastData(cityId: string): ForecastEntry | undefined {
   const city = useCity(cityId);
   const entry = useForecast(cityId);
   const query = useForecastQuery(cityId);
-  use(city !== undefined && entry === undefined && query.status !== 'error' ? refreshCity(cityId, { maxAgeMs: 0 }) : lastSettled(resourceKey.forecast(cityId)));
+  use(city !== undefined && entry === undefined && query.status !== 'error' ? refreshCity(cityId, { maxAgeMs: 0 }) : READY);
   return entry;
 }
 
@@ -28,21 +28,21 @@ export function useDayData(cityId: string, date: string, suspend = true): DayDat
   const city = useCity(cityId);
   const day = useDay(cityId, date);
   const query = useDayQuery(cityId, date);
-  use(suspend && city !== undefined && day === undefined && query.status !== 'error' ? openDay(cityId, date) : lastSettled(resourceKey.day(cityId, date)));
+  use(suspend && city !== undefined && day === undefined && query.status !== 'error' ? openDay(cityId, date) : READY);
   return day;
 }
 
 export function useThisDayData(cityId: string, date: string): ArchiveYear[] | undefined {
   const city = useCity(cityId);
   const years = useThisDay(cityId, date);
-  use(city !== undefined && years === undefined ? loadThisDay(cityId, date) : lastSettled(resourceKey.thisDay(cityId, date)));
+  use(city !== undefined && years === undefined ? loadThisDay(cityId, date) : READY);
   return years;
 }
 
 export function useLookupData(cityId: string, date: string): LookupView {
   const city = useCity(cityId);
   const lookup = useLookup(cityId, date);
-  use(city !== undefined && date !== '' && lookup.record === undefined && lookup.query.status !== 'error' ? lookupDate(cityId, date) : lastSettled(resourceKey.lookup(cityId, date)));
+  use(city !== undefined && date !== '' && lookup.record === undefined && lookup.query.status !== 'error' ? lookupDate(cityId, date) : READY);
   return lookup;
 }
 
@@ -59,6 +59,6 @@ export function useRadarData(cityId: string, cell: number): RadarView {
   const query = useRadarQuery(key);
   const offline = useIsOffline();
   const empty = land === undefined && radar === undefined;
-  use(city !== undefined && empty && server !== '' && !offline && query.status === 'idle' ? loadRadar(cityId, cell) : lastSettled(resourceKey.radar(cityId, cell, key)));
+  use(city !== undefined && empty && server !== '' && !offline && query.status === 'idle' ? loadRadar(cityId, cell) : READY);
   return { key, land, radar, model, query, shownCell: cellOfKey(shownKey, cell) };
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { noteStorageFault } from '../bootStore';
 import { definedOnly, isRecord, without } from '../core/guards';
 import { clearRecords, deleteRecord, putRecord } from '../core/recordSync';
 
@@ -23,7 +24,7 @@ function hasTables(value: unknown): value is PersistedEntities {
   return isRecord(value) && isRecord(value.tables);
 }
 
-function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, next: EntityTypeMap[N], name: N): EntityTypeMap[N] {
+export function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, next: EntityTypeMap[N], name: N): EntityTypeMap[N] {
   if (prev === undefined) {return next;}
   const folded: EntityTypeMap[N] = { ...prev, ...definedOnly(next) };
   const rule = FOLD_RULES[name];
@@ -103,7 +104,7 @@ export const useEntityCache = create<EntityCacheState>()((set, get) => ({
   },
   clearEntities: () => {
     set({ tables: emptyTables() });
-    void clearRecords(ENTITY_PREFIX);
+    void clearRecords(ENTITY_PREFIX).catch(noteStorageFault);
   },
 }));
 

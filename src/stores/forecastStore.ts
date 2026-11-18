@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
 import { fetchAirQuality, fetchForecast, fetchMarine } from './api/remote';
-import { errorMessage } from './core/errors';
+import { classify } from './core/appError';
 import { afterGesture } from './core/gesture';
 import { without } from './core/guards';
 import { persistMap, restore } from './core/recordSync';
 import { FACTORY_VERSION } from './factories/weather';
-import { begin, fail, isFresh, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { begin, isFresh, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { QueryMap } from './core/types';
 import type { ForecastState } from './storeTypes';
@@ -49,7 +49,8 @@ export const useForecastStore = create<ForecastState>()((set, get) => ({
           return entry;
         } catch (error) {
           if (epochOf(city.id) !== epoch) { return null; }
-          set((s) => ({ queries: setQuery(s.queries, city.id, fail(queryAt(s.queries, city.id), errorMessage(error))) }));
+          const appError = classify(error, city.id);
+          set((s) => ({ queries: setQuery(s.queries, city.id, settleError(queryAt(s.queries, city.id), appError)) }));
           return null;
         }
       },

@@ -31,6 +31,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm run test
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests (headless Chromium, production build)
+        run: npm run test:e2e
+
       - name: Build web app and sync into Android
         run: npm run cap:sync
 

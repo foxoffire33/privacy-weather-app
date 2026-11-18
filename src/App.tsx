@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { ScreenTransition } from './components/ScreenTransition';
 import { Splash } from './components/Splash';
+import { StorageWarning } from './components/StorageWarning';
 import { ensureLanguage, languageLoaded, resolveLanguage, useI18n } from './i18n';
 import { syncAppIcon } from './native/appIcon';
 import { allowLandscape } from './native/orientation';
@@ -63,7 +64,7 @@ function Frame({ children }: FrameProps) {
   useEffect(() => { noteRoute(pathname); }, [pathname]);
   return (
     <Box className="stage">
-      <Box className="device" data-accent={accent} data-top={onTopAccent(pathname, hydrated, hasCities) ? 'accent' : undefined}>{children}</Box>
+      <Box className="device" data-accent={accent} data-top={onTopAccent(pathname, hydrated, hasCities) ? 'accent' : undefined}><StorageWarning />{children}</Box>
     </Box>
   );
 }

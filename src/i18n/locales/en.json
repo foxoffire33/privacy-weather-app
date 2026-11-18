@@ -23,7 +23,26 @@
       "other": "{count} days logged"
     },
     "touchChart": "Touch the chart for details",
-    "screenFailed": "This screen could not be loaded."
+    "screenFailed": "This screen could not be loaded.",
+    "storageFault": "Local storage is failing. Some changes may not be saved. Resolve the issue and select Retry saving.",
+    "retrySave": "Retry saving",
+    "storagePending": "Some local changes are still waiting to be saved.",
+    "storageRecovered": "All pending changes have now been saved."
+  },
+  "errors": {
+    "offline": "You are offline, so no new data could be loaded.",
+    "timeout": "The request timed out.",
+    "rateLimited": "The weather service is temporarily rate-limited. Try again later if the automatic retries stop.",
+    "server": "The weather service is unavailable right now.",
+    "client": "The weather request could not be completed.",
+    "invalidResponse": "The weather service returned data the app could not read.",
+    "storageUnavailable": "Local saving is unavailable in this browser.",
+    "quota": "Local storage is full, so changes may not be saved.",
+    "storageRead": "Saved data could not be read.",
+    "storageWrite": "Changes could not be saved locally.",
+    "storageAborted": "Saving was interrupted.",
+    "cancelled": "The request was cancelled.",
+    "unknown": "Something went wrong."
   },
   "ago": {
     "never": "never",
@@ -425,8 +444,7 @@
     "edit": "Edit",
     "addToLog": "Add to log",
     "restore": "Restore",
-    "restoreConfirm": "Replace this day with archive data? Your edits will be lost.",
-    "restoreFailed": "Restore failed: {error}"
+    "restoreConfirm": "Replace this day with archive data? Your edits will be lost."
   },
   "history": {
     "title": "This day,\nother years.",
@@ -477,7 +495,6 @@
       "one": "Added {count} day, updated {updated}, kept {kept} the app logged itself.",
       "other": "Added {count} days, updated {updated}, kept {kept} the app logged itself."
     },
-    "downloadFailed": "Could not download: {error}",
     "edited": "Edited",
     "addManual": "Add a day by hand",
     "lenDays": "{n}d",
@@ -485,6 +502,7 @@
     "editLabel": "Edit {date}"
   },
   "settings": {
+    "reviewPersisted": "Saved settings need review ({fields}). Invalid custom weather servers will not be replaced with public services automatically.",
     "title": "Settings.",
     "language": "Language",
     "languageSystem": "System ({name})",
@@ -535,6 +553,10 @@
     "imported": "Imported {cities} new cities and {days} days.",
     "deleteAll": "Delete all history",
     "confirmDeleteAll": "Delete all logged history? This cannot be undone.",
+    "storage": "Storage",
+    "storageNote": "Your data is kept in this browser's local storage and can still be lost. Export a backup regularly.",
+    "storageLow": "Local storage is almost full. Clearing cached data frees up space without touching your history.",
+    "storageClearCache": "Clear cached data",
     "about": "About",
     "license": "Open source · GPL-3.0 · v{version}",
     "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
@@ -564,7 +586,22 @@
   "backup": {
     "notJson": "This file is not valid JSON.",
     "notBackup": "This is not a Weather Log backup.",
-    "empty": "No cities, history or settings found in this file."
+    "version": "This backup file does not state a supported version.",
+    "futureVersion": "This backup was created by a newer version of the app. Update the app and try again.",
+    "tooLarge": "This backup file is too large to import.",
+    "exportFailed": "The backup could not be exported.",
+    "exportParts": "This backup contains {count} numbered files. Keep every file together and import each one in order to restore all history. Allow multiple downloads if your browser asks.",
+    "empty": "No cities, history or settings found in this file.",
+    "skipCityId": "missing or invalid city id",
+    "skipCityDuplicate": "duplicate city id",
+    "skipCityName": "missing city name",
+    "skipCityCoords": "invalid coordinates",
+    "skipUnknownCity": "history for an unknown city",
+    "skipNotRecord": "not a record",
+    "skipDayDate": "not a valid calendar date",
+    "skipLimit": "record limit exceeded",
+    "skipSetting": "invalid setting value",
+    "skippedCount": "{count} backup records were skipped:"
   },
   "widgets": {
     "past7": "Past 7 days",
@@ -645,8 +682,12 @@
   "diagnostics": {
     "title": "Diagnostics",
     "link": "Performance diagnostics",
-    "note": "Slow frames and data timings from this session. Nothing leaves your device unless you copy it.",
+    "note": "Slow frames, data timings, and failure codes from this session. Local only: nothing leaves your device unless you copy it, and no personal data is recorded.",
     "summary": "{count} slow frames · slowest {ms} ms",
+    "metrics": "data loads {loads} · cache hits {cacheHits} · record writes {recordFlushes} ({recordFlushFailures} failed) · setting saves {kvFlushes} ({kvFlushFailures} failed) · hydration faults {hydrationFailures}",
+    "storageLow": "storage: {used} MB used — low headroom, export your data regularly",
+    "storageOk": "storage: {used} MB of {quota} MB used",
+    "storageUnknown": "storage usage unknown on this device",
     "copy": "Copy report",
     "copied": "Copied",
     "clear": "Clear",

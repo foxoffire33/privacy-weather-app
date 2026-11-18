@@ -155,7 +155,7 @@ function DayDetails({ cityId, date }: DayViewProps): ReactElement {
     return (
       <Box p={20}>
         <Text fw={800}>{t('dayView.couldNotLoad')}</Text>
-        <Text fz={13} c="dimmed">{query.error}</Text>
+        <Text fz={13} c="dimmed">{query.error === null ? '' : t(query.error.messageKey)}</Text>
         <Button mt={12} variant="outline" color="gray" onClick={() => void openDay(cityId, date)}>{t('common.tryAgain')}</Button>
       </Box>
     );

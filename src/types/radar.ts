@@ -1,4 +1,4 @@
-import type { ForecastData, LandMap, RadarFrame } from '../stores';
+import type { AppError, ForecastData, LandMap, RadarFrame } from '../stores';
 import type { ChartHeight } from './components';
 
 export interface RadarPanelProps {
@@ -61,6 +61,7 @@ export interface RadarControlsProps {
   cols: number;
   rows: number;
   stale: boolean;
+  staleNote?: AppError | null;
   visible: boolean;
   onRetry: () => void;
 }

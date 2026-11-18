@@ -26,15 +26,30 @@ export function onConfigure(listener: ConfigListener): () => void {
   return () => { listeners.delete(listener); };
 }
 
-export function onlineSignal(signal?: AbortSignal): AbortSignal {
-  if (signal === undefined) { return online.signal; }
+export interface CombinedSignal {
+  signal: AbortSignal;
+  dispose: () => void;
+}
+
+export function onlineSignal(signal?: AbortSignal): CombinedSignal {
   const both = new AbortController();
-  const stop = () => { both.abort(); };
-  for (const s of [signal, online.signal]) {
-    if (s.aborted) { both.abort(); }
-    s.addEventListener('abort', stop, { once: true });
+  const sources: AbortSignal[] = signal === undefined ? [online.signal] : [signal, online.signal];
+  const unlisteners: (() => void)[] = [];
+  for (const source of sources) {
+    if (source.aborted) {
+      both.abort(source.reason);
+      continue;
+    }
+    const stop = (): void => { both.abort(source.reason); };
+    source.addEventListener('abort', stop, { once: true });
+    unlisteners.push(() => { source.removeEventListener('abort', stop); });
   }
-  return both.signal;
+  return {
+    signal: both.signal,
+    dispose: (): void => {
+      for (const remove of unlisteners) { remove(); }
+    },
+  };
 }
 
 export function isOffline(): boolean {

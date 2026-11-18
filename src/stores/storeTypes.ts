@@ -1,3 +1,4 @@
+import type { AppError } from './core/appError';
 import type { QueryMap, QueryState } from './core/types';
 import type { ArchiveYear, City, DayData, DayEntry, ForecastData, ForecastEntry, GeoResult, LandMap, ModelSet, RadarSet, Settings } from './types';
 
@@ -92,20 +93,36 @@ export interface BootState {
   hydrated: boolean;
   historyReady: boolean;
   storageBlocked: boolean;
+  storageError: AppError | null;
+  storageQuotaExceeded: boolean;
 }
 
 export interface DiagnosticEntry {
-  kind: 'frame' | 'measure';
+  kind: 'frame' | 'measure' | 'failure';
   name: string;
   at: number;
   duration: number;
   blocking: number;
+  detail: string;
   route: string;
+}
+
+export interface DiagnosticMetrics {
+  loads: number;
+  cacheHits: number;
+  recordFlushes: number;
+  recordFlushFailures: number;
+  kvFlushes: number;
+  kvFlushFailures: number;
+  hydrationFailures: number;
 }
 
 export interface DiagnosticsState {
   entries: DiagnosticEntry[];
+  metrics: DiagnosticMetrics;
   add: (entry: DiagnosticEntry) => void;
+  bump: (key: keyof DiagnosticMetrics) => void;
+  addCacheCounts: (loads: number, cacheHits: number) => void;
   clear: () => void;
 }
 

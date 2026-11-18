@@ -2,15 +2,21 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { fetchArchive } from './api/remote';
-import { errorMessage } from './core/errors';
-import { idbStorage } from './core/persistStorage';
-import { begin, fail, isLoading, queryAt, setQuery, succeed } from './factory/queryState';
+import { classify } from './core/appError';
+import { idbStorage, mergePreservingEdits, registerRehydration, trackRehydration } from './core/persistStorage';
+import { begin, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { AlmanacState } from './storeTypes';
 import type { ArchiveYear } from './types';
 
 const BACK = [1, 10, 30] as const;
 const FIRST_YEAR = 1940;
+const NAME = 'wl2-almanac';
+
+const snapshot = (): unknown => {
+  const { normals, thisDay } = useAlmanacStore.getState();
+  return { state: { normals, thisDay }, version: 1 };
+};
 
 export const useAlmanacStore = create<AlmanacState>()(
   persist(
@@ -36,7 +42,8 @@ export const useAlmanacStore = create<AlmanacState>()(
           for (const [md, total] of totals) { means[md] = Number((total.sum / total.n).toFixed(2)); }
           set((s) => ({ normals: { ...s.normals, [city.id]: means }, queries: setQuery(s.queries, key, succeed()) }));
         } catch (error) {
-          set((s) => ({ queries: setQuery(s.queries, key, fail(queryAt(s.queries, key), errorMessage(error))) }));
+          const appError = classify(error, key);
+          set((s) => ({ queries: setQuery(s.queries, key, settleError(queryAt(s.queries, key), appError)) }));
         }
       },
       ensureThisDay: async (city, date) => {
@@ -59,11 +66,15 @@ export const useAlmanacStore = create<AlmanacState>()(
       clear: () => { set({ normals: {}, thisDay: {}, queries: {} }); },
     }),
     {
-      name: 'wl2-almanac',
+      name: NAME,
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      onRehydrateStorage: trackRehydration(NAME, snapshot),
       partialize: (s) => ({ normals: s.normals, thisDay: s.thisDay }),
+      merge: mergePreservingEdits<AlmanacState>({ normals: {}, thisDay: {} }),
     },
   ),
 );
+
+registerRehydration(NAME, async () => { await useAlmanacStore.persist.rehydrate(); });

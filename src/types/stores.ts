@@ -1,4 +1,6 @@
 import type { Backup, BackupParts, QueryState } from '../stores';
+import type { AppError } from '../stores/core/appError';
+import type { MessageKey } from './i18n';
 
 export interface DateRange {
   from: string;
@@ -54,6 +56,7 @@ export interface TrendsState {
   download: QueryState;
   attempted: string[];
   failed: string[];
+  failureErrors: Record<string, AppError>;
   togglePicked: (key: string) => void;
   setLen: (len: number) => void;
   setCustom: (range: DateRange | null) => void;
@@ -65,7 +68,7 @@ export interface TrendsState {
 
 export type AddDatesResult =
   | { ok: true; added: number; updated: number; kept: number }
-  | { ok: false; error: string };
+  | { ok: false; error: MessageKey };
 
 export interface AddDatesState {
   draft: DateRange;
@@ -82,12 +85,14 @@ export type BackupResult =
 
 export interface BackupState {
   pending: Backup | null;
+  importing: boolean;
+  exportParts: number;
   parts: BackupParts;
   result: BackupResult | null;
   pickId: number;
   pick: (file: File | null) => Promise<void>;
   setPart: (part: keyof BackupParts, on: boolean) => void;
-  confirm: () => void;
+  confirm: () => Promise<void>;
   cancel: () => void;
   exportFile: () => Promise<void>;
 }

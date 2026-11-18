@@ -4,7 +4,7 @@ import { Suspense, use, useDeferredValue, useEffect, useEffectEvent, useState } 
 import { useShallow } from 'zustand/react/shallow';
 
 import { t } from '../../i18n';
-import { addDays, daysBetween, lastSettled, latest, useLogStore } from '../../stores';
+import { addDays, daysBetween, latest, READY, useLogStore } from '../../stores';
 import { hasGap, hasLogged, trendsKey, useTrendsStore, windowKey } from '../../stores/trendsStore';
 import { useUiStore } from '../../stores/uiStore';
 import { decimate } from '../../utils/decimate';
@@ -61,7 +61,7 @@ function lenLabel(len: number): string {
 }
 
 function windowsPromise(cached: boolean, missing: boolean, key: string, download: () => PromiseLike<void>): PromiseLike<void> {
-  if (cached) { return lastSettled(key); }
+  if (cached) { return READY; }
   return missing ? download() : latest(key);
 }
 
@@ -128,19 +128,19 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
 }
 
 function TrendCharts({ cityId, range, attrs, names, data, windUnit, back }: TrendChartsProps): ReactElement {
-  const { download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
-    download: st.download, failed: st.failed, retryFailed: st.retryFailed,
+  const { download, failureErrors, retryFailed } = useTrendsStore(useShallow((st) => ({
+    download: st.download, failureErrors: st.failureErrors, retryFailed: st.retryFailed,
   })));
-  const failedHere = range.windows.some((w) => failed.includes(windowKey(cityId, w)));
-  const error = failedHere ? download.error : null;
+  const keys = new Set(range.windows.map((w) => windowKey(cityId, w)));
+  const error = Object.entries(failureErrors).find(([key]) => keys.has(key))?.[1] ?? null;
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
   const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
   return (
     <>
       {download.status === 'loading' && <Text fz={12} c="dimmed" py={8} role="status">{t('history.loadingDays')}</Text>}
-      {error !== null && error !== '' && (
+      {error !== null && (
         <Box py={8}>
-          <Text fz={12} c="signal.3" role="status">{t('history.downloadFailed', { error })}</Text>
+          <Text fz={12} c="signal.3" role="status">{t(error.messageKey)}</Text>
           <Button fullWidth mt={6} variant="outline" color="gray" onClick={() => void retryFailed(cityId, range.windows)}>
             {t('common.tryAgain')}
           </Button>

@@ -112,7 +112,7 @@ function buildSnapshot(input: SnapshotInput): WidgetSnapshot | null {
 }
 
 let last = '';
-let timer: number | undefined;
+let timer: ReturnType<typeof setTimeout> | undefined;
 
 function pushSnapshot(): void {
   const snap = buildSnapshot(readSnapshotInput());

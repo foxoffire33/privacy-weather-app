@@ -1,9 +1,10 @@
+import type { AppError } from './appError';
 
-export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
+export type QueryStatus = 'idle' | 'loading' | 'success' | 'partial' | 'error';
 
 export interface QueryState {
   status: QueryStatus;
-  error: string | null;
+  error: AppError | null;
   lastLoadedAt: number | null;
 }
 
@@ -29,11 +30,6 @@ export interface DataLayerConfig {
   mapServer: string;
   fetch: typeof fetch | null;
   offline: boolean;
-}
-
-export interface PendingWrite {
-  value: unknown;
-  timer: ReturnType<typeof setTimeout>;
 }
 
 export interface Rehydratable extends HydratablePersist {

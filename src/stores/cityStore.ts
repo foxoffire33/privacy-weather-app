@@ -1,12 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { idbStorage } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, registerRehydration, trackRehydration } from './core/persistStorage';
 import { todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 
 import type { CityState } from './storeTypes';
 import type { City } from './types';
+
+const NAME = 'wl2-cities';
+
+const snapshot = (): unknown => {
+  const { cityIds, onboarded } = useCityStore.getState();
+  return { state: { cityIds, onboarded }, version: 1 };
+};
 
 export const useCityStore = create<CityState>()(
   persist(
@@ -48,14 +55,18 @@ export const useCityStore = create<CityState>()(
       },
     }),
     {
-      name: 'wl2-cities',
+      name: NAME,
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
+      onRehydrateStorage: trackRehydration(NAME, snapshot),
       partialize: (s) => ({ cityIds: s.cityIds, onboarded: s.onboarded }),
+      merge: mergePreservingEdits<CityState>({ cityIds: [], onboarded: false }),
     },
   ),
 );
+
+registerRehydration(NAME, async () => { await useCityStore.persist.rehydrate(); });
 
 export function followedCities(): City[] {
   return entityCache.getMany('city', useCityStore.getState().cityIds);
