@@ -61,8 +61,20 @@ describe('idb error semantics', () => {
 
   it('resolves a write only after the transaction completes', async () => {
     const { m } = await fresh();
-    await m.idbSet('k', { v: 1 });
-    await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
+    let completions = 0;
+    const real = IDBTransaction.prototype.addEventListener;
+    const spy = vi.spyOn(IDBTransaction.prototype, 'addEventListener');
+    spy.mockImplementation(function addCompleteObserver(this: IDBTransaction, type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean) {
+      if (type === 'complete') { real.call(this, 'complete', () => { completions += 1; }); }
+      real.call(this, type, listener, options);
+    });
+    try {
+      await m.idbSet('k', { v: 1 });
+      expect(completions).toBeGreaterThanOrEqual(1);
+      await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('reopens a closed connection so the next write lands', async () => {
@@ -96,6 +108,14 @@ describe('idb error semantics', () => {
     await expect(m.idbGet('k')).resolves.toBe(1);
   });
 
+  it('classifies a quota-exceeded write with the quota code', async () => {
+    const { m } = await fresh();
+    vi.stubGlobal('structuredClone', (_value: unknown) => { throw new DOMException('storage full', 'QuotaExceededError'); });
+    await expect(m.idbSet('k', 1)).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
+    vi.unstubAllGlobals();
+    await expect(m.idbSet('k', 1)).resolves.toBeUndefined();
+  });
+
   it('settles a hung write transaction with a typed timeout failure', async () => {
     const { m } = await fresh();
     await m.idbSet('k', 1);
@@ -105,7 +125,7 @@ describe('idb error semantics', () => {
     try {
       const pending = m.idbSet('k', 2);
       const assertion = expect(pending).rejects.toMatchObject({ name: 'StorageError', code: 'transaction-aborted' });
-      await vi.advanceTimersByTimeAsync(10_000);
+      await vi.advanceTimersByTimeAsync(11_000);
       expect(registrations).toBeGreaterThan(0);
       await assertion;
     } finally {

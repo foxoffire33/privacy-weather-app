@@ -21,10 +21,6 @@ async function fresh(log: string[]): Promise<Fresh> {
   return { m, idb };
 }
 
-async function tick(): Promise<void> {
-  await new Promise((resolve) => { setTimeout(resolve, 0); });
-}
-
 const busy = () => { throw new DOMException('busy', 'AbortError'); };
 
 function heldGate(): { promise: Promise<void>; release: () => void } {
@@ -34,6 +30,7 @@ function heldGate(): { promise: Promise<void>; release: () => void } {
 }
 
 afterEach(() => {
+  vi.clearAllTimers();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -42,6 +39,7 @@ describe('clearRecords ordering contract', () => {
   it('drops a pending put submitted before the clear', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     m.putRecord('p:x', 1);
     await m.clearRecords('p:');
     await m.flushRecords();
@@ -53,6 +51,7 @@ describe('clearRecords ordering contract', () => {
   it('commits the clear after an in-flight flush, so the cleared key does not resurrect', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     const gate = heldGate();
     vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => {
       log.push('write');
@@ -71,32 +70,65 @@ describe('clearRecords ordering contract', () => {
   it('lets a put submitted after the clear persist once the clear completes', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     const clearing = m.clearRecords('p:');
-    await tick();
     m.putRecord('p:y', 2);
     await clearing;
-    await m.flushRecords();
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(0);
     expect(log).toEqual(['delete p:', 'write']);
     expect(idb.recordsWrite).toHaveBeenCalledWith([['p:y', 2]], []);
   });
 
-  it('rejects a failed clear with a typed error and leaves the chain usable', async () => {
+  it('keeps a post-clear put safe across a failed clear retry', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     vi.mocked(idb.recordsDeletePrefix).mockImplementationOnce(() => {
       log.push('delete failed');
       throw new DOMException('full', 'QuotaExceededError');
     });
-    await expect(m.clearRecords('p:')).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
+    const clearing = m.clearRecords('p:');
+    const rejected = expect(clearing).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
     m.putRecord('p:z', 3);
-    await m.flushRecords();
+    await vi.advanceTimersByTimeAsync(0);
+    await rejected;
+    expect(m.recordSyncStatus().pending).toBe(1);
+    expect(idb.recordsWrite).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(0);
     expect(idb.recordsWrite).toHaveBeenCalledWith([['p:z', 3]], []);
-    expect(log).toEqual(['delete failed', 'write']);
+    expect(m.recordSyncStatus().pending).toBe(0);
+    expect(log).toEqual(['delete failed', 'delete p:', 'write']);
+  });
+
+  it('retries an exhausted clear on a manual flush, ordered before the queued write', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsDeletePrefix).mockImplementation(() => {
+      log.push('delete failed');
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    const clearing = m.clearRecords('p:');
+    const rejected = expect(clearing).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
+    m.putRecord('p:y', 1);
+    await vi.advanceTimersByTimeAsync(0);
+    await rejected;
+    await vi.advanceTimersByTimeAsync(120_000);
+    expect(log.filter((entry) => entry === 'delete failed')).toHaveLength(9);
+    vi.mocked(idb.recordsDeletePrefix).mockImplementation(async (prefix) => { log.push(`delete ${prefix}`); });
+    await m.flushRecords();
+    expect(m.recordSyncStatus().pending).toBe(0);
+    expect(idb.recordsWrite).toHaveBeenCalledWith([['p:y', 1]], []);
+    expect(log).toContain('delete p:');
   });
 
   it('serializes multiple prefix clears without interference', async () => {
     const log: string[] = [];
     const { m } = await fresh(log);
+    vi.useFakeTimers();
     const first = m.clearRecords('a:');
     const second = m.clearRecords('b:');
     await Promise.all([first, second]);
@@ -108,6 +140,7 @@ describe('record flush retry policy', () => {
   it('rejects when its batch fails and exposes the failure in the status', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     vi.mocked(idb.recordsWrite).mockImplementationOnce(() => {
       log.push('write failed');
       throw new DOMException('full', 'QuotaExceededError');
@@ -118,7 +151,7 @@ describe('record flush retry policy', () => {
     expect(status.pending).toBe(1);
     expect(status.code).toBe('quota-exceeded');
     expect(status.lastError).toBe('IndexedDB write failed: full');
-    await tick();
+    await vi.advanceTimersByTimeAsync(0);
     expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(1);
   });
 
@@ -185,6 +218,7 @@ describe('record flush retry policy', () => {
 describe('change bookkeeping', () => {
   it('records nothing while tracking is off', async () => {
     const { m } = await fresh([]);
+    vi.useFakeTimers();
     m.putRecord('p:x', 1);
     m.deleteRecord('p:y');
     await m.clearRecords('q:');
@@ -196,6 +230,7 @@ describe('change bookkeeping', () => {
 
   it('records puts, deletes and cleared prefixes while tracking', async () => {
     const { m } = await fresh([]);
+    vi.useFakeTimers();
     m.trackChanges(true);
     m.putRecord('p:x', 1);
     m.deleteRecord('p:y');
@@ -208,6 +243,7 @@ describe('change bookkeeping', () => {
 
   it('forgets the bookkeeping when tracking ends', async () => {
     const { m } = await fresh([]);
+    vi.useFakeTimers();
     m.trackChanges(true);
     m.putRecord('p:x', 1);
     await m.clearRecords('q:');
@@ -218,6 +254,7 @@ describe('change bookkeeping', () => {
 
   it('does not record restores even while tracking', async () => {
     const { m } = await fresh([]);
+    vi.useFakeTimers();
     m.trackChanges(true);
     m.restore(() => { m.putRecord('p:x', 1); });
     m.restore(() => { m.deleteRecord('p:y'); });
@@ -225,9 +262,29 @@ describe('change bookkeeping', () => {
     expect(m.changedSinceStart('p:y')).toBe(false);
   });
 
+  it('prunes clear markers once the clears settle and tracking is off', async () => {
+    const { m } = await fresh([]);
+    vi.useFakeTimers();
+    await m.clearRecords('a:');
+    await m.clearRecords('b:');
+    expect(m.changedSinceStart('a:x')).toBe(false);
+    expect(m.changedSinceStart('b:y')).toBe(false);
+  });
+
+  it('keeps clear markers while tracking is on, and drops them when tracking ends', async () => {
+    const { m } = await fresh([]);
+    vi.useFakeTimers();
+    m.trackChanges(true);
+    await m.clearRecords('a:');
+    expect(m.changedSinceStart('a:x')).toBe(true);
+    m.trackChanges(false);
+    expect(m.changedSinceStart('a:x')).toBe(false);
+  });
+
   it('drops a requeued put covered by a clear that landed after the failed flush', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
     vi.mocked(idb.recordsWrite).mockImplementationOnce(busy);
     m.putRecord('p:x', 1);
     const failing = m.flushRecords();

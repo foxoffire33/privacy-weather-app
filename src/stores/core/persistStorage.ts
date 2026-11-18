@@ -14,6 +14,7 @@ const WRITE_DEBOUNCE_MS = 250;
 const RETRY_BASE_MS = 250;
 const RETRY_MAX_MS = 30_000;
 const MAX_AUTO_RETRIES = 8;
+const REHYDRATE_RETRY_MS = 3_000;
 
 interface PendingWriteState {
   revision: number;
@@ -22,7 +23,6 @@ interface PendingWriteState {
   timer: ReturnType<typeof setTimeout> | null;
   chain: Promise<void>;
   lastError: StorageError | null;
-  lastSuccessfulWriteAt: number | null;
 }
 
 export interface PersistenceStatus {
@@ -38,11 +38,22 @@ function isStorageValue<S>(value: unknown): value is StorageValue<S> {
 
 const pending = new Map<string, PendingWriteState>();
 const readErrors = new Map<string, StorageError>();
+const rehydrators = new Map<string, () => Promise<void> | void>();
+const lastSuccess = new Map<string, number>();
 let lastSuccessfulWriteAt: number | null = null;
 let faultListener: ((error: StorageError) => void) | null = null;
+let recoveredListener: (() => void) | null = null;
 
 export function onPersistFault(listener: ((error: StorageError) => void) | null): void {
   faultListener = listener;
+}
+
+export function onPersistRecovered(listener: (() => void) | null): void {
+  recoveredListener = listener;
+}
+
+export function registerRehydration(name: string, rehydrate: () => Promise<void> | void): void {
+  rehydrators.set(name, rehydrate);
 }
 
 function backoffDelay(attempts: number): number {
@@ -55,6 +66,12 @@ async function runFlushOnce(name: string): Promise<void> {
   if (state === undefined) { return; }
   const revision = state.revision;
   const value = state.value;
+  const readError = readErrors.get(name);
+  if (readError !== undefined) {
+    if (state.revision !== revision) { return; }
+    state.lastError = readError;
+    return;
+  }
   try {
     await idbSet(name, value);
   } catch (error) {
@@ -71,16 +88,21 @@ async function runFlushOnce(name: string): Promise<void> {
   if (state.revision !== revision) { return; }
   state.lastError = null;
   state.attempts = 0;
-  state.lastSuccessfulWriteAt = Date.now();
-  lastSuccessfulWriteAt = state.lastSuccessfulWriteAt;
+  const at = Date.now();
+  lastSuccess.set(name, at);
+  lastSuccessfulWriteAt = at;
   useDiagnosticsStore.getState().bump('kvFlushes');
+  recoveredListener?.();
   pending.delete(name);
 }
 
 function flush(name: string): void {
   const state = pending.get(name);
   if (state === undefined) { return; }
-  state.chain = state.chain.then(async () => runFlushOnce(name));
+  state.chain = state.chain.then(
+    async () => { await runFlushOnce(name).catch(() => null); },
+    async () => { await runFlushOnce(name).catch(() => null); },
+  );
 }
 
 function flushAll(): void {
@@ -102,12 +124,15 @@ export function idbStorage<S>(): PersistStorage<S> {
         readErrors.set(name, toStorageError('read', error));
         throw error;
       }
+      const wasFault = readErrors.get(name);
       readErrors.delete(name);
+      const state = pending.get(name);
+      if (state !== undefined && wasFault !== undefined && state.lastError === wasFault) { state.lastError = null; }
       if (pending.has(name)) { flush(name); }
       return isStorageValue<S>(value) ? value : null;
     },
     setItem: (name, value) => {
-      const state: PendingWriteState = pending.get(name) ?? { revision: 0, value: undefined, attempts: 0, timer: null, chain: Promise.resolve(), lastError: null, lastSuccessfulWriteAt: null };
+      const state: PendingWriteState = pending.get(name) ?? { revision: 0, value: undefined, attempts: 0, timer: null, chain: Promise.resolve(), lastError: null };
       state.revision += 1;
       state.value = value;
       state.attempts = 0;
@@ -116,14 +141,35 @@ export function idbStorage<S>(): PersistStorage<S> {
       if (readErrors.has(name)) { return; }
       state.timer = setTimeout(() => { state.timer = null; flush(name); }, WRITE_DEBOUNCE_MS);
     },
-    removeItem: async (name) => {
+    removeItem: (name) => {
       const state = pending.get(name);
-      if (state !== undefined) {
-        if (state.timer !== null) { clearTimeout(state.timer); }
-        await state.chain;
-        pending.delete(name);
+      if (state === undefined) {
+        lastSuccess.delete(name);
+        return idbDel(name);
       }
-      await idbDel(name);
+      if (state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
+      const revision = state.revision;
+      return new Promise<void>((resolve, reject) => {
+        state.chain = state.chain.then(
+          async () => {
+            const current = pending.get(name);
+            if (current !== state || current.revision !== revision) { resolve(); return; }
+            try {
+              await idbDel(name);
+            } catch (error) {
+              const storageError = toStorageError('write', error);
+              state.lastError = storageError;
+              faultListener?.(storageError);
+              reject(storageError);
+              return;
+            }
+            lastSuccess.delete(name);
+            if (pending.get(name) === state) { pending.delete(name); }
+            resolve();
+          },
+          (error: unknown) => { reject(toStorageError('write', error)); },
+        );
+      });
     },
   };
 }
@@ -140,23 +186,42 @@ async function awaitKey(name: string): Promise<void> {
 export async function flushPersistedState(name?: string): Promise<void> {
   if (name === undefined) {
     const keys = [...pending.keys()];
-    for (const key of keys) { flush(key); }
     await Promise.all(keys.map(async (key) => { await awaitKey(key); }));
   } else {
     await awaitKey(name);
   }
 }
 
-export function retryPersistedState(name?: string): void {
-  const keys = name === undefined ? [...pending.keys()] : [name];
-  for (const key of keys) {
+async function retryHydration(name: string): Promise<void> {
+  const rehydrate = rehydrators.get(name);
+  if (rehydrate === undefined) { return; }
+  const deadline = new Promise<void>((resolve) => { setTimeout(resolve, REHYDRATE_RETRY_MS); });
+  await Promise.race([Promise.resolve(rehydrate()).catch(() => null), deadline]);
+}
+
+export async function retryPersistedState(name?: string): Promise<void> {
+  const keys = name === undefined ? [...new Set([...pending.keys(), ...readErrors.keys()])] : [name];
+  await Promise.all(keys.map(async (key) => {
     const state = pending.get(key);
-    if (state === undefined) { continue; }
+    if (state === undefined && readErrors.has(key)) {
+      await retryHydration(key);
+      return;
+    }
+    if (state === undefined) { return; }
+    if (readErrors.has(key)) {
+      await retryHydration(key);
+      const current = readErrors.get(key);
+      if (current !== undefined) {
+        state.lastError = current;
+        state.attempts = 0;
+        return;
+      }
+    }
     state.lastError = null;
     state.attempts = 0;
     if (state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
     flush(key);
-  }
+  }));
 }
 
 export function persistenceStatus(name?: string): PersistenceStatus {
@@ -166,7 +231,7 @@ export function persistenceStatus(name?: string): PersistenceStatus {
       pending: state !== undefined,
       code: state !== undefined && state.lastError !== null ? state.lastError.code : null,
       lastError: state !== undefined && state.lastError !== null ? errorMessage(state.lastError) : null,
-      lastSuccessfulWriteAt: state === undefined ? null : state.lastSuccessfulWriteAt,
+      lastSuccessfulWriteAt: lastSuccess.get(name) ?? null,
     };
   }
   let code: StorageErrorCode | null = null;
@@ -191,13 +256,43 @@ export function trackRehydration(name: string): (state: unknown) => (state?: unk
   };
 }
 
-export function stateEdited<S extends object>(initial: Partial<S>, current: S): boolean {
-  const keys = Object.keys(initial);
-  return keys.some((key) => JSON.stringify(Reflect.get(current, key)) !== JSON.stringify(Reflect.get(initial, key)));
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+function mergeCollection(base: unknown, current: unknown, fromDisk: unknown): unknown {
+  if (isStringArray(base) && isStringArray(current) && isStringArray(fromDisk)) {
+    return [...new Set([...fromDisk, ...current])];
+  }
+  if (isRecord(base) && isRecord(current) && isRecord(fromDisk)) {
+    if (Object.keys(base).length === 0) {
+      return { ...fromDisk, ...current };
+    }
+    const merged: Record<string, unknown> = { ...current };
+    for (const key of Object.keys(base)) {
+      const edited = JSON.stringify(Reflect.get(current, key)) !== JSON.stringify(Reflect.get(base, key));
+      if (!edited && key in fromDisk) { merged[key] = fromDisk[key]; }
+    }
+    return merged;
+  }
+  return current;
 }
 
 export function mergePreservingEdits<S extends object>(initial: Partial<S>): (persisted: unknown, current: S) => S {
-  return (persisted, current) => (stateEdited(initial, current) || !isRecord(persisted) ? current : { ...current, ...persisted });
+  return (persisted, current) => {
+    if (!isRecord(persisted)) { return current; }
+    const result = { ...current };
+    for (const key of Object.keys(initial)) {
+      const base = Reflect.get(initial, key);
+      const cur = Reflect.get(current, key);
+      if (JSON.stringify(cur) === JSON.stringify(base)) {
+        if (key in persisted) { Reflect.set(result, key, persisted[key]); }
+        continue;
+      }
+      Reflect.set(result, key, mergeCollection(base, cur, persisted[key]));
+    }
+    return result;
+  };
 }
 
 export type HydrationResult = { status: 'hydrated' } | { status: 'timeout' };

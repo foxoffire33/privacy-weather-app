@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 import { configureDataLayer } from './core/config';
 import { isRecord } from './core/guards';
-import { idbStorage, stateEdited, trackRehydration } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, registerRehydration, trackRehydration } from './core/persistStorage';
 import { defaultSettings, validatePersistedSettings } from './settingsSchema';
 
 import type { SettingsState } from './storeTypes';
@@ -17,16 +17,16 @@ export function settingsValidationIssues(): string[] {
   return validationIssues;
 }
 
+const merge = mergePreservingEdits<SettingsState>({ settings: defaultSettings });
+
 function mergePersisted(persisted: unknown, current: SettingsState): SettingsState {
-  if (stateEdited({ settings: defaultSettings }, current)) {
-    return current;
-  }
   if (!isRecord(persisted)) {
+    validationIssues = [];
     return current;
   }
   const { value, issues } = validatePersistedSettings(persisted.settings);
   validationIssues = issues;
-  return { ...current, settings: value };
+  return merge({ settings: value }, current);
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -46,6 +46,8 @@ export const useSettingsStore = create<SettingsState>()(
     },
   ),
 );
+
+registerRehydration(NAME, () => { useSettingsStore.persist.rehydrate(); });
 
 function publishApiConfig(s: Settings): void {
   configureDataLayer({ apiKey: s.apiKey, server: s.server, radarServer: s.radarServer, mapServer: s.mapServer, offline: s.offline });

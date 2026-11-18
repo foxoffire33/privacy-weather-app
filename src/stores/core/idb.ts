@@ -58,6 +58,7 @@ export function toStorageError(operation: 'open' | 'read' | 'write', cause: unkn
 const DB_NAME = 'wl-storesv2';
 const DB_VERSION = 2;
 const TX_TIMEOUT_MS = 10_000;
+const TX_SETTLE_GRACE_MS = 1_000;
 const KV = 'kv';
 const RECORDS = 'records';
 const RESPONSES = 'responses';
@@ -83,12 +84,13 @@ function noteClosedConnection(error: unknown): void {
   if (error instanceof DOMException && error.name === 'InvalidStateError') { dbPromise = null; }
 }
 
-function abortIfActive(tx: IDBTransaction | undefined): void {
-  if (tx === undefined) { return; }
+function abortIfActive(tx: IDBTransaction | undefined): boolean {
+  if (tx === undefined) { return true; }
   try {
     tx.abort();
+    return true;
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'InvalidStateError') { return; }
+    if (error instanceof DOMException && error.name === 'InvalidStateError') { return false; }
     throw error;
   }
 }
@@ -100,6 +102,7 @@ function hasIndexedDb(): boolean {
 async function openDb(): Promise<IDBDatabase> {
   dbPromise ??= new Promise<IDBDatabase>((resolve, reject) => {
     let request: IDBOpenDBRequest;
+    let settled = false;
     try {
       request = indexedDB.open(DB_NAME, DB_VERSION);
     } catch (error) {
@@ -121,13 +124,19 @@ async function openDb(): Promise<IDBDatabase> {
     });
     request.addEventListener('blocked', () => {
       blockedListener?.(true);
+      settled = true;
       reject(new StorageError('blocked', 'IndexedDB upgrade is blocked by another tab', { cause: openError() }));
     });
     request.addEventListener('success', () => {
       blockedListener?.(false);
+      if (settled) { request.result.close(); return; }
+      settled = true;
       resolve(manage(request.result));
     });
-    request.addEventListener('error', () => { reject(toStorageError('open', openError() ?? new Error('IndexedDB open failed'))); });
+    request.addEventListener('error', () => {
+      settled = true;
+      reject(toStorageError('open', openError() ?? new Error('IndexedDB open failed')));
+    });
   });
   return dbPromise.catch((error: unknown) => {
     dbPromise = null;
@@ -166,17 +175,19 @@ async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBOb
     try {
       tx = db.transaction(store, 'readwrite', options);
       tx.addEventListener('complete', () => { finish('done'); });
-      tx.addEventListener('error', () => { finish('failed'); });
       tx.addEventListener('abort', () => { finish('failed'); });
       change(tx.objectStore(store));
       timer = setTimeout(() => {
-        abortIfActive(tx);
-        finish('failed', new DOMException('write transaction timed out', 'AbortError'));
+        if (abortIfActive(tx)) {
+          finish('failed', new DOMException('write transaction timed out', 'AbortError'));
+          return;
+        }
+        timer = setTimeout(() => { finish('failed', new DOMException('write transaction timed out', 'AbortError')); }, TX_SETTLE_GRACE_MS);
       }, TX_TIMEOUT_MS);
     } catch (error) {
       noteClosedConnection(error);
       finish('failed', error);
-      tx?.abort();
+      abortIfActive(tx);
     }
   });
 }
@@ -244,7 +255,6 @@ export async function recordsRange(lower: string, upper: string): Promise<IdbEnt
       }
       resolve(out);
     });
-    tx.addEventListener('error', fail);
     tx.addEventListener('abort', fail);
   }).catch((error: unknown) => {
     noteClosedConnection(error);
@@ -262,19 +272,31 @@ export async function responsePut(key: string, record: ResponseRecord): Promise<
 }
 
 export async function responsesPrune(now: number, keep: number): Promise<number> {
-  const all = (await read(RESPONSES, (s) => s.getAll())) ?? [];
-  const keys = (await read(RESPONSES, (s) => s.getAllKeys())) ?? [];
-  if (all.length !== keys.length) { return 0; }
-  const rows = keys.flatMap((key, i) => {
-    const value: unknown = all[i];
-    return typeof key === 'string' && isResponseRecord(value) ? [{ key, value }] : [];
+  let dropped = 0;
+  await write(RESPONSES, (s) => {
+    if (keep === 0) {
+      const count = s.count();
+      count.addEventListener('success', () => { dropped = count.result; s.clear(); });
+      return;
+    }
+    const values = s.getAll();
+    const keys = s.getAllKeys();
+    keys.addEventListener('success', () => {
+      const all = values.result;
+      const allKeys = keys.result;
+      if (all.length !== allKeys.length) { return; }
+      const rows = allKeys.flatMap((key, i) => {
+        const value: unknown = all[i];
+        return typeof key === 'string' && isResponseRecord(value) ? [{ key, value }] : [];
+      });
+      const fresh = rows.filter((r) => r.value.expiresAt > now);
+      const keepKeys = new Set(sortedCopy(fresh, (a, b) => b.value.fetchedAt - a.value.fetchedAt).slice(0, keep).map((r) => r.key));
+      const drop = rows.filter((r) => !keepKeys.has(r.key)).map((r) => r.key);
+      for (const key of drop) { s.delete(key); }
+      dropped = drop.length;
+    });
   });
-  const fresh = rows.filter((r) => r.value.expiresAt > now);
-  const keepKeys = new Set(sortedCopy(fresh, (a, b) => b.value.fetchedAt - a.value.fetchedAt).slice(0, keep).map((r) => r.key));
-  const drop = rows.filter((r) => !keepKeys.has(r.key)).map((r) => r.key);
-  if (drop.length === 0) { return 0; }
-  await write(RESPONSES, (s) => { for (const key of drop) { s.delete(key); } });
-  return drop.length;
+  return dropped;
 }
 
 function isResponseRecord(value: unknown): value is ResponseRecord {

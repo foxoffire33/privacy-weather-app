@@ -13,11 +13,23 @@ const RETRY_MAX_MS = 30_000;
 const MAX_AUTO_RETRIES = 8;
 
 const puts = new Map<string, unknown>();
+const putGen = new Map<string, number>();
 const deletes = new Set<string>();
+const deleteGen = new Map<string, number>();
+let counter = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
+let clearTimer: ReturnType<typeof setTimeout> | null = null;
 let restoring = 0;
 
+interface ClearOp {
+  prefix: string;
+  boundary: number;
+  attempts: number;
+  exhausted: boolean;
+}
+
 let chain: Promise<void> = Promise.resolve();
+const pendingClears: ClearOp[] = [];
 const cleared: { prefix: string; seq: number }[] = [];
 let clearSeq = 0;
 let inFlightMark: number | null = null;
@@ -27,9 +39,14 @@ let tracking = false;
 let attempts = 0;
 let lastError: StorageError | null = null;
 let faultListener: ((error: StorageError) => void) | null = null;
+let recoveredListener: (() => void) | null = null;
 
 export function onRecordFault(listener: ((error: StorageError) => void) | null): void {
   faultListener = listener;
+}
+
+export function onRecordRecovered(listener: (() => void) | null): void {
+  recoveredListener = listener;
 }
 
 export interface RecordSyncStatus {
@@ -63,19 +80,53 @@ function pruneCleared(): void {
   while (cleared.length > 0 && cleared[0].seq < inFlightMark) { cleared.shift(); }
 }
 
+function purgeFor(op: ClearOp): void {
+  for (const key of [...puts.keys()]) {
+    if (key.startsWith(op.prefix) && (putGen.get(key) ?? 0) < op.boundary) { puts.delete(key); putGen.delete(key); }
+  }
+  for (const key of [...deletes]) {
+    if (key.startsWith(op.prefix) && (deleteGen.get(key) ?? 0) < op.boundary) { deletes.delete(key); deleteGen.delete(key); }
+  }
+}
+
+function settleIfIdle(): void {
+  if (puts.size === 0 && deletes.size === 0 && lastError !== null) {
+    lastError = null;
+    recoveredListener?.();
+  }
+}
+
+function requeue(batch: readonly IdbEntry[], gone: readonly string[], sinceSeq: number): void {
+  const clearedSince = cleared.filter((e) => e.seq >= sinceSeq).map((e) => e.prefix);
+  const keep = (key: string): boolean =>
+    !puts.has(key) && !deletes.has(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
+  for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
+  for (const key of gone) { if (keep(key)) { deletes.add(key); } }
+}
+
+function blockedByPendingClear(key: string): boolean {
+  return pendingClears.some((op) => key.startsWith(op.prefix));
+}
+
 async function flushOnce(): Promise<StorageError | null> {
-  if (puts.size === 0 && deletes.size === 0) { return null; }
-  const batch: IdbEntry[] = [...puts];
-  const gone = [...deletes];
+  const batch: IdbEntry[] = [...puts].filter(([key]) => !blockedByPendingClear(key));
+  const gone = [...deletes].filter((key) => !blockedByPendingClear(key));
+  if (batch.length === 0 && gone.length === 0) {
+    settleIfIdle();
+    return null;
+  }
   const clearMark = clearSeq;
   inFlightMark = clearMark;
-  puts.clear();
-  deletes.clear();
+  for (const [key] of batch) { puts.delete(key); }
+  for (const key of gone) { deletes.delete(key); }
   try {
-    await measure('persist-flush', async () => recordsWrite(batch, gone));
+    await measure('persist-flush', async () => { recordsWrite(batch, gone); });
+    for (const [key] of batch) { putGen.delete(key); }
+    for (const key of gone) { deleteGen.delete(key); }
     attempts = 0;
     lastError = null;
     useDiagnosticsStore.getState().bump('recordFlushes');
+    recoveredListener?.();
     return null;
   } catch (error) {
     const storageError = toStorageError('write', error);
@@ -92,13 +143,30 @@ async function flushOnce(): Promise<StorageError | null> {
   }
 }
 
+function enqueueClear(op: ClearOp): void {
+  chain = chain.then(
+    async () => { await runClear(op).catch(() => null); },
+    async () => { await runClear(op).catch(() => null); },
+  );
+}
+
+function retryExhaustedClears(): void {
+  for (const op of pendingClears) {
+    if (!op.exhausted) { continue; }
+    op.exhausted = false;
+    op.attempts = 0;
+    enqueueClear(op);
+  }
+}
+
 export async function flushRecords(): Promise<void> {
   if (timer !== null) { clearTimeout(timer); }
   timer = null;
+  retryExhaustedClears();
   let outcome: StorageError | null;
   chain = chain.then(
     async () => { outcome = await flushOnce(); },
-    async () => { await flushOnce(); },
+    async () => { outcome = await flushOnce(); },
   );
   return chain.then(() => {
     if (outcome !== null) {
@@ -107,16 +175,6 @@ export async function flushRecords(): Promise<void> {
     }
   });
 }
-
-const newer = (key: string): boolean => puts.has(key) || deletes.has(key);
-
-function requeue(batch: readonly IdbEntry[], gone: readonly string[], sinceSeq: number): void {
-  const clearedSince = cleared.filter((e) => e.seq >= sinceSeq).map((e) => e.prefix);
-  const keep = (key: string) => !newer(key) && !clearedSince.some((prefix) => key.startsWith(prefix));
-  for (const [key, value] of batch) { if (keep(key)) { puts.set(key, value); } }
-  for (const key of gone) { if (keep(key)) { deletes.add(key); } }
-}
-
 
 function schedule(): void {
   attempts = 0;
@@ -144,7 +202,10 @@ export function putRecord(key: string, value: unknown): void {
   if (restoring > 0) { return; }
   if (tracking) { touched.add(key); }
   deletes.delete(key);
+  deleteGen.delete(key);
   puts.set(key, value);
+  putGen.set(key, counter);
+  counter += 1;
   schedule();
 }
 
@@ -152,28 +213,44 @@ export function deleteRecord(key: string): void {
   if (restoring > 0) { return; }
   if (tracking) { touched.add(key); }
   puts.delete(key);
+  putGen.delete(key);
   deletes.add(key);
+  deleteGen.set(key, counter);
+  counter += 1;
   schedule();
 }
 
-export async function clearRecords(prefix: string): Promise<void> {
+export function clearRecords(prefix: string): Promise<void> {
+  const op: ClearOp = { prefix, boundary: counter, attempts: 0, exhausted: false };
+  pendingClears.push(op);
   cleared.push({ prefix, seq: clearSeq });
   clearSeq += 1;
-  for (const key of puts.keys()) { if (key.startsWith(prefix)) { puts.delete(key); } }
-  for (const key of deletes) { if (key.startsWith(prefix)) { deletes.delete(key); } }
-  return new Promise<void>((resolve, reject) => {
-    chain = chain.then(
-      async () => {
-        try {
-          await recordsDeletePrefix(prefix);
-          resolve();
-        } catch (error) {
-          reject(toStorageError('write', error));
-        }
-      },
-      (error: unknown) => { reject(toStorageError('write', error)); },
-    );
-  });
+  const step = chain.then(() => runClear(op), () => runClear(op));
+  chain = step;
+  return step;
+}
+
+async function runClear(op: ClearOp): Promise<void> {
+  try {
+    await recordsDeletePrefix(op.prefix);
+  } catch (error) {
+    const storageError = toStorageError('write', error);
+    lastError = storageError;
+    reportFault(storageError);
+    if (RETRYABLE_WRITE_CODES.has(storageError.code) && op.attempts < MAX_AUTO_RETRIES) {
+      op.attempts += 1;
+      clearTimer ??= setTimeout(() => { clearTimer = null; enqueueClear(op); }, backoffDelay(op.attempts));
+    } else {
+      op.exhausted = true;
+    }
+    throw storageError;
+  }
+  const index = pendingClears.indexOf(op);
+  if (index !== -1) { pendingClears.splice(index, 1); }
+  purgeFor(op);
+  pruneCleared();
+  if (puts.size > 0 || deletes.size > 0) { schedule(); }
+  settleIfIdle();
 }
 
 export function restore(apply: () => void): void {

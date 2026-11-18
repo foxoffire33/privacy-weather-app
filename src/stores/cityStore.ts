@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, registerRehydration, trackRehydration } from './core/persistStorage';
 import { todayISO } from './core/time';
 import { entityCache } from './entities/cache';
 
@@ -60,6 +60,8 @@ export const useCityStore = create<CityState>()(
     },
   ),
 );
+
+registerRehydration(NAME, () => { useCityStore.persist.rehydrate(); });
 
 export function followedCities(): City[] {
   return entityCache.getMany('city', useCityStore.getState().cityIds);

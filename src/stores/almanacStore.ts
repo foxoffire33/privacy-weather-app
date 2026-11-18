@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 import { fetchArchive } from './api/remote';
 import { classify } from './core/appError';
-import { idbStorage, mergePreservingEdits, trackRehydration } from './core/persistStorage';
+import { idbStorage, mergePreservingEdits, registerRehydration, trackRehydration } from './core/persistStorage';
 import { begin, isLoading, queryAt, setQuery, settleError, succeed } from './factory/queryState';
 
 import type { AlmanacState } from './storeTypes';
@@ -71,3 +71,5 @@ export const useAlmanacStore = create<AlmanacState>()(
     },
   ),
 );
+
+registerRehydration(NAME, () => { useAlmanacStore.persist.rehydrate(); });

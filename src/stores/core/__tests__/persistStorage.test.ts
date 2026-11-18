@@ -45,7 +45,7 @@ describe('persistStorage write coordinator', () => {
     await vi.advanceTimersByTimeAsync(120_000);
     expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(9);
     vi.mocked(idb.idbSet).mockResolvedValue();
-    m.retryPersistedState('app');
+    await m.retryPersistedState('app');
     await m.flushPersistedState('app');
     const healed = m.persistenceStatus('app');
     expect(healed.pending).toBe(false);
@@ -143,6 +143,23 @@ describe('persistStorage write coordinator', () => {
     expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(1);
     expect(m.persistenceStatus('app').pending).toBe(false);
   });
+
+  it('reports the read fault on an explicit flush while hydration is blocked, without writing', async () => {
+    const { m, idb } = await fresh();
+    vi.mocked(idb.idbGet).mockRejectedValueOnce(new DOMException('gone', 'DataError'));
+    const storage = m.idbStorage<{ n: number }>();
+    await expect(storage.getItem('app')).rejects.toMatchObject({ name: 'DataError' });
+    vi.mocked(idb.idbSet).mockResolvedValue();
+    storage.setItem('app', VALUE);
+    await expect(m.flushPersistedState('app')).rejects.toMatchObject({ name: 'StorageError', code: 'read-failed' });
+    expect(vi.mocked(idb.idbSet)).not.toHaveBeenCalled();
+    expect(m.persistenceStatus('app').pending).toBe(true);
+    vi.mocked(idb.idbGet).mockResolvedValue(null);
+    await storage.getItem('app');
+    await m.flushPersistedState('app');
+    expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(1);
+    expect(m.persistenceStatus('app').pending).toBe(false);
+  });
 });
 
 describe('hydration outcomes', () => {
@@ -236,9 +253,25 @@ describe('mergePreservingEdits', () => {
     expect(merge({ cityIds: ['a'] }, { cityIds: [] })).toEqual({ cityIds: ['a'] });
   });
 
-  it('keeps the current state once it has been edited', () => {
+  it('unions an edited string array with the persisted one so neither side loses entries', () => {
     const merge = mergePreservingEdits<{ cityIds: string[] }>({ cityIds: [] });
-    expect(merge({ cityIds: ['a'] }, { cityIds: ['b'] })).toEqual({ cityIds: ['b'] });
+    expect(merge({ cityIds: ['a'] }, { cityIds: ['b'] })).toEqual({ cityIds: ['a', 'b'] });
+    expect(merge({ cityIds: ['a', 'b'] }, { cityIds: ['b'] })).toEqual({ cityIds: ['a', 'b'] });
+  });
+
+  it('unions an edited empty-base record with the persisted one so neither side loses entries', () => {
+    const merge = mergePreservingEdits<{ normals: Record<string, unknown> }>({ normals: {} });
+    expect(merge({ normals: { a: 1 } }, { normals: { b: 2 } })).toEqual({ normals: { a: 1, b: 2 } });
+  });
+
+  it('keeps edited sub-fields of a non-empty record and takes persisted values for unedited ones', () => {
+    const base = { apiKey: '', serverUrl: '', tempUnit: 'C' };
+    const merge = mergePreservingEdits<{ settings: typeof base }>({ settings: base });
+    const result = merge(
+      { settings: { apiKey: 'k', serverUrl: '', tempUnit: 'F' } },
+      { settings: { apiKey: '', serverUrl: '/weather', tempUnit: 'C' } },
+    );
+    expect(result).toEqual({ settings: { apiKey: 'k', serverUrl: '/weather', tempUnit: 'F' } });
   });
 
   it('keeps the current state when the persisted value is not an object', () => {
