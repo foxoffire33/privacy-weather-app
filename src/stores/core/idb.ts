@@ -47,7 +47,7 @@ const OP_MESSAGE: Readonly<Record<'open' | 'read' | 'write', string>> = {
   write: 'IndexedDB write failed',
 };
 
-export const RETRYABLE_WRITE_CODES: ReadonlySet<StorageErrorCode> = new Set(['open-failed', 'blocked', 'transaction-aborted', 'write-failed']);
+export const RETRYABLE_WRITE_CODES: ReadonlySet<StorageErrorCode> = new Set(['open-failed', 'blocked', 'quota-exceeded', 'transaction-aborted', 'unavailable', 'write-failed']);
 
 export function toStorageError(operation: 'open' | 'read' | 'write', cause: unknown): StorageError {
   if (cause instanceof StorageError) { return cause; }
@@ -57,6 +57,7 @@ export function toStorageError(operation: 'open' | 'read' | 'write', cause: unkn
 
 const DB_NAME = 'wl-storesv2';
 const DB_VERSION = 2;
+const TX_TIMEOUT_MS = 10_000;
 const KV = 'kv';
 const RECORDS = 'records';
 const RESPONSES = 'responses';
@@ -76,6 +77,20 @@ function manage(db: IDBDatabase): IDBDatabase {
     dbPromise = null;
   });
   return db;
+}
+
+function noteClosedConnection(error: unknown): void {
+  if (error instanceof DOMException && error.name === 'InvalidStateError') { dbPromise = null; }
+}
+
+function abortIfActive(tx: IDBTransaction | undefined): void {
+  if (tx === undefined) { return; }
+  try {
+    tx.abort();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'InvalidStateError') { return; }
+    throw error;
+  }
 }
 
 function hasIndexedDb(): boolean {
@@ -132,6 +147,7 @@ async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest
     req.addEventListener('success', () => { resolve(req.result); });
     req.addEventListener('error', () => { reject(toStorageError('read', req.error)); });
   }).catch((error: unknown) => {
+    noteClosedConnection(error);
     throw toStorageError('read', error);
   });
 }
@@ -140,17 +156,27 @@ async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBOb
   return new Promise<void>((resolve, reject) => {
     let tx: IDBTransaction | undefined;
     let settled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const finish = (outcome: 'done' | 'failed', error?: unknown): void => {
+      if (settled) { return; }
+      settled = true;
+      if (timer !== null) { clearTimeout(timer); }
+      if (outcome === 'done') { resolve(); } else { reject(toStorageError('write', error ?? tx?.error)); }
+    };
     try {
       tx = db.transaction(store, 'readwrite', options);
-      const fail = (): void => { if (!settled) { settled = true; reject(toStorageError('write', tx?.error)); } };
-      tx.addEventListener('complete', () => { if (!settled) { settled = true; resolve(); } });
-      tx.addEventListener('error', fail);
-      tx.addEventListener('abort', fail);
+      tx.addEventListener('complete', () => { finish('done'); });
+      tx.addEventListener('error', () => { finish('failed'); });
+      tx.addEventListener('abort', () => { finish('failed'); });
       change(tx.objectStore(store));
+      timer = setTimeout(() => {
+        abortIfActive(tx);
+        finish('failed', new DOMException('write transaction timed out', 'AbortError'));
+      }, TX_TIMEOUT_MS);
     } catch (error) {
-      settled = true;
+      noteClosedConnection(error);
+      finish('failed', error);
       tx?.abort();
-      reject(toStorageError('write', error));
     }
   });
 }
@@ -221,6 +247,7 @@ export async function recordsRange(lower: string, upper: string): Promise<IdbEnt
     tx.addEventListener('error', fail);
     tx.addEventListener('abort', fail);
   }).catch((error: unknown) => {
+    noteClosedConnection(error);
     throw toStorageError('read', error);
   });
 }

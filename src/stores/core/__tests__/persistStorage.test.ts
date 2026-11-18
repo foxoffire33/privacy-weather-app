@@ -32,8 +32,9 @@ afterEach(() => {
 });
 
 describe('persistStorage write coordinator', () => {
-  it('keeps a quota-failed write queued, exposes the error, and recovers through the manual retry', async () => {
+  it('keeps a quota-failed write queued with bounded retries, then recovers through the manual retry', async () => {
     const { m, idb } = await fresh();
+    vi.spyOn(Math, 'random').mockReturnValue(1);
     vi.mocked(idb.idbSet).mockRejectedValue(QUOTA);
     const storage = m.idbStorage<{ n: number }>();
     storage.setItem('app', VALUE);
@@ -42,10 +43,25 @@ describe('persistStorage write coordinator', () => {
     expect(failed.pending).toBe(true);
     expect(failed.code).toBe('quota-exceeded');
     await vi.advanceTimersByTimeAsync(120_000);
-    expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(9);
     vi.mocked(idb.idbSet).mockResolvedValue();
     m.retryPersistedState('app');
     await m.flushPersistedState('app');
+    const healed = m.persistenceStatus('app');
+    expect(healed.pending).toBe(false);
+    expect(healed.lastError).toBeNull();
+    expect(vi.mocked(idb.idbSet)).toHaveBeenLastCalledWith('app', VALUE);
+  });
+
+  it('lands a quota-failed write on the next automatic retry once the quota clears', async () => {
+    const { m, idb } = await fresh();
+    vi.spyOn(Math, 'random').mockReturnValue(1);
+    vi.mocked(idb.idbSet).mockRejectedValue(QUOTA);
+    const storage = m.idbStorage<{ n: number }>();
+    storage.setItem('app', VALUE);
+    await vi.advanceTimersByTimeAsync(300);
+    vi.mocked(idb.idbSet).mockResolvedValue();
+    await vi.advanceTimersByTimeAsync(500);
     const healed = m.persistenceStatus('app');
     expect(healed.pending).toBe(false);
     expect(healed.lastError).toBeNull();
@@ -82,6 +98,19 @@ describe('persistStorage write coordinator', () => {
     await vi.advanceTimersByTimeAsync(250);
     await vi.advanceTimersByTimeAsync(500);
     expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(3);
+    const healed = m.persistenceStatus('app');
+    expect(healed.pending).toBe(false);
+    expect(healed.lastError).toBeNull();
+  });
+
+  it('retries a closed-connection failure and recovers without a manual retry', async () => {
+    const { m, idb } = await fresh();
+    vi.spyOn(Math, 'random').mockReturnValue(1);
+    vi.mocked(idb.idbSet).mockRejectedValueOnce(new DOMException('closed', 'InvalidStateError')).mockResolvedValue();
+    const storage = m.idbStorage<{ n: number }>();
+    storage.setItem('app', VALUE);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(2);
     const healed = m.persistenceStatus('app');
     expect(healed.pending).toBe(false);
     expect(healed.lastError).toBeNull();

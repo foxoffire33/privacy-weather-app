@@ -145,23 +145,23 @@ describe('record flush retry policy', () => {
     expect(healed.lastError).toBeNull();
   });
 
-  it('stops auto-retry on a permanent error and recovers on a manual flush', async () => {
+  it('exhausts the auto-retry budget on a quota failure and recovers on a manual flush', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);
     vi.useFakeTimers();
-    vi.mocked(idb.recordsWrite).mockImplementationOnce(() => {
+    vi.mocked(idb.recordsWrite).mockImplementation(() => {
       log.push('write failed');
       throw new DOMException('full', 'QuotaExceededError');
     });
     m.putRecord('p:x', 1);
     await expect(m.flushRecords()).rejects.toMatchObject({ name: 'StorageError', code: 'quota-exceeded' });
     await vi.advanceTimersByTimeAsync(120_000);
-    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(9);
     expect(m.recordSyncStatus().pending).toBe(1);
-    vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => { log.push('write'); await Promise.resolve(); });
+    vi.mocked(idb.recordsWrite).mockImplementation(async () => { log.push('write'); await Promise.resolve(); });
     await m.flushRecords();
     expect(m.recordSyncStatus().pending).toBe(0);
-    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(idb.recordsWrite)).toHaveBeenCalledTimes(10);
   });
 
   it('lets a newer write win after a failure and resets the retry budget', async () => {

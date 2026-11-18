@@ -37,7 +37,7 @@ describe('classify', () => {
   });
 
   it('maps storage errors to the matching code and operation', () => {
-    expect(classify(new StorageError('quota-exceeded', 'full'))).toMatchObject({ code: 'storage.quota-exceeded', messageKey: 'errors.quota', retryable: false, op: 'quota-exceeded' });
+    expect(classify(new StorageError('quota-exceeded', 'full'))).toMatchObject({ code: 'storage.quota-exceeded', messageKey: 'errors.quota', retryable: true, op: 'quota-exceeded' });
     expect(classify(new StorageError('write-failed', 'write'))).toMatchObject({ code: 'storage.write-failed', messageKey: 'errors.storageWrite', retryable: true, op: 'write-failed' });
     expect(classify(new StorageError('blocked', 'blocked'))).toMatchObject({ code: 'storage.unavailable', messageKey: 'errors.storageUnavailable', retryable: true });
   });

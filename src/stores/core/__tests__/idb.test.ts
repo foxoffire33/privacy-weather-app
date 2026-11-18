@@ -64,6 +64,57 @@ describe('idb error semantics', () => {
     await m.idbSet('k', { v: 1 });
     await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
   });
+
+  it('reopens a closed connection so the next write lands', async () => {
+    const { m, factory } = await fresh();
+    const opened: IDBDatabase[] = [];
+    const realOpen = factory.open.bind(factory);
+    vi.spyOn(factory, 'open').mockImplementation((name: string, version?: number) => {
+      const request = realOpen(name, version);
+      request.addEventListener('success', () => { opened.push(request.result); });
+      return request;
+    });
+    await m.idbSet('k', 1);
+    opened[0].close();
+    await expect(m.idbSet('k', 2)).rejects.toMatchObject({ name: 'StorageError', code: 'unavailable' });
+    await expect(m.idbSet('k', 3)).resolves.toBeUndefined();
+    await expect(m.idbGet('k')).resolves.toBe(3);
+  });
+
+  it('reopens a closed connection so the next read resolves', async () => {
+    const { m, factory } = await fresh();
+    const opened: IDBDatabase[] = [];
+    const realOpen = factory.open.bind(factory);
+    vi.spyOn(factory, 'open').mockImplementation((name: string, version?: number) => {
+      const request = realOpen(name, version);
+      request.addEventListener('success', () => { opened.push(request.result); });
+      return request;
+    });
+    await m.idbSet('k', 1);
+    opened[0].close();
+    await expect(m.idbGet('k')).rejects.toMatchObject({ name: 'StorageError', code: 'unavailable' });
+    await expect(m.idbGet('k')).resolves.toBe(1);
+  });
+
+  it('settles a hung write transaction with a typed timeout failure', async () => {
+    const { m } = await fresh();
+    await m.idbSet('k', 1);
+    let registrations = 0;
+    vi.spyOn(IDBTransaction.prototype, 'addEventListener').mockImplementation(() => { registrations += 1; });
+    vi.useFakeTimers();
+    try {
+      const pending = m.idbSet('k', 2);
+      const assertion = expect(pending).rejects.toMatchObject({ name: 'StorageError', code: 'transaction-aborted' });
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(registrations).toBeGreaterThan(0);
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    }
+    await expect(m.idbSet('k', 3)).resolves.toBeUndefined();
+    await expect(m.idbGet('k')).resolves.toBe(3);
+  });
 });
 
 describe('response cache pruning', () => {
