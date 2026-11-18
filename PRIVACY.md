@@ -5,8 +5,9 @@ Weather Log is built so that there is nothing to collect. This page lists everyt
 ## What stays on your device
 
 Everything you put into the app or that it downloads: the cities you follow, the weather log, edits you make,
-and your settings. It lives in the app's own storage (IndexedDB in the Android WebView) and is never uploaded.
-Uninstalling the app removes it; *Settings → Delete all history* clears the weather log. *Export* writes a backup file only
+and your settings. It lives in the app's own storage (IndexedDB in the Android WebView) and is not uploaded by the app.
+The Android app disables platform backup; platform-specific device-transfer behavior still needs to be verified on supported devices.
+Uninstalling the app normally removes its local storage; *Settings → Delete all history* clears the weather log. *Export* writes a backup file only
 where you choose to save or share it.
 
 ## What the app never does
