@@ -96,7 +96,7 @@ function abortIfActive(tx: IDBTransaction | undefined): boolean {
 }
 
 function hasIndexedDb(): boolean {
-  return typeof indexedDB !== 'undefined' && indexedDB !== null;
+  return typeof indexedDB !== 'undefined' && Boolean(indexedDB);
 }
 
 async function openDb(): Promise<IDBDatabase> {
