@@ -36,8 +36,8 @@ describe('validatePersistedSettings', () => {
     expect(issues).toEqual([]);
   });
 
-  it('accepts http and https server URLs and the empty default', () => {
-    for (const good of ['', 'http://192.168.1.10:8080', 'https://example.com/base', '/weather']) {
+  it('accepts secure or loopback server URLs and the empty default', () => {
+    for (const good of ['', 'http://localhost:8080', 'http://127.0.0.1:8080', 'https://example.com/base', '/weather']) {
       const { value, issues } = validatePersistedSettings({ server: good });
       expect(value.server).toBe(good);
       expect(issues).toEqual([]);
@@ -45,9 +45,9 @@ describe('validatePersistedSettings', () => {
   });
 
   it('rejects unsupported URL schemes and malformed URLs', () => {
-    for (const bad of ['ftp://files.example.com', 'mailto:user@example.com', 'not a url']) {
+    for (const bad of ['ftp://files.example.com', 'mailto:user@example.com', 'not a url', 'javascript:alert(1)', 'http://192.168.1.10:8080', 'http://example.com']) {
       const { value, issues } = validatePersistedSettings({ server: bad });
-      expect(value.server).toBe(bad);
+      expect(value.server).toBe(defaultSettings.server);
       expect(issues).toHaveLength(1);
     }
   });
