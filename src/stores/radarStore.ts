@@ -28,6 +28,7 @@ const isModelSet = (v: unknown): v is ModelSet => isRecord(v) && v.version === M
 const isRadarSet = (v: unknown): v is RadarSet => isRecord(v) && v.version === RADAR_SET_VERSION && typeof v.fetchedAt === 'number' && Array.isArray(v.frames);
 
 const runs = new Map<string, number>();
+export const activeRadarRunCount = (): number => runs.size;
 let nextRun = 0;
 const runOf = (cityId: string): number => {
   const existing = runs.get(cityId);

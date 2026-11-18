@@ -5,7 +5,7 @@ import type * as Rsync from '../recordSync';
 
 vi.mock('../idb', async (importOriginal) => {
   const actual = await importOriginal<typeof Idb>();
-  return { ...actual, recordsWrite: vi.fn(), recordsDeletePrefix: vi.fn() };
+  return { ...actual, recordsWrite: vi.fn(), recordsDeletePrefix: vi.fn(), recordsDeletePrefixes: vi.fn() };
 });
 
 interface Fresh {
@@ -18,6 +18,7 @@ async function fresh(log: string[]): Promise<Fresh> {
   const [m, idb] = await Promise.all([import('../recordSync'), import('../idb')]);
   vi.mocked(idb.recordsWrite).mockImplementation(async () => { log.push('write'); await Promise.resolve(); });
   vi.mocked(idb.recordsDeletePrefix).mockImplementation(async (prefix) => { log.push(`delete ${prefix}`); await Promise.resolve(); });
+  vi.mocked(idb.recordsDeletePrefixes).mockImplementation(async (prefixes) => { log.push(`delete-many ${prefixes.join(',')}`); await Promise.resolve(); });
   return { m, idb };
 }
 
@@ -36,6 +37,16 @@ afterEach(() => {
 });
 
 describe('clearRecords ordering contract', () => {
+  it('clears related history prefixes in one serialized operation', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    m.putRecord('history:old', 1);
+    await m.clearRecordsMany(['history:', 'log:', 'day:']);
+    await m.flushRecords();
+    expect(idb.recordsDeletePrefixes).toHaveBeenCalledWith(['history:', 'log:', 'day:']);
+    expect(idb.recordsWrite).not.toHaveBeenCalled();
+  });
   it('drops a pending put submitted before the clear', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);

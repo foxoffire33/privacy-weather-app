@@ -247,6 +247,13 @@ export async function recordsDeletePrefix(prefix: string): Promise<void> {
   await write(RECORDS, (s) => { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); });
 }
 
+export async function recordsDeletePrefixes(prefixes: readonly string[]): Promise<void> {
+  if (prefixes.length === 0) { return; }
+  await write(RECORDS, (s) => {
+    for (const prefix of prefixes) { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); }
+  });
+}
+
 export async function recordsRange(lower: string, upper: string): Promise<IdbEntry[]> {
   const db = await database();
   return new Promise<IdbEntry[]>((resolve, reject) => {

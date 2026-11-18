@@ -68,9 +68,12 @@ export const useDayStore = create<DayState>()((set, get) => ({
     }
   },
   clear: () => {
+    get().clearMemory();
+    void clearRecords(DAY_PREFIX).catch(noteStorageFault);
+  },
+  clearMemory: () => {
     generation += 1;
     restore(() => { set({ days: {}, queries: {} }); });
-    void clearRecords(DAY_PREFIX).catch(noteStorageFault);
   },
 }));
 

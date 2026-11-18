@@ -51,7 +51,7 @@ export function SunSection({ entry }: EntryProps): ReactElement {
           <Text fz={20} fw={800}>{hhmm(data.daily.sunrise[d])}</Text>
           <Text fz={20} fw={800}>{hhmm(data.daily.sunset[d])}</Text>
         </Group>
-        <Progress size={6} value={(sunPos ?? (isDay ? 1 : 0)) * 100} color="signal.4" />
+        <Progress aria-hidden="true" size={6} value={(sunPos ?? (isDay ? 1 : 0)) * 100} color="signal.4" />
         <Group justify="space-between" mt={4}>
           <Text fz={12} c="dimmed">{t('city.sun.sunrise')}</Text>
           <Text fz={12} c="dimmed">{sunPos === null ? t('city.sun.sunDown') : t('city.sun.passed', { p: Math.round(sunPos * 100) })}</Text>

@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 
 export function Bar({ pct, level, color }: BarProps): ReactElement {
   return (
-    <Progress value={Math.max(0, Math.min(100, pct))} color={color ?? levelColor(level)} />
+    <Progress aria-hidden="true" value={Math.max(0, Math.min(100, pct))} color={color ?? levelColor(level)} />
   );
 }
 

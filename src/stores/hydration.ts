@@ -231,6 +231,13 @@ export function hydrateAll(): Pending {
   return booting;
 }
 
+export function retryHydration(): Pending {
+  if (useBootStore.getState().phase !== 'degraded') { return READY; }
+  booting = null;
+  useBootStore.setState({ phase: 'booting' });
+  return hydrateAll();
+}
+
 export function whenHistoryReady(): Pending {
   if (historyDone) { return READY; }
   history ??= (async () => {

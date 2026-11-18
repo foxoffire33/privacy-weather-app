@@ -28,6 +28,7 @@ export interface DayState {
   queries: QueryMap;
   load: (city: City, date: string) => Promise<DayData | null>;
   clear: () => void;
+  clearMemory: () => void;
 }
 
 export interface RadarState {

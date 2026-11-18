@@ -8,12 +8,12 @@ test('settings screen has no detectable WCAG A/AA violations', async ({ page }) 
   await page.goto('/#/settings');
   await expect(page.getByText('Language').first()).toBeVisible();
   const report = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
-  expect(report.violations).toEqual([]);
+  expect(report.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map(({ target }) => target) }))).toEqual([]);
 });
 
 test('followed city home has no detectable WCAG A/AA violations', async ({ page }) => {
   await installApi(page);
   await followParis(page);
   const report = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
-  expect(report.violations).toEqual([]);
+  expect(report.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map(({ target }) => target) }))).toEqual([]);
 });

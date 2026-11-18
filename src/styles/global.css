@@ -38,6 +38,7 @@ body { font-variant-numeric: tabular-nums; }
 .page { touch-action: pan-y; width: 100%; height: 100%; flex: none; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
 
 .hero, .accent-field { background: var(--mantine-color-signal-5); color: #fff; }
+.hero { background: var(--mantine-color-signal-6); }
 .hero { padding: 72px 20px 56px; }
 [data-accent=off] .hero, [data-accent=off] .accent-field { background: #000; }
 .hero-temp { font-size: 168px; font-weight: 800; line-height: .85; letter-spacing: -.06em; margin-top: 8px; }

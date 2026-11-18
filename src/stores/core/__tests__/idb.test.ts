@@ -21,6 +21,30 @@ afterEach(() => {
 });
 
 describe('idb error semantics', () => {
+  it('atomically clears several user-data record prefixes while retaining unrelated records', async () => {
+    const { m } = await fresh();
+    await m.recordsWrite([['history:a', 1], ['log:a', 2], ['city:a', 3]], []);
+    await m.recordsDeletePrefixes(['history:', 'log:']);
+    await expect(m.recordGet('history:a')).resolves.toBeUndefined();
+    await expect(m.recordGet('log:a')).resolves.toBeUndefined();
+    await expect(m.recordGet('city:a')).resolves.toBe(3);
+  });
+
+  it('rolls back every prefix when a multi-prefix clear aborts', async () => {
+    const { m } = await fresh();
+    await m.recordsWrite([['history:a', 1], ['log:a', 2]], []);
+    const original = IDBKeyRange.bound.bind(IDBKeyRange);
+    let count = 0;
+    vi.spyOn(IDBKeyRange, 'bound').mockImplementation((lower, upper) => {
+      count += 1;
+      if (count === 2) { throw new DOMException('abort clear', 'AbortError'); }
+      return original(lower, upper);
+    });
+    await expect(m.recordsDeletePrefixes(['history:', 'log:'])).rejects.toMatchObject({ name: 'StorageError' });
+    vi.restoreAllMocks();
+    await expect(m.recordGet('history:a')).resolves.toBe(1);
+    await expect(m.recordGet('log:a')).resolves.toBe(2);
+  });
   it('resolves undefined only for a genuinely missing key', async () => {
     const { m } = await fresh();
     await expect(m.idbGet('absent')).resolves.toBeUndefined();

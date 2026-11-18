@@ -5,8 +5,8 @@ import { isOffline } from './core/config';
 import { writeImport } from './core/idb';
 import { once, READY } from './core/inflight';
 import { flushPersistedState, withoutPersistWrites } from './core/persistStorage';
-import { flushRecords, restore } from './core/recordSync';
-import { useDayStore } from './dayStore';
+import { clearRecordsMany, flushRecords, restore } from './core/recordSync';
+import { DAY_PREFIX, useDayStore } from './dayStore';
 import { ENTITY_PREFIX, entityCache, foldEntity, useEntityCache } from './entities/cache';
 import { dayKey } from './entities/schema';
 import { radarKey } from './factories/radar';
@@ -226,15 +226,24 @@ export function storedCounts(): StoredCounts {
 
 export async function clearHistory(): Promise<void> {
   await whenHistoryReady();
-  useLogStore.getState().clear();
-  useAlmanacStore.getState().clear();
-  useDayStore.getState().clear();
+  const before = useEntityCache.getState().tables.dayRecord;
   try {
-    await flushRecords();
+    await clearRecordsMany([`${ENTITY_PREFIX}dayRecord:`, LOG_PREFIX, DAY_PREFIX]);
   } catch (error) {
     noteStorageFault(error);
     throw error;
   }
+  const current = useEntityCache.getState().tables.dayRecord;
+  const retained = Object.fromEntries(Object.entries(current).filter(([id, record]) => record !== before[id]));
+  restore(() => {
+    useEntityCache.setState((state) => ({ tables: { ...state.tables, dayRecord: retained } }));
+    useLogStore.setState((state) => ({
+      dates: Object.fromEntries(Object.entries(state.dates).map(([cityId, dates]) => [cityId, (dates ?? []).filter((date) => retained[dayKey(cityId, date)] !== undefined)])),
+      queries: {},
+    }));
+    useDayStore.getState().clearMemory();
+  });
+  useAlmanacStore.getState().clear();
 }
 
 export { followedCities } from './cityStore';

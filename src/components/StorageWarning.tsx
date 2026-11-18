@@ -7,10 +7,12 @@ import { clearResponseCache } from '../stores/core/persistence';
 import { persistenceStatus } from '../stores/core/persistStorage';
 import { recordSyncStatus, retryPendingRecordClears } from '../stores/core/recordSync';
 import { useDiagnosticsStore } from '../stores/diagnosticsStore';
+import { retryHydration } from '../stores/hydration';
 
 import type { ReactElement } from 'react';
 
 function retrySaves(): void {
+  void Promise.resolve(retryHydration()).catch(noteStorageFault);
   void retryPersistedState().catch(() => null);
   void retryPendingRecordClears().then(async () => { await flushRecords(); }).catch(() => null);
 }
