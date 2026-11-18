@@ -190,6 +190,62 @@ where `error` is a plain, cloneable payload (typed kind + the fields `classify` 
 `api/remote.ts` rehydrates it into the real class before the store's `catch` runs. Untyped
 throws keep their `name` and `message` (offline and abort stay classifiable).
 
+## Guarantees and recovery
+
+**What is stored, and what is re-fetchable.** Two classes of data live on the device.
+*User-owned* — followed cities, log dates, logged days (the app's own record, `source: 'log'`),
+settings — is irreplaceable; every write to it runs in a strict-durability IndexedDB transaction
+(rule 15). *Reconstructable* — forecasts, filled days, normals, the response cache, radar frames
+and land maps — is re-fetchable: losing it degrades to a network fetch, never to a loss of the
+user's data.
+
+**No failed critical write is silently discarded.** Writes are queued, debounced, serialized and —
+on failure — kept, never dropped (rules 11, 13, 14). Transient storage failures (open failed,
+blocked upgrade, aborted transaction, write failure) retry with bounded exponential backoff and
+jitter — 8 attempts, 250 ms base, 30 s cap — and the budget resets on every new change. Permanent
+failures (quota, unavailable, corrupt data) stop the auto-retry at once, keep the value queued,
+and publish a persistent error: the app-wide "Not saved" banner (rule 18) and a diagnostics entry
+(rule 19). A write resolves only after its transaction completes, and the UI never claims a save
+that has not committed.
+
+**Recovery paths.** Every path is tested; the ones that need a real disk are additionally
+device-verified in [`MANUAL-TEST-CHECKLIST.md`](../../MANUAL-TEST-CHECKLIST.md):
+
+- **Automatic retry.** A transient failure clears itself: while the budget runs, the backoff
+  re-flushes the queued value with no user action (device-verified: a full-disk storm that frees
+  within the ~61 s window recovers on its own).
+- **Manual retry.** The banner's "Retry saving" re-flushes the queued settings and record batches
+  (device-verified: a storm that outlives the budget recovers in full — every pending write lands,
+  and the next launch starts clean with the banner cleared).
+- **Quota.** When the fault is a full disk, the banner also offers "Clear cached data": it prunes
+  the reconstructable response cache to zero and never touches user-owned data (rule 15), after
+  which the retry paths above apply.
+- **Export and restore.** The backup file carries the followed cities, every logged day, and the
+  importable settings — never the API key. Import validates the complete file before any live
+  mutation: size, version, real calendar dates, coordinates, record limits, duplicate ids — and
+  reports every invalid record as skipped instead of dropping it silently. The commit is
+  all-or-nothing: a failure anywhere restores the pre-import state exactly (city list, orphan
+  entities, overwritten days, log dates, settings). The round trip is tested end to end and
+  device-verified (export → `pm clear` → import → cities survive relaunch).
+- **Re-fetch.** Every reconstructable record rebuilds itself: a failed cache read degrades to
+  "not cached" and triggers a network fetch (rule 12), a failed optional radar layer re-fetches on
+  the 5-minute refresh, and a factory-version mismatch rebuilds stored objects in the background
+  (rule 2).
+- **Boot.** A failed storage read at boot degrades instead of hanging: the app stays usable in
+  memory, the fault is reported through the banner and the diagnostics, and a key whose read
+  failed cannot be written until a read succeeds — defaults can never be persisted over the
+  user's stored state (rules 11, 12).
+
+**Honest limits.** Local storage can still be lost, and the settings screen says so. No app can
+promise against the user clearing site or app data, a device loss, or an OS-level wipe. A hard
+kill (crash, power loss, OS process kill) can lose the in-memory edits of the last ~250 ms
+debounce window that never reached a flush — the `pagehide` / `visibilitychange` flush is
+best-effort and is never the only guarantee. A disk that stays full past the retry budget keeps
+the app fully functional in memory, with the queued writes waiting on the manual retry or a new
+change. And some WebViews cache the `navigator.storage.estimate()` result, so the low-headroom
+warning can lag a real disk condition until the next launch. Export regularly, especially before
+device changes or OS upgrades.
+
 ## What this layer deliberately does not have
 
 - **No realtime.** Open-Meteo does not push; data arrives when the app asks.
@@ -212,3 +268,33 @@ factory version changes) and the last radar frames (`radar:…`, refreshed after
 `api/radar.ts` reads the frame list from the radar server, draws each frame's tiles onto an `OffscreenCanvas`
 in the worker and turns them into a 46 × 40 grid of levels (`factories/radar.ts`); the map comes from vector tiles (an
 OpenMapTiles TileJSON such as OpenFreeMap, or a `.pmtiles` file), with land and water rasterised the same way. Past frames are never downloaded twice.
+
+## Release scorecard (report §17)
+
+The release gate from the error-handling & data-integrity report: a dimension counts on
+**evidence, not implementation**, and data integrity as a whole is not called 10/10 until the P0
+items are fixed, every data-integrity invariant is automated, and real-browser/device tests cover
+storage failure and concurrency. A green TypeScript build or a happy-path UI test is not
+sufficient evidence.
+
+| Dimension | Acceptance standard | Evidence |
+| --- | --- | --- |
+| Error visibility | Every critical failure has a stable code, safe message and observable state | `core/appError.ts` (rule 18): the 13-code taxonomy, `AppError` with a safe i18n `messageKey` and `classify` at every failure boundary; screens render only the translated key; boot faults land in `bootStore.storageError` and the banner. `core/__tests__/appError.test.ts`. |
+| Persistence | No failed critical write is silently discarded | Failed writes stay queued with bounded backoff (rules 11, 14); a failed flush reports itself into the banner and the diagnostics, so no caller can drop the fault (rule 19); newest-wins supersession. `persistStorage.test.ts`, `recordSync.test.ts`, `diagnosticsWiring.test.ts`; device-verified on a 100 %-full disk (checklist S1). |
+| Ordering | Concurrent writes/deletes have documented, tested semantics | The per-key serialized chain orders `clearRecords` with the record puts (rules 5, 13); a newer write always wins; a requeue drops the puts a covering clear landed. The five put/clear scheduling tests plus the change-bookkeeping suite in `recordSync.test.ts`, on real fake-indexeddb transactions. |
+| Atomicity | Multi-record operations either commit fully or fail without partial state | One IDB transaction per write batch — a write resolves only on `complete`. Backup import: the whole file validated before any live mutation, then a synchronous commit with a snapshot rollback that restores the pre-import state exactly. `backupRoundTrip.test.ts` and the import-rollback tests, including a failure injected after every data mutation. |
+| Recovery | Retry, export/restore and user-facing recovery paths are tested | Automatic in-budget retry, "Retry saving", "Clear cached data", export→import round trip, re-fetch and boot degradation — unit-tested; both real-disk recovery paths (in-budget auto-retry, manual retry after budget exhaustion) plus the wipe+import round trip device-verified (checklist S1, S3). |
+| Validation | All external and persisted data is runtime-validated | Zod on every Open-Meteo response (`api/schemas.ts`); Zod on persisted settings with per-field issues and values kept out of diagnostics; backup version + field validation (size, calendar dates, coordinates, record limits, duplicates) with skipped-record reporting; `FACTORY_VERSION` rebuild on shape change (rule 2). |
+| Cancellation | No unwanted retry after abort; listeners/timers are cleaned up | Scoped `CombinedSignal` disposed in `finally` around the complete request, guarded `sleep`, user cancellation never retried, and inflight dedupe retaining nothing once settled (rule 16). E2E: the superseded search aborts on the wire (`ERR_ABORTED`). |
+| Resilience | Retries are bounded, classified and respect server guidance | Bounded jittered backoff with caps on both the API (200 ms base, 2 s cap) and the storage (250 ms base, 30 s cap, 8 attempts) side; `Retry-After` as a floor on the delay; request timeout distinct from cancellation; permanent vs transient classified at the source. E2E: 429 + `retry-after` honored; persistent 429 → rate-limit message. |
+| Testing | Failure-path, concurrency and invariant tests run in CI | 147 unit tests (failure paths, put/clear ordering, supersession, rollback invariants, retry budgets) + 9 headless-Chromium e2e specs on the production build (real IndexedDB, no-IDB banner, 429, superseded abort, radar partial, backup limits) + the signed-off manual checklist for the rows only a real disk or session can cover. Lint + unit + e2e + build run in CI on every pull request and release. |
+| Operations | Storage/quota/hydration failures are diagnosable without leaking private data | Local, session-scoped, personal-data-free diagnostics with stable codes, numeric metrics and a storage line (rule 19); every persistence fault lands in both the banner and a diagnostics entry; the copy report adds only the numeric storage estimate and the user agent. `diagnosticsWiring.test.ts` asserts the fault-visibility invariant. |
+
+**Verdict (2026-11-18).** The gate's three conditions hold: the P0 items are fixed (milestone 1
+exit gate passed; the one real-disk recoverability defect the checklist exposed was fixed before
+sign-off); every invariant above is automated in the 147 + 9 suites, which run in CI on every
+pull request and release; and the storage-failure and concurrency rows that only a real disk or a
+real session can cover are signed off on an Android 15 (API 35) emulator with Google WebView
+124.0.6367.219 in [`MANUAL-TEST-CHECKLIST.md`](../../MANUAL-TEST-CHECKLIST.md) (2026-11-17/18 —
+S5 partial and S2/S8 not run by design, with the reasons recorded there). On this scorecard, data
+integrity is 10/10.

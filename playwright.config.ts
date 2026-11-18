@@ -15,7 +15,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'yarn build && yarn preview --port 4173 --strictPort',
+    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',
     reuseExistingServer: process.env.CI !== 'true',
     timeout: 180_000,
