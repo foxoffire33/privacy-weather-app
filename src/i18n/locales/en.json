@@ -599,6 +599,7 @@
     "skipUnknownCity": "history for an unknown city",
     "skipNotRecord": "not a record",
     "skipDayDate": "not a valid calendar date",
+    "skipInvalidDay": "invalid weather measurements or snapshot count",
     "skipLimit": "record limit exceeded",
     "skipSetting": "invalid setting value",
     "skippedCount": "{count} backup records were skipped:"
