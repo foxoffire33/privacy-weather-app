@@ -99,14 +99,47 @@ jobs:
       - run: npm run cap:sync
         env:
           VITE_BUILD_SHA: ${{ github.sha }}
+      - name: Build debug APK for release
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Calculate debug APK SHA-256
+        working-directory: android/app/build/outputs/apk/debug
+        run: sha256sum app-debug.apk > app-debug.apk.sha256
+
+      - name: Attach debug APK and checksum to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/app-debug.apk.sha256 --clobber
+
+      - name: Check signing availability
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release signing unavailable; publishing debug APK only."
+          fi
+
       - name: Decode release keystore
+        if: steps.signing.outputs.enabled == 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
         run: |
-          test -n "$KEYSTORE_BASE64" || { echo 'Android signing secret missing' >&2; exit 1; }
+          if [ -z "$KEYSTORE_BASE64" ]; then echo 'No signing keystore configured; debug APK was published.'; exit 0; fi
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
           echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
       - name: Build signed release APK
+        if: steps.signing.outputs.enabled == 'true'
         working-directory: android
         env:
           ANDROID_SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
@@ -116,12 +149,15 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease
       - name: Calculate SHA-256
+        if: steps.signing.outputs.enabled == 'true'
         working-directory: android/app/build/outputs/apk/release
         run: sha256sum app-release.apk > app-release.apk.sha256
       - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        if: steps.signing.outputs.enabled == 'true'
         with:
           subject-path: android/app/build/outputs/apk/release/app-release.apk
       - name: Attach signed APK and checksum
+        if: steps.signing.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
