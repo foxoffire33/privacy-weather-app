@@ -90,6 +90,7 @@ export interface DateSpan {
 }
 
 export interface BootState {
+  phase: 'booting' | 'ready' | 'degraded' | 'failed';
   hydrated: boolean;
   historyReady: boolean;
   storageBlocked: boolean;
