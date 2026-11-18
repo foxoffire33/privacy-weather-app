@@ -28,10 +28,17 @@ const isModelSet = (v: unknown): v is ModelSet => isRecord(v) && v.version === M
 const isRadarSet = (v: unknown): v is RadarSet => isRecord(v) && v.version === RADAR_SET_VERSION && typeof v.fetchedAt === 'number' && Array.isArray(v.frames);
 
 const runs = new Map<string, number>();
-const runOf = (cityId: string): number => runs.get(cityId) ?? 0;
-const bump = (cityId: string): void => { runs.set(cityId, runOf(cityId) + 1); };
+let nextRun = 0;
+const runOf = (cityId: string): number => {
+  const existing = runs.get(cityId);
+  if (existing !== undefined) { return existing; }
+  const token = ++nextRun;
+  runs.set(cityId, token);
+  return token;
+};
+const dropRun = (cityId: string): void => { runs.delete(cityId); };
 let generation = 0;
-const current = (cityId: string, run: number, gen: number): boolean => runOf(cityId) === run && generation === gen;
+const current = (cityId: string, run: number, gen: number): boolean => runs.get(cityId) === run && generation === gen;
 
 const ofCity = <V>(map: Partial<Record<string, V>>, cityId: string): Partial<Record<string, V>> =>
   Object.fromEntries(Object.entries(map).filter(([key]) => !key.startsWith(`${cityId}:`)));
@@ -144,11 +151,12 @@ export const useRadarStore = create<RadarState>()((set, get) => {
       set((s) => ({ queries: without(s.queries, [key]) }));
     },
     drop: (cityId) => {
-      bump(cityId);
+      dropRun(cityId);
       set((s) => ({ land: ofCity(s.land, cityId), radar: ofCity(s.radar, cityId), model: ofCity(s.model, cityId), queries: without(s.queries, Object.keys(s.queries).filter((key) => key.startsWith(`${cityId}:`))) }));
     },
     clear: () => {
       generation += 1;
+      runs.clear();
       restore(() => { set({ land: {}, radar: {}, model: {}, queries: {} }); });
       void clearRecords(LAND_PREFIX).catch(noteStorageFault);
       void clearRecords(RADAR_PREFIX).catch(noteStorageFault);

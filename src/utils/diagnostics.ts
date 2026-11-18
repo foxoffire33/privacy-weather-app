@@ -1,3 +1,5 @@
+import { version } from '../../package.json';
+import { useBootStore } from '../stores/bootStore';
 import { onMeasure } from '../stores/core/marks';
 import { useDiagnosticsStore } from '../stores/diagnosticsStore';
 
@@ -65,6 +67,8 @@ export function startDiagnostics(): void {
 const mb = (bytes: number): number => Math.round((bytes / 1e6) * 10) / 10;
 
 export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string, metrics: DiagnosticMetrics, storage: StorageEstimate | null): string {
+  const phase = useBootStore.getState().phase;
+  const lastWrite = useDiagnosticsStore.getState().lastDurableWriteAt;
   const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), safeRoute(e.route)].join('\t'));
   const metricLines = [
     `metrics\tloads\t${String(metrics.loads)}`,
@@ -78,5 +82,5 @@ export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent
   const storageLine = storage === null
     ? 'storage\tunknown\tunknown\tno'
     : `storage\t${String(mb(storage.usage))}\t${String(mb(storage.quota))}\t${storage.low ? 'yes' : 'no'}`;
-  return [`Weather Log diagnostics · ${userAgent}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines, ...metricLines, storageLine].join('\n');
+  return [`Weather Log diagnostics · ${userAgent}`, `build\t${version}\t${String(import.meta.env.VITE_BUILD_SHA ?? 'unknown')}`, `boot\t${phase}`, `lastDurableWrite\t${lastWrite === null ? 'none' : new Date(lastWrite).toISOString()}`, 'kind\tname\tdetail\tat ms\tduration ms\tblocking ms\troute', ...lines, ...metricLines, storageLine].join('\n');
 }

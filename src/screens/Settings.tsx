@@ -1,6 +1,6 @@
 import { Box, Button, ColorPicker, ColorSwatch, FileButton, Group, SegmentedControl, Select, Stack, Switch, Text, TextInput, Title, UnstyledButton } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { version } from '../../package.json';
@@ -37,14 +37,12 @@ export function Settings(): ReactElement {
   const counts = storedCounts();
   const s = { settings };
   const resetFile = useRef<() => void>(null);
+  const [deleteError, setDeleteError] = useState(false);
   const { pending, importing, exportParts, parts, result, pick, setPart, confirm, cancel, exportFile } = useBackupStore(useShallow((st) => ({
     pending: st.pending, importing: st.importing, exportParts: st.exportParts, parts: st.parts, result: st.result,
     pick: st.pick, setPart: st.setPart, confirm: st.confirm, cancel: st.cancel, exportFile: st.exportFile,
   })));
-  const onFile = async (file: File | null) => {
-    await pick(file);
-    resetFile.current?.();
-  };
+  const onFile = async (file: File | null) => { await pick(file); resetFile.current?.(); };
   const importMsg = backupResultMessage(result);
   return (
     <Box className="screen">
@@ -61,9 +59,7 @@ export function Settings(): ReactElement {
               ...LANGUAGES.map((l) => ({ value: l.code, label: l.name })),
             ]} />
         </Box>
-
         <SettingsDataSource />
-
         <Box className="kicker">{t('settings.appearance')}</Box>
         <Box py={12} className="row">
           <Text fz={14} fw={600}>{t('settings.accent')}</Text>
@@ -106,7 +102,6 @@ export function Settings(): ReactElement {
           <SegmentedControl value={s.settings.windUnit} onChange={(v) => { set({ windUnit: v }); }}
             data={[{ label: 'km/h', value: 'kmh' }, { label: 'm/s', value: 'ms' }, { label: 'mph', value: 'mph' }]} />
         </Group>
-
         <Box className="kicker">{t('settings.history')}</Box>
         <Box py={12} className="row">
           <Switch label={t('offline.label')} description={t('offline.note')}
@@ -175,11 +170,11 @@ export function Settings(): ReactElement {
             groupProps: { grow: true, wrap: 'nowrap', mt: 16 },
             children: t('settings.confirmDeleteAll'),
             labels: { confirm: t('common.delete'), cancel: t('common.cancel') },
-            onConfirm: clearHistory,
+            onConfirm: () => { setDeleteError(false); void clearHistory().catch(() => { setDeleteError(true); }); },
           })}>
           {t('settings.deleteAll')}
         </Button>
-
+        {deleteError && <Text role="alert" c="signal.3" fz={12}>{t('common.storageFault')} {t('common.storagePending')}</Text>}
         <SettingsAbout version={version} />
       </Stack>
     </Box>

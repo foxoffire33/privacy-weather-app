@@ -1,4 +1,5 @@
 import { useAlmanacStore } from './almanacStore';
+import { noteStorageFault } from './bootStore';
 import { followedCities, useCityStore } from './cityStore';
 import { isOffline } from './core/config';
 import { writeImport } from './core/idb';
@@ -223,10 +224,17 @@ export function storedCounts(): StoredCounts {
   };
 }
 
-export function clearHistory(): void {
+export async function clearHistory(): Promise<void> {
+  await whenHistoryReady();
   useLogStore.getState().clear();
   useAlmanacStore.getState().clear();
   useDayStore.getState().clear();
+  try {
+    await flushRecords();
+  } catch (error) {
+    noteStorageFault(error);
+    throw error;
+  }
 }
 
 export { followedCities } from './cityStore';

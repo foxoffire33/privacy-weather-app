@@ -121,6 +121,7 @@ export interface DiagnosticMetrics {
 export interface DiagnosticsState {
   entries: DiagnosticEntry[];
   metrics: DiagnosticMetrics;
+  lastDurableWriteAt: number | null;
   add: (entry: DiagnosticEntry) => void;
   bump: (key: keyof DiagnosticMetrics) => void;
   addCacheCounts: (loads: number, cacheHits: number) => void;
