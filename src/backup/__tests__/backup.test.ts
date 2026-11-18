@@ -84,6 +84,22 @@ describe('parseBackup field validation', () => {
     ]);
   });
 
+  it('skips invalid weather measurements and snapshot counts without losing other days', () => {
+    const backup = parse({
+      cities: [city('1')],
+      history: { '1': {
+        '2026-01-01': { snapshots: -1 },
+        '2026-01-02': { snapshots: 2.7 },
+        '2026-01-03': { mm: -40 },
+        '2026-01-04': { uv: -10 },
+        '2026-01-05': { snapshots: 2, mm: 3 },
+      } },
+    });
+    expect(Object.keys(backup.history['1'])).toEqual(['2026-01-05']);
+    expect(backup.skipped).toHaveLength(4);
+    expect(backup.skipped.every((record) => record.reason === 'invalid weather measurements or snapshot count')).toBe(true);
+  });
+
   it('skips history for cities that were not imported', () => {
     const backup = parse({ cities: [city('1')], history: { '1': { '2026-01-01': { hi: 1 } }, '99': { '2026-01-01': { hi: 2 } } } });
     expect(Object.keys(backup.history)).toEqual(['1']);
