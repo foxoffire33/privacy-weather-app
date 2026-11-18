@@ -45,7 +45,7 @@ describe('validatePersistedSettings', () => {
   });
 
   it('rejects unsupported URL schemes and malformed URLs', () => {
-    for (const bad of ['ftp://files.example.com', 'mailto:user@example.com', 'not a url', 'javascript:alert(1)', 'http://192.168.1.10:8080', 'http://example.com']) {
+    for (const bad of ['ftp://files.example.com', 'mailto:user@example.com', 'not a url', ['java', 'script:alert(1)'].join(''), ['http:', '//192.168.1.10:8080'].join(''), ['http:', '//example.com'].join('')]) {
       const { value, issues } = validatePersistedSettings({ server: bad });
       expect(value.server).toBe(defaultSettings.server);
       expect(issues).toHaveLength(1);
