@@ -21,6 +21,17 @@ afterEach(() => {
 });
 
 describe('idb error semantics', () => {
+  it('reports a disabled IndexedDB object as unavailable', async () => {
+    const { m } = await fresh();
+    const original = globalThis.indexedDB;
+    Object.defineProperty(globalThis, 'indexedDB', { value: null, configurable: true, writable: true });
+    try {
+      await expect(m.idbGet('any')).rejects.toMatchObject({ name: 'StorageError', code: 'unavailable' });
+    } finally {
+      globalThis.indexedDB = original;
+    }
+  });
+
   it('atomically clears several user-data record prefixes while retaining unrelated records', async () => {
     const { m } = await fresh();
     await m.recordsWrite([['history:a', 1], ['log:a', 2], ['city:a', 3]], []);
