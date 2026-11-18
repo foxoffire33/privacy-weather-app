@@ -14,7 +14,7 @@ const httpUrl = z.url().refine((value) => {
   } catch {
     return false;
   }
-  return url.protocol === 'http:' || url.protocol === 'https:';
+  return url.protocol === 'https:' || (url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname));
 }, 'unsupported URL scheme');
 
 const sameOriginUrl = z.string().regex(/^\/(?!\/)[a-zA-Z0-9/_~.%-]*$/, 'invalid same-origin path');
@@ -76,7 +76,7 @@ export function validatePersistedSettings(raw: unknown): { value: Settings; issu
   return {
     value: {
       apiKey: keep('apiKey', fieldSchemas.apiKey, raw.apiKey, defaultSettings.apiKey),
-      server: keep('server', fieldSchemas.server, raw.server, typeof raw.server === 'string' && raw.server !== '' ? raw.server : defaultSettings.server),
+      server: keep('server', fieldSchemas.server, raw.server, defaultSettings.server),
       radarServer: keep('radarServer', fieldSchemas.radarServer, raw.radarServer, defaultSettings.radarServer),
       mapServer: keep('mapServer', fieldSchemas.mapServer, raw.mapServer, defaultSettings.mapServer),
       tempUnit: keep('tempUnit', fieldSchemas.tempUnit, raw.tempUnit, defaultSettings.tempUnit),
