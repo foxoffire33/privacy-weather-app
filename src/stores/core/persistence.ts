@@ -1,6 +1,12 @@
 import { responsesPrune } from './idb';
 
 let asked = false;
+const cacheClearListeners = new Set<() => void>();
+
+export function onCacheCleared(listener: () => void): () => void {
+  cacheClearListeners.add(listener);
+  return () => { cacheClearListeners.delete(listener); };
+}
 
 const LOW_HEADROOM_BYTES = 10_485_760;
 
@@ -29,5 +35,7 @@ export async function estimateStorage(): Promise<StorageEstimate | null> {
 }
 
 export async function clearResponseCache(): Promise<number> {
-  return responsesPrune(Date.now(), 0);
+  const removed = await responsesPrune(Date.now(), 0);
+  for (const listener of cacheClearListeners) { listener(); }
+  return removed;
 }

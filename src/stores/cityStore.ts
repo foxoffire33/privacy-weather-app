@@ -10,6 +10,11 @@ import type { City } from './types';
 
 const NAME = 'wl2-cities';
 
+const snapshot = (): unknown => {
+  const { cityIds, onboarded } = useCityStore.getState();
+  return { state: { cityIds, onboarded }, version: 1 };
+};
+
 export const useCityStore = create<CityState>()(
   persist(
     (set, get) => ({
@@ -54,14 +59,14 @@ export const useCityStore = create<CityState>()(
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
-      onRehydrateStorage: trackRehydration(NAME),
+      onRehydrateStorage: trackRehydration(NAME, snapshot),
       partialize: (s) => ({ cityIds: s.cityIds, onboarded: s.onboarded }),
       merge: mergePreservingEdits<CityState>({ cityIds: [], onboarded: false }),
     },
   ),
 );
 
-registerRehydration(NAME, () => { useCityStore.persist.rehydrate(); });
+registerRehydration(NAME, async () => { await useCityStore.persist.rehydrate(); });
 
 export function followedCities(): City[] {
   return entityCache.getMany('city', useCityStore.getState().cityIds);

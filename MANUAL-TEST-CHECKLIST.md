@@ -24,14 +24,14 @@ Shrink the storage the browser can use: on desktop, fill the profile's disk (or 
 
 1. With headroom low, follow a city and record several days of history.
 2. **Expected:** the app never claims a save that did not commit — the "Not saved: local storage is failing." banner (with retry + cache-clear) appears; the Diagnostics screen shows the `quota-exceeded` failure entry and a nonzero record-flush-failure metric; the pending value stays queued (proven by step 4).
-3. Free space (delete dummy files / clear other data) and relaunch.
-4. **Expected:** the queued write lands on the next launch (the data you added is there), the banner clears, and the diagnostics failure entry for the session is gone.
+3. Free space (delete dummy files / clear other data), select **Retry saving**, and verify that the change has committed before closing the app.
+4. Relaunch the app. **Expected:** the recovered city/day is present. Pending in-memory writes do not survive a terminated process, so a relaunch before successful retry is not a recovery method.
 
 ### 2. Blocked database upgrade
 
-1. Install an older app build (pre-current-schema) on the device, follow at least one city, record one day, close the app.
-2. Install the current build over it, launch.
-3. **Expected:** the migration runs or the blocked state is **observable** (explicit storage error, never a false success): no crash, no empty app pretending migration succeeded. If blocked, the retry path recovers once the blocking connection is closed (relaunch).
+1. Open an older app build (pre-current-schema) in one browser tab and leave that database connection open.
+2. Open the current build in another tab against the same origin without closing the first connection.
+3. **Expected:** the blocked state is observable (explicit storage error, never a false success). Close the older tab, retry, and verify the database upgrade and preserved records. On Android, reproduce with two WebView sessions that share the app origin.
 
 ### 3. OS-level storage wipe (Android)
 
@@ -43,7 +43,7 @@ Shrink the storage the browser can use: on desktop, fill the profile's disk (or 
 
 1. Follow a new city (or add a day to the log).
 2. Immediately background the app (home key / switch window) and stay backgrounded ≥ 5 s, then foreground.
-3. **Expected:** the city/day survives — the `pagehide`/`visibilitychange` best-effort flush committed it. Repeat 5×; any loss is a defect (record the repro).
+3. Force a fresh load of the app after foregrounding and verify the city/day from IndexedDB, rather than relying on its still-mounted in-memory state. Repeat 5×; any loss is a defect (record the repro).
 
 ### 5. Low storage headroom warning (either target)
 

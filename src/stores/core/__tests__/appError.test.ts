@@ -76,9 +76,10 @@ describe('settleError', () => {
   });
 
   it('keeps the last good state on cancellation when data was loaded', () => {
-    const settled = settleError(succeed(), cancelledError());
+    const previous = succeed();
+    const settled = settleError(previous, cancelledError());
     expect(settled.status).toBe('success');
     expect(settled.error).toBeNull();
-    expect(settled.lastLoadedAt).not.toBeNull();
+    expect(settled.lastLoadedAt).toBe(previous.lastLoadedAt);
   });
 });

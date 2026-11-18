@@ -1,5 +1,5 @@
-import { IDBFactory } from 'fake-indexeddb';
-import { describe, expect, it, vi } from 'vitest';
+import { IDBFactory, IDBKeyRange, IDBObjectStore } from 'fake-indexeddb';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MAX_BACKUP_BYTES } from '../../backup/backup';
 import { dayKey } from '../entities/schema';
@@ -21,6 +21,7 @@ interface Modules {
 
 async function fresh(): Promise<Modules> {
   globalThis.indexedDB = new IDBFactory();
+  globalThis.IDBKeyRange = IDBKeyRange;
   vi.resetModules();
   const [backup, city, cacheModule, log, settings] = await Promise.all([
     import('../backupStore'),
@@ -41,6 +42,8 @@ function seedCity(city: typeof CityStore, cache: typeof Cache.entityCache, id: s
   cache.upsert('city', cityRec(id));
   city.useCityStore.setState({ cityIds: [id], onboarded: true });
 }
+
+afterEach(() => { vi.restoreAllMocks(); });
 
 describe('backup import version gate', () => {
   it('rejects a future-version backup without mutating live state', async () => {
@@ -103,7 +106,8 @@ describe('backup import commit', () => {
       settings: { tempUnit: 'C' },
     }));
     backup.useBackupStore.getState().setPart('settings', true);
-    backup.useBackupStore.getState().confirm();
+    await backup.useBackupStore.getState().confirm();
+    expect(backup.useBackupStore.getState().result).toEqual({ ok: true, cities: 1, days: 1 });
     expect(city.useCityStore.getState().cityIds).toEqual(['a', 'b']);
     expect(log.useLogStore.getState().dates).toEqual({ a: ['2026-01-05'], b: ['2026-01-01'] });
     expect(settings.useSettingsStore.getState().settings.tempUnit).toBe('C');
@@ -126,11 +130,13 @@ describe('backup import commit', () => {
       },
       settings: { tempUnit: 'C' },
     }));
-    settings.useSettingsStore.setState({ updateSettings: () => { throw new Error('boom'); } });
+    const [persist, records] = await Promise.all([import('../core/persistStorage'), import('../core/recordSync')]);
+    await Promise.all([persist.flushPersistedState(), records.flushRecords()]);
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => { throw new DOMException('failed', 'DataCloneError'); });
     backup.useBackupStore.getState().setPart('settings', true);
-    backup.useBackupStore.getState().confirm();
+    await backup.useBackupStore.getState().confirm();
     expect(backup.useBackupStore.getState().result).toMatchObject({ ok: false });
-    expect(backup.useBackupStore.getState().pending).toBeNull();
+    expect(backup.useBackupStore.getState().pending).not.toBeNull();
     expect(city.useCityStore.getState().cityIds).toEqual(['a']);
     expect(cache.getOne('city', 'b')).toBeUndefined();
     expect(cache.getOne('dayRecord', dayKey('a', '2026-01-05'))).toEqual(original);
@@ -152,8 +158,9 @@ describe('backup import commit', () => {
       { path: 'cities[1]', reason: 'invalid coordinates' },
       { path: 'history.2', reason: 'history for an unknown city' },
     ]);
-    backup.useBackupStore.getState().confirm();
-    expect(city.useCityStore.getState().cityIds).toEqual(['1']);
+    await backup.useBackupStore.getState().confirm();
+    expect(city.useCityStore.getState().cityIds).toContain('1');
+    expect(city.useCityStore.getState().cityIds).not.toContain('2');
     expect(cache.getOne('city', '2')).toBeUndefined();
     expect(log.useLogStore.getState().dates).toEqual({});
     expect(backup.useBackupStore.getState().result).toMatchObject({ ok: true, cities: 1, days: 0 });

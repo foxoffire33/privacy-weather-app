@@ -13,11 +13,13 @@ export default defineConfig({
     baseURL: 'http://localhost:4173',
     viewport: { width: 430, height: 900 },
     trace: 'retain-on-failure',
+    launchOptions: process.env.CHROMIUM_EXECUTABLE_PATH === undefined || process.env.CHROMIUM_EXECUTABLE_PATH === ''
+      ? {} : { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH },
   },
   webServer: {
     command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',
-    reuseExistingServer: process.env.CI !== 'true',
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 });

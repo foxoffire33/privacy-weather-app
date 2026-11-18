@@ -26,4 +26,12 @@ describe('diagnosticsReport', () => {
     expect(lines).toHaveLength(2 + 7 + 1);
     expect(lines).toContain('storage\tunknown\tunknown\tno');
   });
+
+  it('redacts city IDs and day dates from copied routes', () => {
+    const entry = { ...ENTRY, route: '/city/private-city/day/2026-01-03' };
+    const report = diagnosticsReport([entry], 'TestAgent', METRICS, null);
+    expect(report).toContain('/city/:cityId/day/:date');
+    expect(report).not.toContain('private-city');
+    expect(report).not.toContain('2026-01-03');
+  });
 });

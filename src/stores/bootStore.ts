@@ -4,9 +4,12 @@ import { classify } from './core/appError';
 
 import type { BootState } from './storeTypes';
 
-export const useBootStore = create<BootState>()(() => ({ hydrated: false, historyReady: false, storageBlocked: false, storageError: null }));
+export const useBootStore = create<BootState>()(() => ({ hydrated: false, historyReady: false, storageBlocked: false, storageError: null, storageQuotaExceeded: false }));
 
 export function noteStorageFault(error: unknown): void {
   const appError = classify(error);
-  useBootStore.setState((s) => (s.storageError === null ? { storageError: appError } : {}));
+  useBootStore.setState((s) => ({
+    storageError: s.storageError ?? appError,
+    storageQuotaExceeded: s.storageQuotaExceeded || appError.code === 'storage.quota-exceeded',
+  }));
 }

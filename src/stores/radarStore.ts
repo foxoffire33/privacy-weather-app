@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { fetchLandMap, fetchModelRain, fetchRadarFrame, fetchRadarFrames } from './api/remote';
 import { noteStorageFault } from './bootStore';
-import { AppError } from './core/appError';
+import { AppError, classify } from './core/appError';
 import { getConfig, isOffline } from './core/config';
 import { afterGesture } from './core/gesture';
 import { isRecord, without } from './core/guards';
@@ -60,32 +60,29 @@ export const useRadarStore = create<RadarState>()((set, get) => {
     });
   }
 
-  async function landData(city: City, cell: number): Promise<LandMap> {
-    const key = radarKey(city.id, cell, currentRadarSource());
+  async function landData(city: City, cell: number, key: string): Promise<LandMap> {
     const cached = get().land[key];
     if (cached !== undefined) { return cached; }
     return fetchLandMap(city, cell);
   }
 
-  async function framesData(city: City, cell: number): Promise<RadarSet> {
-    const key = radarKey(city.id, cell, currentRadarSource());
+  async function framesData(city: City, cell: number, key: string): Promise<RadarSet> {
     const previous = get().radar[key];
     if (previous?.version === RADAR_SET_VERSION && Date.now() - previous.fetchedAt < RADAR_FRESH_MS) { return previous; }
     const next: RadarSet = { version: RADAR_SET_VERSION, fetchedAt: Date.now(), frames: await frames(city, cell, previous) };
     return next;
   }
 
-  async function modelData(city: City, cell: number): Promise<ModelSet> {
-    const key = radarKey(city.id, cell, currentRadarSource());
+  async function modelData(city: City, cell: number, key: string): Promise<ModelSet> {
     const previous = get().model[key];
     if (previous?.version === MODEL_SET_VERSION && Date.now() - previous.fetchedAt < MODEL_FRESH_MS) { return previous; }
     return fetchModelRain(city, cell);
   }
 
-  async function applyResults(key: string, stale: () => boolean, results: RadarLoadSettled): Promise<void> {
-    const landValue = results.land.status === 'fulfilled' ? results.land.value : undefined;
-    const framesValue = results.frames.status === 'fulfilled' ? results.frames.value : undefined;
-    const modelValue = results.model.status === 'fulfilled' ? results.model.value : undefined;
+  async function applyResults(key: string, stale: () => boolean, results: Partial<RadarLoadSettled>): Promise<void> {
+    const landValue = results.land?.status === 'fulfilled' ? results.land.value : undefined;
+    const framesValue = results.frames?.status === 'fulfilled' ? results.frames.value : undefined;
+    const modelValue = results.model?.status === 'fulfilled' ? results.model.value : undefined;
     if (landValue === undefined && framesValue === undefined && modelValue === undefined) { return; }
     await afterGesture();
     if (stale()) { return; }
@@ -102,14 +99,24 @@ export const useRadarStore = create<RadarState>()((set, get) => {
     model: {},
     queries: {},
     load: async (city, cell) => {
-      const key = radarKey(city.id, cell, currentRadarSource());
+      const source = currentRadarSource();
+      const key = radarKey(city.id, cell, source);
       const q = queryAt(get().queries, key);
       if (isLoading(q) || isFresh(q, RADAR_FRESH_MS)) { return; }
       const run = runOf(city.id);
       const gen = generation;
+      const stale = (): boolean => !current(city.id, run, gen) || currentRadarSource() !== source;
       set((s) => ({ queries: setQuery(s.queries, key, begin(q)) }));
-      await restoreKey(city.id, key, run, gen);
-      if (!current(city.id, run, gen)) { return; }
+      try {
+        await restoreKey(city.id, key, run, gen);
+      } catch (error) {
+        if (current(city.id, run, gen)) {
+          noteStorageFault(error);
+          set((s) => ({ queries: setQuery(s.queries, key, fail(q, classify(error, key))) }));
+        }
+        return;
+      }
+      if (stale()) { return; }
       if (getConfig().radarServer.trim() === '') {
         set((s) => ({ queries: setQuery(s.queries, key, fail(q, NO_RADAR_ERROR)) }));
         return;
@@ -118,10 +125,19 @@ export const useRadarStore = create<RadarState>()((set, get) => {
         set((s) => ({ queries: setQuery(s.queries, key, q) }));
         return;
       }
-      const [landResult, framesResult, modelResult] = await Promise.allSettled([landData(city, cell), framesData(city, cell), modelData(city, cell)]);
-      if (!current(city.id, run, gen)) { return; }
+      const optional = modelData(city, cell, key).then(
+        (value): PromiseSettledResult<ModelSet> => ({ status: 'fulfilled', value }),
+        (error: unknown): PromiseSettledResult<ModelSet> => ({ status: 'rejected', reason: error }),
+      );
+      const [landResult, framesResult] = await Promise.allSettled([landData(city, cell, key), framesData(city, cell, key)]);
+      if (stale()) { return; }
+      await applyResults(key, stale, { land: landResult, frames: framesResult });
+      if (stale()) { return; }
+      const modelResult = await optional;
+      if (stale()) { return; }
       const result = settleRadarLoad(landResult, framesResult, modelResult);
-      await applyResults(key, () => !current(city.id, run, gen), { land: landResult, frames: framesResult, model: modelResult });
+      await applyResults(key, stale, { model: modelResult });
+      if (stale()) { return; }
       set((s) => ({ queries: setQuery(s.queries, key, radarQueryAfter(q, result)) }));
     },
     retry: (key) => {

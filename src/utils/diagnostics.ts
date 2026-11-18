@@ -7,6 +7,8 @@ import type { RouteVisit } from '../types';
 
 const KEEP_ROUTES = 100;
 const visits: RouteVisit[] = [];
+const safeRoute = (route: string): string => route.replace(/^\/city\/[^/]+\/(history|hourly|day\/[^/]+)$/, (_match, tail: string) =>
+  `/city/:cityId/${tail.startsWith('day/') ? 'day/:date' : tail}`);
 
 function currentRoute(): string {
   if (typeof location === 'undefined') { return ''; }
@@ -15,8 +17,9 @@ function currentRoute(): string {
 }
 
 export function noteRoute(route: string): void {
-  if (visits.at(-1)?.route === route) { return; }
-  visits.push({ at: performance.now(), route });
+  const safe = safeRoute(route);
+  if (visits.at(-1)?.route === safe) { return; }
+  visits.push({ at: performance.now(), route: safe });
   if (visits.length > KEEP_ROUTES) { visits.shift(); }
 }
 
@@ -62,7 +65,7 @@ export function startDiagnostics(): void {
 const mb = (bytes: number): number => Math.round((bytes / 1e6) * 10) / 10;
 
 export function diagnosticsReport(entries: readonly DiagnosticEntry[], userAgent: string, metrics: DiagnosticMetrics, storage: StorageEstimate | null): string {
-  const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), e.route].join('\t'));
+  const lines = entries.map((e) => [e.kind, e.name, e.detail, Math.round(e.at), Math.round(e.duration), Math.round(e.blocking), safeRoute(e.route)].join('\t'));
   const metricLines = [
     `metrics\tloads\t${String(metrics.loads)}`,
     `metrics\tcacheHits\t${String(metrics.cacheHits)}`,

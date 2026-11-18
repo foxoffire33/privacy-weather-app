@@ -1,6 +1,6 @@
 import { t } from '../i18n';
 
-import type { Accent, Backup, BackupDay, City, SkippedRecord, WindUnit } from '../stores';
+import type { Accent, Backup, BackupDay, City, SkippedRecord, Snapshot, WindUnit } from '../stores';
 
 export const BACKUP_VERSION = 1;
 export const MAX_BACKUP_BYTES = 5_000_000;
@@ -101,13 +101,14 @@ function parseHistory(raw: unknown, knownCities: ReadonlySet<string>, skipped: S
       continue;
     }
     const days: Record<string, BackupDay> = {};
+    let accepted = 0;
     let capped = false;
     for (const [date, rec] of Object.entries(log)) {
       if (!isCalendarDate(date)) {
         skipped.push({ path: `history.${cityId}.${date}`, reason: t('backup.skipDayDate') });
         continue;
       }
-      if (Object.keys(days).length >= MAX_DAYS_PER_CITY) {
+      if (accepted >= MAX_DAYS_PER_CITY) {
         if (!capped) {
           capped = true;
           skipped.push({ path: `history.${cityId}`, reason: t('backup.skipLimit') });
@@ -119,6 +120,7 @@ function parseHistory(raw: unknown, knownCities: ReadonlySet<string>, skipped: S
         continue;
       }
       days[date] = toBackupDay(date, rec);
+      accepted += 1;
     }
     if (Object.keys(days).length > 0) { history[cityId] = days; }
   }
@@ -161,7 +163,7 @@ function migrateBackup(raw: Record<string, unknown>, from: number): Record<strin
   return current;
 }
 
-export function parseBackup(text: string): Backup {
+export function parseBackup(text: string, alreadyFollowed: ReadonlySet<string> = new Set()): Backup {
   if (new TextEncoder().encode(text).length > MAX_BACKUP_BYTES) { throw new Error(t('backup.tooLarge')); }
   let raw: unknown;
   try { raw = JSON.parse(text); } catch { throw new Error(t('backup.notJson')); }
@@ -171,11 +173,72 @@ export function parseBackup(text: string): Backup {
   const migrated = migrateBackup(raw, raw.version);
   const skipped: SkippedRecord[] = [];
   const cities = parseCities(migrated.cities, skipped);
-  const history = parseHistory(migrated.history, new Set(cities.map((c) => c.id)), skipped);
+  const history = parseHistory(migrated.history, new Set([...cities.map((c) => c.id), ...alreadyFollowed]), skipped);
   const settings = parseSettings(migrated.settings, skipped);
   if (cities.length === 0 && Object.keys(history).length === 0 && Object.keys(settings).length === 0) { throw new Error(t('backup.empty')); }
   return { version: BACKUP_VERSION, exportedAt: isStr(migrated.exportedAt) ? migrated.exportedAt : '', settings, cities, history, skipped };
 }
 
 export const countDays = (b: Backup): number => Object.values(b.history).reduce((n, log) => n + Object.keys(log).length, 0);
+
+interface ExportBody {
+  version: number;
+  exportedAt: string;
+  settings: Record<string, unknown>;
+  cities: City[];
+  history: Record<string, Record<string, BackupDay>>;
+}
+
+export function exportBackupFiles(snapshot: Snapshot): { name: string; text: string }[] {
+  const { tempUnit, windUnit, snapshotMinutes, backfill, offline, accent, accentColor } = snapshot.settings;
+  const settings = { tempUnit, windUnit, snapshotMinutes, backfill, offline, accent, accentColor };
+  const at = new Date().toISOString();
+  const encoder = new TextEncoder();
+  const size = (text: string): number => encoder.encode(text).length;
+  const empty = (first: boolean): ExportBody => ({ version: BACKUP_VERSION, exportedAt: at, settings: first ? settings : {}, cities: [], history: {} });
+  const texts: string[] = [];
+  let part = empty(true);
+  let bytes = size(JSON.stringify(part));
+  let seen = new Set<string>();
+  let daysInPart = new Map<string, number>();
+  const finish = (): void => {
+    const text = JSON.stringify(part);
+    if (size(text) > MAX_BACKUP_BYTES) { throw new Error(t('backup.tooLarge')); }
+    texts.push(text);
+    part = empty(false);
+    bytes = size(JSON.stringify(part));
+    seen = new Set<string>();
+    daysInPart = new Map<string, number>();
+  };
+  const append = (city: City, date: string, day: BackupDay | null): void => {
+    const newCityBytes = seen.has(city.id) ? 0 : size(JSON.stringify(city)) + 64;
+    const dayBytes = day === null ? 0 : size(JSON.stringify([date, day])) + 32;
+    const full = bytes + newCityBytes + dayBytes > MAX_BACKUP_BYTES - 16_384
+      || (seen.size >= MAX_CITIES && !seen.has(city.id))
+      || (daysInPart.get(city.id) ?? 0) >= MAX_DAYS_PER_CITY;
+    if (full && part.cities.length > 0) { finish(); }
+    const nextCityBytes = seen.has(city.id) ? 0 : size(JSON.stringify(city)) + 64;
+    if (bytes + nextCityBytes + dayBytes > MAX_BACKUP_BYTES - 16_384) { throw new Error(t('backup.tooLarge')); }
+    if (!seen.has(city.id)) {
+      seen.add(city.id);
+      part.cities.push(city);
+      bytes += nextCityBytes;
+    }
+    if (day !== null) {
+      (part.history[city.id] ??= {})[date] = day;
+      daysInPart.set(city.id, (daysInPart.get(city.id) ?? 0) + 1);
+      bytes += dayBytes;
+    }
+  };
+  for (const city of snapshot.cities) {
+    const days = Object.entries(snapshot.history[city.id] ?? {});
+    const entries: [string, BackupDay | null][] = days.length > 0 ? days : [['', null]];
+    for (const [date, day] of entries) { append(city, date, day); }
+  }
+  if (part.cities.length > 0 || texts.length === 0) { finish(); }
+  return texts.map((text, index) => ({
+    name: texts.length === 1 ? 'weather-log.json' : `weather-log-${String(index + 1)}-of-${String(texts.length)}.json`,
+    text,
+  }));
+}
 

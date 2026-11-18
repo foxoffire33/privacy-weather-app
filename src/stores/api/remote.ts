@@ -1,6 +1,8 @@
 import { wrap } from 'comlink';
 
+import { noteFailure } from '../../utils/diagnostics';
 import { onConfigure } from '../core/config';
+import { useDiagnosticsStore } from '../diagnosticsStore';
 
 import * as direct from './openMeteo';
 import OpenMeteoWorker from './worker?worker';
@@ -42,13 +44,22 @@ function start(): Remote<WorkerApi> | null {
 async function call<T>(viaWorker: (api: Remote<WorkerApi>) => Promise<ApiResult<T>>, viaDirect: () => Promise<T>): Promise<T> {
   if (proxy === undefined) { proxy = start(); }
   if (proxy === null || failed === null) { return viaDirect(); }
+  const active = proxy;
   try {
-    const result = await Promise.race([viaWorker(proxy), failed]);
+    const result = await Promise.race([viaWorker(active), failed]);
     if (result.ok) { return result.value; }
     throw restoreError(result.error);
   } catch (error) {
     if (!broken) { throw error; }
-    return viaDirect();
+    return await viaDirect();
+  } finally {
+    if (!broken) {
+      const batch = await active.drainDiagnostics().catch(() => null);
+      if (batch !== null) {
+        useDiagnosticsStore.getState().addCacheCounts(batch.loads, batch.cacheHits);
+        for (const failure of batch.failures) { noteFailure(failure.name, failure.detail); }
+      }
+    }
   }
 }
 

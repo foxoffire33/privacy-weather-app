@@ -93,7 +93,7 @@ describe('clearRecords ordering contract', () => {
     m.putRecord('p:z', 3);
     await vi.advanceTimersByTimeAsync(0);
     await rejected;
-    expect(m.recordSyncStatus().pending).toBe(1);
+    expect(m.recordSyncStatus().pending).toBe(2);
     expect(idb.recordsWrite).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(250);
     await vi.advanceTimersByTimeAsync(250);
@@ -118,11 +118,11 @@ describe('clearRecords ordering contract', () => {
     await rejected;
     await vi.advanceTimersByTimeAsync(120_000);
     expect(log.filter((entry) => entry === 'delete failed')).toHaveLength(9);
-    vi.mocked(idb.recordsDeletePrefix).mockImplementation(async (prefix) => { log.push(`delete ${prefix}`); });
+    vi.mocked(idb.recordsDeletePrefix).mockImplementation(async (prefix) => { log.push(`delete ${prefix}`); await Promise.resolve(); });
     await m.flushRecords();
     expect(m.recordSyncStatus().pending).toBe(0);
     expect(idb.recordsWrite).toHaveBeenCalledWith([['p:y', 1]], []);
-    expect(log).toContain('delete p:');
+    expect(log.slice(-2)).toEqual(['delete p:', 'write']);
   });
 
   it('serializes multiple prefix clears without interference', async () => {
@@ -136,7 +136,113 @@ describe('clearRecords ordering contract', () => {
   });
 });
 
+describe('clearRecords concurrency regressions', () => {
+  it('keeps a post-clear put behind a flush queued before the clear', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    const gate = heldGate();
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => {
+      log.push('first write');
+      await gate.promise;
+    });
+    m.putRecord('p:old', 1);
+    const first = m.flushRecords();
+    await vi.waitFor(() => { expect(idb.recordsWrite).toHaveBeenCalledTimes(1); });
+    const second = m.flushRecords();
+    const clearing = m.clearRecords('p:');
+    m.putRecord('p:new', 2);
+    gate.release();
+    await Promise.all([first, second, clearing]);
+    await m.flushRecords();
+    expect(log).toEqual(['first write', 'delete p:', 'write']);
+    expect(idb.recordsWrite).toHaveBeenLastCalledWith([['p:new', 2]], []);
+  });
+
+  it('preserves a newer put generation when an older write completes before the clear', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    const gate = heldGate();
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => {
+      log.push('first write');
+      await gate.promise;
+    });
+    m.putRecord('p:x', 1);
+    const first = m.flushRecords();
+    await vi.waitFor(() => { expect(idb.recordsWrite).toHaveBeenCalledTimes(1); });
+    const clearing = m.clearRecords('p:');
+    m.putRecord('p:x', 2);
+    gate.release();
+    await Promise.all([first, clearing]);
+    await m.flushRecords();
+    expect(idb.recordsWrite).toHaveBeenLastCalledWith([['p:x', 2]], []);
+    expect(log).toEqual(['first write', 'delete p:', 'write']);
+  });
+
+  it('rejects a flush when a failed clear still blocks its writes', async () => {
+    const { m, idb } = await fresh([]);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsDeletePrefix).mockRejectedValue(new DOMException('full', 'QuotaExceededError'));
+    const rejected = expect(m.clearRecords('p:')).rejects.toMatchObject({ code: 'quota-exceeded' });
+    m.putRecord('p:y', 2);
+    await rejected;
+    await expect(m.flushRecords()).rejects.toMatchObject({ code: 'quota-exceeded' });
+    expect(idb.recordsWrite).not.toHaveBeenCalled();
+    expect(m.recordSyncStatus().pending).toBe(2);
+  });
+
+  it('lets manual retry recover a failed clear before its automatic timer runs', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsDeletePrefix).mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
+    const first = expect(m.clearRecords('p:')).rejects.toMatchObject({ code: 'quota-exceeded' });
+    m.putRecord('p:new', 3);
+    await first;
+    await m.retryPendingRecordClears();
+    await m.flushRecords();
+    expect(log).toEqual(['delete p:', 'write']);
+    expect(m.recordSyncStatus().pending).toBe(0);
+  });
+
+  it('retries independent failed clears, and releases their blocked puts', async () => {
+    const log: string[] = [];
+    const { m, idb } = await fresh(log);
+    vi.useFakeTimers();
+    vi.mocked(idb.recordsDeletePrefix).mockRejectedValueOnce(new DOMException('a', 'AbortError')).mockRejectedValueOnce(new DOMException('b', 'AbortError'));
+    const first = expect(m.clearRecords('a:')).rejects.toMatchObject({ code: 'transaction-aborted' });
+    const second = expect(m.clearRecords('b:')).rejects.toMatchObject({ code: 'transaction-aborted' });
+    m.putRecord('a:1', 1);
+    m.putRecord('b:1', 1);
+    await Promise.all([first, second]);
+    await vi.advanceTimersByTimeAsync(500);
+    await m.flushRecords();
+    expect(log).toContain('delete a:');
+    expect(log).toContain('delete b:');
+    expect(idb.recordsWrite).toHaveBeenCalledWith([['a:1', 1], ['b:1', 1]], []);
+  });
+});
+
 describe('record flush retry policy', () => {
+  it('does not acknowledge a write whose transaction rejects asynchronously', async () => {
+    const { m, idb } = await fresh([]);
+    vi.useFakeTimers();
+    const gate = heldGate();
+    vi.mocked(idb.recordsWrite).mockImplementationOnce(async () => {
+      await gate.promise;
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    m.putRecord('p:x', 1);
+    const flushing = m.flushRecords();
+    await vi.waitFor(() => { expect(idb.recordsWrite).toHaveBeenCalledTimes(1); });
+    gate.release();
+    await expect(flushing).rejects.toMatchObject({ code: 'quota-exceeded' });
+    expect(m.recordSyncStatus().pending).toBe(1);
+    await m.flushRecords();
+    expect(idb.recordsWrite).toHaveBeenLastCalledWith([['p:x', 1]], []);
+    expect(m.recordSyncStatus().pending).toBe(0);
+  });
   it('rejects when its batch fails and exposes the failure in the status', async () => {
     const log: string[] = [];
     const { m, idb } = await fresh(log);

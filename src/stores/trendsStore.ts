@@ -38,6 +38,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
   download: IDLE_QUERY,
   attempted: [],
   failed: [],
+  failureErrors: {},
 
   togglePicked: (key) => { set((s) => ({
     picked: s.picked.includes(key) ? s.picked.filter((k) => k !== key) : [...s.picked, key],
@@ -52,8 +53,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
     const wanted = windows.filter((w) => hasGap(loggedDates(cityId), w) && !tried.has(windowKey(cityId, w)));
     if (wanted.length === 0) { return; }
     set((s) => ({ download: begin(s.download), attempted: [...s.attempted, ...wanted.map((w) => windowKey(cityId, w))] }));
-    let error: AppError | null = null;
-    const failed: string[] = [];
+    const failures: Record<string, AppError> = {};
     const skipped = new Set<string>();
     await inSequence(wanted, async (w) => {
       const key = windowKey(cityId, w);
@@ -62,14 +62,14 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
         await fillRange(cityId, w.from, w.to);
       } catch (error_) {
         if (isOffline()) { skipped.add(key); return; }
-        error = classify(error_, key);
-        failed.push(key);
+        failures[key] = classify(error_, key);
       }
     });
     set((s) => ({
-      download: error === null ? succeed() : fail(s.download, error),
+      download: Object.keys(failures).length === 0 ? succeed() : fail(s.download, Object.values(failures)[0]),
       attempted: s.attempted.filter((k) => !skipped.has(k)),
-      failed: [...s.failed.filter((k) => !wanted.some((w) => windowKey(cityId, w) === k)), ...failed],
+      failed: [...s.failed.filter((k) => !wanted.some((w) => windowKey(cityId, w) === k)), ...Object.keys(failures)],
+      failureErrors: { ...Object.fromEntries(Object.entries(s.failureErrors).filter(([key]) => !wanted.some((w) => windowKey(cityId, w) === key))), ...failures },
     }));
   })),
 
@@ -79,6 +79,7 @@ export const useTrendsStore = create<TrendsState>()((set, get) => ({
     set((s) => ({
       attempted: s.attempted.filter((k) => !keys.has(k)),
       failed: s.failed.filter((k) => !keys.has(k)),
+      failureErrors: Object.fromEntries(Object.entries(s.failureErrors).filter(([key]) => !keys.has(key))),
       download: IDLE_QUERY,
     }));
     await get().ensureWindows(cityId, windows);

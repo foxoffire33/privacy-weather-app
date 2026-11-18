@@ -24,7 +24,7 @@ function hasTables(value: unknown): value is PersistedEntities {
   return isRecord(value) && isRecord(value.tables);
 }
 
-function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, next: EntityTypeMap[N], name: N): EntityTypeMap[N] {
+export function foldEntity<N extends EntityName>(prev: EntityTypeMap[N] | undefined, next: EntityTypeMap[N], name: N): EntityTypeMap[N] {
   if (prev === undefined) {return next;}
   const folded: EntityTypeMap[N] = { ...prev, ...definedOnly(next) };
   const rule = FOLD_RULES[name];

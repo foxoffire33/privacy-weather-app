@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import type { Page } from '@playwright/test';
 
 const PNG_1X1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
@@ -131,5 +133,30 @@ export async function followParis(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Choose your first city' }).click();
   await page.getByLabel('Search cities').fill('Paris');
   await page.getByRole('button', { name: 'Follow' }).first().click();
-  await page.getByText('Paris').first().waitFor({ state: 'visible' });
+  await expect(page.getByLabel('Search cities')).toHaveCount(0);
+  await expect(page.getByText('Paris').first()).toBeVisible();
+}
+
+export async function waitForSavedCity(page: Page, id: string, date?: string): Promise<void> {
+  await page.waitForFunction(async ({ cityId, day }) => {
+    return new Promise<boolean>((resolve) => {
+      const open = indexedDB.open('wl-storesv2');
+      open.addEventListener('error', () => { resolve(false); });
+      open.addEventListener('success', () => {
+        const db = open.result;
+        const tx = db.transaction(['kv', 'records'], 'readonly');
+        const cities = tx.objectStore('kv').get('wl2-cities');
+        const city = tx.objectStore('records').get(`entity:city:${cityId}`);
+        const record = day === undefined ? null : tx.objectStore('records').get(`entity:dayRecord:${cityId}:${day}`);
+        tx.addEventListener('complete', () => {
+          const envelope: unknown = cities.result;
+          const state: unknown = typeof envelope === 'object' && envelope !== null ? Reflect.get(envelope, 'state') : null;
+          const ids: unknown = typeof state === 'object' && state !== null ? Reflect.get(state, 'cityIds') : null;
+          resolve(Array.isArray(ids) && ids.includes(cityId) && city.result !== undefined && (record === null || record.result !== undefined));
+          db.close();
+        });
+        tx.addEventListener('error', () => { resolve(false); db.close(); });
+      });
+    });
+  }, { cityId: id, day: date });
 }

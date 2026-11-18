@@ -24,13 +24,15 @@
     },
     "touchChart": "Touch the chart for details",
     "screenFailed": "This screen could not be loaded.",
-    "storageFault": "Not saved: local storage is failing. The app keeps trying in the background.",
-    "retrySave": "Retry saving"
+    "storageFault": "Local storage is failing. Some changes may not be saved. Resolve the issue and select Retry saving.",
+    "retrySave": "Retry saving",
+    "storagePending": "Some local changes are still waiting to be saved.",
+    "storageRecovered": "All pending changes have now been saved."
   },
   "errors": {
     "offline": "You are offline, so no new data could be loaded.",
     "timeout": "The request timed out.",
-    "rateLimited": "The weather service is temporarily rate-limited. The app retries automatically.",
+    "rateLimited": "The weather service is temporarily rate-limited. Try again later if the automatic retries stop.",
     "server": "The weather service is unavailable right now.",
     "client": "The weather request could not be completed.",
     "invalidResponse": "The weather service returned data the app could not read.",
@@ -500,6 +502,7 @@
     "editLabel": "Edit {date}"
   },
   "settings": {
+    "reviewPersisted": "Saved settings need review ({fields}). Invalid custom weather servers will not be replaced with public services automatically.",
     "title": "Settings.",
     "language": "Language",
     "languageSystem": "System ({name})",
@@ -586,6 +589,8 @@
     "version": "This backup file does not state a supported version.",
     "futureVersion": "This backup was created by a newer version of the app. Update the app and try again.",
     "tooLarge": "This backup file is too large to import.",
+    "exportFailed": "The backup could not be exported.",
+    "exportParts": "This backup contains {count} numbered files. Keep every file together and import each one in order to restore all history. Allow multiple downloads if your browser asks.",
     "empty": "No cities, history or settings found in this file.",
     "skipCityId": "missing or invalid city id",
     "skipCityDuplicate": "duplicate city id",
@@ -595,7 +600,8 @@
     "skipNotRecord": "not a record",
     "skipDayDate": "not a valid calendar date",
     "skipLimit": "record limit exceeded",
-    "skipSetting": "invalid setting value"
+    "skipSetting": "invalid setting value",
+    "skippedCount": "{count} backup records were skipped:"
   },
   "widgets": {
     "past7": "Past 7 days",

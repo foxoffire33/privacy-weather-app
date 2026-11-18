@@ -1,14 +1,12 @@
 import { Box, Button, CopyButton, Group, Stack, Text, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ScreenHeader } from '../components/ScreenHeader';
+import { useStorageEstimate } from '../components/useStorageEstimate';
 import { t } from '../i18n';
 import { useDiagnosticsStore } from '../stores';
-import { estimateStorage } from '../stores/core/persistence';
 import { diagnosticsReport } from '../utils/diagnostics';
 
-import type { StorageEstimate } from '../stores/core/persistence';
 import type { ReactElement } from 'react';
 
 const ms = (v: number) => String(Math.round(v));
@@ -16,8 +14,7 @@ const mb = (bytes: number) => Math.round((bytes / 1e6) * 10) / 10;
 
 export function Diagnostics(): ReactElement {
   const { entries, clear, metrics } = useDiagnosticsStore(useShallow((s) => ({ entries: s.entries, clear: s.clear, metrics: s.metrics })));
-  const [storage, setStorage] = useState<StorageEstimate | null>(null);
-  useEffect(() => { void estimateStorage().then(setStorage); }, []);
+  const storage = useStorageEstimate();
   const frames = entries.filter((e) => e.kind === 'frame');
   let worst = 0;
 

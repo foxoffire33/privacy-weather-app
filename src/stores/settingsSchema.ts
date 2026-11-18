@@ -17,7 +17,9 @@ const httpUrl = z.url().refine((value) => {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }, 'unsupported URL scheme');
 
-const serverUrl = z.union([z.literal(''), httpUrl]);
+const sameOriginUrl = z.string().regex(/^\/(?!\/)[a-zA-Z0-9/_~.%-]*$/, 'invalid same-origin path');
+const serverUrl = z.union([z.literal(''), httpUrl, sameOriginUrl]);
+export const validCustomServer = (value: string): boolean => serverUrl.safeParse(value).success;
 
 export const defaultSettings: Settings = {
   apiKey: '',
@@ -74,7 +76,7 @@ export function validatePersistedSettings(raw: unknown): { value: Settings; issu
   return {
     value: {
       apiKey: keep('apiKey', fieldSchemas.apiKey, raw.apiKey, defaultSettings.apiKey),
-      server: keep('server', fieldSchemas.server, raw.server, defaultSettings.server),
+      server: keep('server', fieldSchemas.server, raw.server, typeof raw.server === 'string' && raw.server !== '' ? raw.server : defaultSettings.server),
       radarServer: keep('radarServer', fieldSchemas.radarServer, raw.radarServer, defaultSettings.radarServer),
       mapServer: keep('mapServer', fieldSchemas.mapServer, raw.mapServer, defaultSettings.mapServer),
       tempUnit: keep('tempUnit', fieldSchemas.tempUnit, raw.tempUnit, defaultSettings.tempUnit),

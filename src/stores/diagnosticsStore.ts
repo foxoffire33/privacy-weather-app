@@ -10,5 +10,6 @@ export const useDiagnosticsStore = create<DiagnosticsState>()((set) => ({
   metrics: ZERO,
   add: (entry) => { set((s) => ({ entries: [...s.entries.slice(-(KEEP - 1)), entry] })); },
   bump: (key) => { set((s) => ({ metrics: { ...s.metrics, [key]: s.metrics[key] + 1 } })); },
+  addCacheCounts: (loads, cacheHits) => { set((s) => ({ metrics: { ...s.metrics, loads: s.metrics.loads + loads, cacheHits: s.metrics.cacheHits + cacheHits } })); },
   clear: () => { set({ entries: [], metrics: ZERO }); },
 }));

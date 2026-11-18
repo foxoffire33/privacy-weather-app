@@ -1,11 +1,11 @@
 import { noteFailure } from '../../utils/diagnostics';
 import { ApiError, TimeoutError } from '../core/appError';
 import { assertOnline, getConfig, onlineSignal } from '../core/config';
-import { errorMessage } from '../core/errors';
 import { isRecord } from '../core/guards';
-import { responseGet, responsePut } from '../core/idb';
+import { responseGet, responsePut, toStorageError } from '../core/idb';
 import { sortedCopy } from '../core/sort';
 import { useDiagnosticsStore } from '../diagnosticsStore';
+import { validCustomServer } from '../settingsSchema';
 
 import type { CombinedSignal } from '../core/config';
 import type { QueryParams } from '../core/types';
@@ -28,7 +28,10 @@ const HOSTS: Record<EndpointKind, [string, string]> = {
 
 function base(kind: EndpointKind): string {
   const { apiKey, server } = getConfig();
-  if (kind === 'forecast' && server !== '') { return server.replace(/\/$/, ''); }
+  if (kind === 'forecast' && server !== '') {
+    if (!validCustomServer(server)) { throw new ApiError('Invalid custom weather server', 400, false, 0); }
+    return server.replace(/\/$/, '');
+  }
   return HOSTS[kind][apiKey === '' ? 0 : 1];
 }
 
@@ -83,18 +86,30 @@ function timedSignal(user: AbortSignal): CombinedSignal {
   };
 }
 
+async function readResponseBody(res: Response, caller: AbortSignal, attemptSignal: AbortSignal, delay: number): Promise<unknown> {
+  try {
+    return await res.json();
+  } catch {
+    caller.throwIfAborted();
+    if (attemptSignal.aborted && res.status === 429) { throw new ApiError('HTTP 429', 429, true, delay); }
+    attemptSignal.throwIfAborted();
+    return UNREADABLE;
+  }
+}
+
 async function attempt(url: string, signal: AbortSignal): Promise<unknown> {
   const live = timedSignal(signal);
   try {
     const doFetch = getConfig().fetch ?? fetch;
     const res = await doFetch(url, { signal: live.signal });
-    const body: unknown = await res.json().catch(() => UNREADABLE);
+    const delay = retryAfterMs(res);
+    const body: unknown = await readResponseBody(res, signal, live.signal, delay);
     live.signal.throwIfAborted();
-    if (res.ok && body === UNREADABLE) { throw new ApiError('Invalid JSON response', res.status, true, 0); }
+    if (res.ok && body === UNREADABLE) { throw new ApiError('Invalid JSON response', 0, true, 0); }
     if (res.ok && !(isRecord(body) && body.error === true)) { return body; }
     const retry = res.status >= 500 || res.status === 429;
     const reason = isRecord(body) && typeof body.reason === 'string' && body.reason !== '' ? body.reason : `HTTP ${String(res.status)}`;
-    throw new ApiError(reason, res.status, retry, retryAfterMs(res));
+    throw new ApiError(reason, res.status, retry, delay);
   } finally {
     live.dispose();
   }
@@ -188,7 +203,7 @@ export async function cachedJson<T>(kind: EndpointKind, path: string, params: Qu
   const key = cacheKey(kind, path, params);
   useDiagnosticsStore.getState().bump('loads');
   if (maxAgeMs > 0) {
-    const hit = await responseGet(key).catch((error: unknown) => { noteFailure('response-cache read', errorMessage(error)); });
+    const hit = await responseGet(key).catch((error: unknown) => { noteFailure('response-cache read', toStorageError('read', error).code); });
     const cached = hit !== undefined && Date.now() - hit.fetchedAt <= maxAgeMs ? fromCache(hit.body, build) : null;
     if (cached !== null) {
       useDiagnosticsStore.getState().bump('cacheHits');
@@ -198,6 +213,6 @@ export async function cachedJson<T>(kind: EndpointKind, path: string, params: Qu
   const body = await getJson(kind, path, params);
   const value = build(body);
   const fetchedAt = Date.now();
-  void responsePut(key, { fetchedAt, expiresAt: fetchedAt + Math.max(keepMs, maxAgeMs), body }).catch((error: unknown) => { noteFailure('response-cache write', errorMessage(error)); });
+  await responsePut(key, { fetchedAt, expiresAt: fetchedAt + Math.max(keepMs, maxAgeMs), body }).catch((error: unknown) => { noteFailure('response-cache write', toStorageError('write', error).code); });
   return value;
 }

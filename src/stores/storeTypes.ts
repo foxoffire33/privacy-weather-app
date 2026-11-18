@@ -94,6 +94,7 @@ export interface BootState {
   historyReady: boolean;
   storageBlocked: boolean;
   storageError: AppError | null;
+  storageQuotaExceeded: boolean;
 }
 
 export interface DiagnosticEntry {
@@ -121,6 +122,7 @@ export interface DiagnosticsState {
   metrics: DiagnosticMetrics;
   add: (entry: DiagnosticEntry) => void;
   bump: (key: keyof DiagnosticMetrics) => void;
+  addCacheCounts: (loads: number, cacheHits: number) => void;
   clear: () => void;
 }
 

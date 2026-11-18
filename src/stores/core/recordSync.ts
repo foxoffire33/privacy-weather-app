@@ -1,10 +1,10 @@
 import { useDiagnosticsStore } from '../diagnosticsStore';
 
 import { errorMessage } from './errors';
-import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, toStorageError } from './idb';
+import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, StorageError, toStorageError } from './idb';
 import { measure } from './marks';
 
-import type { StorageError, StorageErrorCode } from './idb';
+import type { StorageErrorCode } from './idb';
 import type { IdbEntry, MapStore } from './types';
 
 const FLUSH_MS = 250;
@@ -18,7 +18,6 @@ const deletes = new Set<string>();
 const deleteGen = new Map<string, number>();
 let counter = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
-let clearTimer: ReturnType<typeof setTimeout> | null = null;
 let restoring = 0;
 
 interface ClearOp {
@@ -26,6 +25,8 @@ interface ClearOp {
   boundary: number;
   attempts: number;
   exhausted: boolean;
+  timer: ReturnType<typeof setTimeout> | null;
+  queued: boolean;
 }
 
 let chain: Promise<void> = Promise.resolve();
@@ -58,7 +59,7 @@ export interface RecordSyncStatus {
 
 export function recordSyncStatus(): RecordSyncStatus {
   return {
-    pending: puts.size + deletes.size,
+    pending: puts.size + deletes.size + pendingClears.length,
     attempts,
     code: lastError === null ? null : lastError.code,
     lastError: lastError === null ? null : errorMessage(lastError),
@@ -81,16 +82,16 @@ function pruneCleared(): void {
 }
 
 function purgeFor(op: ClearOp): void {
-  for (const key of [...puts.keys()]) {
+  for (const key of puts.keys()) {
     if (key.startsWith(op.prefix) && (putGen.get(key) ?? 0) < op.boundary) { puts.delete(key); putGen.delete(key); }
   }
-  for (const key of [...deletes]) {
+  for (const key of deletes) {
     if (key.startsWith(op.prefix) && (deleteGen.get(key) ?? 0) < op.boundary) { deletes.delete(key); deleteGen.delete(key); }
   }
 }
 
 function settleIfIdle(): void {
-  if (puts.size === 0 && deletes.size === 0 && lastError !== null) {
+  if (puts.size === 0 && deletes.size === 0 && pendingClears.length === 0 && lastError !== null) {
     lastError = null;
     recoveredListener?.();
   }
@@ -108,26 +109,41 @@ function blockedByPendingClear(key: string): boolean {
   return pendingClears.some((op) => key.startsWith(op.prefix));
 }
 
-async function flushOnce(): Promise<StorageError | null> {
-  const batch: IdbEntry[] = [...puts].filter(([key]) => !blockedByPendingClear(key));
-  const gone = [...deletes].filter((key) => !blockedByPendingClear(key));
+function readyBatch(beforeGeneration: number): { batch: IdbEntry[]; gone: string[]; blocked: boolean } {
+  const eligiblePuts = [...puts].filter(([key]) => (putGen.get(key) ?? beforeGeneration) < beforeGeneration);
+  const eligibleDeletes = [...deletes].filter((key) => (deleteGen.get(key) ?? beforeGeneration) < beforeGeneration);
+  const batch = eligiblePuts.filter(([key]) => !blockedByPendingClear(key));
+  const gone = eligibleDeletes.filter((key) => !blockedByPendingClear(key));
+  return { batch, gone, blocked: batch.length !== eligiblePuts.length || gone.length !== eligibleDeletes.length };
+}
+
+function forgetCommitted(keys: ReadonlyMap<string, number | undefined>, generations: Map<string, number>): void {
+  for (const [key, generation] of keys) {
+    if (generations.get(key) === generation) { generations.delete(key); }
+  }
+}
+
+async function flushOnce(beforeGeneration: number): Promise<StorageError | null> {
+  const { batch, gone, blocked } = readyBatch(beforeGeneration);
   if (batch.length === 0 && gone.length === 0) {
     settleIfIdle();
-    return null;
+    return blocked ? lastError ?? new StorageError('write-failed', 'A pending clear prevents the record flush') : null;
   }
+  const batchGen = new Map(batch.map(([key]) => [key, putGen.get(key)]));
+  const goneGen = new Map(gone.map((key) => [key, deleteGen.get(key)]));
   const clearMark = clearSeq;
   inFlightMark = clearMark;
   for (const [key] of batch) { puts.delete(key); }
   for (const key of gone) { deletes.delete(key); }
   try {
-    await measure('persist-flush', async () => { recordsWrite(batch, gone); });
-    for (const [key] of batch) { putGen.delete(key); }
-    for (const key of gone) { deleteGen.delete(key); }
+    await measure('persist-flush', async () => { await recordsWrite(batch, gone); });
+    forgetCommitted(batchGen, putGen);
+    forgetCommitted(goneGen, deleteGen);
     attempts = 0;
     lastError = null;
     useDiagnosticsStore.getState().bump('recordFlushes');
     recoveredListener?.();
-    return null;
+    return blocked ? new StorageError('write-failed', 'A pending clear prevents the record flush') : null;
   } catch (error) {
     const storageError = toStorageError('write', error);
     requeue(batch, gone, clearMark);
@@ -144,10 +160,24 @@ async function flushOnce(): Promise<StorageError | null> {
 }
 
 function enqueueClear(op: ClearOp): void {
+  const state = op;
+  if (state.queued) { return; }
+  state.queued = true;
   chain = chain.then(
-    async () => { await runClear(op).catch(() => null); },
-    async () => { await runClear(op).catch(() => null); },
+    async () => { await runClear(state).catch(() => null); },
+    async () => { await runClear(state).catch(() => null); },
   );
+}
+
+export async function retryPendingRecordClears(): Promise<void> {
+  for (const op of pendingClears) {
+    if (op.queued || (op.attempts === 0 && !op.exhausted)) { continue; }
+    if (op.timer !== null) { clearTimeout(op.timer); op.timer = null; }
+    op.exhausted = false;
+    op.attempts = 0;
+    enqueueClear(op);
+  }
+  await chain;
 }
 
 function retryExhaustedClears(): void {
@@ -155,18 +185,20 @@ function retryExhaustedClears(): void {
     if (!op.exhausted) { continue; }
     op.exhausted = false;
     op.attempts = 0;
+    if (op.timer !== null) { clearTimeout(op.timer); op.timer = null; }
     enqueueClear(op);
   }
 }
 
 export async function flushRecords(): Promise<void> {
+  const beforeGeneration = counter;
   if (timer !== null) { clearTimeout(timer); }
   timer = null;
   retryExhaustedClears();
   let outcome: StorageError | null;
   chain = chain.then(
-    async () => { outcome = await flushOnce(); },
-    async () => { outcome = await flushOnce(); },
+    async () => { outcome = await flushOnce(beforeGeneration); },
+    async () => { outcome = await flushOnce(beforeGeneration); },
   );
   return chain.then(() => {
     if (outcome !== null) {
@@ -220,32 +252,38 @@ export function deleteRecord(key: string): void {
   schedule();
 }
 
-export function clearRecords(prefix: string): Promise<void> {
-  const op: ClearOp = { prefix, boundary: counter, attempts: 0, exhausted: false };
+export async function clearRecords(prefix: string): Promise<void> {
+  const op: ClearOp = { prefix, boundary: counter, attempts: 0, exhausted: false, timer: null, queued: true };
   pendingClears.push(op);
   cleared.push({ prefix, seq: clearSeq });
   clearSeq += 1;
-  const step = chain.then(() => runClear(op), () => runClear(op));
+  const step = chain.then(
+    async () => { await runClear(op); },
+    async () => { await runClear(op); },
+  );
   chain = step;
   return step;
 }
 
 async function runClear(op: ClearOp): Promise<void> {
+  const state = op;
   try {
-    await recordsDeletePrefix(op.prefix);
+    await recordsDeletePrefix(state.prefix);
   } catch (error) {
     const storageError = toStorageError('write', error);
     lastError = storageError;
     reportFault(storageError);
-    if (RETRYABLE_WRITE_CODES.has(storageError.code) && op.attempts < MAX_AUTO_RETRIES) {
-      op.attempts += 1;
-      clearTimer ??= setTimeout(() => { clearTimer = null; enqueueClear(op); }, backoffDelay(op.attempts));
+    if (RETRYABLE_WRITE_CODES.has(storageError.code) && state.attempts < MAX_AUTO_RETRIES) {
+      state.attempts += 1;
+      state.timer = setTimeout(() => { state.timer = null; enqueueClear(state); }, backoffDelay(state.attempts));
     } else {
-      op.exhausted = true;
+      state.exhausted = true;
     }
     throw storageError;
+  } finally {
+    state.queued = false;
   }
-  const index = pendingClears.indexOf(op);
+  const index = pendingClears.indexOf(state);
   if (index !== -1) { pendingClears.splice(index, 1); }
   purgeFor(op);
   pruneCleared();
@@ -263,7 +301,7 @@ export function restore(apply: () => void): void {
 }
 
 export async function readRecord(key: string): Promise<unknown> {
-  return recordGet(key).catch(() => null);
+  return recordGet(key);
 }
 
 export async function readRange(prefix: string, from = '', to = '\uFFFF'): Promise<IdbEntry[]> {

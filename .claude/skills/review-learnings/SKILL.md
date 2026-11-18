@@ -39,10 +39,10 @@ same class of mistake is not made again. Add to this list when a review finds so
 
 ## Suspense
 
-6. **Choose the promise for `use()` as: running request, then last settled, then `READY`.** Use
-   `latest(key)` when the view may need to wait, `lastSettled(key)` when it must not (background fills).
-   Never let a "requested already" flag skip a request that is still running. *From PR #9: leaving
-   History during a download and coming back rendered empty charts instead of waiting.*
+6. **A `use()` consumer must observe an in-flight promise or the fulfilled `READY` marker.** Use
+   `latest(key)` for the active request and `READY` when no request is running; do not retain a
+   global cache of settled promises or let a "requested already" flag skip a running request.
+   *From PR #9 and the PR #33 bounded-memory review.*
 
 ## Git
 
@@ -88,11 +88,10 @@ same class of mistake is not made again. Add to this list when a review finds so
 
 ## Code style
 
-15. **One `try` per function, multiple `catch`, one `finally`.** Never use multiple try-catch blocks in a
-    function. Wrap the risky code in a single `try`; use consecutive `catch` clauses to distinguish the different
-    exception types the code can throw (rethrow from a clause that does not own the error so the next one can);
-    put all cleanup in one `finally`. When separate steps each need independent fault tolerance, give each step its
-    own small helper function with its own single `try`. *From user rule, 2026-11-16.*
+15. **One `try`, one `catch`, and at most one `finally` per function.** JavaScript supports only one
+    `catch` clause per `try`; distinguish error types with checks inside that clause. When separate steps
+    need independent fault tolerance, give each step its own small helper function.
+    *From user rule, 2026-11-16, clarified in PR #33 review.*
 
 16. **No comments in code.** Do not annotate the code with inline comments; the code and its types should carry
     the meaning. *From user rule, 2026-11-16.*
@@ -100,3 +99,45 @@ same class of mistake is not made again. Add to this list when a review finds so
 17. **Long explanations live in the docs, not in code.** If behavior needs explaining, write it in the relevant
     README or doc file. In code, at most a short one-line JSDoc-style comment, and only where truly necessary.
     *From user rule, 2026-11-16.*
+
+## Durable asynchronous changes
+
+18. **Success follows commit, never scheduling.** Await the actual IndexedDB transaction promise through
+    every wrapper. Test with asynchronous rejection after the write call returns; a failed batch must remain
+    pending and retryable. *From PR #33: a discarded `recordsWrite` promise reported unsaved days as saved.*
+
+19. **Queue writes, deletes, and prefix clears by operation generation.** A flush may consume only
+    mutations submitted before its queue boundary. Keep post-clear writes behind the clear, and remove
+    generation metadata only if it still belongs to the completed operation. A failed clear remains
+    queued; each independent clear needs its own retry schedule. *From PR #33 concurrency review.*
+
+20. **Failed hydration reads block all writes to that store.** Preserve queued edits, track which fields
+    were explicitly edited even when their values equal defaults, retry hydration before flushing, and
+    write the fully reconciled snapshot after restoration. Recover records independently of unrelated
+    persisted-store failures and bound boot-time rehydration. *From PR #33 data-loss review.*
+
+21. **Check stored data before claiming an import or deletion succeeded.** Validate inputs before
+    mutation, preserve unrelated existing records, and acknowledge success only after the selected
+    changes form one committed durable outcome. Failure-path tests must cover late transaction rejection,
+    rollback, and restart. *From PR #33 backup review.*
+
+22. **Every exported backup must be importable without silent truncation.** Enforce the import byte,
+    city and per-city day limits on the exporter too. Split large exports into numbered importable
+    parts and inform users to retain/import every part. Test the production export action and both
+    limit boundaries, including API-key omission. *From PR #33 backup review.*
+
+23. **Privacy guarantees include accidental fallbacks and diagnostic route parameters.** Retain
+    supported same-origin weather proxies; never replace an invalid saved nonempty custom server with
+    the empty public-server default. Block invalid requests and prompt for correction. Redact city IDs
+    and dates from paths copied into diagnostic reports, not just URL queries. *From PR #33 security review.*
+
+24. **Independent asynchronous resources must settle independently.** Publish valid primary radar
+    frames without waiting for an optional model. Capture the configured source at the beginning of
+    each request and recheck it after awaits; otherwise stale results can be persisted under the wrong
+    cache key. For multiple trends windows, retain and clear failure reasons per window. *From PR #33 review.*
+
+25. **Tests must wait for observable outcomes, not fixed delays.** Before a reload, poll actual
+    persisted IndexedDB records; verify imported history after restart, and wait until navigation has
+    removed stale search results. In quota tests, retry uncommitted writes before relaunching.
+    Distinguish verified device scenarios from automated coverage in release documentation.
+    *From PR #33 review.*

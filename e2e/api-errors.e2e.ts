@@ -55,10 +55,11 @@ test('a superseded search aborts the in-flight request', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Choose your first city' }).click();
   const input = page.getByLabel('Search cities');
-  await input.fill('Pa');
-  await page.waitForTimeout(500);
+  await Promise.all([
+    page.waitForRequest((req) => req.url().includes('geocoding') && new URL(req.url()).searchParams.get('name') === 'Pa'),
+    input.fill('Pa'),
+  ]);
   await input.fill('Paris');
-  await page.getByText('Paris', { exact: true }).first().click();
-  await page.getByText('Paris').first().waitFor({ state: 'visible' });
+  await expect(page.getByText('Paris', { exact: true }).first()).toBeVisible();
   expect(failures.some((f) => f.includes('ERR_ABORTED'))).toBe(true);
 });

@@ -44,11 +44,15 @@ describe('settings store hydration', () => {
 
   it('keeps user edits when rehydration completes late', async () => {
     const { store, idb } = await fresh();
-    await idb.idbSet('wl2-settings', { version: 1, state: { settings: { ...defaultSettings, snapshotMinutes: 30 } } });
+    await idb.idbSet('wl2-settings', { version: 1, state: { settings: { ...defaultSettings, tempUnit: 'F', snapshotMinutes: 30 } } });
     const pending = store.useSettingsStore.persist.rehydrate();
     store.useSettingsStore.getState().updateSettings({ snapshotMinutes: 15 });
     await pending;
     expect(store.useSettingsStore.getState().settings.snapshotMinutes).toBe(15);
+    expect(store.useSettingsStore.getState().settings.tempUnit).toBe('F');
+    const persist = await import('../core/persistStorage');
+    await persist.flushPersistedState('wl2-settings');
+    expect(await idb.idbGet('wl2-settings')).toMatchObject({ state: { settings: { tempUnit: 'F', snapshotMinutes: 15 } } });
     expect(store.settingsValidationIssues()).toEqual([]);
   });
 });

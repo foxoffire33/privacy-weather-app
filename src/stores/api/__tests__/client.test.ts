@@ -24,6 +24,11 @@ function temp(body: unknown): number {
   throw new Error('invalid forecast');
 }
 
+function urlOf(input: RequestInfo | URL): string {
+  if (typeof input === 'string') { return input; }
+  return input instanceof URL ? input.href : input.url;
+}
+
 async function miss(): Promise<ResponseRecord | undefined> {
   await Promise.resolve();
   return undefined;
@@ -44,7 +49,7 @@ function fetchOk(): void {
 }
 
 afterEach(() => {
-  configureDataLayer({ fetch: null });
+  configureDataLayer({ fetch: null, server: '' });
   vi.mocked(responseGet).mockReset();
   vi.mocked(responsePut).mockReset();
   useDiagnosticsStore.getState().clear();
@@ -52,6 +57,20 @@ afterEach(() => {
 });
 
 describe('getJson retries', () => {
+  it('keeps a same-origin proxy and blocks invalid saved servers without a public fallback', async () => {
+    const urls: string[] = [];
+    const mockFetch = async (input: RequestInfo | URL): Promise<Response> => {
+      urls.push(urlOf(input));
+      await Promise.resolve();
+      return json({ temperature: 5 }, 200);
+    };
+    configureDataLayer({ server: '/weather', fetch: mockFetch });
+    await getJson('forecast', '/v1/forecast', {});
+    expect(urls).toEqual(['/weather/v1/forecast?']);
+    configureDataLayer({ server: '//unintended.example', fetch: mockFetch });
+    await expect(getJson('forecast', '/v1/forecast', {})).rejects.toMatchObject({ status: 400 });
+    expect(urls).toHaveLength(1);
+  });
   it('retries a 503 and returns the successful body', async () => {
     let calls = 0;
     configureDataLayer({

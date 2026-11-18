@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { installApi } from './fixtures';
+import { installApi, waitForSavedCity } from './fixtures';
 
 const file = (name: string, content: string): { name: string; mimeType: string; buffer: Buffer } => ({ name, mimeType: 'application/json', buffer: Buffer.from(content) });
 
@@ -31,7 +31,10 @@ test('a valid backup imports its city and history, which survive a reload', asyn
   await page.setInputFiles('input[type="file"]', file('weather-log.json', JSON.stringify(backup)));
   await page.getByRole('button', { name: 'Import selected' }).click();
   await expect(page.getByText(/Imported 1 new/)).toBeVisible();
-  await page.waitForTimeout(1000);
+  await waitForSavedCity(page, '999999', '2026-11-01');
   await page.goto('/');
   await expect(page.getByText('Testville').first()).toBeVisible();
+  await page.goto('/#/city/999999/history');
+  await expect(page.getByText('Nov 1', { exact: false }).first()).toBeVisible();
+  await expect(page.locator('.log-row').filter({ hasText: '15°' })).toBeVisible();
 });

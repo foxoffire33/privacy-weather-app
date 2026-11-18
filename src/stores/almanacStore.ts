@@ -13,6 +13,11 @@ const BACK = [1, 10, 30] as const;
 const FIRST_YEAR = 1940;
 const NAME = 'wl2-almanac';
 
+const snapshot = (): unknown => {
+  const { normals, thisDay } = useAlmanacStore.getState();
+  return { state: { normals, thisDay }, version: 1 };
+};
+
 export const useAlmanacStore = create<AlmanacState>()(
   persist(
     (set, get) => ({
@@ -65,11 +70,11 @@ export const useAlmanacStore = create<AlmanacState>()(
       version: 1,
       storage: idbStorage(),
       skipHydration: true,
-      onRehydrateStorage: trackRehydration(NAME),
+      onRehydrateStorage: trackRehydration(NAME, snapshot),
       partialize: (s) => ({ normals: s.normals, thisDay: s.thisDay }),
       merge: mergePreservingEdits<AlmanacState>({ normals: {}, thisDay: {} }),
     },
   ),
 );
 
-registerRehydration(NAME, () => { useAlmanacStore.persist.rehydrate(); });
+registerRehydration(NAME, async () => { await useAlmanacStore.persist.rehydrate(); });

@@ -128,11 +128,11 @@ function TrendControls({ range, onSheet }: TrendControlsProps): ReactElement {
 }
 
 function TrendCharts({ cityId, range, attrs, names, data, windUnit, back }: TrendChartsProps): ReactElement {
-  const { download, failed, retryFailed } = useTrendsStore(useShallow((st) => ({
-    download: st.download, failed: st.failed, retryFailed: st.retryFailed,
+  const { download, failureErrors, retryFailed } = useTrendsStore(useShallow((st) => ({
+    download: st.download, failureErrors: st.failureErrors, retryFailed: st.retryFailed,
   })));
-  const failedHere = range.windows.some((w) => failed.includes(windowKey(cityId, w)));
-  const error = failedHere ? download.error : null;
+  const keys = new Set(range.windows.map((w) => windowKey(cityId, w)));
+  const error = Object.entries(failureErrors).find(([key]) => keys.has(key))?.[1] ?? null;
   const base = { dataKey: 'label', xAxisProps: { interval: Math.max(0, Math.ceil(data.length / 6) - 1) } };
   const unitSuffix: Record<TrendGroup, string> = { temp: '°', rain: ' mm', snow: ' cm', wind: ` ${windUnitLabel(windUnit)}`, sun: ' h', uv: '' };
   return (

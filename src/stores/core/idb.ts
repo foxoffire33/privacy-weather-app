@@ -58,7 +58,7 @@ export function toStorageError(operation: 'open' | 'read' | 'write', cause: unkn
 const DB_NAME = 'wl-storesv2';
 const DB_VERSION = 2;
 const TX_TIMEOUT_MS = 10_000;
-const TX_SETTLE_GRACE_MS = 1_000;
+const TX_SETTLE_GRACE_MS = 1000;
 const KV = 'kv';
 const RECORDS = 'records';
 const RESPONSES = 'responses';
@@ -161,7 +161,7 @@ async function read<T>(store: string, request: (s: IDBObjectStore) => IDBRequest
   });
 }
 
-async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBObjectStore) => void, options?: IDBTransactionOptions): Promise<void> {
+async function withTransaction(db: IDBDatabase, stores: string | string[], change: (tx: IDBTransaction) => void, options?: IDBTransactionOptions): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let tx: IDBTransaction | undefined;
     let settled = false;
@@ -173,10 +173,10 @@ async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBOb
       if (outcome === 'done') { resolve(); } else { reject(toStorageError('write', error ?? tx?.error)); }
     };
     try {
-      tx = db.transaction(store, 'readwrite', options);
+      tx = db.transaction(stores, 'readwrite', options);
       tx.addEventListener('complete', () => { finish('done'); });
       tx.addEventListener('abort', () => { finish('failed'); });
-      change(tx.objectStore(store));
+      change(tx);
       timer = setTimeout(() => {
         if (abortIfActive(tx)) {
           finish('failed', new DOMException('write transaction timed out', 'AbortError'));
@@ -195,7 +195,18 @@ async function withTransaction(db: IDBDatabase, store: string, change: (s: IDBOb
 async function write(store: string, change: (s: IDBObjectStore) => void): Promise<void> {
   if (!hasIndexedDb()) { throw new StorageError('unavailable', 'IndexedDB is not available in this environment'); }
   const db = await openDb();
-  await withTransaction(db, store, change, store === RESPONSES ? RELAXED : STRICT);
+  await withTransaction(db, store, (tx) => { change(tx.objectStore(store)); }, store === RESPONSES ? RELAXED : STRICT);
+}
+
+export async function writeImport(kv: readonly IdbEntry[], records: readonly IdbEntry[]): Promise<void> {
+  if (kv.length === 0 && records.length === 0) { return; }
+  const db = await database();
+  await withTransaction(db, [KV, RECORDS], (tx) => {
+    const settings = tx.objectStore(KV);
+    const entries = tx.objectStore(RECORDS);
+    for (const [key, value] of kv) { settings.put(value, key); }
+    for (const [key, value] of records) { entries.put(value, key); }
+  }, STRICT);
 }
 
 export async function idbGet(key: string): Promise<unknown> {

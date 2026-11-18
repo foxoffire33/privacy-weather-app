@@ -1,4 +1,4 @@
-import { IDBFactory } from 'fake-indexeddb';
+import { IDBFactory, IDBKeyRange } from 'fake-indexeddb';
 import { describe, expect, it, vi } from 'vitest';
 
 import { dayKey } from '../entities/schema';
@@ -23,6 +23,7 @@ interface App {
 
 async function fresh(): Promise<App> {
   globalThis.indexedDB = new IDBFactory();
+  globalThis.IDBKeyRange = IDBKeyRange;
   vi.resetModules();
   const [backup, city, cacheModule, log, settings, sync] = await Promise.all([
     import('../../backup/backup'),
@@ -74,9 +75,10 @@ describe('backup round trip', () => {
     seed(app);
     const text = exportText(app);
     const target = await fresh();
+    target.settings.useSettingsStore.setState({ settings: { ...defaultSettings } });
     const backup = app.backup.parseBackup(text);
     expect(backup.skipped).toEqual([]);
-    target.sync.importBackup(backup, { cities: true, history: true, settings: true });
+    await target.sync.importBackup(backup, { cities: true, history: true, settings: true });
     expect(target.city.useCityStore.getState().cityIds).toEqual(['a', 'b']);
     for (const city of SEED_CITIES) { expect(target.cache.getOne('city', city.id)).toEqual(city); }
     expect(target.log.useLogStore.getState().dates).toEqual(SEED_DATES);
@@ -97,8 +99,9 @@ describe('backup round trip', () => {
     seed(app);
     const text = exportText(app);
     const target = await fresh();
+    target.settings.useSettingsStore.setState({ settings: { ...defaultSettings } });
     const backup = app.backup.parseBackup(text);
-    target.sync.importBackup(backup, { cities: true, history: true, settings: false });
+    await target.sync.importBackup(backup, { cities: true, history: true, settings: false });
     expect(target.city.useCityStore.getState().cityIds).toEqual(['a', 'b']);
     expect(target.log.useLogStore.getState().dates).toEqual(SEED_DATES);
     for (const record of SEED_RECORDS) { expect(target.cache.getOne('dayRecord', record.id)).toEqual(record); }

@@ -28,5 +28,6 @@ describe('diagnosticsStore', () => {
     expect(entries).toHaveLength(200);
     expect(entries[0].name).toBe('e5');
     expect(entries.at(-1)?.name).toBe('e204');
+    expect(entries.map((e) => e.name)).toEqual(Array.from({ length: 200 }, (_, i) => `e${String(i + 5)}`));
   });
 });

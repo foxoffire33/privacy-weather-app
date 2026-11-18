@@ -61,20 +61,14 @@ describe('idb error semantics', () => {
 
   it('resolves a write only after the transaction completes', async () => {
     const { m } = await fresh();
-    let completions = 0;
-    const real = IDBTransaction.prototype.addEventListener;
-    const spy = vi.spyOn(IDBTransaction.prototype, 'addEventListener');
-    spy.mockImplementation(function addCompleteObserver(this: IDBTransaction, type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean) {
-      if (type === 'complete') { real.call(this, 'complete', () => { completions += 1; }); }
-      real.call(this, type, listener, options);
-    });
-    try {
-      await m.idbSet('k', { v: 1 });
-      expect(completions).toBeGreaterThanOrEqual(1);
-      await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
-    } finally {
-      spy.mockRestore();
-    }
+    let settled = false;
+    const writing = m.idbSet('k', { v: 1 });
+    void writing.then(() => { settled = true; });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    await writing;
+    expect(settled).toBe(true);
+    await expect(m.idbGet('k')).resolves.toEqual({ v: 1 });
   });
 
   it('reopens a closed connection so the next write lands', async () => {

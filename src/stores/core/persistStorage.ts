@@ -14,7 +14,7 @@ const WRITE_DEBOUNCE_MS = 250;
 const RETRY_BASE_MS = 250;
 const RETRY_MAX_MS = 30_000;
 const MAX_AUTO_RETRIES = 8;
-const REHYDRATE_RETRY_MS = 3_000;
+const REHYDRATE_RETRY_MS = 3000;
 
 interface PendingWriteState {
   revision: number;
@@ -37,12 +37,23 @@ function isStorageValue<S>(value: unknown): value is StorageValue<S> {
 }
 
 const pending = new Map<string, PendingWriteState>();
+const deleting = new Map<string, Promise<void>>();
 const readErrors = new Map<string, StorageError>();
 const rehydrators = new Map<string, () => Promise<void> | void>();
 const lastSuccess = new Map<string, number>();
 let lastSuccessfulWriteAt: number | null = null;
 let faultListener: ((error: StorageError) => void) | null = null;
 let recoveredListener: (() => void) | null = null;
+let suppressedWrites = 0;
+
+export function withoutPersistWrites<T>(apply: () => T): T {
+  suppressedWrites += 1;
+  try {
+    return apply();
+  } finally {
+    suppressedWrites -= 1;
+  }
+}
 
 export function onPersistFault(listener: ((error: StorageError) => void) | null): void {
   faultListener = listener;
@@ -91,9 +102,9 @@ async function runFlushOnce(name: string): Promise<void> {
   const at = Date.now();
   lastSuccess.set(name, at);
   lastSuccessfulWriteAt = at;
+  pending.delete(name);
   useDiagnosticsStore.getState().bump('kvFlushes');
   recoveredListener?.();
-  pending.delete(name);
 }
 
 function flush(name: string): void {
@@ -128,11 +139,11 @@ export function idbStorage<S>(): PersistStorage<S> {
       readErrors.delete(name);
       const state = pending.get(name);
       if (state !== undefined && wasFault !== undefined && state.lastError === wasFault) { state.lastError = null; }
-      if (pending.has(name)) { flush(name); }
       return isStorageValue<S>(value) ? value : null;
     },
     setItem: (name, value) => {
-      const state: PendingWriteState = pending.get(name) ?? { revision: 0, value: undefined, attempts: 0, timer: null, chain: Promise.resolve(), lastError: null };
+      if (suppressedWrites > 0) { return; }
+      const state: PendingWriteState = pending.get(name) ?? { revision: 0, value: undefined, attempts: 0, timer: null, chain: deleting.get(name) ?? Promise.resolve(), lastError: null };
       state.revision += 1;
       state.value = value;
       state.attempts = 0;
@@ -141,35 +152,30 @@ export function idbStorage<S>(): PersistStorage<S> {
       if (readErrors.has(name)) { return; }
       state.timer = setTimeout(() => { state.timer = null; flush(name); }, WRITE_DEBOUNCE_MS);
     },
-    removeItem: (name) => {
+    removeItem: async (name) => {
       const state = pending.get(name);
-      if (state === undefined) {
+      if (state !== undefined && state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
+      const revision = state?.revision;
+      const predecessor = state?.chain ?? deleting.get(name) ?? Promise.resolve();
+      const deletion = predecessor.catch(() => null).then(async () => {
+        try {
+          await idbDel(name);
+        } catch (error) {
+          const storageError = toStorageError('write', error);
+          if (state !== undefined) { state.lastError = storageError; }
+          faultListener?.(storageError);
+          throw storageError;
+        }
         lastSuccess.delete(name);
-        return idbDel(name);
-      }
-      if (state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
-      const revision = state.revision;
-      return new Promise<void>((resolve, reject) => {
-        state.chain = state.chain.then(
-          async () => {
-            const current = pending.get(name);
-            if (current !== state || current.revision !== revision) { resolve(); return; }
-            try {
-              await idbDel(name);
-            } catch (error) {
-              const storageError = toStorageError('write', error);
-              state.lastError = storageError;
-              faultListener?.(storageError);
-              reject(storageError);
-              return;
-            }
-            lastSuccess.delete(name);
-            if (pending.get(name) === state) { pending.delete(name); }
-            resolve();
-          },
-          (error: unknown) => { reject(toStorageError('write', error)); },
-        );
+        if (state !== undefined && pending.get(name) === state && state.revision === revision) { pending.delete(name); }
       });
+      deleting.set(name, deletion);
+      if (state !== undefined) { state.chain = deletion; }
+      try {
+        await deletion;
+      } finally {
+        if (deleting.get(name) === deletion) { deleting.delete(name); }
+      }
     },
   };
 }
@@ -250,9 +256,21 @@ export function hydrationFault(name: string): AppError | null {
   return error === undefined ? null : classify(error);
 }
 
-export function trackRehydration(name: string): (state: unknown) => (state?: unknown, error?: unknown) => void {
+export function trackRehydration(name: string, snapshot?: () => unknown): (state: unknown) => (state?: unknown, error?: unknown) => void {
   return () => (_state, error) => {
-    if (error === undefined) { readErrors.delete(name); } else { readErrors.set(name, toStorageError('read', error)); }
+    if (error !== undefined) {
+      readErrors.set(name, toStorageError('read', error));
+      return;
+    }
+    readErrors.delete(name);
+    const state = pending.get(name);
+    if (state === undefined) { return; }
+    if (snapshot !== undefined) {
+      state.revision += 1;
+      state.value = snapshot();
+    }
+    if (state.timer !== null) { clearTimeout(state.timer); state.timer = null; }
+    flush(name);
   };
 }
 

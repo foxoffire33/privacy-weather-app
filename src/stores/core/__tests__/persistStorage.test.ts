@@ -139,6 +139,7 @@ describe('persistStorage write coordinator', () => {
     expect(vi.mocked(idb.idbSet)).not.toHaveBeenCalled();
     vi.mocked(idb.idbGet).mockResolvedValue(null);
     await storage.getItem('app');
+    m.trackRehydration('app')({})({});
     await vi.advanceTimersByTimeAsync(500);
     expect(vi.mocked(idb.idbSet)).toHaveBeenCalledTimes(1);
     expect(m.persistenceStatus('app').pending).toBe(false);

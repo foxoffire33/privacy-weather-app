@@ -14,12 +14,14 @@ const okWrite = async (): Promise<void> => {
 };
 
 afterEach(() => {
+  vi.clearAllTimers();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 describe('storage faults are diagnosable and observable', () => {
   it('reports a failed record flush as a diagnostic entry, a metric, and a boot fault', async () => {
+    vi.useFakeTimers();
     vi.resetModules();
     await import('..');
     const [idb, rsync, diag, boot] = await Promise.all([
@@ -43,6 +45,9 @@ describe('storage faults are diagnosable and observable', () => {
     expect(diag.useDiagnosticsStore.getState().metrics.recordFlushFailures).toBe(1);
     expect(boot.useBootStore.getState().storageError).toMatchObject({ code: 'storage.quota-exceeded' });
     expect(rsync.recordSyncStatus().pending).toBe(1);
+    vi.mocked(idb.recordsWrite).mockImplementation(okWrite);
+    await rsync.flushRecords();
+    expect(rsync.recordSyncStatus().pending).toBe(0);
   });
 
   it('counts a successful record flush without a failure entry', async () => {

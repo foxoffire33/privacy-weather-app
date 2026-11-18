@@ -8,12 +8,16 @@ export type SerializedError =
 export type ApiResult<T> = { ok: true; value: T } | { ok: false; error: SerializedError };
 
 export function serializeError(error: unknown): SerializedError {
-  if (error instanceof ApiError) {
-    return { kind: 'api', message: error.message, status: error.status, retry: error.retry, delayMs: error.delayMs };
+  try {
+    if (error instanceof ApiError) {
+      return { kind: 'api', message: error.message, status: error.status, retry: error.retry, delayMs: error.delayMs };
+    }
+    if (error instanceof TimeoutError) { return { kind: 'timeout' }; }
+    if (error instanceof Error) { return { kind: 'error', name: error.name, message: error.message }; }
+    return { kind: 'error', name: 'Error', message: String(error) };
+  } catch {
+    return { kind: 'error', name: 'Error', message: 'Unserializable error' };
   }
-  if (error instanceof TimeoutError) { return { kind: 'timeout' }; }
-  if (error instanceof Error) { return { kind: 'error', name: error.name, message: error.message }; }
-  return { kind: 'error', name: 'Error', message: String(error) };
 }
 
 export function restoreError(error: SerializedError): Error {
