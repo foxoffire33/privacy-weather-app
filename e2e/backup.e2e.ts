@@ -35,6 +35,6 @@ test('a valid backup imports its city and history, which survive a reload', asyn
   await page.goto('/');
   await expect(page.getByText('Testville').first()).toBeVisible();
   await page.goto('/#/city/999999/history');
-  await expect(page.getByText('Nov 1', { exact: false }).first()).toBeVisible();
-  await expect(page.locator('.log-row').filter({ hasText: '15°' })).toBeVisible();
+  await expect(page.getByText(/(?:Nov\s+1|1\s+Nov)/).first()).toBeVisible();
+  await expect(page.locator('.log-row').filter({ has: page.getByText(/^(?:1 Nov|Nov 1)$/) }).filter({ hasText: '15°' })).toBeVisible();
 });

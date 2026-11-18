@@ -96,7 +96,7 @@ function abortIfActive(tx: IDBTransaction | undefined): boolean {
 }
 
 function hasIndexedDb(): boolean {
-  return typeof indexedDB !== 'undefined';
+  return typeof indexedDB !== 'undefined' && Boolean(indexedDB);
 }
 
 async function openDb(): Promise<IDBDatabase> {
@@ -245,6 +245,13 @@ export async function recordsWriteMissing(entries: readonly IdbEntry[]): Promise
 
 export async function recordsDeletePrefix(prefix: string): Promise<void> {
   await write(RECORDS, (s) => { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); });
+}
+
+export async function recordsDeletePrefixes(prefixes: readonly string[]): Promise<void> {
+  if (prefixes.length === 0) { return; }
+  await write(RECORDS, (s) => {
+    for (const prefix of prefixes) { s.delete(IDBKeyRange.bound(prefix, `${prefix}\uFFFF`)); }
+  });
 }
 
 export async function recordsRange(lower: string, upper: string): Promise<IdbEntry[]> {

@@ -3,7 +3,7 @@ import { noteFailure } from '../utils/diagnostics';
 import { useAlmanacStore } from './almanacStore';
 import { noteStorageFault, useBootStore } from './bootStore';
 import { useCityStore } from './cityStore';
-import { classify } from './core/appError';
+import { AppError, classify } from './core/appError';
 import { inSequence, isAbsent, isRecord } from './core/guards';
 import { idbDel, idbGet, onUpgradeBlocked, recordsWriteMissing } from './core/idb';
 import { READY } from './core/inflight';
@@ -15,14 +15,14 @@ import { addDays, todayISO } from './core/time';
 import { DAY_PREFIX } from './dayStore';
 import { useDiagnosticsStore } from './diagnosticsStore';
 import { ENTITY_PREFIX, isPersistedEntities, useEntityCache } from './entities/cache';
+import { isPersistedCity, isPersistedDayRecord } from './entities/validation';
 import { FORECAST_PREFIX, restoreForecasts } from './forecastStore';
 import { LOG_PREFIX, restoreLog, useLogStore } from './logStore';
 import { importLegacyStore } from './migrateLegacy';
 import { useSettingsStore } from './settingsStore';
 
-import type { AppError } from './core/appError';
 import type { IdbEntry, Pending, Rehydratable } from './core/types';
-import type { City, DayRecord, ForecastEntry } from './types';
+import type { DayRecord, ForecastEntry } from './types';
 
 const PERSISTED: [Rehydratable, string][] = [
   [useSettingsStore, 'wl2-settings'],
@@ -44,8 +44,6 @@ const MIGRATE_RETRY_MS = 5000;
 const MIGRATE_RETRY_MAX = 12;
 const LEGACY_KEYS = ['wl2-entities', 'wl2-forecasts', 'wl2-log', 'wl2-days'];
 
-const isCity = (v: unknown): v is City => isRecord(v) && typeof v.id === 'string' && typeof v.lat === 'number';
-const isDay = (v: unknown): v is DayRecord => isRecord(v) && typeof v.id === 'string' && typeof v.date === 'string';
 const isForecast = (v: unknown): v is ForecastEntry => isRecord(v) && isRecord(v.data) && typeof v.fetchedAt === 'number';
 const isDates = (v: unknown): v is string[] => Array.isArray(v) && v.every((d) => typeof d === 'string');
 
@@ -60,8 +58,14 @@ const prefixed = (prefix: string, map: Record<string, unknown> | null): IdbEntry
 
 function entityEntries(envelope: unknown): IdbEntry[] {
   const tables = isRecord(envelope) && isPersistedEntities(envelope.state) ? envelope.state.tables : null;
-  const cities = Object.values(tables?.city ?? {}).flatMap((c): IdbEntry[] => (c === undefined ? [] : [[`${ENTITY_PREFIX}city:${c.id}`, c]]));
-  const days = Object.values(tables?.dayRecord ?? {}).flatMap((d): IdbEntry[] => (d === undefined ? [] : [[`${ENTITY_PREFIX}dayRecord:${d.id}`, d]]));
+  const cities = Object.values(tables?.city ?? {}).flatMap((c): IdbEntry[] => {
+    const raw: unknown = c;
+    return isPersistedCity(raw) ? [[`${ENTITY_PREFIX}city:${raw.id}`, raw]] : [];
+  });
+  const days = Object.values(tables?.dayRecord ?? {}).flatMap((d): IdbEntry[] => {
+    const raw: unknown = d;
+    return isPersistedDayRecord(raw) ? [[`${ENTITY_PREFIX}dayRecord:${raw.id}`, raw]] : [];
+  });
   return [...cities, ...days];
 }
 
@@ -119,7 +123,14 @@ async function range(prefix: string, from = '', to = '\uFFFF'): Promise<IdbEntry
   return [...rows, ...legacy];
 }
 
-const values = <T>(rows: IdbEntry[], guard: (v: unknown) => v is T): T[] => rows.flatMap(([, v]) => (guard(v) ? [v] : []));
+function values<T>(rows: IdbEntry[], guard: (v: unknown) => v is T): T[] {
+  const valid: T[] = [];
+  for (const [, value] of rows) {
+    if (guard(value)) { valid.push(value); }
+    else { noteFailure('hydrate.invalid-record', 'data.validation-failed'); }
+  }
+  return valid;
+}
 
 async function restoreCore(): Promise<void> {
   const [cities, forecasts, logs] = await Promise.all([
@@ -127,7 +138,7 @@ async function restoreCore(): Promise<void> {
     range(FORECAST_PREFIX),
     range(LOG_PREFIX),
   ]);
-  restore(() => { useEntityCache.getState().hydrate('city', values(cities, isCity)); });
+  restore(() => { useEntityCache.getState().hydrate('city', values(cities, isPersistedCity)); });
   restoreForecasts(Object.fromEntries(forecasts.flatMap(([k, v]): [string, ForecastEntry][] => (isForecast(v) ? [[k, v]] : []))));
   restoreLog(Object.fromEntries(logs.flatMap(([k, v]): [string, string[]][] => (isDates(v) ? [[k, v]] : []))));
 }
@@ -139,7 +150,7 @@ registerRehydration('wl2-cities', async () => {
 
 async function restoreDays(cityId: string, from: string, to: string): Promise<void> {
   const rows = await range(`${ENTITY_PREFIX}dayRecord:${cityId}:`, from, to);
-  restore(() => { useEntityCache.getState().hydrate('dayRecord', values(rows, isDay)); });
+  restore(() => { useEntityCache.getState().hydrate('dayRecord', values(rows, isPersistedDayRecord)); });
 }
 
 async function restoreRecent(): Promise<void> {
@@ -157,7 +168,7 @@ async function restoreHistory(): Promise<void> {
   const found: DayRecord[] = [];
   await inSequence(chunks, async ({ id, from, to }) => {
     const rows = await range(`${ENTITY_PREFIX}dayRecord:${id}:`, from, to);
-    found.push(...values(rows, isDay));
+    found.push(...values(rows, isPersistedDayRecord));
     await yieldToMain();
   });
   restore(() => { useEntityCache.getState().hydrate('dayRecord', found); });
@@ -195,12 +206,10 @@ async function rehydrateStores(): Promise<void> {
     void Promise.resolve(store.persist.rehydrate()).catch(() => null);
     const result = await waitForHydration(store);
     if (result.status === 'timeout') {
-      const fault = hydrationFault(name);
-      if (fault !== null) {
-        failures.push(fault);
-        noteFailure('hydrate', fault.code);
-        useDiagnosticsStore.getState().bump('hydrationFailures');
-      }
+      const fault = hydrationFault(name) ?? new AppError({ code: 'storage.read-failed', messageKey: 'errors.storageRead', retryable: true, op: 'hydrate-timeout' });
+      failures.push(fault);
+      noteFailure('hydrate', fault.code);
+      useDiagnosticsStore.getState().bump('hydrationFailures');
     }
   }));
   if (failures.length > 0) { throw failures[0]; }
@@ -216,10 +225,17 @@ export function hydrateAll(): Pending {
     await bootStep(restoreCore, note);
     await bootStep(restoreRecent, note);
     if (firstError !== undefined) { noteStorageFault(firstError); }
-    useBootStore.setState({ hydrated: true });
+    useBootStore.setState({ hydrated: true, phase: firstError === undefined ? 'ready' : 'degraded' });
     keepStorage();
   });
   return booting;
+}
+
+export function retryHydration(): Pending {
+  if (useBootStore.getState().phase !== 'degraded') { return READY; }
+  booting = null;
+  useBootStore.setState({ phase: 'booting' });
+  return hydrateAll();
 }
 
 export function whenHistoryReady(): Pending {

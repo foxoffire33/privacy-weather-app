@@ -15,6 +15,7 @@ const isSnapshotMinutes = (x: unknown): x is number => isNum(x) && Number.isInte
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const ACCENT_VALUES: ReadonlySet<string> = new Set<Accent>(['green', 'red', 'blue', 'off', 'custom']);
 const DAY_FIELDS = ['hi', 'lo', 'feelsHi', 'feelsLo', 'mm', 'snow', 'wind', 'gust', 'sunshine', 'uv', 'code'] as const;
+const NON_NEGATIVE_FIELDS: ReadonlySet<string> = new Set(['mm', 'snow', 'wind', 'gust', 'sunshine', 'uv']);
 
 const WIND_UNITS: ReadonlySet<string> = new Set<WindUnit>(['kmh', 'ms', 'mph']);
 const isWindUnit = (x: unknown): x is WindUnit => typeof x === 'string' && WIND_UNITS.has(x);
@@ -34,7 +35,7 @@ const hasValidCoords = (c: Record<string, unknown>): c is Record<string, unknown
   isNum(c.lat) && isNum(c.lon) && c.lat >= -90 && c.lat <= 90 && c.lon >= -180 && c.lon <= 180;
 
 function toCity(c: unknown, index: number, seen: Set<string>, skipped: SkippedRecord[]): City | null {
-  if (!isObj(c) || !isStr(c.id) || c.id === '') {
+  if (!isObj(c) || !isStr(c.id) || c.id === '' || ['__proto__', 'prototype', 'constructor'].includes(c.id)) {
     skipped.push({ path: cityPath(index), reason: t('backup.skipCityId') });
     return null;
   }
@@ -88,6 +89,16 @@ function toBackupDay(date: string, rec: Record<string, unknown>): BackupDay {
   return day;
 }
 
+function validDayNumbers(rec: Record<string, unknown>): boolean {
+  if (rec.snapshots !== undefined && (!isNum(rec.snapshots) || !Number.isInteger(rec.snapshots) || rec.snapshots < 0)) { return false; }
+  for (const field of DAY_FIELDS) {
+    const value = rec[field];
+    if (value === undefined || value === null) { continue; }
+    if (!isNum(value) || (NON_NEGATIVE_FIELDS.has(field) && value < 0) || (field === 'code' && (!Number.isInteger(value) || value < 0 || value > 99))) { return false; }
+  }
+  return true;
+}
+
 function parseHistory(raw: unknown, knownCities: ReadonlySet<string>, skipped: SkippedRecord[]): Backup['history'] {
   const history: Backup['history'] = {};
   if (!isObj(raw)) { return history; }
@@ -117,6 +128,10 @@ function parseHistory(raw: unknown, knownCities: ReadonlySet<string>, skipped: S
       }
       if (!isObj(rec)) {
         skipped.push({ path: `history.${cityId}.${date}`, reason: t('backup.skipNotRecord') });
+        continue;
+      }
+      if (!validDayNumbers(rec)) {
+        skipped.push({ path: `history.${cityId}.${date}`, reason: t('backup.skipInvalidDay') });
         continue;
       }
       days[date] = toBackupDay(date, rec);

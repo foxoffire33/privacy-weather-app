@@ -39,7 +39,7 @@ test('a persistent 429 ends in the rate-limit message', async ({ page }) => {
     await route.fulfill({ status: 429, headers: { 'content-type': 'application/json' }, body: '{}' });
   });
   await followParis(page);
-  await expect(page.getByText('The weather service is temporarily rate-limited. The app retries automatically.')).toBeVisible();
+  await expect(page.getByText('The weather service is temporarily rate-limited. Try again later if the automatic retries stop.')).toBeVisible();
 });
 
 test('a superseded search aborts the in-flight request', async ({ page }) => {

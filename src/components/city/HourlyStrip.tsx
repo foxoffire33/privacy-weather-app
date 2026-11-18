@@ -167,7 +167,7 @@ export function HourlyStrip({ city, entry, units, expanded }: ExpandableProps): 
   const first = hours.at(0);
   return (
     <>
-      <MotionBox className="hourly-strip" ref={ref} data-noswipe {...scroller.dragHandlers} onWheel={wheelAcross}
+      <MotionBox className="hourly-strip" ref={ref} tabIndex={0} aria-label="Hourly weather forecast" data-noswipe {...scroller.dragHandlers} onWheel={wheelAcross}
         onPanStart={onPanStart} onPan={onPan} onPanEnd={onPanEnd}
         style={{ touchAction: scroller.canScrollStart ? 'pan-x pan-y' : 'pan-right pan-y' }}>
         <MotionBox className="pull-past" data-armed={armed || undefined} style={{ width: pullW }}>

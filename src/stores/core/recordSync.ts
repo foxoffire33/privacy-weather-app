@@ -1,7 +1,7 @@
 import { useDiagnosticsStore } from '../diagnosticsStore';
 
 import { errorMessage } from './errors';
-import { recordGet, recordsDeletePrefix, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, StorageError, toStorageError } from './idb';
+import { recordGet, recordsDeletePrefix, recordsDeletePrefixes, recordsRange, recordsWrite, RETRYABLE_WRITE_CODES, StorageError, toStorageError } from './idb';
 import { measure } from './marks';
 
 import type { StorageErrorCode } from './idb';
@@ -22,12 +22,15 @@ let restoring = 0;
 
 interface ClearOp {
   prefix: string;
+  prefixes?: readonly string[];
   boundary: number;
   attempts: number;
   exhausted: boolean;
   timer: ReturnType<typeof setTimeout> | null;
   queued: boolean;
 }
+
+const clearPrefixes = (op: ClearOp): readonly string[] => op.prefixes ?? [op.prefix];
 
 let chain: Promise<void> = Promise.resolve();
 const pendingClears: ClearOp[] = [];
@@ -82,11 +85,12 @@ function pruneCleared(): void {
 }
 
 function purgeFor(op: ClearOp): void {
+  const matches = (key: string): boolean => clearPrefixes(op).some((prefix) => key.startsWith(prefix));
   for (const key of puts.keys()) {
-    if (key.startsWith(op.prefix) && (putGen.get(key) ?? 0) < op.boundary) { puts.delete(key); putGen.delete(key); }
+    if (matches(key) && (putGen.get(key) ?? 0) < op.boundary) { puts.delete(key); putGen.delete(key); }
   }
   for (const key of deletes) {
-    if (key.startsWith(op.prefix) && (deleteGen.get(key) ?? 0) < op.boundary) { deletes.delete(key); deleteGen.delete(key); }
+    if (matches(key) && (deleteGen.get(key) ?? 0) < op.boundary) { deletes.delete(key); deleteGen.delete(key); }
   }
 }
 
@@ -106,7 +110,7 @@ function requeue(batch: readonly IdbEntry[], gone: readonly string[], sinceSeq: 
 }
 
 function blockedByPendingClear(key: string): boolean {
-  return pendingClears.some((op) => key.startsWith(op.prefix));
+  return pendingClears.some((op) => clearPrefixes(op).some((prefix) => key.startsWith(prefix)));
 }
 
 function readyBatch(beforeGeneration: number): { batch: IdbEntry[]; gone: string[]; blocked: boolean } {
@@ -253,9 +257,14 @@ export function deleteRecord(key: string): void {
 }
 
 export async function clearRecords(prefix: string): Promise<void> {
-  const op: ClearOp = { prefix, boundary: counter, attempts: 0, exhausted: false, timer: null, queued: true };
+  return clearRecordsMany([prefix]);
+}
+
+export async function clearRecordsMany(prefixes: readonly string[]): Promise<void> {
+  if (prefixes.length === 0) { return; }
+  const op: ClearOp = { prefix: prefixes[0] ?? '', prefixes, boundary: counter, attempts: 0, exhausted: false, timer: null, queued: true };
   pendingClears.push(op);
-  cleared.push({ prefix, seq: clearSeq });
+  for (const prefix of prefixes) { cleared.push({ prefix, seq: clearSeq }); }
   clearSeq += 1;
   const step = chain.then(
     async () => { await runClear(op); },
@@ -268,7 +277,7 @@ export async function clearRecords(prefix: string): Promise<void> {
 async function runClear(op: ClearOp): Promise<void> {
   const state = op;
   try {
-    await recordsDeletePrefix(state.prefix);
+    await (state.prefixes !== undefined && state.prefixes.length > 1 ? recordsDeletePrefixes(state.prefixes) : recordsDeletePrefix(state.prefix));
   } catch (error) {
     const storageError = toStorageError('write', error);
     lastError = storageError;

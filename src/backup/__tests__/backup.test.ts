@@ -71,6 +71,12 @@ describe('parseBackup field validation', () => {
     ]);
   });
 
+  it('rejects identifiers with special object prototype semantics', () => {
+    const backup = parse({ cities: [city('__proto__'), city('constructor'), city('safe')] });
+    expect(backup.cities.map((entry) => entry.id)).toEqual(['safe']);
+    expect(backup.skipped).toHaveLength(2);
+  });
+
   it('skips history dates that are not real calendar dates', () => {
     const backup = parse({
       cities: [city('1')],
@@ -82,6 +88,22 @@ describe('parseBackup field validation', () => {
       { path: 'history.1.2026-02-29', reason: 'not a valid calendar date' },
       { path: 'history.1.2026-1-01', reason: 'not a valid calendar date' },
     ]);
+  });
+
+  it('skips invalid weather measurements and snapshot counts without losing other days', () => {
+    const backup = parse({
+      cities: [city('1')],
+      history: { '1': {
+        '2026-01-01': { snapshots: -1 },
+        '2026-01-02': { snapshots: 2.7 },
+        '2026-01-03': { mm: -40 },
+        '2026-01-04': { uv: -10 },
+        '2026-01-05': { snapshots: 2, mm: 3 },
+      } },
+    });
+    expect(Object.keys(backup.history['1'])).toEqual(['2026-01-05']);
+    expect(backup.skipped).toHaveLength(4);
+    expect(backup.skipped.every((record) => record.reason === 'invalid weather measurements or snapshot count')).toBe(true);
   });
 
   it('skips history for cities that were not imported', () => {

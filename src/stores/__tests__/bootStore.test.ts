@@ -12,4 +12,10 @@ describe('storage warning state', () => {
     expect(useBootStore.getState().storageError).toBe(first);
     expect(useBootStore.getState().storageQuotaExceeded).toBe(true);
   });
+
+  it('marks a storage failure as degraded rather than ready', () => {
+    useBootStore.setState({ phase: 'ready', storageError: null });
+    noteStorageFault(new StorageError('read-failed', 'corrupt'));
+    expect(useBootStore.getState().phase).toBe('degraded');
+  });
 });

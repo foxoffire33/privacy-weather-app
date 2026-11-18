@@ -28,6 +28,7 @@ export interface DayState {
   queries: QueryMap;
   load: (city: City, date: string) => Promise<DayData | null>;
   clear: () => void;
+  clearMemory: () => void;
 }
 
 export interface RadarState {
@@ -90,6 +91,7 @@ export interface DateSpan {
 }
 
 export interface BootState {
+  phase: 'booting' | 'ready' | 'degraded' | 'failed';
   hydrated: boolean;
   historyReady: boolean;
   storageBlocked: boolean;
@@ -120,6 +122,7 @@ export interface DiagnosticMetrics {
 export interface DiagnosticsState {
   entries: DiagnosticEntry[];
   metrics: DiagnosticMetrics;
+  lastDurableWriteAt: number | null;
   add: (entry: DiagnosticEntry) => void;
   bump: (key: keyof DiagnosticMetrics) => void;
   addCacheCounts: (loads: number, cacheHits: number) => void;

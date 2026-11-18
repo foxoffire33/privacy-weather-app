@@ -23,7 +23,8 @@ describe('diagnosticsReport', () => {
 
   it('marks unknown storage and an empty entry list', () => {
     const lines = diagnosticsReport([], 'TestAgent', METRICS, null).split('\n');
-    expect(lines).toHaveLength(2 + 7 + 1);
+    expect(lines).toHaveLength(5 + 7 + 1);
+    expect(lines).toContain('lastDurableWrite\tnone');
     expect(lines).toContain('storage\tunknown\tunknown\tno');
   });
 

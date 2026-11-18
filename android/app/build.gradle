@@ -3,6 +3,16 @@ apply plugin: 'com.android.application'
 android {
     namespace "nl.delaparraservices.apps.weather"
     compileSdk rootProject.ext.compileSdkVersion
+    signingConfigs {
+        release {
+            if (System.getenv('ANDROID_KEYSTORE_FILE')) {
+                storeFile file(System.getenv('ANDROID_KEYSTORE_FILE'))
+                storePassword System.getenv('ANDROID_SIGNING_STORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_SIGNING_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_SIGNING_KEY_PASSWORD')
+            }
+        }
+    }
     defaultConfig {
         applicationId "nl.delaparraservices.apps.weather"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -22,6 +32,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

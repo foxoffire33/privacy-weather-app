@@ -2,6 +2,7 @@ node_modules
 dist
 test-results
 playwright-report
+coverage
 android/.gradle
 android/build
 android/app/build
