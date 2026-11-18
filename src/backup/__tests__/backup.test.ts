@@ -71,6 +71,12 @@ describe('parseBackup field validation', () => {
     ]);
   });
 
+  it('rejects identifiers with special object prototype semantics', () => {
+    const backup = parse({ cities: [city('__proto__'), city('constructor'), city('safe')] });
+    expect(backup.cities.map((entry) => entry.id)).toEqual(['safe']);
+    expect(backup.skipped).toHaveLength(2);
+  });
+
   it('skips history dates that are not real calendar dates', () => {
     const backup = parse({
       cities: [city('1')],

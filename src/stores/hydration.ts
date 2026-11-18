@@ -58,8 +58,14 @@ const prefixed = (prefix: string, map: Record<string, unknown> | null): IdbEntry
 
 function entityEntries(envelope: unknown): IdbEntry[] {
   const tables = isRecord(envelope) && isPersistedEntities(envelope.state) ? envelope.state.tables : null;
-  const cities = Object.values(tables?.city ?? {}).flatMap((c): IdbEntry[] => (c === undefined ? [] : [[`${ENTITY_PREFIX}city:${c.id}`, c]]));
-  const days = Object.values(tables?.dayRecord ?? {}).flatMap((d): IdbEntry[] => (d === undefined ? [] : [[`${ENTITY_PREFIX}dayRecord:${d.id}`, d]]));
+  const cities = Object.values(tables?.city ?? {}).flatMap((c): IdbEntry[] => {
+    const raw: unknown = c;
+    return isPersistedCity(raw) ? [[`${ENTITY_PREFIX}city:${raw.id}`, raw]] : [];
+  });
+  const days = Object.values(tables?.dayRecord ?? {}).flatMap((d): IdbEntry[] => {
+    const raw: unknown = d;
+    return isPersistedDayRecord(raw) ? [[`${ENTITY_PREFIX}dayRecord:${raw.id}`, raw]] : [];
+  });
   return [...cities, ...days];
 }
 
@@ -117,7 +123,14 @@ async function range(prefix: string, from = '', to = '\uFFFF'): Promise<IdbEntry
   return [...rows, ...legacy];
 }
 
-const values = <T>(rows: IdbEntry[], guard: (v: unknown) => v is T): T[] => rows.flatMap(([, v]) => (guard(v) ? [v] : []));
+function values<T>(rows: IdbEntry[], guard: (v: unknown) => v is T): T[] {
+  const valid: T[] = [];
+  for (const [, value] of rows) {
+    if (guard(value)) { valid.push(value); }
+    else { noteFailure('hydrate.invalid-record', 'data.validation-failed'); }
+  }
+  return valid;
+}
 
 async function restoreCore(): Promise<void> {
   const [cities, forecasts, logs] = await Promise.all([

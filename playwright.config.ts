@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
@@ -9,9 +9,12 @@ export default defineConfig({
   workers: 1,
   retries: process.env.CI === 'true' ? 1 : 0,
   reporter: [['list']],
+  projects: [
+    { name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 430, height: 900 } } },
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+  ],
   use: {
     baseURL: 'http://localhost:4173',
-    viewport: { width: 430, height: 900 },
     trace: 'retain-on-failure',
     launchOptions: process.env.CHROMIUM_EXECUTABLE_PATH === undefined || process.env.CHROMIUM_EXECUTABLE_PATH === ''
       ? {} : { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH },

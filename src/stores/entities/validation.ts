@@ -7,7 +7,7 @@ const measurement = z.number().nullable().optional();
 const nonNegativeMeasurement = z.number().nonnegative().nullable().optional();
 
 export const citySchema: z.ZodType<City> = z.object({
-  id: z.string().min(1),
+  id: z.string().min(1).refine((id) => !['__proto__', 'prototype', 'constructor'].includes(id)),
   name: z.string().min(1),
   region: z.string(),
   lat: z.number().min(-90).max(90),

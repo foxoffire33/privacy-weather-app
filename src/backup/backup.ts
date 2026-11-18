@@ -35,7 +35,7 @@ const hasValidCoords = (c: Record<string, unknown>): c is Record<string, unknown
   isNum(c.lat) && isNum(c.lon) && c.lat >= -90 && c.lat <= 90 && c.lon >= -180 && c.lon <= 180;
 
 function toCity(c: unknown, index: number, seen: Set<string>, skipped: SkippedRecord[]): City | null {
-  if (!isObj(c) || !isStr(c.id) || c.id === '') {
+  if (!isObj(c) || !isStr(c.id) || c.id === '' || ['__proto__', 'prototype', 'constructor'].includes(c.id)) {
     skipped.push({ path: cityPath(index), reason: t('backup.skipCityId') });
     return null;
   }
